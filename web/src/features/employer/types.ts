@@ -4,6 +4,7 @@ export type EmployerCompany = {
   id: string;
   owner_id: string;
   company_name: string;
+  trade_license_number: string | null;
   industry: string | null;
   company_size: string | null;
   country: string | null;
@@ -12,9 +13,23 @@ export type EmployerCompany = {
   contact_person: string | null;
   contact_role: string | null;
   hiring_needs: string[] | null;
+  website: string | null;
+  logo_url: string | null;
   description: string | null;
   is_verified: boolean | null;
   status: string;
+  updated_at: string | null;
+};
+
+export type VerificationDocumentRow = {
+  id: string;
+  owner_id: string;
+  company_id: string | null;
+  document_type: string;
+  bucket_id: string;
+  file_path: string;
+  status: string;
+  created_at: string;
   updated_at: string | null;
 };
 

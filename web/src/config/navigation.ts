@@ -15,6 +15,7 @@ export const candidateNavigation = [
 export const employerNavigation = [
   { href: routes.employerDashboard, label: "Dashboard" },
   { href: routes.employerProfile, label: "Company Profile" },
+  { href: routes.employerDocuments, label: "Documents" },
   { href: routes.employerSearch, label: "Search Candidates" },
   { href: routes.employerShortlist, label: "Shortlist" },
   { href: routes.employerInterests, label: "Interests" },

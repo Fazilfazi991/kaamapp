@@ -20,7 +20,7 @@ export async function resolveEmployerAccess({ redirectIncomplete = false } = {})
     .maybeSingle<EmployerCompany>();
 
   if (!company) {
-    if (redirectIncomplete) redirect(`${routes.employerProfile}?notice=company_required`);
+    if (redirectIncomplete) redirect(routes.employerOnboarding);
     return {
       ok: false,
       userId: account.userId,

@@ -2,11 +2,14 @@ import { EmptyStateCard } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ButtonLink } from "@/components/ui/button";
 import { routes } from "@/config/routes";
+import { employerCompanyCompletion } from "@/features/employer/profile/completion";
 import type { EmployerAccess } from "@/features/employer/server/access";
+import type { VerificationDocumentRow } from "./types";
 
 export function EmployerDashboard({
   access,
   counts,
+  documents = [],
 }: {
   access: EmployerAccess;
   counts: {
@@ -15,8 +18,10 @@ export function EmployerDashboard({
     acceptedInterests: number;
     matches: number;
   } | null;
+  documents?: VerificationDocumentRow[];
 }) {
   const company = access.ok ? access.company : null;
+  const completion = employerCompanyCompletion(company, documents);
   return (
     <div className="grid gap-5">
       <section className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
@@ -40,6 +45,14 @@ export function EmployerDashboard({
         ) : access.warning ? (
           <p className="mt-4 text-sm text-[#66616f]">{access.warning}</p>
         ) : null}
+        <p className="mt-4 text-sm text-[#3b3340]">
+          Profile completion: {completion.percentage}% - Documents: {completion.documentsComplete ? "Uploaded" : "Required"}
+        </p>
+        <div className="mt-5">
+          <ButtonLink href={completion.isComplete ? routes.employerSearch : routes.employerOnboarding}>
+            {completion.isComplete ? "Search Candidates" : "Complete Company Profile"}
+          </ButtonLink>
+        </div>
       </section>
 
       <div className="grid gap-4 md:grid-cols-4">
