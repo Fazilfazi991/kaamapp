@@ -87,7 +87,7 @@ export function CandidateDashboard({
 
       <EmptyStateCard
         title="Documents"
-        description="Document review status is managed by the existing mobile-backed flow. Upload actions are intentionally not duplicated in this web foundation."
+        description="Upload passport and supporting documents securely, review OCR fields, and track pending verification."
         actionHref={routes.candidateDocuments}
         actionLabel="View documents"
       />
