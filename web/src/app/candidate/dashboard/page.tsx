@@ -1,15 +1,16 @@
 import { PageTitle } from "@/components/layout/page-title";
 import { AuthNotice } from "@/components/ui/auth-notice";
 import { CandidateDashboard } from "@/features/candidate/candidate-dashboard";
-import { loadCandidateDashboardData, requireRole } from "@/lib/auth/session";
+import { loadCandidateBundle } from "@/features/candidate/server/data";
+import { requireRole } from "@/lib/auth/session";
 
 export default async function CandidateDashboardPage({
   searchParams,
 }: {
   searchParams: Promise<{ authNotice?: string }>;
 }) {
-  const { userId } = await requireRole("candidate");
-  const { candidate, membership } = await loadCandidateDashboardData(userId);
+  await requireRole("candidate");
+  const { profile, candidate, membership } = await loadCandidateBundle();
   const params = await searchParams;
 
   return (
@@ -19,7 +20,7 @@ export default async function CandidateDashboardPage({
         title="Candidate dashboard"
         description="Your profile, verification, matching, and membership status in one place."
       />
-      <CandidateDashboard candidate={candidate} membership={membership} />
+      <CandidateDashboard profile={profile} candidate={candidate} membership={membership} />
     </div>
   );
 }

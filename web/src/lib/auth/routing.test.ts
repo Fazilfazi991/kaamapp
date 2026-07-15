@@ -85,7 +85,7 @@ describe("protectedRouteDecision", () => {
     });
   });
 
-  it("sends candidate accounts missing candidate profile to profile completion", () => {
+  it("sends candidate accounts missing candidate profile to onboarding", () => {
     expect(
       protectedRouteDecision(
         { ...candidate, hasCandidateProfile: false },
@@ -94,7 +94,7 @@ describe("protectedRouteDecision", () => {
       ),
     ).toMatchObject({
       allowed: false,
-      redirectTo: routes.candidateProfile,
+      redirectTo: routes.candidateOnboarding,
     });
   });
 

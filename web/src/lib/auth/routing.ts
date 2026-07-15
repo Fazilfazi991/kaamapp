@@ -109,11 +109,11 @@ export function protectedRouteDecision(
   if (
     account.role === "candidate" &&
     !account.hasCandidateProfile &&
-    currentPath !== routes.candidateProfile
+    !currentPath.startsWith(routes.candidateOnboarding)
   ) {
     return {
       allowed: false,
-      redirectTo: routes.candidateProfile,
+      redirectTo: routes.candidateOnboarding,
       status: "ready",
       message: "Complete your candidate profile to continue.",
     };

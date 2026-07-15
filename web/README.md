@@ -71,6 +71,8 @@ src/
 
 See `docs/auth-qa-checklist.md` for manual checks covering candidate-to-employer logout/login, employer-to-candidate logout/login, wrong role-tab selection, refresh, and browser restart.
 
+See `docs/candidate-onboarding-qa-checklist.md` for candidate onboarding, profile editing, skills, location, contact privacy, and profile photo checks.
+
 ## Branch Workflow
 
 Work for this application belongs on `web-development`. Do not merge mobile, admin, or production branches from this task.

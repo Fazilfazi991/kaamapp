@@ -1,11 +1,13 @@
-import { PageTitle } from "@/components/layout/page-title";
-import { EmptyStateCard } from "@/components/ui/empty-state";
+import { ProfileSummary } from "@/features/candidate/components/profile-summary";
+import { loadCandidateBundle } from "@/features/candidate/server/data";
 
-export default function CandidateProfilePage() {
+export default async function CandidateProfilePage() {
+  const bundle = await loadCandidateBundle();
   return (
-    <div className="grid gap-6">
-      <PageTitle title="Profile" description="Candidate profile editing will connect to the existing profile tables in a later phase." />
-      <EmptyStateCard title="Profile editor not enabled" description="No fake candidate profile data is shown here. Use the mobile app for full profile editing until this web flow is connected." />
-    </div>
+    <ProfileSummary
+      profile={bundle.profile}
+      candidate={bundle.candidate}
+      membership={bundle.membership}
+    />
   );
 }

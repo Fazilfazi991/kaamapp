@@ -2,7 +2,8 @@ import { EmptyStateCard } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { StatCard } from "@/components/cards/stat-card";
 import { routes } from "@/config/routes";
-import type { CandidateMembershipRow, CandidateProfileRow } from "@/types/domain";
+import { candidateCompletion } from "@/features/candidate/profile-completion";
+import type { CandidateMembershipRow, CandidateProfileRow, ProfileRow } from "@/types/domain";
 
 function listSummary(values?: string[] | null) {
   return values && values.length > 0 ? values.slice(0, 3).join(", ") : "Not added yet";
@@ -15,19 +16,15 @@ function membershipTone(status?: string | null) {
 }
 
 export function CandidateDashboard({
+  profile,
   candidate,
   membership,
 }: {
+  profile: ProfileRow | null;
   candidate: CandidateProfileRow | null;
   membership: CandidateMembershipRow | null;
 }) {
-  const completionItems = [
-    candidate?.headline,
-    candidate?.nationality,
-    candidate?.current_city,
-    candidate?.skills?.length ? "skills" : "",
-  ].filter(Boolean).length;
-  const completion = Math.round((completionItems / 4) * 100);
+  const completion = candidateCompletion({ profile, candidate });
 
   return (
     <div className="grid gap-5">
@@ -55,9 +52,9 @@ export function CandidateDashboard({
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard
           title="Profile completion"
-          value={`${completion}%`}
+          value={`${completion.percentage}%`}
           note="Complete your headline, location, nationality, and up to three skills."
-          tone={completion === 100 ? "success" : "warning"}
+          tone={completion.isComplete ? "success" : "warning"}
         />
         <StatCard
           title="Verification"
