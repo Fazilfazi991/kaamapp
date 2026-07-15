@@ -7,11 +7,13 @@ Kaam is a privacy-first job matching application for candidates and employers. T
 - Flutter mobile app remains in the root project structure.
 - Supabase migrations and setup notes live in `supabase/`.
 - Local environment files are required for development but must not be committed.
-- A future web application and admin panel are planned, but they are not created in this setup task.
+- The Next.js web application foundation lives in `web/` on the `web-development` branch.
+- A separate admin panel is still planned and is not implemented in this web foundation.
 
 ## Technology Stack
 
 - Flutter and Dart for the mobile application
+- Next.js, TypeScript, Tailwind CSS, and Supabase SSR helpers for the web application
 - Supabase for authentication, database, storage, memberships, matching, chat, and document verification support
 - Supabase Edge Functions for server-side integrations such as OCR
 - Android project files under `android/`
@@ -104,11 +106,20 @@ Select an environment file when needed:
 flutter run --dart-define=KAAM_ENV_FILE=.env.qa
 ```
 
-## Planned Web Application
+## Web Application
 
-The planned web application will use Next.js with TypeScript and live in a future `/web` folder. It will use the same Supabase project as the Flutter app and reuse authentication, candidate profiles, employer profiles, skills, matching, chat, document verification, memberships, and storage.
+The web application uses Next.js with TypeScript and lives in `web/`. It uses the same Supabase project as the Flutter app and must only use browser-safe Supabase URL and anonymous/public key values.
 
-The web application is expected to include candidate, employer, and admin interfaces. Supabase service-role credentials must never be exposed in browser code.
+Install and run it from the `web/` folder:
+
+```bash
+npm install
+npm run dev
+npm run lint
+npm run build
+```
+
+See `web/README.md` for route scope, environment setup, and Supabase safety notes.
 
 ## Planned Admin Panel
 
