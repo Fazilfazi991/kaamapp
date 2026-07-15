@@ -118,6 +118,7 @@ class _EmployerLoginScreenState extends State<EmployerLoginScreen> {
   String _routeForSession(KaamAuthDestination destination) =>
       switch (destination) {
         KaamAuthDestination.roleSelection => AppRoutes.roleSelection,
+        KaamAuthDestination.blocked => AppRoutes.accountBlocked,
         KaamAuthDestination.candidateOnboarding => AppRoutes.documentsUpload,
         KaamAuthDestination.candidateDashboard => AppRoutes.dashboard,
         KaamAuthDestination.employerOnboarding =>
@@ -321,6 +322,7 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
   String _routeFor(KaamAuthDestination destination) {
     return switch (destination) {
       KaamAuthDestination.roleSelection => AppRoutes.roleSelection,
+      KaamAuthDestination.blocked => AppRoutes.accountBlocked,
       KaamAuthDestination.candidateOnboarding => AppRoutes.documentsUpload,
       KaamAuthDestination.candidateDashboard => AppRoutes.dashboard,
       KaamAuthDestination.employerOnboarding =>

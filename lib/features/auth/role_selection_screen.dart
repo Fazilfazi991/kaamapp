@@ -27,22 +27,31 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       if (!mounted) return;
       const auth = KaamAuthRepository();
       if (auth.currentUser == null) {
-        final route = selectedRole == KaamRole.candidate ? AppRoutes.login : AppRoutes.employerLogin;
-        await Navigator.of(context).pushNamed(route, arguments: {'role': selectedRole});
+        final route = selectedRole == KaamRole.candidate
+            ? AppRoutes.login
+            : AppRoutes.employerLogin;
+        await Navigator.of(context)
+            .pushNamed(route, arguments: {'role': selectedRole});
         return;
       }
-      final result = await auth.resolvePostOtpDestination(fallbackRole: selectedRole!);
+      final result =
+          await auth.resolvePostOtpDestination(fallbackRole: selectedRole!);
       if (!mounted) return;
       final route = switch (result.destination) {
         KaamAuthDestination.roleSelection => AppRoutes.roleSelection,
+        KaamAuthDestination.blocked => AppRoutes.accountBlocked,
         KaamAuthDestination.candidateOnboarding => AppRoutes.documentsUpload,
         KaamAuthDestination.candidateDashboard => AppRoutes.dashboard,
-        KaamAuthDestination.employerOnboarding => AppRoutes.employerOnboardingOverview,
+        KaamAuthDestination.employerOnboarding =>
+          AppRoutes.employerOnboardingOverview,
         KaamAuthDestination.employerDashboard => AppRoutes.employerDashboard,
       };
       Navigator.of(context).pushNamed(route);
     } catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not continue: $error')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not continue: $error')));
+      }
     } finally {
       if (mounted) setState(() => navigating = false);
     }
@@ -65,118 +74,120 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
           children: [
-        const Center(
-          child: Text.rich(
-            TextSpan(
-              text: "Let's start ",
-              style: AppTextStyles.headline,
-              children: [
+            const Center(
+              child: Text.rich(
                 TextSpan(
-                  text: 'your journey',
-                  style: TextStyle(color: AppColors.primaryPink),
+                  text: "Let's start ",
+                  style: AppTextStyles.headline,
+                  children: [
+                    TextSpan(
+                      text: 'your journey',
+                      style: TextStyle(color: AppColors.primaryPink),
+                    ),
+                  ],
                 ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Center(
+              child: Text(
+                'Choose how you want to use KAAM. Your privacy is protected from the first step.',
+                style: AppTextStyles.body,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 26),
+            SizedBox(
+              height: 286,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _JourneyCard(
+                      title: 'Find Work',
+                      subtitle: 'Create a private profile',
+                      icon: Icons.work_outline_rounded,
+                      color: AppColors.primaryPink,
+                      selected: isCandidate,
+                      onTap: () =>
+                          setState(() => selectedRole = KaamRole.candidate),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _JourneyCard(
+                      title: 'Hire Talent',
+                      subtitle: 'Discover skilled professionals',
+                      icon: Icons.business_center_outlined,
+                      color: AppColors.accentPurple,
+                      selected: isEmployer,
+                      onTap: () =>
+                          setState(() => selectedRole = KaamRole.employer),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            PrimaryButton(
+              label: navigating
+                  ? 'Opening...'
+                  : isCandidate
+                      ? 'Continue to find work'
+                      : isEmployer
+                          ? 'Continue to hire talent'
+                          : 'Select how you want to continue',
+              onPressed: navigating || selectedRole == null ? null : _continue,
+            ),
+            const SizedBox(height: 22),
+            const Row(
+              children: [
+                Expanded(child: Divider(color: AppColors.border)),
+                Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Text('or', style: AppTextStyles.muted)),
+                Expanded(child: Divider(color: AppColors.border)),
               ],
             ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        const SizedBox(height: 10),
-        const Center(
-          child: Text(
-            'Choose how you want to use KAAM. Your privacy is protected from the first step.',
-            style: AppTextStyles.body,
-            textAlign: TextAlign.center,
-          ),
-        ),
-        const SizedBox(height: 26),
-        SizedBox(
-          height: 286,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: _JourneyCard(
-                  title: 'Find Work',
-                  subtitle: 'Create a private profile',
-                  icon: Icons.work_outline_rounded,
-                  color: AppColors.primaryPink,
-                  selected: isCandidate,
-                  onTap: () =>
-                      setState(() => selectedRole = KaamRole.candidate),
-                ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppColors.border),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _JourneyCard(
-                  title: 'Hire Talent',
-                  subtitle: 'Discover skilled professionals',
-                  icon: Icons.business_center_outlined,
-                  color: AppColors.accentPurple,
-                  selected: isEmployer,
-                  onTap: () => setState(() => selectedRole = KaamRole.employer),
-                ),
+              child: Column(
+                children: [
+                  const Icon(Icons.account_circle_outlined,
+                      color: AppColors.softPink, size: 30),
+                  const SizedBox(height: 10),
+                  const Text('Already registered?', style: AppTextStyles.title),
+                  const SizedBox(height: 5),
+                  const Text('Sign in to continue your journey.',
+                      style: AppTextStyles.body, textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  SecondaryButton(
+                    label: 'Log In',
+                    icon: Icons.login_rounded,
+                    onPressed: navigating ? null : _openLogin,
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-        PrimaryButton(
-          label: navigating
-              ? 'Opening...'
-              : isCandidate
-                  ? 'Continue to find work'
-                  : isEmployer
-                      ? 'Continue to hire talent'
-                      : 'Select how you want to continue',
-          onPressed: navigating || selectedRole == null ? null : _continue,
-        ),
-        const SizedBox(height: 22),
-        const Row(
-          children: [
-            Expanded(child: Divider(color: AppColors.border)),
-            Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Text('or', style: AppTextStyles.muted)),
-            Expanded(child: Divider(color: AppColors.border)),
-          ],
-        ),
-        const SizedBox(height: 20),
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Column(
-            children: [
-              const Icon(Icons.account_circle_outlined,
-                  color: AppColors.softPink, size: 30),
-              const SizedBox(height: 10),
-              const Text('Already registered?', style: AppTextStyles.title),
-              const SizedBox(height: 5),
-              const Text('Sign in to continue your journey.',
-                  style: AppTextStyles.body, textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              SecondaryButton(
-                label: 'Log In',
-                icon: Icons.login_rounded,
-                onPressed: navigating ? null : _openLogin,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 22),
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.lock_outline, color: AppColors.softPink, size: 18),
-            SizedBox(width: 8),
-            Flexible(
-                child: Text('Your privacy is important. We keep it protected.',
-                    style: AppTextStyles.muted)),
-          ],
-        ),
+            ),
+            const SizedBox(height: 22),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.lock_outline, color: AppColors.softPink, size: 18),
+                SizedBox(width: 8),
+                Flexible(
+                    child: Text(
+                        'Your privacy is important. We keep it protected.',
+                        style: AppTextStyles.muted)),
+              ],
+            ),
           ],
         ),
       ),

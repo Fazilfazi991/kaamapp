@@ -10,10 +10,37 @@ enum KaamRole { candidate, employer }
 
 enum KaamAuthDestination {
   roleSelection,
+  blocked,
   candidateOnboarding,
   candidateDashboard,
   employerOnboarding,
   employerDashboard,
+}
+
+enum KaamProtectedAccess { allowed, blocked, signedOut, wrongRole }
+
+class KaamAccountStatusPolicy {
+  const KaamAccountStatusPolicy._();
+
+  static const blockedMessage =
+      'Your Kaam account has been blocked. Please contact support if you believe this is a mistake.';
+
+  static bool isBlocked(String? status) => status?.trim() == 'blocked';
+
+  static KaamProtectedAccess protectedAccess({
+    required KaamRole? actualRole,
+    required String? status,
+    required KaamRole expectedRole,
+  }) {
+    if (actualRole == null) return KaamProtectedAccess.signedOut;
+    if (isBlocked(status)) return KaamProtectedAccess.blocked;
+    if (actualRole != expectedRole) return KaamProtectedAccess.wrongRole;
+    return KaamProtectedAccess.allowed;
+  }
+
+  static KaamAuthDestination? blockedDestination(String? status) {
+    return isBlocked(status) ? KaamAuthDestination.blocked : null;
+  }
 }
 
 class CandidateSkillLimits {
@@ -33,6 +60,13 @@ class KaamAuthRouteResult {
 
   final KaamAuthDestination destination;
   final String message;
+}
+
+class KaamStoredProfile {
+  const KaamStoredProfile({required this.role, required this.status});
+
+  final KaamRole role;
+  final String status;
 }
 
 class CandidatePrivacySettings {
@@ -822,8 +856,8 @@ class KaamAuthRepository {
         _client.auth.currentUser == null) {
       throw StateError('OTP verified but no Supabase session was created.');
     }
-    final existingRole = await _storedRole();
-    if (existingRole == null) {
+    final existingProfile = await _storedProfile();
+    if (existingProfile == null) {
       if (role == null) {
         return const KaamAuthRouteResult(
           destination: KaamAuthDestination.roleSelection,
@@ -834,32 +868,62 @@ class KaamAuthRepository {
       await ensureProfile(role: role);
       return resolvePostOtpDestination(fallbackRole: role);
     }
+    if (KaamAccountStatusPolicy.isBlocked(existingProfile.status)) {
+      await signOut();
+      return const KaamAuthRouteResult(
+        destination: KaamAuthDestination.blocked,
+        message: KaamAccountStatusPolicy.blockedMessage,
+      );
+    }
 
-    final result = await resolvePostOtpDestination(fallbackRole: existingRole);
+    final result =
+        await resolvePostOtpDestination(fallbackRole: existingProfile.role);
     if (role != null) {
       return KaamAuthRouteResult(
         destination: result.destination,
-        message:
-            'This email is already registered as a ${existingRole.name}. Continuing to your account.',
+        message: result.destination == KaamAuthDestination.blocked
+            ? result.message
+            : 'This email is already registered as a ${existingProfile.role.name}. Continuing to your account.',
       );
     }
     return result;
   }
 
-  Future<KaamRole?> _storedRole() async {
+  Future<KaamStoredProfile?> _storedProfile() async {
     final client = _client;
     final user = _requireUser(client);
     final profile = await client
         .from('profiles')
-        .select('role')
+        .select('role,status')
         .eq('id', user.id)
         .maybeSingle();
     final roleName = profile?['role'] as String?;
     if (roleName == null) return null;
-    return _roleFromName(roleName);
+    return KaamStoredProfile(
+      role: _roleFromName(roleName),
+      status: profile?['status'] as String? ?? 'draft',
+    );
   }
 
-  Future<KaamRole?> currentBackendRole() => _storedRole();
+  Future<KaamRole?> currentBackendRole() async =>
+      (await _storedProfile())?.role;
+
+  Future<KaamProtectedAccess> checkProtectedAccess(
+      KaamRole expectedRole) async {
+    final client = _client;
+    await SupabaseService.waitForSessionRecovery();
+    if (client.auth.currentUser == null) return KaamProtectedAccess.signedOut;
+    final profile = await _storedProfile();
+    final access = KaamAccountStatusPolicy.protectedAccess(
+      actualRole: profile?.role,
+      status: profile?.status,
+      expectedRole: expectedRole,
+    );
+    if (access == KaamProtectedAccess.blocked) {
+      await signOut();
+    }
+    return access;
+  }
 
   Future<void> ensureProfile({required KaamRole role}) async {
     final client = _client;
@@ -885,18 +949,29 @@ class KaamAuthRepository {
   }) async {
     final client = _client;
     final user = _requireUser(client);
+    await _ensureCurrentProfileNotBlocked(client);
+    await _ensureCurrentProfileNotBlocked(client);
+    await _ensureCurrentProfileNotBlocked(client);
     final profile = await client
         .from('profiles')
-        .select('role')
+        .select('role,status')
         .eq('id', user.id)
         .maybeSingle();
     final roleName = profile?['role'] as String?;
     final role = roleName == null ? fallbackRole : _roleFromName(roleName);
+    final status = profile?['status'] as String?;
 
     if (profile == null) {
       return const KaamAuthRouteResult(
         destination: KaamAuthDestination.roleSelection,
         message: 'Account verified. Choose how you want to use KAAM.',
+      );
+    }
+    if (KaamAccountStatusPolicy.isBlocked(status)) {
+      await signOut();
+      return const KaamAuthRouteResult(
+        destination: KaamAuthDestination.blocked,
+        message: KaamAccountStatusPolicy.blockedMessage,
       );
     }
 
@@ -1034,6 +1109,7 @@ class CandidateProfileRepository {
       Map<String, dynamic> values) async {
     final client = _client;
     final user = _requireUser(client);
+    await _ensureCurrentProfileNotBlocked(client);
 
     await client.from('candidate_profiles').upsert({
       'id': user.id,
@@ -1095,6 +1171,7 @@ class CandidateProfileRepository {
     required List<CandidateSkillData> selections,
   }) async {
     final user = _requireUser(_client);
+    await _ensureCurrentProfileNotBlocked(_client);
     if (selections.isEmpty ||
         selections.length > CandidateSkillLimits.maxSkills) {
       throw ArgumentError(
@@ -1161,6 +1238,7 @@ class CandidateProfileRepository {
       throw ArgumentError('Custom skill names must be 2 to 50 characters.');
     }
     final user = _requireUser(_client);
+    await _ensureCurrentProfileNotBlocked(_client);
     final existing = await loadSkills(categoryIds: [categoryId]);
     if (existing
         .any((skill) => skill.name.toLowerCase() == trimmed.toLowerCase())) {
@@ -1280,6 +1358,7 @@ class CandidateProfileRepository {
   }) async {
     final client = _client;
     final user = _requireUser(client);
+    await _ensureCurrentProfileNotBlocked(client);
     var stage = 'candidate profile';
     try {
       // Document onboarding can happen before the basic profile form. Create
@@ -1424,6 +1503,7 @@ class CandidateProfileRepository {
     if (id.trim().isEmpty) return;
     final client = _client;
     final user = _requireUser(client);
+    await _ensureCurrentProfileNotBlocked(client);
     await client
         .from('candidate_document_notifications')
         .update({'is_read': true})
@@ -1670,6 +1750,7 @@ class EmployerRepository {
   Future<EmployerCompanyData> updateCompanyLogo(String publicUrl) async {
     final client = _client;
     final user = _requireUser(client);
+    await _ensureCurrentProfileNotBlocked(client);
     await client
         .from('employer_companies')
         .update({'logo_url': publicUrl}).eq('owner_id', user.id);
@@ -1692,6 +1773,7 @@ class EmployerRepository {
   ) async {
     final client = _client;
     final user = _requireUser(client);
+    await _ensureCurrentProfileNotBlocked(client);
     final company = await loadMyCompany();
     if (company?.id == null) {
       throw StateError(
@@ -1733,6 +1815,7 @@ class EmployerRepository {
 
   Future<void> updateHiringRequirementStatus(String id, String status) async {
     if (id.isEmpty) throw ArgumentError('Hiring requirement ID is missing.');
+    await _ensureCurrentProfileNotBlocked(_client);
     await _client
         .from('employer_hiring_requirements')
         .update({'status': status}).eq('id', id);
@@ -1740,6 +1823,7 @@ class EmployerRepository {
 
   Future<void> deleteHiringRequirement(String id) async {
     if (id.isEmpty) throw ArgumentError('Hiring requirement ID is missing.');
+    await _ensureCurrentProfileNotBlocked(_client);
     await _client.from('employer_hiring_requirements').delete().eq('id', id);
   }
 
@@ -1796,6 +1880,7 @@ class EmployerRepository {
   Future<void> saveCandidate(String candidateId) async {
     final client = _client;
     final user = _requireUser(client);
+    await _ensureCurrentProfileNotBlocked(client);
     if (candidateId.isEmpty) {
       throw ArgumentError('Candidate ID is missing.');
     }
@@ -2038,6 +2123,7 @@ class InterestRepository {
     if (requestId.isEmpty) {
       throw ArgumentError('Request ID is missing.');
     }
+    await _ensureCurrentProfileNotBlocked(_client);
     await _client.from('interest_requests').update(
         {'status': accepted ? 'accepted' : 'rejected'}).eq('id', requestId);
   }
@@ -2152,6 +2238,7 @@ class MatchRepository {
 
   Future<void> revealCandidateContact(String matchId) async {
     if (matchId.isEmpty) throw ArgumentError('Match ID is missing.');
+    await _ensureCurrentProfileNotBlocked(_client);
     await _client
         .rpc('reveal_candidate_contact', params: {'target_match_id': matchId});
   }
@@ -2184,6 +2271,7 @@ class ChatRepository {
     if (body.trim().isEmpty) {
       throw ArgumentError('Message cannot be empty.');
     }
+    await _ensureCurrentProfileNotBlocked(client);
     final access = await client.rpc(
           'match_chat_enabled',
           params: {'target_match_id': matchId},
@@ -2240,6 +2328,7 @@ class KaamStorageRepository {
     required String fileName,
     required String documentType,
   }) async {
+    await _ensureCurrentProfileNotBlocked(_client);
     final extension = fileName.contains('.') ? fileName.split('.').last : 'bin';
     final safeType = documentType.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '-');
     final safeName =
@@ -2267,6 +2356,7 @@ class KaamStorageRepository {
   }) async {
     final client = _client;
     final user = _requireUser(client);
+    await _ensureCurrentProfileNotBlocked(client);
     await client.from('verification_documents').insert({
       'owner_id': user.id,
       'company_id': companyId,
@@ -2336,6 +2426,19 @@ User _requireUser(SupabaseClient client) {
     throw StateError('Please sign in again before continuing.');
   }
   return user;
+}
+
+Future<void> _ensureCurrentProfileNotBlocked(SupabaseClient client) async {
+  final user = _requireUser(client);
+  final row = await client
+      .from('profiles')
+      .select('status')
+      .eq('id', user.id)
+      .maybeSingle();
+  if (KaamAccountStatusPolicy.isBlocked(row?['status'] as String?)) {
+    await client.auth.signOut(scope: SignOutScope.global);
+    throw StateError(KaamAccountStatusPolicy.blockedMessage);
+  }
 }
 
 String? _nullable(String value) {

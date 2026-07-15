@@ -86,6 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String _routeFor(KaamAuthDestination destination) => switch (destination) {
         KaamAuthDestination.roleSelection => AppRoutes.roleSelection,
+        KaamAuthDestination.blocked => AppRoutes.accountBlocked,
         KaamAuthDestination.candidateOnboarding => AppRoutes.documentsUpload,
         KaamAuthDestination.candidateDashboard => AppRoutes.dashboard,
         KaamAuthDestination.employerOnboarding =>
