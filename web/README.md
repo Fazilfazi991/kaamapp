@@ -31,6 +31,7 @@ Only browser-safe Supabase values belong here. Never place service-role keys, da
 npm run dev
 npm run lint
 npm run build
+npm test
 ```
 
 ## Folder Structure
@@ -65,6 +66,10 @@ src/
 - Shortlist, messages, matches, and job-post workflows
 - Admin panel
 - Payment or production membership activation
+
+## Authentication QA
+
+See `docs/auth-qa-checklist.md` for manual checks covering candidate-to-employer logout/login, employer-to-candidate logout/login, wrong role-tab selection, refresh, and browser restart.
 
 ## Branch Workflow
 

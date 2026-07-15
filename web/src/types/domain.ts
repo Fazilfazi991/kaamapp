@@ -39,3 +39,12 @@ export type EmployerCompanyRow = {
   is_verified: boolean | null;
   status: string;
 };
+
+export type AccountContext = {
+  userId: string;
+  email: string | null;
+  role: UserRole;
+  profileStatus: string;
+  hasCandidateProfile: boolean;
+  hasEmployerProfile: boolean;
+};

@@ -18,6 +18,8 @@ export const routes = {
   employerMessages: "/employer/messages",
   employerJobPosts: "/employer/job-posts",
   admin: "/admin",
+  accountRecovery: "/account/recovery",
+  accountConflict: "/account/conflict",
 } as const;
 
 export type AppRoute = (typeof routes)[keyof typeof routes];

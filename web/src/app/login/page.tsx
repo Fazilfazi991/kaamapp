@@ -3,8 +3,13 @@ import { Header } from "@/components/layout/header";
 import { PageTitle } from "@/components/layout/page-title";
 import { AuthForm } from "@/features/auth/auth-form";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
+import { redirectAuthenticatedAuthPage } from "@/lib/auth/session";
+import { supabaseConfigError } from "@/lib/supabase/env";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const configError = supabaseConfigError();
+  if (!configError) await redirectAuthenticatedAuthPage();
+
   return (
     <>
       <Header />
@@ -14,7 +19,7 @@ export default function LoginPage() {
           description="Use email OTP to continue as a candidate or employer. Your account role is verified against Supabase after login."
         />
         <Suspense fallback={<LoadingIndicator label="Preparing login" />}>
-          <AuthForm />
+          <AuthForm mode="login" configError={configError} />
         </Suspense>
       </main>
     </>
