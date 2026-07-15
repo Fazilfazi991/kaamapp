@@ -22,6 +22,8 @@ export const routes = {
   employerProfile: "/employer/profile",
   employerSearch: "/employer/search",
   employerShortlist: "/employer/shortlist",
+  employerInterests: "/employer/interests",
+  employerMatches: "/employer/matches",
   employerMessages: "/employer/messages",
   employerJobPosts: "/employer/job-posts",
   admin: "/admin",
