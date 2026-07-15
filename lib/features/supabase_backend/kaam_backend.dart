@@ -277,6 +277,113 @@ class CandidateSkillData {
   final String otherCertificateName;
 }
 
+class CandidateLocationOptions {
+  const CandidateLocationOptions._();
+
+  static const countries = ['UAE', 'India'];
+  static const uaeEmirates = [
+    'Abu Dhabi',
+    'Dubai',
+    'Sharjah',
+    'Ajman',
+    'Umm Al Quwain',
+    'Ras Al Khaimah',
+    'Fujairah',
+  ];
+  static const indianStates = [
+    'Andhra Pradesh',
+    'Arunachal Pradesh',
+    'Assam',
+    'Bihar',
+    'Chhattisgarh',
+    'Goa',
+    'Gujarat',
+    'Haryana',
+    'Himachal Pradesh',
+    'Jharkhand',
+    'Karnataka',
+    'Kerala',
+    'Madhya Pradesh',
+    'Maharashtra',
+    'Manipur',
+    'Meghalaya',
+    'Mizoram',
+    'Nagaland',
+    'Odisha',
+    'Punjab',
+    'Rajasthan',
+    'Sikkim',
+    'Tamil Nadu',
+    'Telangana',
+    'Tripura',
+    'Uttar Pradesh',
+    'Uttarakhand',
+    'West Bengal',
+    'Delhi',
+    'Jammu and Kashmir',
+    'Ladakh',
+    'Puducherry',
+    'Chandigarh',
+    'Dadra and Nagar Haveli and Daman and Diu',
+    'Lakshadweep',
+    'Andaman and Nicobar Islands',
+  ];
+
+  static List<String> regionsForCountry(String country) {
+    return switch (country.trim()) {
+      'UAE' => uaeEmirates,
+      'India' => indianStates,
+      _ => const [],
+    };
+  }
+
+  static String normalizeRegionForCountry(String country, String region) {
+    final trimmed = region.trim();
+    if (trimmed.isEmpty) return '';
+    final normalized = trimmed.toLowerCase();
+    for (final option in regionsForCountry(country)) {
+      if (option.toLowerCase() == normalized) return option;
+    }
+    return '';
+  }
+}
+
+class CandidateBasicProfileLocationMapper {
+  const CandidateBasicProfileLocationMapper._();
+
+  static Map<String, dynamic> candidateProfileValues({
+    required String nationality,
+    required String currentCountry,
+    required String currentLocation,
+    required String preferredCountry,
+    required String preferredLocation,
+  }) {
+    final currentCountryValue = _countryOrEmpty(currentCountry);
+    final preferredCountryValue = _countryOrEmpty(preferredCountry);
+    final currentCityValue = CandidateLocationOptions.normalizeRegionForCountry(
+      currentCountryValue,
+      currentLocation,
+    );
+    final preferredCityValue =
+        CandidateLocationOptions.normalizeRegionForCountry(
+      preferredCountryValue,
+      preferredLocation,
+    );
+    return {
+      'nationality': _nullable(nationality),
+      'current_country': _nullable(currentCountryValue),
+      'current_city': _nullable(currentCityValue),
+      'preferred_country': _nullable(preferredCountryValue),
+      'preferred_city': _nullable(preferredCityValue),
+    };
+  }
+
+  static String _countryOrEmpty(String country) {
+    final trimmed = country.trim();
+    return CandidateLocationOptions.countries.contains(trimmed) ? trimmed : '';
+  }
+}
+
 class EmployerCompanyData {
   const EmployerCompanyData({
     this.id,
@@ -891,7 +998,9 @@ class CandidateProfileRepository {
     required String fullName,
     required String phone,
     required String nationality,
+    required String currentCountry,
     required String currentLocation,
+    required String preferredCountry,
     required String preferredLocation,
   }) async {
     final client = _client;
@@ -908,11 +1017,13 @@ class CandidateProfileRepository {
 
     await client.from('candidate_profiles').upsert({
       'id': user.id,
-      'nationality': _nullable(nationality),
-      'current_country': _nullable(currentLocation),
-      'current_city': _nullable(preferredLocation),
-      'preferred_country': _nullable(currentLocation),
-      'preferred_city': _nullable(preferredLocation),
+      ...CandidateBasicProfileLocationMapper.candidateProfileValues(
+        nationality: nationality,
+        currentCountry: currentCountry,
+        currentLocation: currentLocation,
+        preferredCountry: preferredCountry,
+        preferredLocation: preferredLocation,
+      ),
     }, onConflict: 'id');
 
     _debug('Candidate basic profile saved');
