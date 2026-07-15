@@ -6,6 +6,7 @@ export type AppAccountRole = Exclude<UserRole, "admin">;
 export type AccountStatus =
   | "unauthenticated"
   | "ready"
+  | "blocked"
   | "missing_profile"
   | "conflicting_records"
   | "unsupported_role";
@@ -14,6 +15,7 @@ export type AccountSnapshot = {
   userId: string | null;
   email: string | null;
   role: UserRole | null;
+  profileStatus?: string | null;
   hasCandidateProfile: boolean;
   hasEmployerProfile: boolean;
 };
@@ -43,10 +45,23 @@ export function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+export const blockedAccountMessage =
+  "Your Kaam account has been blocked. Please contact support if you believe this is a mistake.";
+
+export function isBlockedStatus(status: string | null | undefined) {
+  return status === "blocked";
+}
+
 export function safeReturnPath(value: string | null | undefined) {
   if (!value) return null;
   if (!value.startsWith("/") || value.startsWith("//")) return null;
-  if (value.startsWith("/login") || value.startsWith("/register")) return null;
+  if (
+    value.startsWith("/login") ||
+    value.startsWith("/register") ||
+    value.startsWith(routes.accountBlocked)
+  ) {
+    return null;
+  }
   return value;
 }
 
@@ -57,6 +72,15 @@ export function roleMismatchMessage(role: UserRole) {
 export function profileRecoveryDecision(account: AccountSnapshot): RouteDecision | null {
   if (!account.userId) {
     return { allowed: false, redirectTo: routes.login, status: "unauthenticated" };
+  }
+
+  if (isBlockedStatus(account.profileStatus)) {
+    return {
+      allowed: false,
+      redirectTo: routes.accountBlocked,
+      status: "blocked",
+      message: blockedAccountMessage,
+    };
   }
 
   if (!account.role) {

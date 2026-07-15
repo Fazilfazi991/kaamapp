@@ -60,6 +60,7 @@ export async function getAuthenticatedAccountSnapshot(): Promise<AccountSnapshot
     userId: user.id,
     email: user.email ?? profile?.email ?? null,
     role: profile?.role ?? null,
+    profileStatus: profile?.status ?? null,
     hasCandidateProfile: Boolean(candidate),
     hasEmployerProfile: Boolean(company),
   };
@@ -111,6 +112,7 @@ export async function requireRole(role: AppAccountRole): Promise<AccountContext>
     userId: user.id,
     email: user.email ?? profile?.email ?? null,
     role: profile?.role ?? null,
+    profileStatus: profile?.status ?? null,
     hasCandidateProfile: Boolean(candidate),
     hasEmployerProfile: Boolean(company),
   };

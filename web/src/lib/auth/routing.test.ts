@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   authPageDecision,
+  blockedAccountMessage,
   canCreateProfile,
+  isBlockedStatus,
   normalizeOtp,
   postOtpDestination,
   protectedRouteDecision,
@@ -32,6 +34,14 @@ const employer: AccountSnapshot = {
   role: "employer",
   hasCandidateProfile: false,
   hasEmployerProfile: true,
+};
+
+const admin: AccountSnapshot = {
+  userId: "user-admin",
+  email: "admin@example.com",
+  role: "admin",
+  hasCandidateProfile: false,
+  hasEmployerProfile: false,
 };
 
 describe("protectedRouteDecision", () => {
@@ -138,6 +148,45 @@ describe("protectedRouteDecision", () => {
       status: "conflicting_records",
     });
   });
+
+  it("blocks candidate protected routes when profile status is blocked", () => {
+    expect(
+      protectedRouteDecision(
+        { ...candidate, profileStatus: "blocked" },
+        "candidate",
+        routes.candidateDashboard,
+      ),
+    ).toMatchObject({
+      allowed: false,
+      redirectTo: routes.accountBlocked,
+      status: "blocked",
+      message: blockedAccountMessage,
+    });
+  });
+
+  it("blocks employer protected routes when profile status is blocked", () => {
+    expect(
+      protectedRouteDecision(
+        { ...employer, profileStatus: "blocked" },
+        "employer",
+        routes.employerDashboard,
+      ),
+    ).toMatchObject({
+      allowed: false,
+      redirectTo: routes.accountBlocked,
+      status: "blocked",
+    });
+  });
+
+  it("does not block an unblocked account after admin restores active status", () => {
+    expect(
+      protectedRouteDecision(
+        { ...candidate, profileStatus: "active" },
+        "candidate",
+        routes.candidateDashboard,
+      ),
+    ).toMatchObject({ allowed: true, status: "ready" });
+  });
 });
 
 describe("auth routing helpers", () => {
@@ -183,10 +232,47 @@ describe("auth routing helpers", () => {
     });
   });
 
+  it("authenticated blocked user visiting login is sent to the blocked page", () => {
+    expect(authPageDecision({ ...employer, profileStatus: "blocked" })).toMatchObject({
+      allowed: false,
+      redirectTo: routes.accountBlocked,
+      status: "blocked",
+    });
+  });
+
+  it("blocked admin accounts are not allowed through normal admin routing", () => {
+    expect(authPageDecision({ ...admin, profileStatus: "blocked" })).toMatchObject({
+      allowed: false,
+      redirectTo: routes.accountBlocked,
+      status: "blocked",
+    });
+  });
+
+  it("post-OTP routing sends blocked accounts to the blocked page", () => {
+    expect(
+      postOtpDestination(
+        { ...candidate, profileStatus: "blocked" },
+        "candidate",
+      ),
+    ).toMatchObject({
+      allowed: false,
+      redirectTo: routes.accountBlocked,
+      status: "blocked",
+    });
+  });
+
+  it("blocked status detection only rejects the exact blocked state", () => {
+    expect(isBlockedStatus("blocked")).toBe(true);
+    expect(isBlockedStatus("active")).toBe(false);
+    expect(isBlockedStatus("paused")).toBe(false);
+    expect(isBlockedStatus(null)).toBe(false);
+  });
+
   it("unsafe external return URL is rejected", () => {
     expect(safeReturnPath("https://evil.example/candidate")).toBeNull();
     expect(safeReturnPath("//evil.example/candidate")).toBeNull();
     expect(safeReturnPath("/login?redirectTo=/employer")).toBeNull();
+    expect(safeReturnPath(routes.accountBlocked)).toBeNull();
     expect(safeReturnPath("/candidate/dashboard")).toBe(
       routes.candidateDashboard,
     );

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAuthenticatedProfile } from "@/lib/auth/session";
+import { isBlockedStatus } from "@/lib/auth/routing";
 import { routes } from "@/config/routes";
 import type { ChatMessageRow, ConversationAccess, ConversationSummary } from "@/features/messaging/types";
 import type { UserRole } from "@/types/domain";
@@ -8,6 +9,7 @@ import type { UserRole } from "@/types/domain";
 async function requireMessagingAccount() {
   const { user, profile } = await getAuthenticatedProfile();
   if (!user) redirect(routes.login);
+  if (isBlockedStatus(profile?.status)) redirect(routes.accountBlocked);
   if (profile?.role !== "candidate" && profile?.role !== "employer") redirect(routes.accountConflict);
   return { userId: user.id, role: profile.role as UserRole };
 }

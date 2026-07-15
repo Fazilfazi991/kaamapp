@@ -31,6 +31,7 @@ export const routes = {
   employerMessages: "/employer/messages",
   employerJobPosts: "/employer/job-posts",
   admin: "/admin",
+  accountBlocked: "/account/blocked",
   accountRecovery: "/account/recovery",
   accountConflict: "/account/conflict",
 } as const;

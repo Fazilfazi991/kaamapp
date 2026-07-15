@@ -7,7 +7,9 @@ import { Label, TextInput } from "@/components/ui/form";
 import { routes } from "@/config/routes";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import {
+  blockedAccountMessage,
   dashboardForRole,
+  isBlockedStatus,
   isValidEmail,
   normalizeOtp,
   postOtpDestination,
@@ -153,9 +155,9 @@ export function AuthForm({
 
     const roleResult = await supabase
       .from("profiles")
-      .select("role")
+      .select("role,status")
       .eq("id", data.user.id)
-      .maybeSingle<{ role: UserRole }>();
+      .maybeSingle<{ role: UserRole; status: string | null }>();
 
     if (roleResult.error) {
       setLoading(false);
@@ -164,6 +166,7 @@ export function AuthForm({
     }
 
     let backendRole = roleResult.data?.role ?? null;
+    let backendStatus = roleResult.data?.status ?? null;
     if (!backendRole && mode === "register") {
       const insertResult = await supabase.from("profiles").insert({
         id: data.user.id,
@@ -175,12 +178,14 @@ export function AuthForm({
       if (insertResult.error) {
         const retry = await supabase
           .from("profiles")
-          .select("role")
+          .select("role,status")
           .eq("id", data.user.id)
-          .maybeSingle<{ role: UserRole }>();
+          .maybeSingle<{ role: UserRole; status: string | null }>();
         backendRole = retry.data?.role ?? null;
+        backendStatus = retry.data?.status ?? null;
       } else {
         backendRole = role;
+        backendStatus = "active";
       }
     }
 
@@ -195,6 +200,7 @@ export function AuthForm({
       userId: data.user.id,
       email: data.user.email ?? null,
       role: backendRole,
+      profileStatus: backendStatus,
       hasCandidateProfile: false,
       hasEmployerProfile: false,
     };
@@ -208,6 +214,8 @@ export function AuthForm({
 
     if (mode === "register" && roleResult.data?.role) {
       setMessage("This email is already registered. Continuing to the existing account.");
+    } else if (decision.status === "blocked") {
+      setMessage(blockedAccountMessage);
     } else if (decision.message) {
       setMessage(decision.message);
     }
@@ -218,7 +226,7 @@ export function AuthForm({
     );
     if (mode === "register" && roleResult.data?.role) {
       destination.searchParams.set("authNotice", "existing-account");
-    } else if (decision.message) {
+    } else if (decision.message && decision.status !== "blocked") {
       destination.searchParams.set("authNotice", "role-redirect");
     }
     router.replace(`${destination.pathname}${destination.search}`);
@@ -241,9 +249,9 @@ export function AuthForm({
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role,status")
       .eq("id", user.id)
-      .maybeSingle<{ role: UserRole }>();
+      .maybeSingle<{ role: UserRole; status: string | null }>();
 
     setLoading(false);
     if (profileError) {
@@ -252,6 +260,12 @@ export function AuthForm({
     }
     if (!profile?.role) {
       router.replace(routes.accountRecovery);
+      router.refresh();
+      return;
+    }
+    if (isBlockedStatus(profile.status)) {
+      setMessage(blockedAccountMessage);
+      router.replace(routes.accountBlocked);
       router.refresh();
       return;
     }

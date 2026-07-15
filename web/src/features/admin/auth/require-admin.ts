@@ -17,7 +17,9 @@ export async function requireAdmin(): Promise<AdminAccount> {
     .eq("id", user.id)
     .maybeSingle<AdminProfileRow>();
 
-  if (!profile || profile.role !== "admin" || profile.status === "blocked") {
+  if (profile?.status === "blocked") redirect(routes.accountBlocked);
+
+  if (!profile || profile.role !== "admin") {
     redirect(routes.home);
   }
 
