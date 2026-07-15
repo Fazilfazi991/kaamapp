@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kaam | Edit Company Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#f65f9d",
+                    "on-background": "#dfe1f7",
+                    "surface-container-high": "#252939",
+                    "inverse-on-surface": "#2c3040",
+                    "on-tertiary-fixed": "#3c0321",
+                    "on-surface": "#dfe1f7",
+                    "surface-container-low": "#171b2a",
+                    "error-container": "#93000a",
+                    "secondary": "#c9bfff",
+                    "secondary-container": "#470cd9",
+                    "surface-variant": "#303445",
+                    "on-primary-fixed-variant": "#8d004d",
+                    "on-primary": "#640035",
+                    "primary": "#ffb0c9",
+                    "tertiary-fixed-dim": "#ffb0cd",
+                    "on-surface-variant": "#ddbfc7",
+                    "on-secondary-fixed-variant": "#4503d7",
+                    "surface-bright": "#353849",
+                    "on-tertiary": "#571936",
+                    "tertiary-fixed": "#ffd9e4",
+                    "surface-container-lowest": "#090d1c",
+                    "on-tertiary-container": "#541734",
+                    "on-secondary-container": "#baaeff",
+                    "inverse-primary": "#ae2565",
+                    "primary-fixed-dim": "#ffb0c9",
+                    "outline-variant": "#574147",
+                    "outline": "#a58a91",
+                    "primary-fixed": "#ffd9e3",
+                    "surface-container": "#1b1f2f",
+                    "surface": "#0f1322",
+                    "tertiary-container": "#cf7d9d",
+                    "tertiary": "#ffb0cd",
+                    "secondary-fixed": "#e5deff",
+                    "surface-container-highest": "#303445",
+                    "on-primary-fixed": "#3e001e",
+                    "on-tertiary-fixed-variant": "#72304d",
+                    "secondary-fixed-dim": "#c9bfff",
+                    "on-secondary-fixed": "#1a0063",
+                    "error": "#ffb4ab",
+                    "surface-dim": "#0f1322",
+                    "inverse-surface": "#dfe1f7",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary": "#2f009c",
+                    "on-primary-container": "#600032",
+                    "surface-tint": "#ffb0c9",
+                    "on-error": "#690005",
+                    "background": "#0f1322"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "64px",
+                    "gutter": "24px",
+                    "container-margin-mobile": "20px",
+                    "base": "4px",
+                    "sm": "16px",
+                    "md": "24px",
+                    "container-margin-desktop": "80px",
+                    "xs": "8px",
+                    "lg": "40px"
+            },
+            "fontFamily": {
+                    "body-md": ["Manrope"],
+                    "body-lg": ["Manrope"],
+                    "label-sm": ["Manrope"],
+                    "headline-lg-mobile": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "label-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #090B1A; /* Canvas layer from Style Guidance */
+            color: #dfe1f7;
+            font-family: 'Manrope', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .glass-header {
+            background: rgba(9, 11, 26, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #2A2E4A;
+        }
+        .form-input {
+            background-color: #11142A;
+            border: 1px solid #2A2E4A;
+            color: #dfe1f7;
+            transition: all 0.2s ease;
+        }
+        .form-input:focus {
+            border-color: #F65F9D;
+            outline: none;
+            box-shadow: 0 0 10px rgba(246, 95, 157, 0.2);
+        }
+        .card-layer {
+            background-color: #181C35;
+            border: 1px solid #2A2E4A;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        .card-layer:hover {
+            background-color: #202542;
+        }
+        .primary-btn {
+            background: linear-gradient(135deg, #F65F9D 0%, #D44A85 100%);
+            box-shadow: 0 4px 15px rgba(246, 95, 157, 0.3);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .primary-btn:active {
+            transform: scale(0.96);
+            opacity: 0.9;
+        }
+        .secondary-btn {
+            border: 1.5px solid #6E4CFF;
+            transition: all 0.2s ease;
+        }
+        .secondary-btn:hover {
+            background: rgba(110, 76, 255, 0.1);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090B1A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2A2E4A;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #303445;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 w-full h-16 flex justify-between items-center px-container-margin-mobile md:px-container-margin-desktop backdrop-blur-xl border-b border-surface-variant bg-surface/70">
+<div class="flex items-center gap-xs">
+<div class="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-primary-container">
+<img class="w-8 h-8 object-contain" data-alt="A professional high-contrast logo of a modern tech company named Kaam, featuring elegant minimalist typography. The logo uses a vibrant primary pink accent against a deep navy background, embodying luxury and corporate status in the UAE market. High-end polished finish with subtle glassmorphic glow." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsSj9GCIqVcxhH6792uvi5qXw5k5Dg8E06QdwVDkcfAf7OVMATE7uGY6y7QP1yo83XDRFz_eDClp3JersAenR2EoGb1siRlPxxgHt-oO4f4yCpv7-ycxkzOWlxtB3XnkUglaIIXjdI6rNoDAQoixtrNgICGf6NELmKck-QLHvk2DWy3Jt8Y6sp2_YJCbaZCZzRKPcVZAsLjuJHI4poOosLEvahCdH9Ol_RPZwl-hvcP3nsl1nEbu2LodsgbHZmP_o2nuL803zAoUzo"/>
+</div>
+<span class="text-headline-md font-headline-md font-bold text-on-surface">Kaam</span>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-primary hover:bg-surface-container-high p-2 rounded-full transition-colors" data-icon="notifications">notifications</button>
+<div class="hidden md:flex items-center gap-sm">
+<span class="text-label-md font-label-md text-on-surface-variant">Khalid Al-Mansouri</span>
+<div class="w-8 h-8 rounded-full bg-surface-variant border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A close-up professional portrait of Khalid Al-Mansouri, an elite recruiter in Dubai, wearing a sharp charcoal business suit. The background is a soft-focus high-end office with warm ambient lighting. The aesthetic is clean, professional, and reflects a high-status corporate environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlUg7ishBgU-OJBtVb8rBpMifPyXbJvhxuwaN1O1Q08hHQBOERGrA53p8ptAY3A0xQJJom2dNCCr_eQgJjeBhmBHL5nQsun1E-QWQIINyQxzg2kWg3epWe3N9KjeKA7vagxBx99SM0aVoqOUZXkfiL9QRcZUdM-w3PqOcEeBvplnRhabviUkAx2omZZq51L3Zy2cjDQrkL1I4vU0Zcnj0cP7JBR8qxP9NWvoGgtjjmKacT-9D7qaJDBo8a9Vg0iEG0GqACZ44oH8TJ"/>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-24 px-container-margin-mobile md:px-container-margin-desktop max-w-[1280px] mx-auto">
+<!-- Breadcrumb / Header -->
+<div class="mb-lg">
+<h1 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg text-on-surface mb-2">Edit Company Profile</h1>
+<p class="text-body-md font-body-md text-on-surface-variant">Manage your corporate identity and recruitment preferences.</p>
+</div>
+<form class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Sidebar: Navigation/Shortcuts -->
+<aside class="lg:col-span-3 space-y-xs hidden lg:block">
+<nav class="flex flex-col gap-xs sticky top-24">
+<a class="flex items-center gap-sm p-md rounded-xl bg-secondary-container text-on-secondary-container font-bold transition-all" href="#company-details">
+<span class="material-symbols-outlined" data-icon="business">business</span>
+<span class="text-label-md font-label-md">Company Details</span>
+</a>
+<a class="flex items-center gap-sm p-md rounded-xl text-on-surface-variant hover:bg-surface-variant transition-all" href="#about-company">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="text-label-md font-label-md">About Company</span>
+</a>
+<a class="flex items-center gap-sm p-md rounded-xl text-on-surface-variant hover:bg-surface-variant transition-all" href="#hiring-needs">
+<span class="material-symbols-outlined" data-icon="work">work</span>
+<span class="text-label-md font-label-md">Hiring Needs</span>
+</a>
+<a class="flex items-center gap-sm p-md rounded-xl text-on-surface-variant hover:bg-surface-variant transition-all" href="#contact-person">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-label-md font-label-md">Contact Person</span>
+</a>
+<a class="flex items-center gap-sm p-md rounded-xl text-on-surface-variant hover:bg-surface-variant transition-all" href="#documents">
+<span class="material-symbols-outlined" data-icon="folder_shared">folder_shared</span>
+<span class="text-label-md font-label-md">Documents</span>
+</a>
+</nav>
+</aside>
+<!-- Main Form Content -->
+<div class="lg:col-span-9 space-y-gutter">
+<!-- Logo Upload Section -->
+<section class="card-layer p-md md:p-lg rounded-xl flex flex-col md:flex-row items-center gap-lg">
+<div class="relative group">
+<div class="w-32 h-32 rounded-2xl bg-surface-container-low border-2 border-dashed border-outline-variant flex items-center justify-center overflow-hidden">
+<img class="w-24 h-24 object-contain opacity-50 group-hover:opacity-100 transition-opacity" data-alt="A minimalist tech logo placeholder for a company profile, displayed within a modern glassmorphic interface. The logo is centrally aligned on a deep navy background with primary pink glow effects surrounding the icon, conveying a premium and secure brand identity." id="logo-preview" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTqummZGOfTy8Nrx-DRO3RAKFknnj2wYJQFn4pMasAjduJIbuziCH2YwjIW9dQniJ9EpY4nSb6NP2KQqqgRACVOo0B0eqtQimIfHIBaLbBiQwCFs8DRc2u9bShPYuRqRzleMQOXPXSJdQJl92T2lTajbzdrL_muMU5jkS7_yPaAtUCQ2x7MnJ2AU2shk3K-vpkBIy7XsA-ja1i5SYSrPHw78uwx6L0OBSl1uhDTXNUZR_6UuxTLS6fr2IODNWi7fAVQDm1f35T3ne0"/>
+</div>
+<label class="absolute -bottom-2 -right-2 w-10 h-10 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-transform" for="logo-upload">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+<input class="hidden" id="logo-upload" type="file"/>
+</label>
+</div>
+<div class="text-center md:text-left">
+<h3 class="text-headline-md font-headline-md text-on-surface">Company Logo</h3>
+<p class="text-label-md font-label-md text-on-surface-variant mt-1">PNG or JPG, Max 5MB. Recommended size 400x400px.</p>
+<div class="mt-md flex gap-sm justify-center md:justify-start">
+<button class="text-label-md font-label-md text-primary-container hover:underline" type="button">Upload New</button>
+<button class="text-label-md font-label-md text-error hover:underline" type="button">Remove</button>
+</div>
+</div>
+</section>
+<!-- Company Details -->
+<section class="card-layer p-md md:p-lg rounded-xl" id="company-details">
+<div class="flex items-center gap-sm mb-lg">
+<span class="material-symbols-outlined text-primary" data-icon="business">business</span>
+<h2 class="text-headline-md font-headline-md text-on-surface">Company Details</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Company Name</label>
+<input class="form-input w-full p-md rounded-xl text-body-md font-body-md" type="text" value="Al-Mansouri Tech Solutions"/>
+</div>
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Industry</label>
+<select class="form-input w-full p-md rounded-xl text-body-md font-body-md appearance-none">
+<option>Information Technology</option>
+<option>Finance &amp; Fintech</option>
+<option>Real Estate</option>
+<option>Healthcare</option>
+</select>
+</div>
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Company Size</label>
+<select class="form-input w-full p-md rounded-xl text-body-md font-body-md appearance-none">
+<option>1-50 Employees</option>
+<option selected="">51-200 Employees</option>
+<option>201-500 Employees</option>
+<option>500+ Employees</option>
+</select>
+</div>
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Website</label>
+<input class="form-input w-full p-md rounded-xl text-body-md font-body-md" type="url" value="https://al-mansouri.tech"/>
+</div>
+<div class="md:col-span-2 space-y-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Headquarters Address</label>
+<input class="form-input w-full p-md rounded-xl text-body-md font-body-md" type="text" value="Business Bay, Tower 4, Suite 1202, Dubai, UAE"/>
+</div>
+</div>
+</section>
+<!-- About Company -->
+<section class="card-layer p-md md:p-lg rounded-xl" id="about-company">
+<div class="flex items-center gap-sm mb-lg">
+<span class="material-symbols-outlined text-primary" data-icon="description">description</span>
+<h2 class="text-headline-md font-headline-md text-on-surface">About Company</h2>
+</div>
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Company Description</label>
+<textarea class="form-input w-full p-md rounded-xl text-body-md font-body-md resize-none" rows="6">Al-Mansouri Tech Solutions is a leading innovator in the GCC market, specializing in AI-driven enterprise software and secure cloud infrastructure. Founded in 2015, we bridge the gap between traditional corporate values and cutting-edge technological advancements. Our mission is to empower regional businesses with scalable, high-performance solutions that guarantee data sovereignty and operational excellence.</textarea>
+</div>
+</section>
+<!-- Hiring Needs (Bento Chips Style) -->
+<section class="card-layer p-md md:p-lg rounded-xl" id="hiring-needs">
+<div class="flex items-center justify-between mb-lg">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="work">work</span>
+<h2 class="text-headline-md font-headline-md text-on-surface">Hiring Needs</h2>
+</div>
+<button class="text-primary-container text-label-md font-label-md hover:underline flex items-center gap-xs" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span> Add Role
+                        </button>
+</div>
+<div class="flex flex-wrap gap-sm">
+<div class="px-md py-sm bg-primary-container/15 text-primary-container rounded-full flex items-center gap-xs border border-primary-container/30">
+<span class="text-label-md font-label-md">Senior Full Stack Developer</span>
+<span class="material-symbols-outlined text-[16px] cursor-pointer" data-icon="close">close</span>
+</div>
+<div class="px-md py-sm bg-primary-container/15 text-primary-container rounded-full flex items-center gap-xs border border-primary-container/30">
+<span class="text-label-md font-label-md">Product Manager</span>
+<span class="material-symbols-outlined text-[16px] cursor-pointer" data-icon="close">close</span>
+</div>
+<div class="px-md py-sm bg-primary-container/15 text-primary-container rounded-full flex items-center gap-xs border border-primary-container/30">
+<span class="text-label-md font-label-md">Cybersecurity Analyst</span>
+<span class="material-symbols-outlined text-[16px] cursor-pointer" data-icon="close">close</span>
+</div>
+<div class="px-md py-sm bg-surface-variant text-on-surface-variant rounded-full flex items-center gap-xs border border-outline-variant">
+<span class="text-label-md font-label-md">Add New Category...</span>
+</div>
+</div>
+</section>
+<!-- Contact Person -->
+<section class="card-layer p-md md:p-lg rounded-xl" id="contact-person">
+<div class="flex items-center gap-sm mb-lg">
+<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+<h2 class="text-headline-md font-headline-md text-on-surface">Contact Person</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Full Name</label>
+<input class="form-input w-full p-md rounded-xl text-body-md font-body-md" type="text" value="Khalid Al-Mansouri"/>
+</div>
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Job Title</label>
+<input class="form-input w-full p-md rounded-xl text-body-md font-body-md" type="text" value="Premium Recruiter &amp; HR Director"/>
+</div>
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Email Address</label>
+<input class="form-input w-full p-md rounded-xl text-body-md font-body-md" type="email" value="khalid@al-mansouri.tech"/>
+</div>
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Phone Number</label>
+<input class="form-input w-full p-md rounded-xl text-body-md font-body-md" type="tel" value="+971 50 123 4567"/>
+</div>
+</div>
+</section>
+<!-- Documents -->
+<section class="card-layer p-md md:p-lg rounded-xl" id="documents">
+<div class="flex items-center gap-sm mb-lg">
+<span class="material-symbols-outlined text-primary" data-icon="folder_shared">folder_shared</span>
+<h2 class="text-headline-md font-headline-md text-on-surface">Company Documents</h2>
+</div>
+<div class="space-y-md">
+<div class="flex items-center justify-between p-md bg-surface-container-low rounded-xl border border-surface-variant group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary text-[32px]" data-icon="picture_as_pdf">picture_as_pdf</span>
+<div>
+<p class="text-body-md font-body-md text-on-surface">Trade_License_2024.pdf</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Uploaded on Oct 12, 2023 • 1.2 MB</p>
+</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors" data-icon="delete" type="button">delete</button>
+</div>
+<div class="flex items-center justify-between p-md bg-surface-container-low rounded-xl border border-surface-variant group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary text-[32px]" data-icon="picture_as_pdf">picture_as_pdf</span>
+<div>
+<p class="text-body-md font-body-md text-on-surface">Company_Profile_Deck.pdf</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Uploaded on Jan 05, 2024 • 4.8 MB</p>
+</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors" data-icon="delete" type="button">delete</button>
+</div>
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-xl flex flex-col items-center justify-center hover:bg-surface-container-high transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-primary text-[40px] mb-sm" data-icon="cloud_upload">cloud_upload</span>
+<p class="text-body-md font-body-md text-on-surface">Drop files here or click to upload</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-xs">PDF, DOCX up to 10MB</p>
+</div>
+</div>
+</section>
+</div>
+</form>
+</main>
+<!-- Bottom Action Bar -->
+<div class="fixed bottom-0 left-0 w-full z-[60] bg-surface/80 backdrop-blur-xl border-t border-surface-variant p-md flex items-center justify-between md:justify-end gap-md">
+<button class="px-lg py-md text-on-surface-variant font-label-md hover:text-on-surface transition-colors">Discard Changes</button>
+<button class="primary-btn px-xl py-md rounded-xl text-on-primary font-bold text-label-md flex items-center gap-sm">
+            Save Changes
+            <span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</button>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-surface/70 backdrop-blur-xl border-t border-surface-variant shadow-lg">
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-label-sm font-label-sm">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="text-label-sm font-label-sm">Search</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="text-label-sm font-label-sm">Interests</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="handshake">handshake</span>
+<span class="text-label-sm font-label-sm">Matches</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container/15 text-primary rounded-xl px-3 py-1">
+<span class="material-symbols-outlined" data-icon="business_center">business_center</span>
+<span class="text-label-sm font-label-sm">Company</span>
+</div>
+</nav>
+<script>
+        // Micro-interaction for form inputs and smooth scrolling
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                
+                // Update active state in sidebar
+                document.querySelectorAll('nav a').forEach(a => {
+                    a.classList.remove('bg-secondary-container', 'text-on-secondary-container', 'font-bold');
+                    a.classList.add('text-on-surface-variant', 'hover:bg-surface-variant');
+                });
+                this.classList.add('bg-secondary-container', 'text-on-secondary-container', 'font-bold');
+                this.classList.remove('text-on-surface-variant', 'hover:bg-surface-variant');
+            });
+        });
+
+        // Simple logo preview simulation
+        const logoInput = document.getElementById('logo-upload');
+        const logoPreview = document.getElementById('logo-preview');
+
+        logoInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    logoPreview.src = event.target.result;
+                    logoPreview.classList.remove('opacity-50');
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+    </script>
+</body></html>

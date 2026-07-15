@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Account Settings - Kaam</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ffb0c9",
+                    "tertiary-fixed": "#ffd9e4",
+                    "surface-container": "#1b1f2f",
+                    "secondary-fixed": "#e5deff",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#8d004d",
+                    "on-secondary": "#2f009c",
+                    "tertiary-container": "#cf7d9d",
+                    "surface-variant": "#303445",
+                    "tertiary": "#ffb0cd",
+                    "surface-bright": "#353849",
+                    "outline": "#a58a91",
+                    "on-secondary-fixed": "#1a0063",
+                    "secondary": "#c9bfff",
+                    "primary-fixed-dim": "#ffb0c9",
+                    "on-tertiary-fixed-variant": "#72304d",
+                    "on-tertiary-fixed": "#3c0321",
+                    "on-surface": "#dfe1f7",
+                    "surface-dim": "#0f1322",
+                    "on-tertiary-container": "#541734",
+                    "background": "#0f1322",
+                    "secondary-fixed-dim": "#c9bfff",
+                    "surface-tint": "#ffb0c9",
+                    "surface-container-low": "#171b2a",
+                    "on-primary-container": "#600032",
+                    "secondary-container": "#470cd9",
+                    "primary-fixed": "#ffd9e3",
+                    "on-primary-fixed": "#3e001e",
+                    "inverse-primary": "#ae2565",
+                    "outline-variant": "#574147",
+                    "inverse-on-surface": "#2c3040",
+                    "primary-container": "#f65f9d",
+                    "on-background": "#dfe1f7",
+                    "on-secondary-fixed-variant": "#4503d7",
+                    "on-primary": "#640035",
+                    "surface-container-highest": "#303445",
+                    "surface-container-high": "#252939",
+                    "on-tertiary": "#571936",
+                    "on-error-container": "#ffdad6",
+                    "surface": "#0f1322",
+                    "on-error": "#690005",
+                    "tertiary-fixed-dim": "#ffb0cd",
+                    "on-surface-variant": "#ddbfc7",
+                    "error": "#ffb4ab",
+                    "on-secondary-container": "#baaeff",
+                    "surface-container-lowest": "#090d1c",
+                    "inverse-surface": "#dfe1f7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "8px",
+                    "sm": "16px",
+                    "container-margin-desktop": "80px",
+                    "base": "4px",
+                    "gutter": "24px",
+                    "xl": "64px",
+                    "lg": "40px",
+                    "md": "24px",
+                    "container-margin-mobile": "20px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "body-lg": ["Manrope"],
+                    "label-md": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "label-sm": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-lowest text-on-surface min-h-screen flex flex-col font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar JSON Component -->
+<header class="sticky top-0 w-full z-50 flex justify-between items-center px-container-margin-mobile h-16 bg-surface/70 dark:bg-surface/70 docked full-width top-0 backdrop-blur-xl transition-all duration-200">
+<button class="flex items-center justify-center p-2 rounded-full hover:opacity-80 transition-all active:scale-95 text-primary">
+<span class="material-symbols-outlined" data-icon="shield_person">shield_person</span>
+</button>
+<div class="font-headline-md text-headline-md font-bold text-primary flex-1 text-center">Kaam</div>
+<button class="flex items-center justify-center p-2 rounded-full hover:opacity-80 transition-all active:scale-95 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-screen-md mx-auto px-container-margin-mobile md:px-lg py-md pb-32">
+<!-- Page Title -->
+<div class="mb-lg">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface mb-xs">Settings</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your account preferences and security.</p>
+</div>
+<!-- Profile Snapshot Card (Glassmorphic) -->
+<div class="bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/30 rounded-xl p-md flex items-center gap-md mb-lg shadow-lg">
+<div class="w-16 h-16 rounded-full overflow-hidden border-2 border-primary-container/50 flex-shrink-0">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A sophisticated close-up portrait of a professional individual in a dimly lit, high-end modern office setting. The lighting is cinematic, casting subtle pink and blue neon reflections on their face, fitting a premium, futuristic dark-mode tech aesthetic. Professional attire." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7EFmkvPY2BEJU39YTMms2id4fdkFJp5ii9deKTXhbVI0byFArWpztKjfbcRVWQFvNlkE_42slRIwmu6qwES-nzG54l7WQ9SbjrqbCp-0u8aKHonQNWaaD1pIXf0k6URfYQsZGIJRGCFFREPzRrPBhK11Jetntd9T61X2_DnyJ7AUgYh4LyfhVZgi0gcsOa0Nrkp7bzlS1KBKB0Xpj_H1U3dF4qr29qmNYvAEFkG6M5rK09mSY8_pBZ41qaqu5l1PWeta0HdZIqIAX"/>
+</div>
+<div class="flex-1">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-base">Alex Mercer</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">alex.mercer@example.com</p>
+</div>
+<button class="text-primary hover:text-primary-container transition-colors p-2">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+<!-- Settings Groups (Bento-style layout for larger screens, stacked groups for mobile) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md mb-xl">
+<!-- Group 1: Account -->
+<div class="bg-surface-container/50 border border-outline-variant/20 rounded-xl overflow-hidden flex flex-col col-span-1 md:col-span-2">
+<div class="px-md py-sm bg-surface-container-high/40 border-b border-outline-variant/20">
+<span class="font-label-md text-label-md text-primary uppercase tracking-widest">Account</span>
+</div>
+<button class="w-full flex items-center justify-between p-md hover:bg-surface-container-high/60 transition-colors group">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center group-hover:bg-primary-container/20 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="person">person</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface">Personal details</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<div class="h-px w-full bg-outline-variant/10 ml-16"></div>
+<button class="w-full flex items-center justify-between p-md hover:bg-surface-container-high/60 transition-colors group">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center group-hover:bg-primary-container/20 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="lock">lock</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface">Login & security</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<!-- Group 2: Preferences -->
+<div class="bg-surface-container/50 border border-outline-variant/20 rounded-xl overflow-hidden flex flex-col">
+<div class="px-md py-sm bg-surface-container-high/40 border-b border-outline-variant/20">
+<span class="font-label-md text-label-md text-tertiary uppercase tracking-widest">Preferences</span>
+</div>
+<button class="w-full flex items-center justify-between p-md hover:bg-surface-container-high/60 transition-colors group">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center group-hover:bg-tertiary-container/20 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-tertiary transition-colors" data-icon="visibility">visibility</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface">Privacy</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<div class="h-px w-full bg-outline-variant/10 ml-16"></div>
+<button class="w-full flex items-center justify-between p-md hover:bg-surface-container-high/60 transition-colors group">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center group-hover:bg-tertiary-container/20 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-tertiary transition-colors" data-icon="notifications">notifications</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface">Notifications</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<div class="h-px w-full bg-outline-variant/10 ml-16"></div>
+<button class="w-full flex items-center justify-between p-md hover:bg-surface-container-high/60 transition-colors group">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center group-hover:bg-tertiary-container/20 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-tertiary transition-colors" data-icon="language">language</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface">Language</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">English</span>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</div>
+</button>
+</div>
+<!-- Group 3: Support -->
+<div class="bg-surface-container/50 border border-outline-variant/20 rounded-xl overflow-hidden flex flex-col">
+<div class="px-md py-sm bg-surface-container-high/40 border-b border-outline-variant/20">
+<span class="font-label-md text-label-md text-secondary uppercase tracking-widest">Support</span>
+</div>
+<button class="w-full flex items-center justify-between p-md hover:bg-surface-container-high/60 transition-colors group h-full">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center group-hover:bg-secondary-container/20 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary transition-colors" data-icon="help">help</span>
+</div>
+<div class="text-left">
+<span class="font-body-lg text-body-lg text-on-surface block">Help & support</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block mt-base">FAQs, contact us</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Logout Button -->
+<button class="w-full md:w-auto md:min-w-[200px] mx-auto flex items-center justify-center gap-xs px-md py-sm rounded-lg border-2 border-error/50 text-error hover:bg-error-container/20 hover:border-error transition-all font-label-md text-label-md group">
+<span class="material-symbols-outlined text-[20px] group-hover:animate-pulse" data-icon="logout">logout</span>
+            Logout
+        </button>
+</main>
+<!-- BottomNavBar JSON Component (Hidden on medium screens and up) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-surface-container-low/80 dark:bg-surface-container-low/80 docked full-width bottom-0 rounded-t-xl backdrop-blur-lg shadow-lg md:hidden">
+<!-- Home (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 font-label-sm text-label-sm w-16">
+<span class="material-symbols-outlined mb-1 text-[24px]" data-icon="grid_view">grid_view</span>
+<span>Home</span>
+</button>
+<!-- Requests (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 font-label-sm text-label-sm w-16">
+<span class="material-symbols-outlined mb-1 text-[24px]" data-icon="ads_click">ads_click</span>
+<span>Requests</span>
+</button>
+<!-- Matches (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 font-label-sm text-label-sm w-16">
+<span class="material-symbols-outlined mb-1 text-[24px]" data-icon="handshake">handshake</span>
+<span>Matches</span>
+</button>
+<!-- Chat (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 font-label-sm text-label-sm w-16">
+<span class="material-symbols-outlined mb-1 text-[24px]" data-icon="chat_bubble">chat_bubble</span>
+<span>Chat</span>
+</button>
+<!-- Profile (Active Semantic Match for Account Settings) -->
+<button class="flex flex-col items-center justify-center text-primary font-semibold transition-transform duration-200 active:scale-90 font-label-sm text-label-sm w-16">
+<div class="bg-primary-container/20 px-4 py-1 rounded-full mb-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+<span>Profile</span>
+</button>
+</nav>
+</body></html>

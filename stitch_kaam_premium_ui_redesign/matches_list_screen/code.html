@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kaam - Matches</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container": "#1b1f2f",
+                        "secondary-fixed": "#e5deff",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-secondary": "#2f009c",
+                        "tertiary-container": "#cf7d9d",
+                        "surface-variant": "#303445",
+                        "tertiary": "#ffb0cd",
+                        "surface-bright": "#353849",
+                        "outline": "#a58a91",
+                        "on-secondary-fixed": "#1a0063",
+                        "secondary": "#c9bfff",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-dim": "#0f1322",
+                        "on-tertiary-container": "#541734",
+                        "background": "#0f1322",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "surface-tint": "#ffb0c9",
+                        "surface-container-low": "#171b2a",
+                        "on-primary-container": "#600032",
+                        "secondary-container": "#470cd9",
+                        "primary-fixed": "#ffd9e3",
+                        "on-primary-fixed": "#3e001e",
+                        "inverse-primary": "#ae2565",
+                        "outline-variant": "#574147",
+                        "inverse-on-surface": "#2c3040",
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "on-primary": "#640035",
+                        "surface-container-highest": "#303445",
+                        "surface-container-high": "#252939",
+                        "on-tertiary": "#571936",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#0f1322",
+                        "on-error": "#690005",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#baaeff",
+                        "surface-container-lowest": "#090d1c",
+                        "inverse-surface": "#dfe1f7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "sm": "16px",
+                        "container-margin-desktop": "80px",
+                        "base": "4px",
+                        "gutter": "24px",
+                        "xl": "64px",
+                        "lg": "40px",
+                        "md": "24px",
+                        "container-margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-md": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-sm": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #090B1A;
+            color: #dfe1f7;
+            font-family: 'Manrope', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .glass-card {
+            background-color: #181C35;
+            border: 1px solid #2A2E4A;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .glass-header {
+            background-color: rgba(9, 11, 26, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid #2A2E4A;
+        }
+
+        .match-card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .match-card-hover:hover {
+            background-color: #202542;
+            box-shadow: 0 0 15px rgba(246, 95, 157, 0.1);
+            border-color: rgba(246, 95, 157, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* Hide scrollbar for tabs */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="glass-header sticky top-0 w-full z-50 flex justify-between items-center px-container-margin-mobile h-16 transition-all duration-200 active:scale-95">
+<button class="flex items-center justify-center p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="shield_person">shield_person</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight">Kaam</h1>
+<button class="flex items-center justify-center p-2 text-on-surface-variant hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary-container rounded-full"></span>
+</button>
+</header>
+<!-- Main Canvas -->
+<main class="max-w-[1280px] mx-auto px-container-margin-mobile md:px-[40px] lg:px-[80px] py-md">
+<!-- Page Header & Tabs -->
+<div class="mb-gutter">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-bold mb-md">Your Matches</h2>
+<!-- Horizontal Scrollable Tabs -->
+<div class="flex space-x-sm overflow-x-auto hide-scrollbar pb-2">
+<button class="whitespace-nowrap px-sm py-2 rounded-full bg-primary-container/15 border border-primary-container/30 text-primary-container font-label-md text-label-md transition-colors hover:bg-primary-container/20">
+                    All
+                </button>
+<button class="whitespace-nowrap px-sm py-2 rounded-full bg-surface-container border border-outline-variant/30 text-on-surface-variant font-label-md text-label-md transition-colors hover:bg-surface-container-high hover:text-on-surface">
+                    New <span class="ml-1 bg-primary-container text-white text-[10px] px-1.5 py-0.5 rounded-full">3</span>
+</button>
+<button class="whitespace-nowrap px-sm py-2 rounded-full bg-surface-container border border-outline-variant/30 text-on-surface-variant font-label-md text-label-md transition-colors hover:bg-surface-container-high hover:text-on-surface">
+                    Interviewing
+                </button>
+<button class="whitespace-nowrap px-sm py-2 rounded-full bg-surface-container border border-outline-variant/30 text-on-surface-variant font-label-md text-label-md transition-colors hover:bg-surface-container-high hover:text-on-surface">
+                    Hired
+                </button>
+</div>
+</div>
+<!-- Bento Grid for Matches -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Match Card 1: New Match -->
+<div class="glass-card rounded-xl p-md match-card-hover flex flex-col justify-between h-full relative overflow-hidden">
+<!-- Subtle decorative blob -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary-container/10 rounded-full blur-2xl"></div>
+<div>
+<div class="flex justify-between items-start mb-sm">
+<div class="flex items-center space-x-sm">
+<div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container-high border border-outline-variant/30 flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A sleek, minimalist corporate logo featuring a geometric abstract 'N' in cool blue and silver tones, set against a dark premium background. The style is modern, professional, and sophisticated, reflecting a high-end tech firm." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgGEjuj3AgUyzNTrfQdIXjnBSjR9ElqZQiF42IqfZ_gtzqqrsrfNt43N-bx4Xn9ChMd462OWUswlrMBnxUXfJvIbYz9oCIrTYejk93AgkeEmcknRgm7o45k30ETn1uDJpiY1LenDYH9PK_E7o6kPqxAkD-bXpllGZRbm3PpL4NO6dNf6n0CpTeIyEHmj7py7U1QVKHgZkNh-13eQD195iCiV7yELxh7PFsXPUZ1lvuL4oj_F6_fgHIgtHBlOO1dgDaP7XEvwuIitRN"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md font-bold text-on-surface">Nexus Tech Solutions</h3>
+<p class="font-body-md text-[14px] text-on-surface-variant flex items-center mt-1">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="location_on">location_on</span> Dubai, UAE
+                                </p>
+</div>
+</div>
+<span class="bg-primary-container/20 text-primary-container text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">New Match</span>
+</div>
+<h4 class="font-headline-md text-[20px] font-semibold text-primary mb-2">Senior Full Stack Developer</h4>
+<div class="bg-surface-container/50 border border-outline-variant/20 rounded-lg p-3 mb-md mt-4">
+<p class="font-body-md text-[13px] text-on-surface-variant italic">
+<span class="text-primary-container">Sarah (HR):</span> "We were really impressed with your portfolio, especially the React Native projects. When are you free for a quick call?"
+                        </p>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-outline-variant/20">
+<button class="w-full bg-primary-container hover:bg-inverse-primary text-white font-label-md text-label-md py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="chat_bubble">chat_bubble</span>
+<span>Open Chat</span>
+</button>
+</div>
+</div>
+<!-- Match Card 2: Interviewing -->
+<div class="glass-card rounded-xl p-md match-card-hover flex flex-col justify-between h-full relative overflow-hidden">
+<div>
+<div class="flex justify-between items-start mb-sm">
+<div class="flex items-center space-x-sm">
+<div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container-high border border-outline-variant/30 flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A refined, modern corporate logo showing an abstract intersecting shape resembling a globe in deep purple and soft pink neon lighting, suitable for an international finance or consulting firm." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlmeoOP_gPmFYO7v-cL6Szh7BNPgq3LlhQl2A_j8YjK_SBEPi7_B_dXJc-xKIzEf0jmXdvSUGA2yA_6bvjk2LEyn6TE9l0kLUchm0WdqTvzxz0VmgBilj35O8Rd6DLWU1Z0L6VCabO9HTEwhy-NRvAGp7jY5Eflyz80x030mFnxxkzFT7p8jxSOxjfA9DZ7rwHmTAawYXbFGzXqVu8nlp6aVqqo0qUMRKCb_VWMe6intbH1R4SWlf7Z_1NZh4tL2YKxoZk5AHSWEyM"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md font-bold text-on-surface">Global Horizon Finance</h3>
+<p class="font-body-md text-[14px] text-on-surface-variant flex items-center mt-1">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="location_on">location_on</span> Abu Dhabi, UAE
+                                </p>
+</div>
+</div>
+<span class="bg-secondary-container/20 text-secondary border border-secondary/30 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Interviewing</span>
+</div>
+<h4 class="font-headline-md text-[20px] font-semibold text-primary mb-2">Lead Frontend Engineer</h4>
+<div class="bg-surface-container/50 border border-outline-variant/20 rounded-lg p-3 mb-md mt-4">
+<p class="font-body-md text-[13px] text-on-surface-variant italic">
+<span class="text-secondary">David (Tech Lead):</span> "Great speaking with you yesterday. I've sent over the technical assessment details to your email."
+                        </p>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-outline-variant/20">
+<button class="w-full bg-transparent border-[1.5px] border-secondary hover:bg-secondary/10 text-secondary font-label-md text-label-md py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="chat_bubble">chat_bubble</span>
+<span>Open Chat</span>
+</button>
+</div>
+</div>
+<!-- Match Card 3: New Match -->
+<div class="glass-card rounded-xl p-md match-card-hover flex flex-col justify-between h-full relative overflow-hidden">
+<!-- Subtle decorative blob -->
+<div class="absolute -bottom-10 -left-10 w-32 h-32 bg-primary-container/10 rounded-full blur-2xl"></div>
+<div>
+<div class="flex justify-between items-start mb-sm">
+<div class="flex items-center space-x-sm">
+<div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container-high border border-outline-variant/30 flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px] text-on-surface-variant" data-icon="domain">domain</span>
+</div>
+<div>
+<h3 class="font-label-md text-label-md font-bold text-on-surface">Stellar Dynamics</h3>
+<p class="font-body-md text-[14px] text-on-surface-variant flex items-center mt-1">
+<span class="material-symbols-outlined text-[16px] mr-1" data-icon="location_on">location_on</span> Riyadh, KSA
+                                </p>
+</div>
+</div>
+<span class="bg-primary-container/20 text-primary-container text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">New Match</span>
+</div>
+<h4 class="font-headline-md text-[20px] font-semibold text-primary mb-2">UI/UX Designer</h4>
+<div class="bg-surface-container/50 border border-outline-variant/20 rounded-lg p-3 mb-md mt-4">
+<p class="font-body-md text-[13px] text-on-surface-variant italic">
+<span class="text-primary-container">System:</span> "You have matched! You can now start a conversation."
+                        </p>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-outline-variant/20">
+<button class="w-full bg-primary-container hover:bg-inverse-primary text-white font-label-md text-label-md py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="chat_bubble">chat_bubble</span>
+<span>Start Chat</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden bg-surface-container-low/80 dark:bg-surface-container-low/80 backdrop-blur-lg border-t border-outline-variant/20 shadow-lg fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]" data-icon="grid_view">grid_view</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]" data-icon="ads_click">ads_click</span>
+<span class="font-label-sm text-label-sm">Requests</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-semibold transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]" data-icon="handshake" style="font-variation-settings: 'FILL' 1;">handshake</span>
+<span class="font-label-sm text-label-sm">Matches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-sm text-label-sm">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<!-- Bottom Nav Spacer for Desktop to ensure content isn't hidden under a potential footer, though bottom nav is mobile only here -->
+<div class="hidden md:block h-16"></div>
+</body></html>

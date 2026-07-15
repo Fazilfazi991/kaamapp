@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kaam - Interest Sent Confirmation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #090B1A;
+            color: #dfe1f7;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(24, 28, 53, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid #2A2E4A;
+        }
+        .primary-glow {
+            box-shadow: 0 0 20px rgba(246, 95, 157, 0.2);
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(246, 95, 157, 0.1), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#f65f9d",
+                      "on-background": "#dfe1f7",
+                      "surface-container-high": "#252939",
+                      "inverse-on-surface": "#2c3040",
+                      "on-tertiary-fixed": "#3c0321",
+                      "on-surface": "#dfe1f7",
+                      "surface-container-low": "#171b2a",
+                      "error-container": "#93000a",
+                      "secondary": "#c9bfff",
+                      "secondary-container": "#470cd9",
+                      "surface-variant": "#303445",
+                      "on-primary-fixed-variant": "#8d004d",
+                      "on-primary": "#640035",
+                      "primary": "#ffb0c9",
+                      "tertiary-fixed-dim": "#ffb0cd",
+                      "on-surface-variant": "#ddbfc7",
+                      "on-secondary-fixed-variant": "#4503d7",
+                      "surface-bright": "#353849",
+                      "on-tertiary": "#571936",
+                      "tertiary-fixed": "#ffd9e4",
+                      "surface-container-lowest": "#090d1c",
+                      "on-tertiary-container": "#541734",
+                      "on-secondary-container": "#baaeff",
+                      "inverse-primary": "#ae2565",
+                      "primary-fixed-dim": "#ffb0c9",
+                      "outline-variant": "#574147",
+                      "outline": "#a58a91",
+                      "primary-fixed": "#ffd9e3",
+                      "surface-container": "#1b1f2f",
+                      "surface": "#0f1322",
+                      "tertiary-container": "#cf7d9d",
+                      "tertiary": "#ffb0cd",
+                      "secondary-fixed": "#e5deff",
+                      "surface-container-highest": "#303445",
+                      "on-primary-fixed": "#3e001e",
+                      "on-tertiary-fixed-variant": "#72304d",
+                      "secondary-fixed-dim": "#c9bfff",
+                      "on-secondary-fixed": "#1a0063",
+                      "error": "#ffb4ab",
+                      "surface-dim": "#0f1322",
+                      "inverse-surface": "#dfe1f7",
+                      "on-error-container": "#ffdad6",
+                      "on-secondary": "#2f009c",
+                      "on-primary-container": "#600032",
+                      "surface-tint": "#ffb0c9",
+                      "on-error": "#690005",
+                      "background": "#0f1322"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xl": "64px",
+                      "gutter": "24px",
+                      "container-margin-mobile": "20px",
+                      "base": "4px",
+                      "sm": "16px",
+                      "md": "24px",
+                      "container-margin-desktop": "80px",
+                      "xs": "8px",
+                      "lg": "40px"
+              },
+              "fontFamily": {
+                      "body-md": ["Manrope"],
+                      "body-lg": ["Manrope"],
+                      "label-sm": ["Manrope"],
+                      "headline-lg-mobile": ["Manrope"],
+                      "display-lg": ["Manrope"],
+                      "headline-md": ["Manrope"],
+                      "headline-lg": ["Manrope"],
+                      "label-md": ["Manrope"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-md">
+<!-- Atmospheric Background Shader -->
+<div class="fixed inset-0 -z-10 opacity-30">
+
+</div>
+<!-- Main Content Shell -->
+<main class="w-full max-w-lg z-10 space-y-md">
+<!-- Success State Card -->
+<section class="glass-card rounded-xl p-lg text-center flex flex-col items-center gap-md">
+<!-- Animated Icon Holder -->
+<div class="relative flex items-center justify-center w-24 h-24 mb-xs">
+<div class="absolute inset-0 bg-primary-container/20 rounded-full animate-ping"></div>
+<div class="relative bg-primary-container text-white w-20 h-20 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(246,95,157,0.4)]">
+<span class="material-symbols-outlined !text-4xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Header -->
+<div class="space-y-xs">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Interest Sent ✅</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Candidate #KM2048 has been notified.</p>
+</div>
+<!-- Details Bento Piece -->
+<div class="w-full grid grid-cols-1 gap-xs mt-md">
+<div class="glass-card bg-surface-container-low/40 rounded-lg p-sm flex items-start gap-sm border-l-4 border-primary-container">
+<span class="material-symbols-outlined text-primary-container">work</span>
+<div class="text-left">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Role</p>
+<p class="font-body-md text-body-md font-bold text-on-surface">Senior Product Designer</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-xs">
+<div class="glass-card bg-surface-container-low/40 rounded-lg p-sm flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary-container">payments</span>
+<div class="text-left">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Salary</p>
+<p class="font-body-md text-body-md font-bold text-on-surface">AED 35k - 45k</p>
+</div>
+</div>
+<div class="glass-card bg-surface-container-low/40 rounded-lg p-sm flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary-container">location_on</span>
+<div class="text-left">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Location</p>
+<p class="font-body-md text-body-md font-bold text-on-surface">Dubai, UAE</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Status Indicator -->
+<div class="w-full flex items-center justify-center gap-xs py-xs bg-secondary-container/10 border border-secondary-container/20 rounded-full">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-md text-label-md text-secondary">Waiting for candidate response</span>
+</div>
+</section>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-sm w-full">
+<button class="w-full bg-primary-container text-white h-14 rounded-xl font-label-md text-body-md font-bold transition-all hover:brightness-110 active:scale-[0.98] shadow-lg flex items-center justify-center gap-sm">
+                View Sent Interests
+                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+<button class="w-full border-1.5 border-secondary text-secondary h-14 rounded-xl font-label-md text-body-md font-bold transition-all hover:bg-secondary/10 active:scale-[0.98] flex items-center justify-center gap-sm" style="border-width: 1.5px;">
+<span class="material-symbols-outlined text-[20px]">person_search</span>
+                Search More Candidates
+            </button>
+</div>
+<!-- Matching Aesthetic Accent -->
+<footer class="pt-lg flex flex-col items-center gap-sm">
+<div class="flex -space-x-4">
+<img class="w-12 h-12 rounded-full border-2 border-surface object-cover" data-alt="A professional close-up portrait of a diverse corporate executive in a modern high-end office setting in Dubai. The lighting is soft and cinematic with cool navy and warm pink highlights, reflecting a premium career platform aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuArZxm557p7uoGUHg7fQKJSKcjBYvXVa71V0ljZSwiJZ8FCWgNZgiUR8kS2W-2mQEi-6a3WvUaeexqWQihvvK8Yq_cizEk5tpB1RsLaCvb0psGyd47nNhUEG2ODr8XyliDLf9Khd5wc8f8OZsOb7XIQE7E3dCpAzQ_a9OrApFPqCI0-ojfStgAB0R5sM3Qg5O9HGjZRg0qhbLfnxogKIHtBS48g5-5-Pyi0rFE6yHj6O7KMuRlFbzQJojBkfbmPnZMlmZjaoiF9zoG0"/>
+<img class="w-12 h-12 rounded-full border-2 border-surface object-cover" data-alt="A sophisticated professional profile photo of a technology leader in the UAE, featuring a minimalist background and elite lighting. The visual style follows a dark mode palette with vibrant career-matching accents in purple and pink." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJYcibVyaTWzjJ2on-9QDJLgOsGjWCcnnzM4DAECB29Ln8Ff_Q7EbjeFswdMX9hFhL_oFDjUSwyub2glzt00Ck5cNXaoriLR8OXnunsJNvDPG42rQTOv9tqCoilOeTMBumviRym4HrVgm8o52Gd_GDEbaY00MDHSJjmfZh9CYBLcmHmYp6SvsDvqA-IkT2JIZhxg6cpRVoLGqUQYbcX1dnhOECSKQQ9fk8z20ygapK3PIYf29bFTrpcR_wtO8xvAYqfiJSyRsXT-IC"/>
+<img class="w-12 h-12 rounded-full border-2 border-surface object-cover" data-alt="A high-quality portrait of a successful female professional in a luxury corporate environment, showcasing a modern tech-driven matchmaking vibe. The composition is clean and spacious with a focus on privacy and status." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSD7vZHovzBIa57F5PnGNKVuyCk-hLFgNgJWmMJ0JK064EucpRw3HqyrcPzOq6-lW8ktMRGVGHOfZHMVbsJUcrQ4X9dT5933BVkDlxh8-xx_AUT8dBHccRWiMp8cQHg6Gj6koKWT5_HSGoqkzyuZBVWHnqeFcNJq_0xqj7i2Sq17O6I2FfWi-zew3UX2I5w-0RvIrvF7tpgHGqZ47CqK8IsFHGhXa7M4UfKaTTk9TxAfObqZgXLCDt95iMrjqjcF8pDJGSM4U1o0J2"/>
+<div class="w-12 h-12 rounded-full border-2 border-surface bg-surface-container-highest flex items-center justify-center font-label-sm text-label-sm text-on-surface">
+                    +12
+                </div>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant opacity-60">12 other candidates match your profile.</p>
+</footer>
+</main>
+<script>
+        // Subtle micro-interaction: Button hover glow
+        const primaryBtn = document.querySelector('button.bg-primary-container');
+        primaryBtn.addEventListener('mousemove', (e) => {
+            const rect = primaryBtn.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            primaryBtn.style.setProperty('--x', `${x}px`);
+            primaryBtn.style.setProperty('--y', `${y}px`);
+        });
+    </script>
+<style>
+        button.bg-primary-container {
+            position: relative;
+            overflow: hidden;
+        }
+        button.bg-primary-container::after {
+            content: '';
+            position: absolute;
+            top: var(--y, 0);
+            left: var(--x, 0);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+    </style>
+</body></html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kaam - Request CV</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#f65f9d",
+                    "on-background": "#dfe1f7",
+                    "surface-container-high": "#252939",
+                    "inverse-on-surface": "#2c3040",
+                    "on-tertiary-fixed": "#3c0321",
+                    "on-surface": "#dfe1f7",
+                    "surface-container-low": "#171b2a",
+                    "error-container": "#93000a",
+                    "secondary": "#c9bfff",
+                    "secondary-container": "#470cd9",
+                    "surface-variant": "#303445",
+                    "on-primary-fixed-variant": "#8d004d",
+                    "on-primary": "#640035",
+                    "primary": "#ffb0c9",
+                    "tertiary-fixed-dim": "#ffb0cd",
+                    "on-surface-variant": "#ddbfc7",
+                    "on-secondary-fixed-variant": "#4503d7",
+                    "surface-bright": "#353849",
+                    "on-tertiary": "#571936",
+                    "tertiary-fixed": "#ffd9e4",
+                    "surface-container-lowest": "#090d1c",
+                    "on-tertiary-container": "#541734",
+                    "on-secondary-container": "#baaeff",
+                    "inverse-primary": "#ae2565",
+                    "primary-fixed-dim": "#ffb0c9",
+                    "outline-variant": "#574147",
+                    "outline": "#a58a91",
+                    "primary-fixed": "#ffd9e3",
+                    "surface-container": "#1b1f2f",
+                    "surface": "#0f1322",
+                    "tertiary-container": "#cf7d9d",
+                    "tertiary": "#ffb0cd",
+                    "secondary-fixed": "#e5deff",
+                    "surface-container-highest": "#303445",
+                    "on-primary-fixed": "#3e001e",
+                    "on-tertiary-fixed-variant": "#72304d",
+                    "secondary-fixed-dim": "#c9bfff",
+                    "on-secondary-fixed": "#1a0063",
+                    "error": "#ffb4ab",
+                    "surface-dim": "#0f1322",
+                    "inverse-surface": "#dfe1f7",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary": "#2f009c",
+                    "on-primary-container": "#600032",
+                    "surface-tint": "#ffb0c9",
+                    "on-error": "#690005",
+                    "background": "#0f1322"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "64px",
+                    "gutter": "24px",
+                    "container-margin-mobile": "20px",
+                    "base": "4px",
+                    "sm": "16px",
+                    "md": "24px",
+                    "container-margin-desktop": "80px",
+                    "xs": "8px",
+                    "lg": "40px"
+            },
+            "fontFamily": {
+                    "body-md": ["Manrope"],
+                    "body-lg": ["Manrope"],
+                    "label-sm": ["Manrope"],
+                    "headline-lg-mobile": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "label-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #090B1A; /* Canvas layer as per guidance */
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .card-border {
+            border: 1px solid #2A2E4A;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #11142A;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2A2E4A;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="dark text-on-background min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Anchor (As per JSON) -->
+<header class="bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-surface-variant dark:border-surface-variant fixed top-0 w-full z-50 h-16 flex justify-between items-center px-container-margin-mobile md:px-container-margin-desktop">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A sophisticated corporate logo for Kaam, featuring a minimalist abstract geometric emblem in vibrant pink and purple, set against a dark polished glass background to convey high-end professional matchmaking in the UAE market. The lighting is cinematic and focused, suggesting security and elite tech-driven career services." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQ24Ry6UD_3AvQq6qFuhdGNNrddH5SA38m5XgQQcyVoAHDe3hzn34x8LD5W1GWxszW_zPrPY0W5je-UETXgW7_X5PmzWTdE2HZ1_5AaGa7rb61yuMFmMaBurL3CRCXHYoOyfRTWZPiYoAtcIVK4hHEpr5zqDHywesdO99tmT9FyaKJ0YYdFFTzekqkQ8PCT9b6NWGcNIfK-uaqmiDpcSe9_EoTsXNw3bvmpDybmcIip2b2PbGy1UwdgNhMLA0Pu6DGK4CW2XRj6lEJ"/>
+</div>
+<span class="text-headline-md font-headline-md font-bold text-on-surface dark:text-on-surface">Kaam</span>
+</div>
+<div class="flex items-center gap-md">
+<button class="text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="hidden md:flex gap-sm">
+<div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A portrait of a professional Middle Eastern male recruiter named Khalid Al-Mansouri, wearing a sharp navy blue suit and a crisp white shirt, looking confident and approachable. The setting is a blurred luxury office in Dubai with soft warm lighting and a high-end corporate aesthetic, reflecting status and security." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqVVAysk-5CWOoS2rXbzAfnsRzNkXMq8ywmM6bPlcnN2YOvbQy6qnMhUqwX4z5N_e_HRS244qA01DYx-zsSOEKM0fVo2-zdxvwUHInXvw6iIrmh_GjxKXBbHcxZOQT_MbTRpym2dcgPSebm-FWyYRb8JloiM1h0BoUdDosGsa27EOWiUpqagiKgiTPEFFG6JHQaf-vrpwAL-dasWAbkMCTNFWyc51kDZzhr_BEM9BCKBgJmNTJAFm6hD63X8ciI9voK6Dbb49Rm2CM"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Side Navigation Shell (As per JSON) -->
+<aside class="hidden md:flex flex-col h-full w-80 fixed left-0 top-16 bg-surface-container-low dark:bg-surface-container-low border-r border-surface-variant z-40 p-md gap-xs">
+<div class="mb-lg">
+<h2 class="text-headline-md font-headline-md text-primary px-xs mb-xs">Khalid Al-Mansouri</h2>
+<p class="text-body-md font-body-md text-on-surface-variant px-xs opacity-70">Premium Recruiter</p>
+<span class="inline-block mt-xs mx-xs px-2 py-0.5 bg-secondary-container/20 text-secondary text-label-sm font-label-sm rounded-full border border-secondary/30">Verified Entity</span>
+</div>
+<nav class="flex flex-col gap-xs">
+<a class="flex items-center gap-sm p-sm bg-secondary-container text-on-secondary-container font-bold rounded-lg translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-body-md font-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-body-md font-body-md">Team Management</span>
+</a>
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="text-body-md font-body-md">Billing &amp; Plans</span>
+</a>
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="text-body-md font-body-md">Security Settings</span>
+</a>
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="text-body-md font-body-md">Help Center</span>
+</a>
+<div class="mt-xl pt-xl border-t border-surface-variant">
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-body-md font-body-md">Logout</span>
+</a>
+</div>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="pt-24 pb-32 md:pb-8 md:pl-80 px-container-margin-mobile md:px-container-margin-desktop min-h-screen relative overflow-hidden">
+<!-- Animated Background Shader (Ambient Mood) -->
+
+<section class="max-w-5xl mx-auto relative z-10">
+<!-- Candidate Detail Context (Mock) -->
+<div class="mb-lg">
+<h1 class="text-headline-lg font-headline-lg text-on-surface mb-2">Talent Profile Match</h1>
+<p class="text-body-md font-body-md text-on-surface-variant">Reviewing candidate status for Senior Product Manager role.</p>
+</div>
+<!-- Bento Grid of Profile Insights -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="md:col-span-2 bg-[#181C35] card-border p-md rounded-xl">
+<div class="flex flex-wrap items-center gap-md mb-md">
+<div class="w-16 h-16 rounded-2xl overflow-hidden border border-primary/30 shadow-lg shadow-primary-container/10">
+<img class="w-full h-full object-cover" data-alt="A clean professional profile headshot of a candidate with a friendly yet professional expression. The background is a soft gradient of deep blues and subtle pinks, matching the premium Midnight Pulse aesthetic of the platform. High-end portrait lighting highlights the candidate's features with clarity and modern style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-rZFw6-mVW2IkFC1Orv7A4cqQz3V81JwmeNc4o3Ehb_rayBvM47J6fW4Wlg1eYBKsW0TzGi6fH094_V70HOWzggGZAh_B6y6laqu63m4x7-whamy5uf9nzgIJIkhIzj1f6MeYhGhfPXKDbfX2ImeyOLp_ogEUbxvIVuUxvMQIjG5EgZ5GnrY8B6lqOpfN2jP9UwQ99vv8IozZzGHx6sazOnZdPY4ZmdKCLPc6VzSQFGkZU8-VneGjQqlSuR8F3QrMCo6lXokO1ZPA"/>
+</div>
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface">Sarah Chen</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">FinTech Expert | 8+ Years Exp.</p>
+</div>
+<div class="ml-auto">
+<span class="px-sm py-1 bg-primary/10 text-primary rounded-full text-label-md font-label-md border border-primary/20">98% Match</span>
+</div>
+</div>
+<div class="space-y-sm">
+<p class="text-body-md font-body-md text-on-surface-variant leading-relaxed">
+                            A highly motivated professional with deep expertise in GCC payment gateways and regulatory compliance. Looking for leadership roles in established tech hubs within Riyadh or Dubai.
+                        </p>
+<div class="flex flex-wrap gap-xs">
+<span class="px-3 py-1 bg-[#202542] text-[#B8BBD0] rounded-full text-label-sm font-label-sm">FinTech</span>
+<span class="px-3 py-1 bg-[#202542] text-[#B8BBD0] rounded-full text-label-sm font-label-sm">Product Strategy</span>
+<span class="px-3 py-1 bg-[#202542] text-[#B8BBD0] rounded-full text-label-sm font-label-sm">Regulatory Compliance</span>
+</div>
+</div>
+</div>
+<div class="bg-[#181C35] card-border p-md rounded-xl flex flex-col justify-center items-center text-center gap-sm">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-primary border border-primary/20 mb-xs">
+<span class="material-symbols-outlined text-3xl" data-icon="description">description</span>
+</div>
+<h4 class="text-headline-md font-headline-md text-on-surface">Curriculum Vitae</h4>
+<p class="text-body-md font-body-md text-on-surface-variant text-sm">Full CV is currently hidden for privacy.</p>
+<button class="mt-md w-full py-3 bg-[#F65F9D] text-white rounded-lg font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary-container/20" onclick="toggleModal('cv-modal', true)">
+                        Request CV
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- THE REQUEST CV MODAL (Active Request) -->
+<div class="fixed inset-0 z-[100] hidden items-center justify-center p-md overflow-hidden" id="cv-modal">
+<!-- Backdrop -->
+<div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="toggleModal('cv-modal', false)"></div>
+<!-- Modal Container -->
+<div class="relative bg-[#11142A] card-border w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-100 flex flex-col">
+<!-- Decorative Accent -->
+<div class="h-1.5 w-full bg-gradient-to-r from-primary-container to-secondary"></div>
+<div class="p-lg">
+<!-- Icon & Title Cluster -->
+<div class="flex items-center gap-sm mb-md">
+<div class="p-2 bg-primary/10 rounded-lg text-primary">
+<span class="material-symbols-outlined" data-icon="lock_person">lock_person</span>
+</div>
+<h2 class="text-headline-md font-headline-md text-on-surface">Request CV?</h2>
+</div>
+<!-- Text Content -->
+<p class="text-body-md font-body-md text-on-surface-variant mb-lg leading-relaxed">
+                    The candidate will be asked to share their CV. Documents are shared only with candidate permission.
+                </p>
+<!-- Action Buttons -->
+<div class="flex flex-col sm:flex-row gap-sm">
+<button class="flex-1 py-3 px-md text-on-surface-variant font-bold hover:text-on-surface hover:bg-surface-container-high rounded-xl transition-colors order-2 sm:order-1" onclick="toggleModal('cv-modal', false)">
+                        Cancel
+                    </button>
+<button class="flex-1 py-3 px-md bg-[#F65F9D] text-white font-bold rounded-xl hover:shadow-[0_0_15px_rgba(246,95,157,0.4)] active:scale-95 transition-all order-1 sm:order-2" onclick="simulateRequest()">
+                        Request CV
+                    </button>
+</div>
+</div>
+<!-- Bottom privacy badge -->
+<div class="bg-surface-container-low/50 px-lg py-sm flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant/50" data-icon="verified_user">verified_user</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant/50 tracking-wider">SECURE GCC COMPLIANCE</span>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar (Mobile Filtered) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-t border-surface-variant dark:border-surface-variant shadow-lg dark:shadow-none rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-label-sm font-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="text-label-sm font-label-sm">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="text-label-sm font-label-sm">Interests</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/15 text-primary rounded-xl px-3 py-1 scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="handshake">handshake</span>
+<span class="text-label-sm font-label-sm">Matches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="business_center">business_center</span>
+<span class="text-label-sm font-label-sm">Company</span>
+</a>
+</nav>
+<script>
+        function toggleModal(id, show) {
+            const modal = document.getElementById(id);
+            if (show) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function simulateRequest() {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin" data-icon="progress_activity">progress_activity</span>';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = 'Sent!';
+                btn.classList.replace('bg-[#F65F9D]', 'bg-green-600');
+                setTimeout(() => {
+                    toggleModal('cv-modal', false);
+                    // Reset for demo purposes
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.replace('bg-green-600', 'bg-[#F65F9D]');
+                        btn.disabled = false;
+                    }, 500);
+                }, 800);
+            }, 1500);
+        }
+
+        // Initialize Material Symbols logic if needed dynamically
+        document.querySelectorAll('.material-symbols-outlined').forEach(icon => {
+            if (icon.hasAttribute('data-weight') && icon.getAttribute('data-weight') === 'fill') {
+                icon.style.fontVariationSettings = "'FILL' 1";
+            }
+        });
+    </script>
+</body></html>

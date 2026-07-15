@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Documents</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#00a94c",
+                        "primary-container": "#ff4d97",
+                        "outline-variant": "#594047",
+                        "surface-tint": "#ffb1c8",
+                        "on-surface": "#e4e1e6",
+                        "inverse-surface": "#e4e1e6",
+                        "surface-bright": "#39393c",
+                        "on-surface-variant": "#e0bec6",
+                        "on-secondary": "#3b0091",
+                        "primary-fixed": "#ffd9e2",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-lowest": "#0e0e11",
+                        "on-primary": "#650033",
+                        "secondary-container": "#5417be",
+                        "primary": "#ffb1c8",
+                        "on-tertiary": "#003915",
+                        "tertiary": "#4ae176",
+                        "surface-container-high": "#2a2a2d",
+                        "surface-container-low": "#1b1b1e",
+                        "inverse-on-surface": "#303033",
+                        "on-primary-container": "#5b002d",
+                        "tertiary-fixed": "#6bff8f",
+                        "secondary-fixed": "#e9ddff",
+                        "primary-fixed-dim": "#ffb1c8",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "on-secondary-container": "#c0a7ff",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#b80662",
+                        "on-secondary-fixed-variant": "#5417be",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "surface-dim": "#131316",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "secondary": "#d0bcff",
+                        "surface-variant": "#353438",
+                        "on-tertiary-fixed": "#002109",
+                        "on-background": "#e4e1e6",
+                        "surface-container": "#1f1f22",
+                        "background": "#131316",
+                        "surface": "#131316",
+                        "on-primary-fixed-variant": "#8e004a",
+                        "on-secondary-fixed": "#23005c",
+                        "on-primary-fixed": "#3e001d",
+                        "on-tertiary-container": "#003312",
+                        "surface-container-highest": "#353438",
+                        "outline": "#a78991"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "20px",
+                        "xs": "8px",
+                        "xl": "64px",
+                        "base": "4px",
+                        "sm": "16px",
+                        "md": "24px",
+                        "container-max": "1200px",
+                        "lg": "40px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["JetBrains Mono", "monospace"],
+                        "headline-lg-mobile": ["Hanken Grotesk", "sans-serif"],
+                        "body-lg": ["Hanken Grotesk", "sans-serif"],
+                        "headline-md": ["Hanken Grotesk", "sans-serif"],
+                        "headline-lg": ["Hanken Grotesk", "sans-serif"],
+                        "display": ["Hanken Grotesk", "sans-serif"],
+                        "body-md": ["Hanken Grotesk", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-md": ["13px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-card-hover:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transform: translateY(-2px);
+        }
+        .accent-gradient {
+            background: linear-gradient(135deg, #ff4d97 0%, #ffb1c8 100%);
+        }
+        .bg-image-blur {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAleVtz2fsHiIC0Qik6zINgMpGLhLOoUblqT0C4EQnwSCM03glYf5m_WwHMuPRHMaZkYZfsn81Xm0rZ-KQ_j19YzWJB-QuBl9pOo4LFMuYmshdoEzDnbvT7E0JAz7TNhHtmQPt2o_U8xKyoMzbuYkMaveXngb7wlcF8qiSnHUKLZuUoQPHNY-O0RcQe5uBejoaffJwrnQ6s30QwlBAiDdbvmUiHwxJbUigET4JIYX3_RdJCJTMlkelJthk1MCHT7HwJqUVV5ZXZiWo');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            filter: blur(40px);
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col font-body-md antialiased relative overflow-hidden">
+<!-- Background Texture -->
+<div class="bg-image-blur"></div>
+<!-- Top Navigation (Onboarding - Task Focused, close action implies departure) -->
+<header class="w-full top-0 fixed top-0 left-0 w-full z-50 flex items-center justify-between px-gutter h-16 bg-transparent flat no shadows scale-95 active:transition-all">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors group">
+<span class="material-symbols-outlined text-primary group-hover:opacity-80 transition-opacity">close</span>
+</button>
+<div class="font-display text-display tracking-tighter text-primary">KAAM</div>
+<div class="w-10 h-10"></div> <!-- Spacer for flex balance -->
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex flex-col justify-center items-center px-gutter pt-20 pb-md max-w-container-max mx-auto w-full relative z-10">
+<!-- Header Section -->
+<div class="w-full max-w-md mb-lg text-center md:text-left">
+<p class="font-label-md text-label-md text-primary mb-xs tracking-widest uppercase">Step 1 of 5</p>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-sm">Add Documents</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">We need to verify your identity to ensure a secure environment. This process is quick and secure.</p>
+</div>
+<!-- Document Upload Card -->
+<div class="w-full max-w-md">
+<div class="glass-card glass-card-hover rounded-xl p-md flex flex-col items-center justify-center text-center transition-all duration-300 group cursor-pointer border-t border-white/10 relative overflow-hidden">
+<!-- Decorative Glow inside card -->
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl"></div>
+<div class="w-20 h-20 rounded-full bg-surface-container flex items-center justify-center mb-md border border-white/5 relative z-10">
+<span class="material-symbols-outlined text-[40px] text-primary" style="font-variation-settings: 'FILL' 0;">badge</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-xs relative z-10">Passport</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg relative z-10">Upload a clear photo of your valid passport.</p>
+<button class="w-full accent-gradient text-on-primary font-label-md text-label-md py-sm rounded-lg flex items-center justify-center gap-xs hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(255,77,151,0.3)] relative z-10">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">upload</span>
+                    UPLOAD
+                </button>
+</div>
+</div>
+</main>
+<!-- Bottom Actions / Skip (Optional for this flow) -->
+<div class="w-full px-gutter py-md max-w-md mx-auto relative z-10">
+<button class="w-full text-primary font-label-md text-label-md py-sm flex items-center justify-center hover:bg-surface-container-low rounded-lg transition-colors">
+            I'll do this later
+        </button>
+</div>
+</body></html>

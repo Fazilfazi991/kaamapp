@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kaam - Interest Request Details #KM2048</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#f65f9d",
+                    "on-background": "#dfe1f7",
+                    "surface-container-high": "#252939",
+                    "inverse-on-surface": "#2c3040",
+                    "on-tertiary-fixed": "#3c0321",
+                    "on-surface": "#dfe1f7",
+                    "surface-container-low": "#171b2a",
+                    "error-container": "#93000a",
+                    "secondary": "#c9bfff",
+                    "secondary-container": "#470cd9",
+                    "surface-variant": "#303445",
+                    "on-primary-fixed-variant": "#8d004d",
+                    "on-primary": "#640035",
+                    "primary": "#ffb0c9",
+                    "tertiary-fixed-dim": "#ffb0cd",
+                    "on-surface-variant": "#ddbfc7",
+                    "on-secondary-fixed-variant": "#4503d7",
+                    "surface-bright": "#353849",
+                    "on-tertiary": "#571936",
+                    "tertiary-fixed": "#ffd9e4",
+                    "surface-container-lowest": "#090d1c",
+                    "on-tertiary-container": "#541734",
+                    "on-secondary-container": "#baaeff",
+                    "inverse-primary": "#ae2565",
+                    "primary-fixed-dim": "#ffb0c9",
+                    "outline-variant": "#574147",
+                    "outline": "#a58a91",
+                    "primary-fixed": "#ffd9e3",
+                    "surface-container": "#1b1f2f",
+                    "surface": "#0f1322",
+                    "tertiary-container": "#cf7d9d",
+                    "tertiary": "#ffb0cd",
+                    "secondary-fixed": "#e5deff",
+                    "surface-container-highest": "#303445",
+                    "on-primary-fixed": "#3e001e",
+                    "on-tertiary-fixed-variant": "#72304d",
+                    "secondary-fixed-dim": "#c9bfff",
+                    "on-secondary-fixed": "#1a0063",
+                    "error": "#ffb4ab",
+                    "surface-dim": "#0f1322",
+                    "inverse-surface": "#dfe1f7",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary": "#2f009c",
+                    "on-primary-container": "#600032",
+                    "surface-tint": "#ffb0c9",
+                    "on-error": "#690005",
+                    "background": "#0f1322"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "64px",
+                    "gutter": "24px",
+                    "container-margin-mobile": "20px",
+                    "base": "4px",
+                    "sm": "16px",
+                    "md": "24px",
+                    "container-margin-desktop": "80px",
+                    "xs": "8px",
+                    "lg": "40px"
+            },
+            "fontFamily": {
+                    "body-md": ["Manrope"],
+                    "body-lg": ["Manrope"],
+                    "label-sm": ["Manrope"],
+                    "headline-lg-mobile": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "label-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #090B1A;
+            color: #dfe1f7;
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(17, 20, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid #2A2E4A;
+        }
+        .match-glow {
+            box-shadow: 0 0 20px rgba(246, 95, 157, 0.15);
+        }
+        .step-active {
+            color: #f65f9d;
+        }
+        .step-line {
+            background: #2A2E4A;
+        }
+        .step-line-active {
+            background: #f65f9d;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f1322; }
+        ::-webkit-scrollbar-thumb { background: #303445; border-radius: 10px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex min-h-screen">
+<!-- Navigation Drawer (Desktop) -->
+<aside class="hidden md:flex flex-col h-screen w-80 bg-surface-container-low border-r border-surface-variant p-md gap-xs fixed left-0 top-0 z-40">
+<div class="mb-lg">
+<h1 class="text-headline-lg font-headline-lg text-primary">Kaam</h1>
+</div>
+<nav class="flex flex-col gap-xs flex-1">
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-sm p-sm bg-secondary-container text-on-secondary-container font-bold rounded-lg translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-body-md text-body-md">Interests</span>
+</a>
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md text-body-md">Team Management</span>
+</a>
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body-md text-body-md">Billing &amp; Plans</span>
+</a>
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">security</span>
+<span class="font-body-md text-body-md">Security Settings</span>
+</a>
+</nav>
+<div class="pt-md border-t border-surface-variant mt-auto">
+<div class="flex items-center gap-sm p-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center border border-primary-container/30 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a Middle Eastern male recruiter in a sharp tailored navy suit, smiling confidently. High-end studio lighting with a subtle dark office background, embodying the 'Midnight Pulse' professional aesthetic of elite corporate matchmaking in the UAE." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBt6BAE7ibvgLyt-NGIDv8nxd2rdoHFywiSEKugdQzyv60aL3yu4CvinNVpMQ2EQEtMTLvfDpXpwno0MHS9_ZmO7mnN8T4ZJ_qqv2dfN4fG3iljFvGqHsIbvGShV8lS0pN9Tr7RzUmXW8DgIcHQp4cgP7ac-uy1GV09ddfYTk1SxxFxaYj2B7zzxRtYyuXDzsf7f3YBO-churhpcp1h5uA1LhIJVj050ha3U6vVxQybNxg3U-XLCqiSqomkwga0xfpO2JIgVjm-a8wZ"/>
+</div>
+<div class="flex flex-col">
+<span class="text-label-md font-label-md text-on-surface">Khalid Al-Mansouri</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Premium Recruiter</span>
+</div>
+</div>
+<a class="flex items-center gap-sm p-sm text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all mt-xs" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-md text-body-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-80 pb-24 md:pb-0">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-50 h-16 w-full flex justify-between items-center px-container-margin-mobile md:px-lg glass-panel border-b-0">
+<div class="flex items-center gap-sm">
+<button class="md:hidden text-on-surface">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="text-headline-md font-headline-md font-bold text-on-surface">Request Details</h2>
+</div>
+<div class="flex items-center gap-md">
+<span class="hidden md:block text-label-md font-label-md text-on-surface-variant">Reference: #KM2048</span>
+<button class="p-2 hover:bg-surface-container-high rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary-container rounded-full border border-surface"></span>
+</button>
+</div>
+</header>
+<!-- Content Area -->
+<div class="p-container-margin-mobile md:p-lg max-w-5xl mx-auto space-y-gutter">
+<!-- Hero Status Section -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Request Card -->
+<div class="md:col-span-2 glass-panel p-md rounded-xl space-y-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-md">
+<div class="w-16 h-16 rounded-xl bg-surface-container-highest flex items-center justify-center border border-surface-variant overflow-hidden relative group">
+<img class="w-full h-full object-cover" data-alt="A portrait of a highly skilled software engineer candidate with a modern, focused expression. The visual style is premium and corporate, featuring cool blue and deep purple lighting highlights against a dark tech-inspired background, suggesting elite technical talent in a GCC market context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSNDyZXnz-klShmZGo_rxKq1hhoh3SPdVCm97P9un3ZZJjyuOYojHx8RNy_hqGqfz6_2rYt6WTqG4yZNAe13Q1zruDLjLHgfp1WIsCT1oLApFp4QZzh-mI5-cfYHjRvMJ_bMNSuD6uv1k_AvQ7xC_QKgTV5U7hQXVj6CZbyAJ3E1Amdqgyu6LK27FO5ysB79Qw1RSMW08xzCHraVvvxBdSd0oH7qrahsbCLhpd_i3M4X1bRTRFXz3KOyNToap6VfyFcs03wdHRCexo"/>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined text-white">visibility</span>
+</div>
+</div>
+<div>
+<h3 class="text-headline-md font-headline-md text-on-surface">Amina Zafar</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Senior Cloud Architect • 8+ Years</p>
+</div>
+</div>
+<div class="px-3 py-1 rounded-full bg-primary-container/10 border border-primary-container/30 text-primary-container text-label-sm font-label-sm">
+                            PENDING
+                        </div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-sm pt-base">
+<div class="flex flex-col gap-1">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Salary Goal</span>
+<span class="text-body-md font-bold text-on-surface">AED 45,000/mo</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Location</span>
+<span class="text-body-md font-bold text-on-surface">Dubai, UAE</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Notice Period</span>
+<span class="text-body-md font-bold text-on-surface">Immediate</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Match Score</span>
+<span class="text-body-md font-bold text-primary">94% Perfect</span>
+</div>
+</div>
+</div>
+<!-- Action Panel -->
+<div class="glass-panel p-md rounded-xl flex flex-col justify-between">
+<div class="space-y-xs">
+<h4 class="text-label-md font-label-md text-on-surface">Request Controls</h4>
+<p class="text-label-sm text-on-surface-variant">Manage this interest request. Actions depend on the candidate's current response state.</p>
+</div>
+<div class="space-y-sm mt-md">
+<!-- State: Pending (Currently Active) -->
+<div class="flex flex-col gap-sm" id="pending-actions">
+<button class="w-full bg-primary-container text-on-primary-container py-3 rounded-lg font-bold hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-xs shadow-lg shadow-primary-container/10">
+<span class="material-symbols-outlined">bolt</span>
+                                Boost Request
+                            </button>
+<button class="w-full border border-error/50 text-error py-3 rounded-lg font-bold hover:bg-error/5 transition-colors flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined">cancel</span>
+                                Cancel Request
+                            </button>
+</div>
+<!-- State: Accepted (Hidden for Demo Toggle) -->
+<div class="hidden flex flex-col gap-sm" id="accepted-actions">
+<button class="w-full bg-secondary-container text-on-secondary-container py-3 rounded-lg font-bold hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined">chat</span>
+                                Open Chat
+                            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Timeline Status -->
+<section class="glass-panel p-md rounded-xl overflow-hidden relative">
+<div class="absolute top-0 right-0 p-md">
+<span class="material-symbols-outlined text-primary-container/20 text-6xl rotate-12 select-none">timeline</span>
+</div>
+<h4 class="text-headline-md font-headline-md text-on-surface mb-lg">Status Timeline</h4>
+<div class="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-lg md:gap-0">
+<!-- Progress Line (Desktop) -->
+<div class="hidden md:block absolute top-1/2 left-0 w-full h-[2px] step-line -translate-y-1/2 z-0">
+<div class="h-full step-line-active w-2/3"></div>
+</div>
+<!-- Step 1: Sent -->
+<div class="relative z-10 flex md:flex-col items-center gap-md md:gap-xs text-center w-full md:w-auto">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg shadow-primary-container/20">
+<span class="material-symbols-outlined">send</span>
+</div>
+<div class="text-left md:text-center">
+<span class="block text-body-md font-bold text-primary-container">Sent</span>
+<span class="block text-label-sm text-on-surface-variant">Oct 24, 09:15 AM</span>
+</div>
+</div>
+<!-- Step 2: Notified -->
+<div class="relative z-10 flex md:flex-col items-center gap-md md:gap-xs text-center w-full md:w-auto">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg shadow-primary-container/20">
+<span class="material-symbols-outlined">notifications_active</span>
+</div>
+<div class="text-left md:text-center">
+<span class="block text-body-md font-bold text-primary-container">Notified</span>
+<span class="block text-label-sm text-on-surface-variant">Oct 24, 09:20 AM</span>
+</div>
+</div>
+<!-- Step 3: Waiting (Active) -->
+<div class="relative z-10 flex md:flex-col items-center gap-md md:gap-xs text-center w-full md:w-auto">
+<div class="w-12 h-12 rounded-full border-2 border-primary-container bg-surface flex items-center justify-center animate-pulse">
+<span class="material-symbols-outlined text-primary-container">hourglass_empty</span>
+</div>
+<div class="text-left md:text-center">
+<span class="block text-body-md font-bold text-primary">Waiting</span>
+<span class="block text-label-sm text-on-surface-variant">Candidate Reviewing</span>
+</div>
+</div>
+<!-- Step 4: Decision -->
+<div class="relative z-10 flex md:flex-col items-center gap-md md:gap-xs text-center w-full md:w-auto grayscale opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined">handshake</span>
+</div>
+<div class="text-left md:text-center">
+<span class="block text-body-md font-bold">Match</span>
+<span class="block text-label-sm text-on-surface-variant">Pending Decision</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Match Insight Bento -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Bento Card: Unlocked Info -->
+<div class="lg:col-span-2 glass-panel p-md rounded-xl match-glow border-primary/20 relative overflow-hidden">
+<div class="absolute -right-10 -bottom-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="flex items-center gap-sm mb-md">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">lock_open</span>
+<h4 class="text-headline-md font-headline-md text-on-surface">Match Unlocked Insights</h4>
+</div>
+<p class="text-body-md text-on-surface-variant mb-gutter max-w-xl">
+                        Based on Amina's profile and your current offer, our AI engine has identified 3 key synergy points that make this a high-value match.
+                    </p>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
+<div class="flex gap-sm p-sm bg-surface-container rounded-lg border border-surface-variant">
+<span class="material-symbols-outlined text-primary">psychology</span>
+<div>
+<span class="block font-bold text-on-surface">Skill Alignment</span>
+<span class="text-label-sm text-on-surface-variant">Exceeds Azure &amp; Terraform reqs.</span>
+</div>
+</div>
+<div class="flex gap-sm p-sm bg-surface-container rounded-lg border border-surface-variant">
+<span class="material-symbols-outlined text-primary">trending_up</span>
+<div>
+<span class="block font-bold text-on-surface">Growth Fit</span>
+<span class="text-label-sm text-on-surface-variant">Seeking Senior Leadership role.</span>
+</div>
+</div>
+<div class="flex gap-sm p-sm bg-surface-container rounded-lg border border-surface-variant">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+<div>
+<span class="block font-bold text-on-surface">Domain Expertise</span>
+<span class="text-label-sm text-on-surface-variant">FinTech experience matches yours.</span>
+</div>
+</div>
+<div class="flex gap-sm p-sm bg-surface-container rounded-lg border border-surface-variant">
+<span class="material-symbols-outlined text-primary">schedule</span>
+<div>
+<span class="block font-bold text-on-surface">Urgency Match</span>
+<span class="text-label-sm text-on-surface-variant">Both parties active in 24h.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bento Card: Statistics -->
+<div class="glass-panel p-md rounded-xl space-y-md">
+<h4 class="text-label-md font-label-md text-on-surface-variant uppercase tracking-widest">Candidate Pulse</h4>
+<div class="space-y-gutter">
+<div>
+<div class="flex justify-between text-label-md mb-xs">
+<span>Response Rate</span>
+<span class="text-primary">98%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 98%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-label-md mb-xs">
+<span>Interest Converted</span>
+<span class="text-secondary">72%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 72%"></div>
+</div>
+</div>
+<div class="p-sm bg-surface-container-high rounded-lg border border-surface-variant flex items-center justify-between">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-on-surface-variant">group</span>
+<span class="text-label-sm text-on-surface-variant">Competing Offers</span>
+</div>
+<span class="text-body-md font-bold text-on-surface">2 Active</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Nav Bar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 glass-panel flex justify-around items-center px-2 py-3 pb-safe border-t-0 rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-sm font-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="text-label-sm font-label-sm">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/15 text-primary rounded-xl px-3 py-1 scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="text-label-sm font-label-sm">Interests</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">handshake</span>
+<span class="text-label-sm font-label-sm">Matches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">business_center</span>
+<span class="text-label-sm font-label-sm">Company</span>
+</a>
+</nav>
+<script>
+        // Micro-interactions and simulation for demo
+        document.addEventListener('DOMContentLoaded', () => {
+            const cancelButton = document.querySelector('#pending-actions button:last-child');
+            
+            cancelButton.addEventListener('click', () => {
+                if(confirm('Are you sure you want to cancel this interest request? This action cannot be undone.')) {
+                    cancelButton.innerHTML = '<span class="material-symbols-outlined animate-spin">autorenew</span> Cancelling...';
+                    cancelButton.disabled = true;
+                    setTimeout(() => {
+                        alert('Request #KM2048 has been cancelled.');
+                        window.location.reload();
+                    }, 1500);
+                }
+            });
+
+            // Hover effects on profile image
+            const profileImg = document.querySelector('img');
+            profileImg.closest('div').addEventListener('mouseenter', () => {
+                profileImg.style.transform = 'scale(1.1)';
+                profileImg.style.transition = 'transform 0.5s ease';
+            });
+            profileImg.closest('div').addEventListener('mouseleave', () => {
+                profileImg.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

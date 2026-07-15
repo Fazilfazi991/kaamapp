@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Work Preferences - Kaam</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container": "#1b1f2f",
+                        "secondary-fixed": "#e5deff",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-secondary": "#2f009c",
+                        "tertiary-container": "#cf7d9d",
+                        "surface-variant": "#303445",
+                        "tertiary": "#ffb0cd",
+                        "surface-bright": "#353849",
+                        "outline": "#a58a91",
+                        "on-secondary-fixed": "#1a0063",
+                        "secondary": "#c9bfff",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-dim": "#0f1322",
+                        "on-tertiary-container": "#541734",
+                        "background": "#0f1322",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "surface-tint": "#ffb0c9",
+                        "surface-container-low": "#171b2a",
+                        "on-primary-container": "#600032",
+                        "secondary-container": "#470cd9",
+                        "primary-fixed": "#ffd9e3",
+                        "on-primary-fixed": "#3e001e",
+                        "inverse-primary": "#ae2565",
+                        "outline-variant": "#574147",
+                        "inverse-on-surface": "#2c3040",
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "on-primary": "#640035",
+                        "surface-container-highest": "#303445",
+                        "surface-container-high": "#252939",
+                        "on-tertiary": "#571936",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#0f1322",
+                        "on-error": "#690005",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#baaeff",
+                        "surface-container-lowest": "#090d1c",
+                        "inverse-surface": "#dfe1f7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "sm": "16px",
+                        "container-margin-desktop": "80px",
+                        "base": "4px",
+                        "gutter": "24px",
+                        "xl": "64px",
+                        "lg": "40px",
+                        "md": "24px",
+                        "container-margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-md": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-sm": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #090B1A; }
+        .glass-header {
+            background-color: rgba(9, 11, 26, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #2A2E4A;
+        }
+        .card-bg { background-color: #181C35; border: 1px solid #2A2E4A; }
+        .input-bg { background-color: #11142A; border: 1px solid #2A2E4A; }
+        .input-bg:focus-within { border-color: #F65F9D; box-shadow: 0 0 8px rgba(246, 95, 157, 0.3); }
+        .chip { background-color: #202542; color: #B8BBD0; }
+        .chip.active { background-color: rgba(246, 95, 157, 0.15); color: #F65F9D; }
+        
+        /* Custom Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #F65F9D;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #F65F9D;
+        }
+        .toggle-checkbox:checked + .toggle-label:after {
+            transform: translateX(100%);
+            border-color: white;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background font-body-md antialiased min-h-screen flex flex-col pb-32">
+<!-- Top Navigation (Transactional, no shell nav, just back button and title) -->
+<header class="glass-header sticky top-0 w-full z-50 flex justify-between items-center px-container-margin-mobile md:px-container-margin-desktop h-16">
+<button class="text-primary-container hover:opacity-80 transition-all p-2 -ml-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">Step 2 of 5</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<main class="flex-grow w-full max-w-3xl mx-auto px-container-margin-mobile md:px-0 pt-md pb-xl">
+<!-- Progress Bar -->
+<div class="mb-lg">
+<div class="flex justify-between font-label-sm text-on-surface-variant mb-2">
+<span>Work Preferences</span>
+<span>40%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full w-2/5 transition-all duration-500"></div>
+</div>
+</div>
+<div class="mb-lg">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">What kind of work are you looking for?</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Help us match you with the right opportunities.</p>
+</div>
+<form class="space-y-xl">
+<!-- Job Category -->
+<section class="card-bg rounded-xl p-md">
+<h3 class="font-label-md text-label-md text-on-surface mb-sm">Job Category</h3>
+<div class="flex flex-wrap gap-xs">
+<button class="chip active px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent transition-colors" type="button">Hospitality</button>
+<button class="chip px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent hover:border-primary-container transition-colors" type="button">Retail</button>
+<button class="chip px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent hover:border-primary-container transition-colors" type="button">Logistics</button>
+<button class="chip px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent hover:border-primary-container transition-colors" type="button">Construction</button>
+<button class="chip px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent hover:border-primary-container transition-colors" type="button">Cleaning</button>
+<button class="chip px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent hover:border-primary-container transition-colors" type="button">Security</button>
+</div>
+</section>
+<!-- Preferred Job Role -->
+<section class="card-bg rounded-xl p-md space-y-md">
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-xs">Preferred Job Role</label>
+<div class="input-bg rounded-lg relative flex items-center overflow-hidden transition-all duration-300">
+<span class="material-symbols-outlined text-[#7E829F] pl-4" data-icon="work">work</span>
+<select class="w-full bg-transparent text-on-surface py-3 px-4 outline-none appearance-none cursor-pointer font-body-md">
+<option class="bg-surface-container text-[#7E829F]" disabled="" value="">Select a role</option>
+<option class="bg-surface-container" selected="" value="waiter">Waiter / Waitress</option>
+<option class="bg-surface-container" value="barista">Barista</option>
+<option class="bg-surface-container" value="chef">Chef / Cook</option>
+<option class="bg-surface-container" value="housekeeping">Housekeeping</option>
+</select>
+<span class="material-symbols-outlined text-[#7E829F] pr-4 pointer-events-none absolute right-0" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Expected Salary -->
+<div>
+<div class="flex justify-between items-center mb-xs">
+<label class="block font-label-md text-label-md text-on-surface">Expected Salary (Monthly)</label>
+<span class="font-label-md text-primary-container">AED <span id="salary-value">3,500</span></span>
+</div>
+<input class="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary-container" id="salary-slider" max="10000" min="1500" oninput="document.getElementById('salary-value').innerText = parseInt(this.value).toLocaleString()" step="100" type="range" value="3500"/>
+<div class="flex justify-between font-label-sm text-[#7E829F] mt-2">
+<span>AED 1,500</span>
+<span>AED 10,000+</span>
+</div>
+</div>
+</section>
+<!-- Availability & Shifts -->
+<section class="card-bg rounded-xl p-md space-y-md">
+<div>
+<h3 class="font-label-md text-label-md text-on-surface mb-sm">Availability</h3>
+<div class="flex flex-wrap gap-xs">
+<button class="chip active px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent transition-colors" type="button">Immediate</button>
+<button class="chip px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent hover:border-primary-container transition-colors" type="button">1 Week</button>
+<button class="chip px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent hover:border-primary-container transition-colors" type="button">1 Month</button>
+</div>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface mb-sm">Preferred Shift</h3>
+<div class="flex flex-wrap gap-xs">
+<button class="chip px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent hover:border-primary-container transition-colors" type="button">Morning</button>
+<button class="chip active px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent transition-colors" type="button">Evening</button>
+<button class="chip px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent hover:border-primary-container transition-colors" type="button">Night Shift</button>
+<button class="chip px-4 py-2 rounded-full font-label-sm text-label-sm border border-transparent hover:border-primary-container transition-colors" type="button">Flexible</button>
+</div>
+</div>
+</section>
+<!-- Logistics (Toggles) -->
+<section class="card-bg rounded-xl p-md space-y-md">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-label-md text-label-md text-on-surface">Accommodation Required</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Do you need employer-provided housing?</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0 bottom-0 m-auto" id="toggle-accom" name="toggle-accom" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-container-high cursor-pointer before:absolute before:inset-0 before:bg-surface-container-high before:rounded-full before:transition-colors" for="toggle-accom"></label>
+</div>
+</div>
+<div class="h-px w-full bg-[#2A2E4A]"></div>
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-label-md text-label-md text-on-surface">Transportation Required</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Do you need company transport to site?</p>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 top-0 bottom-0 m-auto" id="toggle-trans" name="toggle-trans" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-surface-container-high cursor-pointer before:absolute before:inset-0 before:bg-surface-container-high before:rounded-full before:transition-colors" for="toggle-trans"></label>
+</div>
+</div>
+</section>
+</form>
+</main>
+<!-- Fixed Bottom CTA -->
+<div class="fixed bottom-0 left-0 w-full glass-header py-4 px-container-margin-mobile md:px-container-margin-desktop z-40">
+<div class="max-w-3xl mx-auto flex justify-between items-center gap-sm">
+<button class="px-6 py-3 rounded-lg font-label-md text-label-md text-[#B8BBD0] hover:text-white transition-colors">Skip</button>
+<button class="flex-grow bg-gradient-to-r from-primary-container to-[#ae2565] text-white font-label-md text-label-md py-3 px-6 rounded-lg shadow-lg hover:shadow-primary-container/20 hover:opacity-90 transition-all flex justify-center items-center gap-2">
+                Continue
+                <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<script>
+        // Simple chip interaction script
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                // For radio-like behavior in preferred shift
+                if(this.closest('div').querySelector('.active') && this.closest('div').previousElementSibling.innerText === 'Preferred Shift') {
+                    this.closest('div').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                }
+                this.classList.toggle('active');
+            });
+        });
+    </script>
+</body></html>

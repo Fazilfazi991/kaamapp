@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kaam | Respect Candidate Privacy</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "surface-container-high": "#252939",
+                        "inverse-on-surface": "#2c3040",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-container-low": "#171b2a",
+                        "error-container": "#93000a",
+                        "secondary": "#c9bfff",
+                        "secondary-container": "#470cd9",
+                        "surface-variant": "#303445",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-primary": "#640035",
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "surface-bright": "#353849",
+                        "on-tertiary": "#571936",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container-lowest": "#090d1c",
+                        "on-tertiary-container": "#541734",
+                        "on-secondary-container": "#baaeff",
+                        "inverse-primary": "#ae2565",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "outline-variant": "#574147",
+                        "outline": "#a58a91",
+                        "primary-fixed": "#ffd9e3",
+                        "surface-container": "#1b1f2f",
+                        "surface": "#0f1322",
+                        "tertiary-container": "#cf7d9d",
+                        "tertiary": "#ffb0cd",
+                        "secondary-fixed": "#e5deff",
+                        "surface-container-highest": "#303445",
+                        "on-primary-fixed": "#3e001e",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "on-secondary-fixed": "#1a0063",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#0f1322",
+                        "inverse-surface": "#dfe1f7",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary": "#2f009c",
+                        "on-primary-container": "#600032",
+                        "surface-tint": "#ffb0c9",
+                        "on-error": "#690005",
+                        "background": "#0f1322"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "64px",
+                        "gutter": "24px",
+                        "container-margin-mobile": "20px",
+                        "base": "4px",
+                        "sm": "16px",
+                        "md": "24px",
+                        "container-margin-desktop": "80px",
+                        "xs": "8px",
+                        "lg": "40px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-sm": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #090B1A;
+            color: #dfe1f7;
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(24, 28, 53, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(42, 46, 74, 1);
+        }
+        .checkmark-glow {
+            box-shadow: 0 0 15px rgba(246, 95, 157, 0.4);
+        }
+        .step-progress-glow {
+            box-shadow: 0 0 10px rgba(246, 95, 157, 0.6);
+        }
+        .nav-glass {
+            background: rgba(9, 11, 26, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(48, 52, 69, 1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 nav-glass h-16 flex justify-between items-center px-container-margin-mobile md:px-container-margin-desktop">
+<div class="flex items-center gap-sm">
+<div class="h-10 w-10 flex items-center justify-center rounded-xl bg-primary-container text-on-primary-container font-bold text-headline-md">
+                K
+            </div>
+<span class="text-on-surface font-headline-md text-headline-md font-bold tracking-tight">Kaam</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="hidden md:block text-label-md font-label-md text-on-surface-variant">Step 5 of 5</span>
+<button class="h-10 w-10 rounded-full flex items-center justify-center hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-on-surface" data-icon="close">close</span>
+</button>
+</div>
+</header>
+<!-- Background Ambient Effect -->
+<div class="fixed inset-0 pointer-events-none z-0">
+
+</div>
+<!-- Main Content Canvas -->
+<main class="relative z-10 w-full max-w-2xl px-container-margin-mobile pt-32 pb-xl flex flex-col gap-lg">
+<!-- Step Progress Indicator -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-end">
+<span class="text-label-md font-label-md text-primary font-bold tracking-widest uppercase">Safety &amp; Security</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">100% Complete</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container step-progress-glow w-full transition-all duration-1000 ease-out"></div>
+</div>
+</div>
+<!-- Section Header -->
+<div class="flex flex-col gap-xs">
+<h1 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg text-on-surface">Respect candidate privacy</h1>
+<p class="text-body-md font-body-md text-on-surface-variant max-w-lg">
+                To maintain the integrity of our elite matchmaking community, we require all employers to adhere to strict privacy and professional conduct protocols.
+            </p>
+</div>
+<!-- Privacy Checklist Container -->
+<div class="flex flex-col gap-sm">
+<!-- Checklist Item 1 -->
+<label class="glass-card p-md rounded-xl flex items-start gap-md cursor-pointer group hover:bg-surface-container-high transition-all duration-300">
+<div class="mt-1">
+<input checked="" class="hidden peer" type="checkbox"/>
+<div class="w-6 h-6 rounded-lg border-2 border-outline flex items-center justify-center peer-checked:bg-primary-container peer-checked:border-primary-container checkmark-glow transition-all">
+<span class="material-symbols-outlined text-on-primary-container text-body-md scale-0 peer-checked:scale-100 transition-transform" data-icon="check" data-weight="fill">check</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="text-label-md font-label-md text-on-surface group-hover:text-primary transition-colors">Confidential Data Handling</span>
+<p class="text-label-sm font-label-sm text-on-surface-variant">I agree to never share candidate contact details or CVs with third-party entities outside of my direct hiring team.</p>
+</div>
+</label>
+<!-- Checklist Item 2 -->
+<label class="glass-card p-md rounded-xl flex items-start gap-md cursor-pointer group hover:bg-surface-container-high transition-all duration-300">
+<div class="mt-1">
+<input class="hidden peer" id="check-2" type="checkbox"/>
+<div class="w-6 h-6 rounded-lg border-2 border-outline flex items-center justify-center peer-checked:bg-primary-container peer-checked:border-primary-container checkmark-glow transition-all">
+<span class="material-symbols-outlined text-on-primary-container text-body-md scale-0 peer-checked:scale-100 transition-transform" data-icon="check" data-weight="fill">check</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="text-label-md font-label-md text-on-surface group-hover:text-primary transition-colors">Professional Communication</span>
+<p class="text-label-sm font-label-sm text-on-surface-variant">All platform chats must remain professional. I will not use the chat for unsolicited marketing or personal solicitation.</p>
+</div>
+</label>
+<!-- Checklist Item 3 -->
+<label class="glass-card p-md rounded-xl flex items-start gap-md cursor-pointer group hover:bg-surface-container-high transition-all duration-300">
+<div class="mt-1">
+<input class="hidden peer" id="check-3" type="checkbox"/>
+<div class="w-6 h-6 rounded-lg border-2 border-outline flex items-center justify-center peer-checked:bg-primary-container peer-checked:border-primary-container checkmark-glow transition-all">
+<span class="material-symbols-outlined text-on-primary-container text-body-md scale-0 peer-checked:scale-100 transition-transform" data-icon="check" data-weight="fill">check</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="text-label-md font-label-md text-on-surface group-hover:text-primary transition-colors">Non-Discriminatory Practices</span>
+<p class="text-label-sm font-label-sm text-on-surface-variant">I confirm that all hiring decisions will be made based on merit and in compliance with regional labor laws and ethical guidelines.</p>
+</div>
+</label>
+<!-- Checklist Item 4 -->
+<label class="glass-card p-md rounded-xl flex items-start gap-md cursor-pointer group hover:bg-surface-container-high transition-all duration-300">
+<div class="mt-1">
+<input class="hidden peer" id="check-4" type="checkbox"/>
+<div class="w-6 h-6 rounded-lg border-2 border-outline flex items-center justify-center peer-checked:bg-primary-container peer-checked:border-primary-container checkmark-glow transition-all">
+<span class="material-symbols-outlined text-on-primary-container text-body-md scale-0 peer-checked:scale-100 transition-transform" data-icon="check" data-weight="fill">check</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="text-label-md font-label-md text-on-surface group-hover:text-primary transition-colors">No External Poaching</span>
+<p class="text-label-sm font-label-sm text-on-surface-variant">I will not attempt to bypass Kaam’s secure matching ecosystem to solicit candidates through unverified external channels.</p>
+</div>
+</label>
+</div>
+<!-- Profile Preview Card (Status Symbol) -->
+<div class="mt-sm p-md rounded-2xl bg-gradient-to-br from-surface-container-high to-surface-container-lowest border border-primary/20 flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="relative">
+<img class="w-14 h-14 rounded-full object-cover border-2 border-primary-container" data-alt="A professional corporate headshot of a Middle Eastern male recruiter in a sharp tailored suit, set against a blurred high-end office background in Dubai. The lighting is sophisticated and soft, emphasizing status and security with deep navy and vibrant pink color tones in the background bokeh." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnx4CKMjg9j9s6rlY4Et7-E3yxSFKPt66OjzuQZP1FJ6WuC_nu_o-7wg5kCL_45ixx0rwuyOuEfUyHve4aTrXxtWqI6_ISGGyHEutw-WAC1d5U0BLrVM6znS40gC-Pf7cufOQQH3IXb8EONPflThaPQu8eeOOttQkQk2A_akoEQxVs1sPLgq4QsJkdqEMQx36e7aL__kQ6KidtHvzw-m5HGaCn13bCHnVavQbCDB4iEoWnhhic_VRRyDLrumNy7vjCnv5aR_gCXJnv"/>
+<div class="absolute -bottom-1 -right-1 bg-primary text-on-primary p-0.5 rounded-full border-2 border-surface">
+<span class="material-symbols-outlined text-[12px]" data-icon="verified" data-weight="fill">verified</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="text-label-md font-label-md text-on-surface">Khalid Al-Mansouri</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Premium Recruiter • Verified Entity</span>
+</div>
+</div>
+<div class="hidden sm:flex flex-col items-end">
+<span class="text-label-sm font-label-sm text-primary uppercase tracking-tighter">Elite Status</span>
+<span class="text-body-md font-bold text-on-surface">98% Compliance</span>
+</div>
+</div>
+<!-- CTA Action Area -->
+<div class="flex flex-col sm:flex-row items-center gap-md mt-md">
+<button class="w-full sm:w-auto px-xl py-md rounded-full bg-primary-container text-on-primary-container font-headline-md text-label-md hover:opacity-90 active:scale-95 transition-all shadow-[0_8px_30px_rgb(246,95,157,0.3)] disabled:opacity-50 disabled:pointer-events-none" id="complete-btn">
+                Complete Setup
+            </button>
+<button class="w-full sm:w-auto px-xl py-md rounded-full border-1.5 border-outline-variant text-on-surface-variant font-label-md hover:bg-surface-container-high transition-colors active:scale-95">
+                Review Agreement
+            </button>
+</div>
+<!-- Agreement Footer -->
+<p class="text-center text-label-sm font-label-sm text-on-surface-variant/60 mt-xs">
+            By clicking Complete Setup, you legally bind yourself and your organization to the <a class="underline hover:text-primary" href="#">Recruiter Privacy Agreement</a> and Kaam's <a class="underline hover:text-primary" href="#">Global Terms of Service</a>.
+        </p>
+</main>
+<!-- Bottom Notification (Hidden by default) -->
+<div class="fixed bottom-10 left-1/2 -translate-x-1/2 translate-y-32 opacity-0 glass-card px-lg py-sm rounded-full flex items-center gap-sm transition-all duration-500 z-[100]" id="toast">
+<span class="material-symbols-outlined text-primary" data-icon="lock">lock</span>
+<span class="text-label-md font-label-md text-on-surface">Account finalized and secured.</span>
+</div>
+<script>
+        // Checkboxes handling to enable the CTA
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const completeBtn = document.getElementById('complete-btn');
+        const toast = document.getElementById('toast');
+
+        function checkAll() {
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            completeBtn.disabled = !allChecked;
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', checkAll);
+        });
+
+        // Initialize state
+        checkAll();
+
+        // CTA Interaction
+        completeBtn.addEventListener('click', () => {
+            completeBtn.innerHTML = '<span class="material-symbols-outlined animate-spin" data-icon="progress_activity">progress_activity</span>';
+            
+            setTimeout(() => {
+                completeBtn.innerHTML = 'Setup Complete';
+                completeBtn.classList.remove('bg-primary-container');
+                completeBtn.classList.add('bg-green-600');
+                
+                toast.classList.remove('translate-y-32', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+                
+                // Trigger subtle particle or confetti effect logic would go here
+            }, 1500);
+        });
+
+        // Add micro-interaction for checklist item focus
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.style.transform = 'scale(0.98)';
+            });
+            card.addEventListener('mouseup', () => {
+                card.style.transform = 'scale(1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

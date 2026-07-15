@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Upload Documents</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container": "#1b1f2f",
+                        "secondary-fixed": "#e5deff",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-secondary": "#2f009c",
+                        "tertiary-container": "#cf7d9d",
+                        "surface-variant": "#303445",
+                        "tertiary": "#ffb0cd",
+                        "surface-bright": "#353849",
+                        "outline": "#a58a91",
+                        "on-secondary-fixed": "#1a0063",
+                        "secondary": "#c9bfff",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-dim": "#0f1322",
+                        "on-tertiary-container": "#541734",
+                        "background": "#0f1322",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "surface-tint": "#ffb0c9",
+                        "surface-container-low": "#171b2a",
+                        "on-primary-container": "#600032",
+                        "secondary-container": "#470cd9",
+                        "primary-fixed": "#ffd9e3",
+                        "on-primary-fixed": "#3e001e",
+                        "inverse-primary": "#ae2565",
+                        "outline-variant": "#574147",
+                        "inverse-on-surface": "#2c3040",
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "on-primary": "#640035",
+                        "surface-container-highest": "#303445",
+                        "surface-container-high": "#252939",
+                        "on-tertiary": "#571936",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#0f1322",
+                        "on-error": "#690005",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#baaeff",
+                        "surface-container-lowest": "#090d1c",
+                        "inverse-surface": "#dfe1f7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "sm": "16px",
+                        "container-margin-desktop": "80px",
+                        "base": "4px",
+                        "gutter": "24px",
+                        "xl": "64px",
+                        "lg": "40px",
+                        "md": "24px",
+                        "container-margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-md": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-sm": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #090B1A; }
+        .glass-header {
+            background-color: rgba(9, 11, 26, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid #2A2E4A;
+        }
+        .upload-card {
+            background-color: #11142A;
+            border: 1px dashed #2A2E4A;
+            transition: all 0.2s ease-in-out;
+        }
+        .upload-card:hover {
+            background-color: #181C35;
+            border-color: #F65F9D;
+            box-shadow: 0 0 10px rgba(246, 95, 157, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #F65F9D 0%, #D84A83 100%);
+            box-shadow: 0 4px 15px rgba(246, 95, 157, 0.2);
+        }
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #F65F9D 0%, #D84A83 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background min-h-screen flex flex-col font-body-md">
+<!-- Top Navigation (Transactional/Linear flow, so simple header) -->
+<header class="glass-header sticky top-0 w-full z-50 flex justify-between items-center px-container-margin-mobile md:px-container-margin-desktop h-16">
+<button class="text-on-surface hover:text-primary transition-colors flex items-center justify-center p-2 -ml-2 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<span class="font-headline-md text-headline-md font-bold text-primary">Kaam</span>
+<div class="w-10"></div> <!-- Placeholder for balance -->
+</header>
+<main class="flex-grow flex flex-col items-center px-container-margin-mobile md:px-container-margin-desktop py-md md:py-lg max-w-4xl mx-auto w-full">
+<!-- Progress Indicator -->
+<div class="w-full mb-xl">
+<div class="flex justify-between items-center mb-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">Step 4 of 5</span>
+<span class="font-label-md text-label-md text-on-surface">Documents</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="progress-bar-fill h-full w-4/5 rounded-full transition-all duration-500"></div>
+</div>
+</div>
+<!-- Header -->
+<div class="w-full text-center mb-lg">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-sm text-on-surface">Upload your documents</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto">
+                Help us verify your profile to start matching.
+            </p>
+</div>
+<!-- Privacy Note -->
+<div class="w-full bg-[#181C35] rounded-lg p-sm mb-lg border border-[#2A2E4A] flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary mt-1" style="font-variation-settings: 'FILL' 1;">lock</span>
+<p class="font-body-md text-body-md text-on-surface">
+<strong>Privacy first:</strong> Documents are only shared when you explicitly allow it during a match.
+            </p>
+</div>
+<!-- Upload Grid -->
+<div class="w-full grid grid-cols-1 md:grid-cols-2 gap-md mb-xl">
+<!-- CV / Resume -->
+<button class="upload-card rounded-xl p-md flex flex-col items-center justify-center text-center gap-sm group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary h-48">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-[#202542] transition-colors mb-2">
+<span class="material-symbols-outlined text-[#B8BBD0] group-hover:text-primary transition-colors text-3xl">description</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface">CV / Resume</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">PDF, DOCX up to 10MB</p>
+</button>
+<!-- Certificates -->
+<button class="upload-card rounded-xl p-md flex flex-col items-center justify-center text-center gap-sm group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary h-48">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-[#202542] transition-colors mb-2">
+<span class="material-symbols-outlined text-[#B8BBD0] group-hover:text-primary transition-colors text-3xl">workspace_premium</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface">Certificates</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">PDF, JPG up to 5MB</p>
+</button>
+<!-- Portfolio -->
+<button class="upload-card rounded-xl p-md flex flex-col items-center justify-center text-center gap-sm group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary h-48">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-[#202542] transition-colors mb-2">
+<span class="material-symbols-outlined text-[#B8BBD0] group-hover:text-primary transition-colors text-3xl">photo_library</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface">Portfolio / Work photos</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">JPG, PNG up to 20MB</p>
+</button>
+<!-- ID Document -->
+<button class="upload-card rounded-xl p-md flex flex-col items-center justify-center text-center gap-sm group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary h-48 relative overflow-hidden">
+<div class="absolute top-sm right-sm bg-surface-container-high px-2 py-1 rounded font-label-sm text-label-sm text-on-surface-variant">Optional</div>
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center group-hover:bg-[#202542] transition-colors mb-2 mt-4">
+<span class="material-symbols-outlined text-[#B8BBD0] group-hover:text-primary transition-colors text-3xl">badge</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface">ID Document</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">For verification badge</p>
+</button>
+</div>
+</main>
+<!-- Bottom Action Area -->
+<div class="w-full sticky bottom-0 bg-[#090B1A] border-t border-[#2A2E4A] p-container-margin-mobile md:px-container-margin-desktop md:py-md z-40 pb-safe">
+<div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-md">
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors w-full md:w-auto text-center py-3 px-6 rounded-lg bg-transparent border border-transparent hover:border-[#2A2E4A]">
+                Skip for now
+            </button>
+<button class="btn-primary w-full md:w-auto text-white font-label-md text-label-md py-4 px-xl rounded-full transition-transform active:scale-95 flex items-center justify-center gap-2">
+                Continue
+                <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 600;">arrow_forward</span>
+</button>
+</div>
+</div>
+</body></html>

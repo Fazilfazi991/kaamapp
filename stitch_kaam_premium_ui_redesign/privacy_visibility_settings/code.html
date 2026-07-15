@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-width=1.0" name="viewport"/>
+<title>Privacy &amp; Visibility Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container": "#1b1f2f",
+                        "secondary-fixed": "#e5deff",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-secondary": "#2f009c",
+                        "tertiary-container": "#cf7d9d",
+                        "surface-variant": "#303445",
+                        "tertiary": "#ffb0cd",
+                        "surface-bright": "#353849",
+                        "outline": "#a58a91",
+                        "on-secondary-fixed": "#1a0063",
+                        "secondary": "#c9bfff",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-dim": "#0f1322",
+                        "on-tertiary-container": "#541734",
+                        "background": "#0f1322",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "surface-tint": "#ffb0c9",
+                        "surface-container-low": "#171b2a",
+                        "on-primary-container": "#600032",
+                        "secondary-container": "#470cd9",
+                        "primary-fixed": "#ffd9e3",
+                        "on-primary-fixed": "#3e001e",
+                        "inverse-primary": "#ae2565",
+                        "outline-variant": "#574147",
+                        "inverse-on-surface": "#2c3040",
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "on-primary": "#640035",
+                        "surface-container-highest": "#303445",
+                        "surface-container-high": "#252939",
+                        "on-tertiary": "#571936",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#0f1322",
+                        "on-error": "#690005",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#baaeff",
+                        "surface-container-lowest": "#090d1c",
+                        "inverse-surface": "#dfe1f7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "sm": "16px",
+                        "container-margin-desktop": "80px",
+                        "base": "4px",
+                        "gutter": "24px",
+                        "xl": "64px",
+                        "lg": "40px",
+                        "md": "24px",
+                        "container-margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-md": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-sm": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #090B1A;
+            color: #dfe1f7;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .glass-card {
+            background: #181C35;
+            border: 1px solid #2A2E4A;
+        }
+        
+        .glass-card:hover {
+            background: #202542;
+            box-shadow: 0 0 10px rgba(246, 95, 157, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #F65F9D;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #F65F9D;
+        }
+        
+        .toggle-checkbox {
+            right: 0;
+            z-index: 1;
+            border-color: #2A2E4A;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-label {
+            width: 3rem;
+            height: 1.5rem;
+            background-color: #11142A;
+            border-radius: 9999px;
+            border: 1px solid #2A2E4A;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-dot {
+            top: 0.125rem;
+            left: 0.125rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            background-color: #B8BBD0;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-checkbox:checked ~ .toggle-dot {
+            transform: translateX(1.5rem);
+            background-color: #FFFFFF;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col md:pb-0">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-50 flex justify-between items-center px-container-margin-mobile h-16 bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 transition-all duration-200">
+<div class="flex items-center gap-2 hover:opacity-80 cursor-pointer">
+<span class="material-symbols-outlined text-primary text-headline-md">shield_person</span>
+<span class="font-headline-md text-headline-md font-bold text-primary">Kaam</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:opacity-80 transition-all duration-200 active:scale-95 text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<!-- Desktop Nav (Hidden on mobile) -->
+<nav class="hidden md:flex gap-6 items-center">
+<a class="text-on-surface-variant font-label-md hover:opacity-80 transition-all" href="#">Home</a>
+<a class="text-on-surface-variant font-label-md hover:opacity-80 transition-all" href="#">Requests</a>
+<a class="text-on-surface-variant font-label-md hover:opacity-80 transition-all" href="#">Matches</a>
+<a class="text-on-surface-variant font-label-md hover:opacity-80 transition-all" href="#">Chat</a>
+<a class="text-primary font-label-md font-semibold border-b-2 border-primary pb-1 transition-all" href="#">Profile</a>
+</nav>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-[1280px] mx-auto px-container-margin-mobile md:px-[40px] lg:px-container-margin-desktop py-md md:py-lg grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-gutter mb-20 md:mb-0">
+<!-- Header Section -->
+<div class="col-span-4 md:col-span-8 lg:col-span-12 mb-sm">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Privacy &amp; Visibility</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage who can see your profile and how they can contact you.</p>
+</div>
+<!-- Visibility Toggles -->
+<div class="col-span-4 md:col-span-8 lg:col-span-7 flex flex-col gap-sm">
+<div class="glass-card rounded-xl p-md flex flex-col gap-sm">
+<div class="flex justify-between items-center pb-sm border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">visibility</span>
+<div>
+<h3 class="font-headline-md text-body-lg text-on-surface font-semibold">Profile visibility</h3>
+<p class="font-body-md text-label-md text-on-surface-variant font-normal">Allow employers to find you in searches</p>
+</div>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle1" name="toggle1" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle1"></label>
+<div class="toggle-dot absolute"></div>
+</div>
+</div>
+<div class="flex justify-between items-center pb-sm border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline">phone_disabled</span>
+<div>
+<h3 class="font-headline-md text-body-lg text-on-surface font-semibold">Hide phone number</h3>
+<p class="font-body-md text-label-md text-on-surface-variant font-normal">Keep hidden until a match is confirmed</p>
+</div>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle2" name="toggle2" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle2"></label>
+<div class="toggle-dot absolute"></div>
+</div>
+</div>
+<div class="flex justify-between items-center pb-sm border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline">mail_lock</span>
+<div>
+<h3 class="font-headline-md text-body-lg text-on-surface font-semibold">Hide email</h3>
+<p class="font-body-md text-label-md text-on-surface-variant font-normal">Keep hidden until a match is confirmed</p>
+</div>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle3" name="toggle3" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle3"></label>
+<div class="toggle-dot absolute"></div>
+</div>
+</div>
+<div class="flex justify-between items-center pb-sm border-b border-outline-variant/20">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline">gpp_maybe</span>
+<div>
+<h3 class="font-headline-md text-body-lg text-on-surface font-semibold">Require approval</h3>
+<p class="font-body-md text-label-md text-on-surface-variant font-normal">Manually approve incoming chat requests</p>
+</div>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle4" name="toggle4" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle4"></label>
+<div class="toggle-dot absolute"></div>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline">description</span>
+<div>
+<h3 class="font-headline-md text-body-lg text-on-surface font-semibold">Allow document sharing</h3>
+<p class="font-body-md text-label-md text-on-surface-variant font-normal">Enable sharing CVs/portfolios post-match</p>
+</div>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle5" name="toggle5" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle5"></label>
+<div class="toggle-dot absolute"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Block Companies Section & Save CTA -->
+<div class="col-span-4 md:col-span-8 lg:col-span-5 flex flex-col gap-sm">
+<div class="glass-card rounded-xl p-md flex flex-col gap-md">
+<div>
+<h3 class="font-headline-md text-body-lg text-on-surface font-semibold mb-1">Block Companies</h3>
+<p class="font-body-md text-label-md text-on-surface-variant font-normal mb-4">Hide your profile from specific organizations.</p>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-3 text-outline">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg py-3 pl-10 pr-4 text-on-surface font-body-md focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="Search companies to block..." type="text"/>
+</div>
+<div class="flex flex-wrap gap-2 mt-2">
+<div class="flex items-center gap-1 bg-surface-container-high px-3 py-1.5 rounded-full border border-outline-variant/20">
+<span class="font-label-md text-label-md text-on-surface">Acme Corp</span>
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-high px-3 py-1.5 rounded-full border border-outline-variant/20">
+<span class="font-label-md text-label-md text-on-surface">Global Tech</span>
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-sm flex justify-end">
+<button class="bg-primary-container hover:bg-[#ff75af] text-white font-label-md text-label-md py-3 px-6 rounded-lg transition-all duration-200 active:scale-95 shadow-[0_0_15px_rgba(246,95,157,0.3)] w-full md:w-auto">
+                    Save Privacy Settings
+                </button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-surface-container-low/80 dark:bg-surface-container-low/80 backdrop-blur-lg border-t border-outline-variant/20 shadow-lg rounded-t-xl transition-transform duration-200">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-label-sm text-label-sm mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined">ads_click</span>
+<span class="font-label-sm text-label-sm mt-1">Requests</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined">handshake</span>
+<span class="font-label-sm text-label-sm mt-1">Matches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="font-label-sm text-label-sm mt-1">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-semibold hover:text-primary-container active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-sm text-label-sm mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

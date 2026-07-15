@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Interest Requests - Kaam</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ffb0c9",
+                    "tertiary-fixed": "#ffd9e4",
+                    "surface-container": "#1b1f2f",
+                    "secondary-fixed": "#e5deff",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#8d004d",
+                    "on-secondary": "#2f009c",
+                    "tertiary-container": "#cf7d9d",
+                    "surface-variant": "#303445",
+                    "tertiary": "#ffb0cd",
+                    "surface-bright": "#353849",
+                    "outline": "#a58a91",
+                    "on-secondary-fixed": "#1a0063",
+                    "secondary": "#c9bfff",
+                    "primary-fixed-dim": "#ffb0c9",
+                    "on-tertiary-fixed-variant": "#72304d",
+                    "on-tertiary-fixed": "#3c0321",
+                    "on-surface": "#dfe1f7",
+                    "surface-dim": "#0f1322",
+                    "on-tertiary-container": "#541734",
+                    "background": "#0f1322",
+                    "secondary-fixed-dim": "#c9bfff",
+                    "surface-tint": "#ffb0c9",
+                    "surface-container-low": "#171b2a",
+                    "on-primary-container": "#600032",
+                    "secondary-container": "#470cd9",
+                    "primary-fixed": "#ffd9e3",
+                    "on-primary-fixed": "#3e001e",
+                    "inverse-primary": "#ae2565",
+                    "outline-variant": "#574147",
+                    "inverse-on-surface": "#2c3040",
+                    "primary-container": "#f65f9d",
+                    "on-background": "#dfe1f7",
+                    "on-secondary-fixed-variant": "#4503d7",
+                    "on-primary": "#640035",
+                    "surface-container-highest": "#303445",
+                    "surface-container-high": "#252939",
+                    "on-tertiary": "#571936",
+                    "on-error-container": "#ffdad6",
+                    "surface": "#0f1322",
+                    "on-error": "#690005",
+                    "tertiary-fixed-dim": "#ffb0cd",
+                    "on-surface-variant": "#ddbfc7",
+                    "error": "#ffb4ab",
+                    "on-secondary-container": "#baaeff",
+                    "surface-container-lowest": "#090d1c",
+                    "inverse-surface": "#dfe1f7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "8px",
+                    "sm": "16px",
+                    "container-margin-desktop": "80px",
+                    "base": "4px",
+                    "gutter": "24px",
+                    "xl": "64px",
+                    "lg": "40px",
+                    "md": "24px",
+                    "container-margin-mobile": "20px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "body-lg": ["Manrope"],
+                    "label-md": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "label-sm": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #090B1A; color: #dfe1f7; }
+        .glass-header { background: rgba(9, 11, 26, 0.7); backdrop-filter: blur(20px); border-bottom: 1px solid #2A2E4A; }
+        .glass-nav { background: rgba(17, 20, 42, 0.8); backdrop-filter: blur(20px); border-top: 1px solid #2A2E4A; }
+        .match-card { background: #181C35; border: 1px solid #2A2E4A; transition: all 0.3s ease; }
+        .match-card:hover { background: #202542; box-shadow: 0 0 15px rgba(246, 95, 157, 0.15); border-color: rgba(246, 95, 157, 0.3); transform: translateY(-2px); }
+        .pill-chip { background: #202542; color: #B8BBD0; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; }
+        .pill-chip.active { background: rgba(246, 95, 157, 0.15); color: #f65f9d; }
+        .btn-primary { background: linear-gradient(135deg, #f65f9d, #ae2565); color: white; }
+        .btn-secondary { background: transparent; border: 1.5px solid #6E4CFF; color: white; }
+        
+        /* Custom scrollbar for tabs */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md bg-background text-on-background min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar (Mobile & Desktop Header) -->
+<header class="sticky top-0 w-full z-50 flex justify-between items-center px-container-margin-mobile h-16 bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary hover:opacity-80 transition-all duration-200 active:scale-95 cursor-pointer">shield_person</span>
+</div>
+<div class="font-headline-md text-headline-md font-bold text-primary">Kaam</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary hover:opacity-80 transition-all duration-200 active:scale-95 cursor-pointer">notifications</span>
+</div>
+</header>
+<!-- Main Content Layout -->
+<main class="w-full max-w-[1280px] mx-auto px-container-margin-mobile md:px-container-margin-desktop py-md md:py-lg grid grid-cols-4 md:grid-cols-12 gap-gutter">
+<!-- Desktop SideNav (Hidden on Mobile) -->
+<aside class="hidden md:flex flex-col col-span-3 sticky top-[100px] h-[calc(100vh-140px)] gap-sm pr-md border-r border-outline-variant/20">
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-sm px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">grid_view</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 rounded-lg bg-surface-container-low text-primary font-semibold transition-colors group relative overflow-hidden" href="#">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r"></div>
+<span class="material-symbols-outlined text-primary">ads_click</span>
+<span class="font-label-md text-label-md">Requests</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">handshake</span>
+<span class="font-label-md text-label-md">Matches</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">chat_bubble</span>
+<span class="font-label-md text-label-md">Chat</span>
+</a>
+<a class="flex items-center gap-sm px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+</aside>
+<!-- Central Content Canvas -->
+<section class="col-span-4 md:col-span-9 flex flex-col gap-md md:gap-lg">
+<!-- Page Header & Filtering -->
+<div class="flex flex-col gap-sm md:gap-md">
+<div>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Interest Requests</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Manage employers who have shown interest in your profile. Accept to open communication channels.</p>
+</div>
+<!-- Horizontal Tabs -->
+<div class="flex overflow-x-auto hide-scrollbar gap-sm py-2 border-b border-surface-variant w-full relative">
+<button class="font-label-md text-label-md px-4 py-2 text-primary border-b-2 border-primary whitespace-nowrap">New (3)</button>
+<button class="font-label-md text-label-md px-4 py-2 text-on-surface-variant hover:text-on-surface whitespace-nowrap transition-colors">Pending</button>
+<button class="font-label-md text-label-md px-4 py-2 text-on-surface-variant hover:text-on-surface whitespace-nowrap transition-colors">Accepted</button>
+<button class="font-label-md text-label-md px-4 py-2 text-on-surface-variant hover:text-on-surface whitespace-nowrap transition-colors">Declined</button>
+</div>
+</div>
+<!-- Bento Grid / Cards Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-sm md:gap-gutter">
+<!-- Request Card 1 -->
+<div class="match-card rounded-xl p-md flex flex-col justify-between group relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -z-10 group-hover:bg-primary/10 transition-colors"></div>
+<div>
+<!-- Header: Company & Role -->
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-sm items-center">
+<div class="w-12 h-12 rounded-full bg-surface-container-high overflow-hidden border border-surface-variant flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A professional logo of Bright Star Cleaning Services, featuring a sparkling star motif in blue and white, set against a dark premium UI background, reflecting corporate cleanliness and reliability in a corporate modern style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDE-zTwpEnelizgMvM5q92A8Oc0Vdq5CkOmg-Dk2QOlNUv0SjiRK5oDgXTs4MWejLiuqo9q3Sdo67-ADvgl8y3EoC3F6LlSaFaOYu3RBNzi--MbeMXwYPEW6BDidB3E9Jtpbt1vfzjZbfhP_gbvYMrs-B2VW7U3BzytqcdWMhDMrTjBRgZZrvN0leV0X7VAj8m2gsElhX8xTYk1rmUQnr8kD0AirkFULb0w5kSMe5bWIB-YvMc8pNPhtNvNpbjpkA6ZqOEqbpoUFhE4"/>
+</div>
+<div>
+<div class="flex items-center gap-1">
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight text-lg">Bright Star Cleaning</h3>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;" title="Verified Employer">verified</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant">Facilities Management</p>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">schedule</span> 2h ago
+                            </span>
+</div>
+<!-- Match Details -->
+<div class="mb-4">
+<h4 class="font-label-md text-label-md text-on-surface mb-1">Position Offering</h4>
+<p class="font-headline-md text-headline-md text-primary text-xl">Cleaner Supervisor</p>
+</div>
+<!-- Highlights / Chips -->
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="pill-chip flex items-center gap-1"><span class="material-symbols-outlined text-sm">payments</span> AED 2,200 - 2,800</span>
+<span class="pill-chip flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span> Dubai, Business Bay</span>
+<span class="pill-chip flex items-center gap-1"><span class="material-symbols-outlined text-sm">work</span> Full-Time</span>
+</div>
+<!-- Message Snippet -->
+<div class="bg-surface-dim p-3 rounded-lg border border-surface-variant mb-6">
+<p class="font-body-md text-body-md text-on-surface-variant text-sm italic relative pl-4">
+<span class="absolute left-0 top-0 text-primary opacity-50 text-xl font-serif">"</span>
+                                Impressive profile! We are looking for an experienced supervisor for a new commercial contract starting next month. Would love to discuss this with you.
+                            </p>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex gap-sm">
+<button class="btn-primary flex-1 font-label-md text-label-md py-3 rounded-lg shadow-lg hover:shadow-xl hover:opacity-90 transition-all active:scale-95">Accept Interest</button>
+<button class="btn-secondary px-6 font-label-md text-label-md py-3 rounded-lg hover:bg-surface-variant/50 transition-all active:scale-95">Decline</button>
+</div>
+</div>
+<!-- Request Card 2 -->
+<div class="match-card rounded-xl p-md flex flex-col justify-between group relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -z-10 group-hover:bg-primary/10 transition-colors"></div>
+<div>
+<!-- Header: Company & Role -->
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-sm items-center">
+<div class="w-12 h-12 rounded-full bg-surface-container-high overflow-hidden border border-surface-variant flex-shrink-0 flex items-center justify-center font-bold text-lg text-on-surface">
+                                    AM
+                                </div>
+<div>
+<div class="flex items-center gap-1">
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight text-lg">Al Maha Hospitality</h3>
+<!-- No verified badge -->
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant">Hotel Services</p>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">schedule</span> 5h ago
+                            </span>
+</div>
+<!-- Match Details -->
+<div class="mb-4">
+<h4 class="font-label-md text-label-md text-on-surface mb-1">Position Offering</h4>
+<p class="font-headline-md text-headline-md text-primary text-xl">Senior Housekeeper</p>
+</div>
+<!-- Highlights / Chips -->
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="pill-chip flex items-center gap-1"><span class="material-symbols-outlined text-sm">payments</span> AED 2,000 - 2,500</span>
+<span class="pill-chip flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span> Abu Dhabi, Corniche</span>
+<span class="pill-chip flex items-center gap-1"><span class="material-symbols-outlined text-sm">bed</span> Accommodation Inc.</span>
+</div>
+<!-- Message Snippet -->
+<div class="bg-surface-dim p-3 rounded-lg border border-surface-variant mb-6">
+<p class="font-body-md text-body-md text-on-surface-variant text-sm italic relative pl-4">
+<span class="absolute left-0 top-0 text-primary opacity-50 text-xl font-serif">"</span>
+                                Your background in 5-star hotel housekeeping matches our current requirement. Please accept so we can share full details of the package.
+                            </p>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex gap-sm">
+<button class="btn-primary flex-1 font-label-md text-label-md py-3 rounded-lg shadow-lg hover:shadow-xl hover:opacity-90 transition-all active:scale-95">Accept Interest</button>
+<button class="btn-secondary px-6 font-label-md text-label-md py-3 rounded-lg hover:bg-surface-variant/50 transition-all active:scale-95">Decline</button>
+</div>
+</div>
+<!-- Request Card 3 (Minimal Info Example) -->
+<div class="match-card rounded-xl p-md flex flex-col justify-between group relative overflow-hidden lg:col-span-2">
+<div class="flex flex-col md:flex-row gap-6 md:items-center">
+<div class="flex-1">
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-sm items-center">
+<div class="w-12 h-12 rounded-full bg-surface-container-high overflow-hidden border border-surface-variant flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A sleek corporate logo for a security firm named SecureTech, featuring a shield icon with sharp geometric lines in silver against a dark navy background, embodying a modern, secure, and professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDR0IY4XSkBaiXYSy_alf1jxp4AkcGCMxh7a_X-Y1tYLRWFL4De9Cn6T-5Ys45mkjKYuQ3dzQ8SyKRw71zrcivFCDrBsLX0VqJvNqnYQwQYvHr93vhbM29UatY3YAgZF5uoLSiN3Vnf98LEiH22qUYMOFuVBI-im4G6jryQbGzjerf6DZOspC848CppLjPg1rBGSgwjOo-kYaSCqdRzO2bGz7PcAytOP-HaEtKNbZbuFyYuzJy3CG9tilAEsSAO-SRU02gtlgGRiLay"/>
+</div>
+<div>
+<div class="flex items-center gap-1">
+<h3 class="font-headline-md text-headline-md text-on-surface leading-tight text-lg">SecureTech Services</h3>
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;" title="Verified Employer">verified</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant">Security &amp; Surveillance</p>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1 md:hidden">
+<span class="material-symbols-outlined text-xs">schedule</span> 1d ago
+                                </span>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface mb-1">Position Offering</h4>
+<p class="font-headline-md text-headline-md text-primary text-xl mb-4">Operations Coordinator</p>
+<div class="flex flex-wrap gap-2">
+<span class="pill-chip flex items-center gap-1"><span class="material-symbols-outlined text-sm">payments</span> AED 3,500</span>
+<span class="pill-chip flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span> Sharjah</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-4">
+<span class="font-label-sm text-label-sm text-on-surface-variant items-center gap-1 hidden md:flex justify-end">
+<span class="material-symbols-outlined text-xs">schedule</span> 1d ago
+                            </span>
+<!-- Actions -->
+<div class="flex flex-col sm:flex-row gap-sm mt-auto md:justify-end">
+<button class="btn-secondary px-6 font-label-md text-label-md py-3 rounded-lg hover:bg-surface-variant/50 transition-all active:scale-95 text-center">Decline</button>
+<button class="btn-primary px-8 font-label-md text-label-md py-3 rounded-lg shadow-lg hover:shadow-xl hover:opacity-90 transition-all active:scale-95 text-center">Accept Interest</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-surface-container-low/80 dark:bg-surface-container-low/80 backdrop-blur-lg border-t border-outline-variant/20 shadow-lg md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 group" href="#">
+<span class="material-symbols-outlined mb-1 group-hover:opacity-80">grid_view</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-semibold transition-transform duration-200 active:scale-90 group" href="#">
+<div class="relative">
+<span class="material-symbols-outlined mb-1 group-hover:opacity-80" style="font-variation-settings: 'FILL' 1;">ads_click</span>
+<span class="absolute -top-1 -right-1 flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+</span>
+</div>
+<span class="font-label-sm text-label-sm">Requests</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 group" href="#">
+<span class="material-symbols-outlined mb-1 group-hover:opacity-80">handshake</span>
+<span class="font-label-sm text-label-sm">Matches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 group" href="#">
+<span class="material-symbols-outlined mb-1 group-hover:opacity-80">chat_bubble</span>
+<span class="font-label-sm text-label-sm">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 group" href="#">
+<span class="material-symbols-outlined mb-1 group-hover:opacity-80">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kaam Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="custom-styles">
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b0c10;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .bg-gradient-dark {
+      background: linear-gradient(180deg, rgba(17,14,31,1) 0%, rgba(9,10,15,1) 100%);
+    }
+
+    .text-glow-pink {
+      text-shadow: 0 0 10px rgba(255, 62, 128, 0.5);
+    }
+
+    .border-glow-pink {
+      box-shadow: 0 0 15px rgba(255, 62, 128, 0.2);
+    }
+
+    .border-glow-blue {
+      box-shadow: 0 0 15px rgba(74, 114, 255, 0.1);
+    }
+
+    .gradient-text-pink {
+      background: linear-gradient(90deg, #ff3e80, #ff71a4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .bg-abstract-pink {
+      position: absolute;
+      top: -50px;
+      left: -50px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255,62,128,0.15) 0%, rgba(0,0,0,0) 70%);
+      z-index: 0;
+    }
+
+    .bg-abstract-purple {
+      position: absolute;
+      bottom: 100px;
+      right: -100px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(128,62,255,0.1) 0%, rgba(0,0,0,0) 70%);
+      z-index: 0;
+    }
+    
+    .logo-font {
+      font-family: 'Inter', sans-serif; /* Fallback for the custom logo font */
+      font-weight: 800;
+      letter-spacing: -0.05em;
+    }
+  </style>
+</head>
+<body class="bg-gradient-dark min-h-screen flex flex-col items-center justify-start relative">
+<!-- Decorative Background Elements -->
+<div class="bg-abstract-pink pointer-events-none"></div>
+<div class="bg-abstract-purple pointer-events-none"></div>
+<main class="w-full max-w-[400px] px-6 py-12 flex flex-col items-center relative z-10 h-full">
+<!-- BEGIN: Header Section -->
+<header class="flex flex-col items-center mb-10 w-full" data-purpose="app-header">
+<!-- iOS Status Bar Placeholder (Visual only) -->
+<div class="flex justify-between w-full text-xs font-semibold mb-8 px-2 opacity-90">
+<span>9:41</span>
+<div class="flex space-x-2 items-center">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path d="M12 21L1 10C5 6 19 6 23 10L12 21Z"></path></svg>
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><path d="M21 4H3C2.45 4 2 4.45 2 5V19C2 19.55 2.45 20 3 20H21C21.55 20 22 19.55 22 19V5C22 4.45 21.55 4 21 4ZM20 18H4V6H20V18Z"></path></svg>
+<span>100</span>
+</div>
+</div>
+<!-- Logo -->
+<div class="flex flex-col items-center">
+<h1 class="text-5xl logo-font text-white flex items-center relative">
+          kaam
+          <div class="absolute -top-1 -right-2 flex space-x-1">
+<div class="w-1.5 h-1.5 bg-pink-500 rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-pink-500 rounded-full"></div>
+</div>
+</h1>
+<div class="flex items-center space-x-2 mt-2">
+<div class="h-px bg-pink-500/50 w-8"></div>
+<span class="text-[10px] tracking-widest text-pink-500 font-bold uppercase">Perfect Match</span>
+<div class="h-px bg-pink-500/50 w-8"></div>
+</div>
+</div>
+</header>
+<!-- END: Header Section -->
+<!-- BEGIN: Main Content -->
+<section class="flex flex-col items-center text-center w-full mb-8" data-purpose="headline-section">
+<h2 class="text-3xl font-bold mb-3 tracking-tight">
+        Let's start <span class="gradient-text-pink">your journey</span>
+</h2>
+<p class="text-sm text-gray-400 mb-8 max-w-xs leading-relaxed">
+        Choose how you want to use Kaam.<br/>Your privacy is protected from the first step.
+      </p>
+<!-- Selection Cards Container -->
+<div class="grid grid-cols-2 gap-4 w-full mb-8">
+<!-- Find Work Card (Selected) -->
+<button class="relative bg-white/5 border border-[#ff3e80] rounded-3xl p-5 flex flex-col items-center text-center border-glow-pink transition-transform active:scale-95">
+<!-- Checkmark -->
+<div class="absolute top-3 right-3 w-6 h-6 bg-[#ff3e80] rounded-full flex items-center justify-center">
+<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path></svg>
+</div>
+<!-- Icon -->
+<div class="w-16 h-16 rounded-full bg-[#ff3e80]/10 flex items-center justify-center mb-4 relative">
+<div class="absolute inset-0 bg-[#ff3e80]/20 rounded-full blur-md"></div>
+<svg class="w-8 h-8 text-[#ff3e80] relative z-10" fill="currentColor" viewbox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"></path></svg>
+</div>
+<h3 class="text-white font-semibold mb-1 text-lg">Find Work</h3>
+<p class="text-xs text-gray-400 mb-4">Create a private profile</p>
+<div class="mt-auto bg-[#ff3e80]/10 rounded-xl p-2.5 flex items-center text-left space-x-2 w-full border border-[#ff3e80]/20">
+<svg class="w-4 h-4 text-[#ff3e80] flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="text-[10px] text-[#ff3e80] leading-tight">Your details stay private until a match</span>
+</div>
+</button>
+<!-- Hire Talent Card -->
+<button class="relative bg-white/5 border border-[#4a72ff]/30 rounded-3xl p-5 flex flex-col items-center text-center transition-transform active:scale-95">
+<!-- Empty Circle -->
+<div class="absolute top-3 right-3 w-6 h-6 border border-gray-500 rounded-full"></div>
+<!-- Icon -->
+<div class="w-16 h-16 rounded-full bg-[#4a72ff]/10 flex items-center justify-center mb-4 relative">
+<div class="absolute inset-0 bg-[#4a72ff]/20 rounded-full blur-md"></div>
+<svg class="w-8 h-8 text-[#4a72ff] relative z-10" fill="currentColor" viewbox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"></path></svg>
+</div>
+<h3 class="text-white font-semibold mb-1 text-lg">Hire Talent</h3>
+<p class="text-xs text-gray-400 mb-4">Discover skilled professionals</p>
+<div class="mt-auto bg-[#4a72ff]/5 rounded-xl p-2.5 flex items-center text-left space-x-2 w-full border border-[#4a72ff]/10">
+<svg class="w-4 h-4 text-[#4a72ff]/70 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="text-[10px] text-[#4a72ff]/70 leading-tight">Your contact stays private until a match</span>
+</div>
+</button>
+</div>
+<!-- Divider -->
+<div class="flex items-center w-full mb-8">
+<div class="flex-grow h-px bg-white/10"></div>
+<span class="px-4 text-gray-500 text-sm">or</span>
+<div class="flex-grow h-px bg-white/10"></div>
+</div>
+<!-- Already Registered Section -->
+<div class="bg-[#151522] border border-white/5 rounded-3xl p-6 w-full flex flex-col items-center relative overflow-hidden">
+<!-- Subtle top glow -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-purple-500/30 blur-sm"></div>
+<div class="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mb-4">
+<svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h3 class="text-white font-bold text-lg mb-1">Already registered?</h3>
+<p class="text-sm text-gray-400 mb-6">Sign in to continue your journey.</p>
+<button class="w-full border border-purple-500/50 rounded-2xl py-3.5 flex items-center justify-center space-x-2 hover:bg-purple-500/10 transition-colors">
+<svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="text-white font-semibold">Log In</span>
+</button>
+</div>
+</section>
+<!-- END: Main Content -->
+<!-- BEGIN: Footer -->
+<footer class="mt-auto flex items-center justify-center space-x-2 text-gray-400 text-xs py-4" data-purpose="privacy-footer">
+<svg class="w-4 h-4 text-[#ff3e80]" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>Your privacy is important. We keep it protected.</span>
+</footer>
+<!-- END: Footer -->
+</main>
+</body></html>

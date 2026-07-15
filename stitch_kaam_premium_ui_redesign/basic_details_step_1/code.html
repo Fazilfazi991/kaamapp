@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kaam - Basic Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ffb0c9",
+                    "tertiary-fixed": "#ffd9e4",
+                    "surface-container": "#1b1f2f",
+                    "secondary-fixed": "#e5deff",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#8d004d",
+                    "on-secondary": "#2f009c",
+                    "tertiary-container": "#cf7d9d",
+                    "surface-variant": "#303445",
+                    "tertiary": "#ffb0cd",
+                    "surface-bright": "#353849",
+                    "outline": "#a58a91",
+                    "on-secondary-fixed": "#1a0063",
+                    "secondary": "#c9bfff",
+                    "primary-fixed-dim": "#ffb0c9",
+                    "on-tertiary-fixed-variant": "#72304d",
+                    "on-tertiary-fixed": "#3c0321",
+                    "on-surface": "#dfe1f7",
+                    "surface-dim": "#0f1322",
+                    "on-tertiary-container": "#541734",
+                    "background": "#0f1322",
+                    "secondary-fixed-dim": "#c9bfff",
+                    "surface-tint": "#ffb0c9",
+                    "surface-container-low": "#171b2a",
+                    "on-primary-container": "#600032",
+                    "secondary-container": "#470cd9",
+                    "primary-fixed": "#ffd9e3",
+                    "on-primary-fixed": "#3e001e",
+                    "inverse-primary": "#ae2565",
+                    "outline-variant": "#574147",
+                    "inverse-on-surface": "#2c3040",
+                    "primary-container": "#f65f9d",
+                    "on-background": "#dfe1f7",
+                    "on-secondary-fixed-variant": "#4503d7",
+                    "on-primary": "#640035",
+                    "surface-container-highest": "#303445",
+                    "surface-container-high": "#252939",
+                    "on-tertiary": "#571936",
+                    "on-error-container": "#ffdad6",
+                    "surface": "#0f1322",
+                    "on-error": "#690005",
+                    "tertiary-fixed-dim": "#ffb0cd",
+                    "on-surface-variant": "#ddbfc7",
+                    "error": "#ffb4ab",
+                    "on-secondary-container": "#baaeff",
+                    "surface-container-lowest": "#090d1c",
+                    "inverse-surface": "#dfe1f7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "8px",
+                    "sm": "16px",
+                    "container-margin-desktop": "80px",
+                    "base": "4px",
+                    "gutter": "24px",
+                    "xl": "64px",
+                    "lg": "40px",
+                    "md": "24px",
+                    "container-margin-mobile": "20px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "body-lg": ["Manrope"],
+                    "label-md": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "label-sm": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #090B1A;
+            color: #dfe1f7;
+            font-family: 'Manrope', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(24, 28, 53, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid #2A2E4A;
+        }
+        .input-field {
+            background-color: #11142A;
+            border: 1px solid #2A2E4A;
+            color: #dfe1f7;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            border-color: #F65F9D;
+            box-shadow: 0 0 0 2px rgba(246, 95, 157, 0.2);
+            outline: none;
+        }
+        .input-field::placeholder {
+            color: #7E829F;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #F65F9D, #ae2565);
+            color: #FFFFFF;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(246, 95, 157, 0.4);
+        }
+        .btn-ghost {
+            color: #B8BBD0;
+            transition: all 0.3s ease;
+        }
+        .btn-ghost:hover {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        select option {
+            background-color: #11142A;
+            color: #dfe1f7;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col items-center justify-center p-container-margin-mobile md:p-container-margin-desktop relative overflow-hidden">
+<!-- Background Accents -->
+<div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary-container opacity-5 blur-[120px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-secondary-container opacity-5 blur-[150px]"></div>
+</div>
+<!-- Header / Nav -->
+<header class="absolute top-0 left-0 w-full z-50 flex justify-between items-center px-container-margin-mobile h-16 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30">
+<button class="text-primary hover:opacity-80 transition-all duration-200 active:scale-95 flex items-center justify-center p-2 rounded-full hover:bg-surface-variant/50">
+<span class="material-symbols-outlined text-[24px]">close</span>
+</button>
+<div class="font-headline-md text-headline-md font-bold text-primary tracking-tight">Kaam</div>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<main class="w-full max-w-md mx-auto mt-20 md:mt-16 z-10 flex flex-col flex-grow justify-center">
+<!-- Progress Bar -->
+<div class="mb-8 w-full">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Step 1 of 5</span>
+<span class="font-label-sm text-label-sm text-primary">Basic Details</span>
+</div>
+<div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-1/5 rounded-full shadow-[0_0_8px_rgba(246,95,157,0.6)]"></div>
+</div>
+</div>
+<div class="glass-panel rounded-xl p-md shadow-2xl relative overflow-hidden">
+<!-- Subtle glow inside card -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-container opacity-[0.03] blur-2xl rounded-full pointer-events-none"></div>
+<div class="mb-8">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Let's get started</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Tell us a bit about yourself to help us find the perfect match.</p>
+</div>
+<form class="space-y-6">
+<!-- Full Name -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2" for="fullName">Full Name</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant text-[20px]">person</span>
+<input class="input-field w-full rounded-lg py-3 pl-10 pr-4 font-body-md text-body-md" id="fullName" placeholder="e.g. Sarah Al Maktoum" required="" type="text"/>
+</div>
+</div>
+<!-- Nationality -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2" for="nationality">Nationality</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant text-[20px]">public</span>
+<select class="input-field w-full rounded-lg py-3 pl-10 pr-10 font-body-md text-body-md appearance-none" id="nationality" required="">
+<option disabled="" selected="" value="">Select nationality</option>
+<option value="ae">United Arab Emirates</option>
+<option value="sa">Saudi Arabia</option>
+<option value="uk">United Kingdom</option>
+<option value="us">United States</option>
+<option value="other">Other</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- Current Location -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2" for="currentLocation">Current Location</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant text-[20px]">location_on</span>
+<select class="input-field w-full rounded-lg py-3 pl-10 pr-10 font-body-md text-body-md appearance-none" id="currentLocation" required="">
+<option disabled="" selected="" value="">Select city</option>
+<option value="dubai">Dubai, UAE</option>
+<option value="abudhabi">Abu Dhabi, UAE</option>
+<option value="riyadh">Riyadh, KSA</option>
+<option value="london">London, UK</option>
+<option value="other">Other</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- Preferred Work Location -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2" for="prefLocation">Preferred Work Location</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant text-[20px]">work</span>
+<select class="input-field w-full rounded-lg py-3 pl-10 pr-10 font-body-md text-body-md appearance-none" id="prefLocation" required="">
+<option disabled="" selected="" value="">Select preferred city</option>
+<option value="dubai">Dubai, UAE</option>
+<option value="abudhabi">Abu Dhabi, UAE</option>
+<option value="riyadh">Riyadh, KSA</option>
+<option value="remote">Remote (Anywhere)</option>
+<option value="flexible">Flexible / Hybrid</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- Date of Birth (Optional) -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2 flex items-center justify-between" for="dob">
+<span>Date of Birth</span>
+<span class="text-on-surface-variant font-normal text-[12px]">Optional</span>
+</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant text-[20px]">calendar_today</span>
+<input class="input-field w-full rounded-lg py-3 pl-10 pr-4 font-body-md text-body-md [color-scheme:dark]" id="dob" type="date"/>
+</div>
+</div>
+<div class="pt-4">
+<button class="btn-primary w-full rounded-lg py-3 px-4 font-label-md text-label-md flex justify-center items-center gap-2" type="button">
+<span>Continue</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</form>
+</div>
+</main>
+</body></html>

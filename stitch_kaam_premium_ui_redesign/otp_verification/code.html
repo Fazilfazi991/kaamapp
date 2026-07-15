@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kaam - OTP Verification</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container": "#1b1f2f",
+                        "secondary-fixed": "#e5deff",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-secondary": "#2f009c",
+                        "tertiary-container": "#cf7d9d",
+                        "surface-variant": "#303445",
+                        "tertiary": "#ffb0cd",
+                        "surface-bright": "#353849",
+                        "outline": "#a58a91",
+                        "on-secondary-fixed": "#1a0063",
+                        "secondary": "#c9bfff",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-dim": "#0f1322",
+                        "on-tertiary-container": "#541734",
+                        "background": "#0f1322",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "surface-tint": "#ffb0c9",
+                        "surface-container-low": "#171b2a",
+                        "on-primary-container": "#600032",
+                        "secondary-container": "#470cd9",
+                        "primary-fixed": "#ffd9e3",
+                        "on-primary-fixed": "#3e001e",
+                        "inverse-primary": "#ae2565",
+                        "outline-variant": "#574147",
+                        "inverse-on-surface": "#2c3040",
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "on-primary": "#640035",
+                        "surface-container-highest": "#303445",
+                        "surface-container-high": "#252939",
+                        "on-tertiary": "#571936",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#0f1322",
+                        "on-error": "#690005",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#baaeff",
+                        "surface-container-lowest": "#090d1c",
+                        "inverse-surface": "#dfe1f7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "sm": "16px",
+                        "container-margin-desktop": "80px",
+                        "base": "4px",
+                        "gutter": "24px",
+                        "xl": "64px",
+                        "lg": "40px",
+                        "md": "24px",
+                        "container-margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-md": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-sm": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #090B1A; /* Canvas background from style guidance */
+        }
+        .otp-input {
+            background-color: #11142A; /* Surface Layer */
+            border: 1px solid #2A2E4A;
+        }
+        .otp-input:focus {
+            border-color: #F65F9D; /* Primary Pink */
+            box-shadow: 0 0 8px rgba(246, 95, 157, 0.4);
+            outline: none;
+        }
+        .glass-panel {
+            background-color: #181C35; /* Card Layer */
+            border: 1px solid #2A2E4A;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col items-center justify-center p-container-margin-mobile md:p-container-margin-desktop relative overflow-hidden">
+<!-- Subtle Background Elements for Midnight Pulse vibe -->
+<div class="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-primary-container opacity-5 blur-[120px] pointer-events-none"></div>
+<div class="absolute bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-secondary-container opacity-5 blur-[100px] pointer-events-none"></div>
+<!-- Top App Bar (Simplified for transactional flow, suppressing full shell) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-margin-mobile h-16 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30">
+<button aria-label="Go back" class="text-primary hover:opacity-80 transition-all duration-200 active:scale-95">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="font-headline-md text-headline-md font-bold text-primary">Kaam</div>
+<div class="w-6"></div> <!-- Spacer for alignment -->
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full max-w-[400px] z-10 mt-16 md:mt-0 flex flex-col items-center">
+<div class="w-20 h-20 mb-md rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/30 shadow-lg">
+<span class="material-symbols-outlined text-[40px] text-primary" data-icon="dialpad">dialpad</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-center mb-xs">
+            Verify your phone
+        </h1>
+<p class="font-body-md text-body-md text-on-surface-variant text-center mb-xl">
+            Enter the 6-digit code sent to your number
+        </p>
+<!-- OTP Form -->
+<form class="w-full glass-panel rounded-xl p-md shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]">
+<div class="flex justify-between gap-2 mb-lg" id="otp-container">
+<!-- 6 Inputs -->
+<input aria-label="Digit 1" class="otp-input w-12 h-14 md:w-14 md:h-16 text-center font-headline-md text-headline-md text-on-background rounded-lg transition-all duration-200" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text"/>
+<input aria-label="Digit 2" class="otp-input w-12 h-14 md:w-14 md:h-16 text-center font-headline-md text-headline-md text-on-background rounded-lg transition-all duration-200" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text"/>
+<input aria-label="Digit 3" class="otp-input w-12 h-14 md:w-14 md:h-16 text-center font-headline-md text-headline-md text-on-background rounded-lg transition-all duration-200" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text"/>
+<input aria-label="Digit 4" class="otp-input w-12 h-14 md:w-14 md:h-16 text-center font-headline-md text-headline-md text-on-background rounded-lg transition-all duration-200" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text"/>
+<input aria-label="Digit 5" class="otp-input w-12 h-14 md:w-14 md:h-16 text-center font-headline-md text-headline-md text-on-background rounded-lg transition-all duration-200" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text"/>
+<input aria-label="Digit 6" class="otp-input w-12 h-14 md:w-14 md:h-16 text-center font-headline-md text-headline-md text-on-background rounded-lg transition-all duration-200" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text"/>
+</div>
+<button class="w-full h-12 bg-primary-container text-[#FFFFFF] font-label-md text-label-md rounded-lg flex items-center justify-center transition-all duration-200 hover:bg-[#F65F9D]/90 active:scale-[0.98] shadow-[0_4px_12px_rgba(246,95,157,0.3)]" type="button">
+                Verify
+            </button>
+<div class="mt-md text-center">
+<span class="font-body-md text-body-md text-on-surface-variant">Didn't receive a code?</span>
+<button class="ml-1 font-label-md text-label-md text-primary hover:text-primary-container transition-colors duration-200" type="button">
+                    Resend code
+                </button>
+</div>
+</form>
+</main>
+<script>
+        // Simple OTP input logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('.otp-input');
+            
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    if (e.target.value.length === 1 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+            });
+            
+            // Focus first input on load
+            if(inputs.length > 0) inputs[0].focus();
+        });
+    </script>
+</body></html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Match Unlocked</title>
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#ffb0c9",
+                      "tertiary-fixed": "#ffd9e4",
+                      "surface-container": "#1b1f2f",
+                      "secondary-fixed": "#e5deff",
+                      "error-container": "#93000a",
+                      "on-primary-fixed-variant": "#8d004d",
+                      "on-secondary": "#2f009c",
+                      "tertiary-container": "#cf7d9d",
+                      "surface-variant": "#303445",
+                      "tertiary": "#ffb0cd",
+                      "surface-bright": "#353849",
+                      "outline": "#a58a91",
+                      "on-secondary-fixed": "#1a0063",
+                      "secondary": "#c9bfff",
+                      "primary-fixed-dim": "#ffb0c9",
+                      "on-tertiary-fixed-variant": "#72304d",
+                      "on-tertiary-fixed": "#3c0321",
+                      "on-surface": "#dfe1f7",
+                      "surface-dim": "#0f1322",
+                      "on-tertiary-container": "#541734",
+                      "background": "#0f1322",
+                      "secondary-fixed-dim": "#c9bfff",
+                      "surface-tint": "#ffb0c9",
+                      "surface-container-low": "#171b2a",
+                      "on-primary-container": "#600032",
+                      "secondary-container": "#470cd9",
+                      "primary-fixed": "#ffd9e3",
+                      "on-primary-fixed": "#3e001e",
+                      "inverse-primary": "#ae2565",
+                      "outline-variant": "#574147",
+                      "inverse-on-surface": "#2c3040",
+                      "primary-container": "#f65f9d",
+                      "on-background": "#dfe1f7",
+                      "on-secondary-fixed-variant": "#4503d7",
+                      "on-primary": "#640035",
+                      "surface-container-highest": "#303445",
+                      "surface-container-high": "#252939",
+                      "on-tertiary": "#571936",
+                      "on-error-container": "#ffdad6",
+                      "surface": "#0f1322",
+                      "on-error": "#690005",
+                      "tertiary-fixed-dim": "#ffb0cd",
+                      "on-surface-variant": "#ddbfc7",
+                      "error": "#ffb4ab",
+                      "on-secondary-container": "#baaeff",
+                      "surface-container-lowest": "#090d1c",
+                      "inverse-surface": "#dfe1f7"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "8px",
+                      "sm": "16px",
+                      "container-margin-desktop": "80px",
+                      "base": "4px",
+                      "gutter": "24px",
+                      "xl": "64px",
+                      "lg": "40px",
+                      "md": "24px",
+                      "container-margin-mobile": "20px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Manrope"],
+                      "display-lg": ["Manrope"],
+                      "body-lg": ["Manrope"],
+                      "label-md": ["Manrope"],
+                      "headline-md": ["Manrope"],
+                      "body-md": ["Manrope"],
+                      "headline-lg": ["Manrope"],
+                      "label-sm": ["Manrope"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .pulse-glow {
+            animation: pulseGlow 3s infinite alternate;
+        }
+        
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 20px rgba(246, 95, 157, 0.2); }
+            100% { box-shadow: 0 0 40px rgba(246, 95, 157, 0.5); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col items-center justify-center p-gutter relative overflow-hidden">
+<!-- Ambient Background Glows -->
+<div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-primary-container/20 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="absolute bottom-0 right-0 w-64 h-64 bg-secondary-container/10 rounded-full blur-[80px] pointer-events-none"></div>
+<!-- Celebration Graphic -->
+<div class="relative w-48 h-48 md:w-64 md:h-64 mb-lg animate-fade-in-up">
+<div class="absolute inset-0 bg-primary/10 rounded-full blur-2xl"></div>
+<img class="relative z-10 w-full h-full object-contain" data-alt="A high-end 3D rendered graphic celebrating a successful match connection. The image features a stylized, glowing 'handshake' or interconnected rings in vibrant pink and purple neon hues, floating against a deep midnight navy background. Small spark-like particles and subtle glassmorphic shapes surround the central icon, conveying a sense of premium, secure corporate success in a dark-mode setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaqdw6KxlCXdrSj4so52Tt0XWwWtf6lP8ruliDE4NeUDr_R5dHrwGOhiifwfvPMORnrqiqDwP_jKVPkuHjmvcTlS_KNXOpHJHH7JCq-XG0VQNeyZWSeBN_2Bey1WCwcwwu7m55T5Yy7P5GNGglr24Rf1QYzvrW8e0m8T66nLYh4i22l62PiVi3rxugYVQCVWIIwXcYSVIw5ImIdqndkaIy0AygPWzQ_4KmRMjlBFqun5zSfs-kyvstmaxGZTfUOua4NKLHMN08JIYt"/>
+</div>
+<!-- Typography Content -->
+<div class="text-center w-full max-w-md animate-fade-in-up delay-100">
+<h1 class="font-display-lg text-display-lg mb-xs bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Match Unlocked 🎉</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-xl">Both sides are interested. You can now chat securely.</p>
+</div>
+<!-- Employer Summary Card -->
+<div class="w-full max-w-sm bg-surface-container-low/80 backdrop-blur-xl border border-outline-variant/30 rounded-xl p-md mb-xl shadow-2xl animate-fade-in-up delay-200">
+<div class="flex items-start gap-sm mb-sm">
+<div class="w-12 h-12 shrink-0 bg-surface-container rounded-full border border-outline-variant/20 flex items-center justify-center text-primary overflow-hidden relative">
+<div class="absolute inset-0 bg-gradient-to-br from-primary-container/20 to-transparent"></div>
+<span class="material-symbols-outlined relative z-10" style="font-variation-settings: 'FILL' 1;">business</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Bright Star Cleaning Services</h2>
+<p class="font-label-md text-label-md text-primary-container mt-1">Cleaner Supervisor</p>
+</div>
+</div>
+<div class="h-px w-full bg-outline-variant/20 my-sm"></div>
+<div class="flex items-center justify-between mt-sm">
+<div class="flex items-center gap-xs text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>Dubai</span>
+</div>
+<div class="flex items-center gap-xs text-on-surface font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px] text-tertiary">payments</span>
+<span>AED 2,500</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="w-full max-w-sm flex flex-col gap-sm animate-fade-in-up delay-300 relative z-10">
+<button class="w-full bg-primary-container text-on-primary-container font-label-md text-label-md py-4 rounded-full hover:bg-primary transition-all duration-300 flex justify-center items-center gap-xs pulse-glow active:scale-[0.98]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat</span>
+            Start Chat
+        </button>
+<button class="w-full border border-secondary text-secondary font-label-md text-label-md py-4 rounded-full hover:bg-secondary/10 transition-colors duration-300 active:scale-[0.98]">
+            View Employer Profile
+        </button>
+</div>
+</body></html>

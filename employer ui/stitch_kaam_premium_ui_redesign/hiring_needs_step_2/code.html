@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kaam | Hiring Needs</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "surface-container-high": "#252939",
+                        "inverse-on-surface": "#2c3040",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-container-low": "#171b2a",
+                        "error-container": "#93000a",
+                        "secondary": "#c9bfff",
+                        "secondary-container": "#470cd9",
+                        "surface-variant": "#303445",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-primary": "#640035",
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "surface-bright": "#353849",
+                        "on-tertiary": "#571936",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container-lowest": "#090d1c",
+                        "on-tertiary-container": "#541734",
+                        "on-secondary-container": "#baaeff",
+                        "inverse-primary": "#ae2565",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "outline-variant": "#574147",
+                        "outline": "#a58a91",
+                        "primary-fixed": "#ffd9e3",
+                        "surface-container": "#1b1f2f",
+                        "surface": "#0f1322",
+                        "tertiary-container": "#cf7d9d",
+                        "tertiary": "#ffb0cd",
+                        "secondary-fixed": "#e5deff",
+                        "surface-container-highest": "#303445",
+                        "on-primary-fixed": "#3e001e",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "on-secondary-fixed": "#1a0063",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#0f1322",
+                        "inverse-surface": "#dfe1f7",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary": "#2f009c",
+                        "on-primary-container": "#600032",
+                        "surface-tint": "#ffb0c9",
+                        "on-error": "#690005",
+                        "background": "#0f1322"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "64px",
+                        "gutter": "24px",
+                        "container-margin-mobile": "20px",
+                        "base": "4px",
+                        "sm": "16px",
+                        "md": "24px",
+                        "container-margin-desktop": "80px",
+                        "xs": "8px",
+                        "lg": "40px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-sm": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #090B1A;
+            font-family: 'Manrope', sans-serif;
+            color: #dfe1f7;
+        }
+        .glass-card {
+            background: rgba(24, 28, 53, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid #2A2E4A;
+        }
+        .input-dark {
+            background: #11142A;
+            border: 1px solid #2A2E4A;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-dark:focus {
+            border-color: #F65F9D;
+            box-shadow: 0 0 8px rgba(246, 95, 157, 0.2);
+            outline: none;
+        }
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #F65F9D;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(246, 95, 157, 0.4);
+        }
+        .custom-toggle:checked ~ .toggle-bg {
+            background-color: #F65F9D;
+        }
+        .custom-toggle:checked ~ .toggle-dot {
+            transform: translateX(100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-container-margin-mobile z-50 h-16 docked full-width top-0 sticky backdrop-blur-xl border-b border-surface-variant dark:border-surface-variant bg-surface/70 dark:bg-surface/70">
+<div class="flex items-center gap-xs">
+<div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">work</span>
+</div>
+<span class="text-headline-md font-headline-md font-bold text-on-surface dark:text-on-surface">Kaam</span>
+</div>
+<div class="flex items-center gap-md">
+<div class="hidden md:flex gap-md">
+<span class="text-label-md font-label-md text-on-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors px-2 py-1 rounded">Dashboard</span>
+<span class="text-label-md font-label-md text-primary cursor-pointer hover:bg-surface-container-high transition-colors px-2 py-1 rounded">Hiring</span>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-2 rounded-full transition-colors">notifications</button>
+</div>
+</header>
+<main class="flex-grow flex flex-col items-center justify-start py-xl px-container-margin-mobile">
+<!-- Progress Stepper -->
+<div class="w-full max-w-2xl mb-lg">
+<div class="flex justify-between items-center mb-xs">
+<span class="text-label-sm font-label-sm text-primary uppercase tracking-widest">Step 2 of 5</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Hiring Needs</span>
+</div>
+<div class="flex gap-xs h-1 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[20%]"></div>
+<div class="h-full bg-primary-container w-[20%]"></div>
+<div class="h-full bg-surface-variant w-[20%]"></div>
+<div class="h-full bg-surface-variant w-[20%]"></div>
+<div class="h-full bg-surface-variant w-[20%]"></div>
+</div>
+</div>
+<!-- Main Content Canvas -->
+<div class="w-full max-w-2xl glass-card rounded-xl p-md md:p-lg space-y-lg">
+<header>
+<h1 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg text-on-surface mb-xs">What roles are you hiring for?</h1>
+<p class="text-body-md font-body-md text-on-surface-variant">Tell us more about the position and requirements to find the perfect professional match.</p>
+</header>
+<form class="space-y-lg">
+<!-- Row 1: Category & Title -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface">Job category</label>
+<select class="w-full input-dark rounded-lg px-md h-12 text-body-md font-body-md text-on-surface focus:ring-0">
+<option>Hospitality &amp; F&amp;B</option>
+<option>Construction &amp; Labor</option>
+<option>Logistics &amp; Warehouse</option>
+<option>Healthcare</option>
+<option>Domestic Help</option>
+</select>
+</div>
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface">Job title</label>
+<input class="w-full input-dark rounded-lg px-md h-12 text-body-md font-body-md text-on-surface" placeholder="e.g. Head Chef" type="text"/>
+</div>
+</div>
+<!-- Row 2: Openings & Location -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface">Number of openings</label>
+<div class="flex items-center gap-md">
+<button class="w-12 h-12 rounded-lg bg-surface-container-high border border-surface-variant flex items-center justify-center text-primary hover:bg-surface-variant transition-colors" onclick="this.nextElementSibling.stepDown()" type="button">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<input class="w-full text-center bg-transparent border-none text-headline-md font-headline-md text-on-surface [appearance:textfield] [&amp;::-webkit-outer-spin-button]:appearance-none [&amp;::-webkit-inner-spin-button]:appearance-none" min="1" type="number" value="1"/>
+<button class="w-12 h-12 rounded-lg bg-surface-container-high border border-surface-variant flex items-center justify-center text-primary hover:bg-surface-variant transition-colors" onclick="this.previousElementSibling.stepUp()" type="button">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface">Work location</label>
+<div class="flex flex-wrap gap-xs">
+<label class="cursor-pointer">
+<input checked="" class="hidden peer" name="location" type="checkbox" value="Dubai"/>
+<div class="px-md py-2 rounded-full border border-surface-variant bg-surface-container-low text-on-surface-variant peer-checked:bg-primary-container/15 peer-checked:text-primary peer-checked:border-primary-container transition-all text-label-md font-label-md">Dubai</div>
+</label>
+<label class="cursor-pointer">
+<input class="hidden peer" name="location" type="checkbox" value="Sharjah"/>
+<div class="px-md py-2 rounded-full border border-surface-variant bg-surface-container-low text-on-surface-variant peer-checked:bg-primary-container/15 peer-checked:text-primary peer-checked:border-primary-container transition-all text-label-md font-label-md">Sharjah</div>
+</label>
+<label class="cursor-pointer">
+<input class="hidden peer" name="location" type="checkbox" value="Abu Dhabi"/>
+<div class="px-md py-2 rounded-full border border-surface-variant bg-surface-container-low text-on-surface-variant peer-checked:bg-primary-container/15 peer-checked:text-primary peer-checked:border-primary-container transition-all text-label-md font-label-md">Abu Dhabi</div>
+</label>
+</div>
+</div>
+</div>
+<!-- Salary Range -->
+<div class="space-y-md">
+<div class="flex justify-between items-center">
+<label class="text-label-md font-label-md text-on-surface">Monthly Salary range (AED)</label>
+<span class="text-primary font-bold text-body-md" id="salary-val">3,500 - 8,000</span>
+</div>
+<div class="relative w-full h-1 bg-surface-variant rounded-full">
+<div class="absolute h-full bg-primary-container left-[20%] right-[30%]"></div>
+<input class="absolute w-full h-full appearance-none bg-transparent slider-thumb pointer-events-none [&amp;::-webkit-slider-thumb]:pointer-events-auto" max="20000" min="1000" type="range" value="3500"/>
+<input class="absolute w-full h-full appearance-none bg-transparent slider-thumb pointer-events-none [&amp;::-webkit-slider-thumb]:pointer-events-auto" max="20000" min="1000" type="range" value="8000"/>
+</div>
+</div>
+<!-- Working Hours -->
+<div class="space-y-xs">
+<label class="text-label-md font-label-md text-on-surface">Working hours</label>
+<div class="flex gap-md">
+<label class="flex-1 cursor-pointer">
+<input checked="" class="hidden peer" name="hours" type="radio"/>
+<div class="p-md rounded-xl border border-surface-variant bg-surface-container-low text-on-surface-variant peer-checked:bg-primary-container/10 peer-checked:border-primary-container peer-checked:text-on-surface transition-all">
+<div class="text-label-md font-bold mb-1">Standard</div>
+<div class="text-label-sm opacity-70">8-9 hours / day</div>
+</div>
+</label>
+<label class="flex-1 cursor-pointer">
+<input class="hidden peer" name="hours" type="radio"/>
+<div class="p-md rounded-xl border border-surface-variant bg-surface-container-low text-on-surface-variant peer-checked:bg-primary-container/10 peer-checked:border-primary-container peer-checked:text-on-surface transition-all">
+<div class="text-label-md font-bold mb-1">Split Shift</div>
+<div class="text-label-sm opacity-70">Flexible hours</div>
+</div>
+</label>
+</div>
+</div>
+<!-- Benefits Toggles -->
+<div class="bg-surface-container-low/50 rounded-xl p-md border border-surface-variant/30 space-y-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary">home</span>
+<span class="text-body-md font-body-md text-on-surface">Accommodation provided</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer custom-toggle" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant rounded-full peer toggle-bg transition-colors"></div>
+<div class="absolute left-[2px] top-[2px] bg-white w-5 h-5 rounded-full transition-transform toggle-dot"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary">commute</span>
+<span class="text-body-md font-body-md text-on-surface">Transport provided</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer custom-toggle" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant rounded-full peer toggle-bg transition-colors"></div>
+<div class="absolute left-[2px] top-[2px] bg-white w-5 h-5 rounded-full transition-transform toggle-dot"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary">description</span>
+<span class="text-body-md font-body-md text-on-surface">Visa provided</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer custom-toggle" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant rounded-full peer toggle-bg transition-colors"></div>
+<div class="absolute left-[2px] top-[2px] bg-white w-5 h-5 rounded-full transition-transform toggle-dot"></div>
+</label>
+</div>
+</div>
+<!-- Immediate Hiring Toggle -->
+<div class="flex items-center justify-between p-md bg-secondary-container/10 border border-secondary-container/30 rounded-xl">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-secondary">bolt</span>
+<div>
+<div class="text-body-md font-bold text-on-surface">Immediate hiring?</div>
+<div class="text-label-sm text-on-surface-variant">Looking to hire within 48 hours</div>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer custom-toggle" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant rounded-full peer toggle-bg transition-colors"></div>
+<div class="absolute left-[2px] top-[2px] bg-white w-5 h-5 rounded-full transition-transform toggle-dot"></div>
+</label>
+</div>
+<!-- CTA -->
+<div class="flex items-center gap-md pt-md">
+<button class="flex-1 h-14 rounded-lg bg-surface-container-high border border-surface-variant text-on-surface font-label-md transition-all active:scale-95" type="button">Back</button>
+<button class="flex-[2] h-14 rounded-lg bg-primary-container text-on-primary-container font-headline-md font-bold shadow-lg shadow-primary-container/20 transition-all active:scale-95 hover:opacity-90" type="submit">Continue</button>
+</div>
+</form>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-t border-surface-variant dark:border-surface-variant">
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-sm font-label-sm">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container/15 text-primary rounded-xl px-3 py-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">business_center</span>
+<span class="text-label-sm font-label-sm">Hiring</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">favorite</span>
+<span class="text-label-sm font-label-sm">Interests</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">handshake</span>
+<span class="text-label-sm font-label-sm">Matches</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-label-sm font-label-sm">Company</span>
+</div>
+</nav>
+<script>
+        // Simple salary slider display update logic
+        const sliders = document.querySelectorAll('input[type="range"]');
+        const salaryVal = document.getElementById('salary-val');
+        
+        const updateSalary = () => {
+            const values = Array.from(sliders).map(s => parseInt(s.value)).sort((a, b) => a - b);
+            salaryVal.textContent = `${values[0].toLocaleString()} - ${values[1].toLocaleString()}`;
+        };
+
+        sliders.forEach(s => s.addEventListener('input', updateSalary));
+    </script>
+</body></html>

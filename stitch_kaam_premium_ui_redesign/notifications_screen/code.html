@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Notifications - Kaam</title>
+<!-- Google Fonts: Manrope -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration (Provided) -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#ffb0c9",
+                    "tertiary-fixed": "#ffd9e4",
+                    "surface-container": "#1b1f2f",
+                    "secondary-fixed": "#e5deff",
+                    "error-container": "#93000a",
+                    "on-primary-fixed-variant": "#8d004d",
+                    "on-secondary": "#2f009c",
+                    "tertiary-container": "#cf7d9d",
+                    "surface-variant": "#303445",
+                    "tertiary": "#ffb0cd",
+                    "surface-bright": "#353849",
+                    "outline": "#a58a91",
+                    "on-secondary-fixed": "#1a0063",
+                    "secondary": "#c9bfff",
+                    "primary-fixed-dim": "#ffb0c9",
+                    "on-tertiary-fixed-variant": "#72304d",
+                    "on-tertiary-fixed": "#3c0321",
+                    "on-surface": "#dfe1f7",
+                    "surface-dim": "#0f1322",
+                    "on-tertiary-container": "#541734",
+                    "background": "#0f1322",
+                    "secondary-fixed-dim": "#c9bfff",
+                    "surface-tint": "#ffb0c9",
+                    "surface-container-low": "#171b2a",
+                    "on-primary-container": "#600032",
+                    "secondary-container": "#470cd9",
+                    "primary-fixed": "#ffd9e3",
+                    "on-primary-fixed": "#3e001e",
+                    "inverse-primary": "#ae2565",
+                    "outline-variant": "#574147",
+                    "inverse-on-surface": "#2c3040",
+                    "primary-container": "#f65f9d",
+                    "on-background": "#dfe1f7",
+                    "on-secondary-fixed-variant": "#4503d7",
+                    "on-primary": "#640035",
+                    "surface-container-highest": "#303445",
+                    "surface-container-high": "#252939",
+                    "on-tertiary": "#571936",
+                    "on-error-container": "#ffdad6",
+                    "surface": "#0f1322",
+                    "on-error": "#690005",
+                    "tertiary-fixed-dim": "#ffb0cd",
+                    "on-surface-variant": "#ddbfc7",
+                    "error": "#ffb4ab",
+                    "on-secondary-container": "#baaeff",
+                    "surface-container-lowest": "#090d1c",
+                    "inverse-surface": "#dfe1f7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "8px",
+                    "sm": "16px",
+                    "container-margin-desktop": "80px",
+                    "base": "4px",
+                    "gutter": "24px",
+                    "xl": "64px",
+                    "lg": "40px",
+                    "md": "24px",
+                    "container-margin-mobile": "20px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "body-lg": ["Manrope"],
+                    "label-md": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "label-sm": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); }
+        /* Subtle glow animation for the active notification indicator */
+        @keyframes subtlePulse {
+            0% { box-shadow: 0 0 0 0 rgba(246, 95, 157, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(246, 95, 157, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(246, 95, 157, 0); }
+        }
+        .pulse-glow {
+            animation: subtlePulse 2s infinite;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen">
+<!-- Top App Bar -->
+<!-- Applying Shared Component rules for TopAppBar, adapting headline to task intent -->
+<header class="sticky top-0 w-full z-50 flex justify-between items-center px-container-margin-mobile h-16 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30">
+<button aria-label="Go Back" class="text-on-surface-variant hover:text-primary transition-colors duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 300;">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Notifications</h1>
+<button aria-label="Settings" class="text-on-surface-variant hover:opacity-80 transition-all duration-200 active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 300;">settings</span>
+</button>
+</header>
+<!-- Main Canvas -->
+<!-- Using a fluid grid layout; centering content with max width for larger screens while maintaining mobile padding -->
+<main class="flex-1 w-full max-w-[768px] mx-auto px-container-margin-mobile py-md pb-32 flex flex-col gap-sm">
+<!-- Notification Item: New interest request (Pink icon / Active state) -->
+<div class="relative flex flex-row items-start p-md gap-sm bg-[#181C35] border border-[#2A2E4A] rounded-xl hover:bg-[#202542] transition-colors duration-300 cursor-pointer overflow-hidden group">
+<!-- Glassmorphic highlight for new item -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container"></div>
+<div class="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center bg-primary-container/15 text-primary-container pulse-glow group-hover:scale-105 transition-transform duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<div class="flex flex-col flex-1 gap-1">
+<div class="flex justify-between items-baseline w-full gap-2">
+<h3 class="font-label-md text-label-md text-on-surface">New interest request received</h3>
+<span class="font-label-sm text-label-sm text-primary whitespace-nowrap">Just now</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">A leading tech firm in Dubai has expressed interest in your portfolio.</p>
+</div>
+</div>
+<!-- Notification Item: Employer viewed your profile -->
+<div class="relative flex flex-row items-start p-md gap-sm bg-[#181C35] border border-[#2A2E4A] rounded-xl hover:bg-[#202542] transition-colors duration-300 cursor-pointer group">
+<div class="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center bg-surface-container-high text-on-surface-variant group-hover:text-primary transition-colors duration-300">
+<span class="material-symbols-outlined">visibility</span>
+</div>
+<div class="flex flex-col flex-1 gap-1">
+<div class="flex justify-between items-baseline w-full gap-2">
+<h3 class="font-label-md text-label-md text-on-surface">Employer viewed your profile</h3>
+<span class="font-label-sm text-label-sm text-outline whitespace-nowrap">2h ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">Your profile appeared in 3 new employer searches this week.</p>
+</div>
+</div>
+<!-- Notification Item: Match unlocked -->
+<div class="relative flex flex-row items-start p-md gap-sm bg-[#181C35] border border-[#2A2E4A] rounded-xl hover:bg-[#202542] transition-colors duration-300 cursor-pointer group">
+<div class="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center bg-surface-container-high text-on-surface-variant group-hover:text-tertiary-container transition-colors duration-300">
+<span class="material-symbols-outlined">handshake</span>
+</div>
+<div class="flex flex-col flex-1 gap-1">
+<div class="flex justify-between items-baseline w-full gap-2">
+<h3 class="font-label-md text-label-md text-on-surface">Match unlocked</h3>
+<span class="font-label-sm text-label-sm text-outline whitespace-nowrap">1d ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">You and Senior Product Designer role have mutually matched!</p>
+</div>
+</div>
+<!-- Notification Item: New message received -->
+<div class="relative flex flex-row items-start p-md gap-sm bg-[#181C35] border border-[#2A2E4A] rounded-xl hover:bg-[#202542] transition-colors duration-300 cursor-pointer group">
+<div class="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center bg-surface-container-high text-on-surface-variant group-hover:text-secondary transition-colors duration-300">
+<span class="material-symbols-outlined">chat_bubble</span>
+</div>
+<div class="flex flex-col flex-1 gap-1">
+<div class="flex justify-between items-baseline w-full gap-2">
+<h3 class="font-label-md text-label-md text-on-surface">New message received</h3>
+<span class="font-label-sm text-label-sm text-outline whitespace-nowrap">2d ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">Sarah from HR: "Hi! We were very impressed with your recent case studies..."</p>
+</div>
+</div>
+<!-- Notification Item: Interview request received -->
+<div class="relative flex flex-row items-start p-md gap-sm bg-[#181C35] border border-[#2A2E4A] rounded-xl hover:bg-[#202542] transition-colors duration-300 cursor-pointer group">
+<div class="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center bg-surface-container-high text-on-surface-variant group-hover:text-primary transition-colors duration-300">
+<span class="material-symbols-outlined">event_available</span>
+</div>
+<div class="flex flex-col flex-1 gap-1">
+<div class="flex justify-between items-baseline w-full gap-2">
+<h3 class="font-label-md text-label-md text-on-surface">Interview request received</h3>
+<span class="font-label-sm text-label-sm text-outline whitespace-nowrap">3d ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">You have a pending interview schedule request for tomorrow at 10:00 AM.</p>
+</div>
+</div>
+</main>
+<!-- Bottom Nav Bar -->
+<!-- Implementation strictly follows Shared Components JSON specifications -->
+<!-- As this is a sub-page (Notifications), no tab is semantically "active", 
+         so we use style_inactive_navigation classes for all items to indicate a contextual drill-down state. -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-surface-container-low/80 backdrop-blur-lg shadow-lg border-t border-outline-variant/20 rounded-t-xl md:hidden">
+<button aria-label="Home" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 group w-16 gap-1">
+<span class="material-symbols-outlined text-[24px]">grid_view</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</button>
+<button aria-label="Requests" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 group w-16 gap-1">
+<span class="material-symbols-outlined text-[24px]">ads_click</span>
+<span class="font-label-sm text-label-sm">Requests</span>
+</button>
+<button aria-label="Matches" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 group w-16 gap-1">
+<span class="material-symbols-outlined text-[24px]">handshake</span>
+<span class="font-label-sm text-label-sm">Matches</span>
+</button>
+<button aria-label="Chat" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 group w-16 gap-1">
+<span class="material-symbols-outlined text-[24px]">chat_bubble</span>
+<span class="font-label-sm text-label-sm">Chat</span>
+</button>
+<button aria-label="Profile" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 group w-16 gap-1">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</button>
+</nav>
+</body></html>

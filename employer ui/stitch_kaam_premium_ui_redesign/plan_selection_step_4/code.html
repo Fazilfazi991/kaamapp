@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Choose your hiring plan | Kaam</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-container": "#f65f9d",
+            "on-background": "#dfe1f7",
+            "surface-container-high": "#252939",
+            "inverse-on-surface": "#2c3040",
+            "on-tertiary-fixed": "#3c0321",
+            "on-surface": "#dfe1f7",
+            "surface-container-low": "#171b2a",
+            "error-container": "#93000a",
+            "secondary": "#c9bfff",
+            "secondary-container": "#470cd9",
+            "surface-variant": "#303445",
+            "on-primary-fixed-variant": "#8d004d",
+            "on-primary": "#640035",
+            "primary": "#ffb0c9",
+            "tertiary-fixed-dim": "#ffb0cd",
+            "on-surface-variant": "#ddbfc7",
+            "on-secondary-fixed-variant": "#4503d7",
+            "surface-bright": "#353849",
+            "on-tertiary": "#571936",
+            "tertiary-fixed": "#ffd9e4",
+            "surface-container-lowest": "#090d1c",
+            "on-tertiary-container": "#541734",
+            "on-secondary-container": "#baaeff",
+            "inverse-primary": "#ae2565",
+            "primary-fixed-dim": "#ffb0c9",
+            "outline-variant": "#574147",
+            "outline": "#a58a91",
+            "primary-fixed": "#ffd9e3",
+            "surface-container": "#1b1f2f",
+            "surface": "#0f1322",
+            "tertiary-container": "#cf7d9d",
+            "tertiary": "#ffb0cd",
+            "secondary-fixed": "#e5deff",
+            "surface-container-highest": "#303445",
+            "on-primary-fixed": "#3e001e",
+            "on-tertiary-fixed-variant": "#72304d",
+            "secondary-fixed-dim": "#c9bfff",
+            "on-secondary-fixed": "#1a0063",
+            "error": "#ffb4ab",
+            "surface-dim": "#0f1322",
+            "inverse-surface": "#dfe1f7",
+            "on-error-container": "#ffdad6",
+            "on-secondary": "#2f009c",
+            "on-primary-container": "#600032",
+            "surface-tint": "#ffb0c9",
+            "on-error": "#690005",
+            "background": "#0f1322"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "xl": "64px",
+            "gutter": "24px",
+            "container-margin-mobile": "20px",
+            "base": "4px",
+            "sm": "16px",
+            "md": "24px",
+            "container-margin-desktop": "80px",
+            "xs": "8px",
+            "lg": "40px"
+          },
+          "fontFamily": {
+            "body-md": ["Manrope"],
+            "body-lg": ["Manrope"],
+            "label-sm": ["Manrope"],
+            "headline-lg-mobile": ["Manrope"],
+            "display-lg": ["Manrope"],
+            "headline-md": ["Manrope"],
+            "headline-lg": ["Manrope"],
+            "label-md": ["Manrope"]
+          },
+          "fontSize": {
+            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+            "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+            "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+            "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Manrope', sans-serif;
+      background-color: #090B1A;
+      color: #dfe1f7;
+    }
+    .glass-card {
+      background: #181C35;
+      border: 1px solid #2A2E4A;
+      transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+      background: #202542;
+      border-color: #f65f9d;
+      box-shadow: 0 0 20px rgba(246, 95, 157, 0.15);
+    }
+    .recommended-border {
+      border: 2px solid #f65f9d !important;
+    }
+    .step-indicator {
+      width: 40px;
+      height: 4px;
+      border-radius: 2px;
+      background: #303445;
+    }
+    .step-indicator.active {
+      background: #f65f9d;
+    }
+    .step-indicator.complete {
+      background: #470cd9;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .fill-icon {
+      font-variation-settings: 'FILL' 1;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background min-h-screen flex flex-col overflow-x-hidden">
+<!-- Header Anchor -->
+<header class="sticky top-0 z-50 backdrop-blur-xl bg-surface/70 border-b border-surface-variant h-16 flex justify-between items-center px-container-margin-mobile md:px-container-margin-desktop">
+<div class="flex items-center gap-sm">
+<span class="text-headline-md font-headline-md font-bold text-on-surface">Kaam</span>
+</div>
+<div class="hidden md:flex gap-md">
+<span class="text-label-md font-label-md text-on-surface-variant">Step 4 of 5</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">notifications</button>
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold text-xs">
+        KA
+      </div>
+</div>
+</header>
+<main class="flex-1 max-w-[1280px] mx-auto w-full px-container-margin-mobile md:px-container-margin-desktop py-lg flex flex-col items-center">
+<!-- Step Progress Mobile -->
+<div class="flex gap-xs mb-lg md:hidden">
+<div class="step-indicator complete"></div>
+<div class="step-indicator complete"></div>
+<div class="step-indicator complete"></div>
+<div class="step-indicator active"></div>
+<div class="step-indicator"></div>
+</div>
+<!-- Title Section -->
+<div class="text-center mb-xl">
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-xs">Choose your hiring plan</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto">Select the plan that matches your recruitment volume. You can upgrade or downgrade at any time as your team grows.</p>
+</div>
+<!-- Pricing Bento-ish Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter w-full mb-xl">
+<!-- Starter Plan -->
+<div class="glass-card rounded-xl p-md flex flex-col">
+<div class="mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Starter</h3>
+<p class="text-label-md font-label-md text-on-surface-variant">Perfect for single hires</p>
+</div>
+<div class="mb-lg">
+<div class="flex items-baseline gap-1">
+<span class="text-label-md font-label-md text-on-surface-variant">AED</span>
+<span class="text-headline-lg font-headline-lg text-on-surface">99</span>
+<span class="text-label-md font-label-md text-on-surface-variant">/month</span>
+</div>
+</div>
+<div class="flex-1 space-y-sm mb-lg">
+<div class="flex items-start gap-xs">
+<span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+<span class="text-body-md font-body-md text-on-surface-variant">1 Active Job Posting</span>
+</div>
+<div class="flex items-start gap-xs">
+<span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+<span class="text-body-md font-body-md text-on-surface-variant">Standard Matchmaking</span>
+</div>
+<div class="flex items-start gap-xs">
+<span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+<span class="text-body-md font-body-md text-on-surface-variant">24h Support Response</span>
+</div>
+</div>
+<button class="w-full py-3 rounded-lg border-1.5 border-secondary text-secondary font-label-md hover:bg-secondary/10 transition-colors">Select Starter</button>
+</div>
+<!-- Professional Plan (Recommended) -->
+<div class="glass-card recommended-border rounded-xl p-md flex flex-col relative transform md:scale-105 z-10">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-container text-on-primary-container text-label-sm font-label-sm px-4 py-1 rounded-full uppercase tracking-wider">
+          Recommended
+        </div>
+<div class="mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Professional</h3>
+<p class="text-label-md font-label-md text-on-surface-variant">Ideal for growing teams</p>
+</div>
+<div class="mb-lg">
+<div class="flex items-baseline gap-1">
+<span class="text-label-md font-label-md text-on-surface-variant">AED</span>
+<span class="text-headline-lg font-headline-lg text-on-surface">299</span>
+<span class="text-label-md font-label-md text-on-surface-variant">/month</span>
+</div>
+</div>
+<div class="flex-1 space-y-sm mb-lg">
+<div class="flex items-start gap-xs">
+<span class="material-symbols-outlined text-primary-container text-sm mt-1 fill-icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-body-md font-body-md text-on-surface">5 Active Job Postings</span>
+</div>
+<div class="flex items-start gap-xs">
+<span class="material-symbols-outlined text-primary-container text-sm mt-1 fill-icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-body-md font-body-md text-on-surface">AI-Powered Matchmaking</span>
+</div>
+<div class="flex items-start gap-xs">
+<span class="material-symbols-outlined text-primary-container text-sm mt-1 fill-icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-body-md font-body-md text-on-surface">Priority Candidate Access</span>
+</div>
+<div class="flex items-start gap-xs">
+<span class="material-symbols-outlined text-primary-container text-sm mt-1 fill-icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-body-md font-body-md text-on-surface">Team Collaboration Tools</span>
+</div>
+</div>
+<button class="w-full py-4 rounded-lg bg-primary-container text-on-primary-container font-label-md font-bold shadow-lg shadow-primary-container/20 hover:opacity-90 active:scale-95 transition-all">Select Professional</button>
+</div>
+<!-- Enterprise Plan -->
+<div class="glass-card rounded-xl p-md flex flex-col">
+<div class="mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Enterprise</h3>
+<p class="text-label-md font-label-md text-on-surface-variant">Customized for high-volume</p>
+</div>
+<div class="mb-lg">
+<span class="text-headline-lg font-headline-lg text-on-surface">Custom</span>
+</div>
+<div class="flex-1 space-y-sm mb-lg">
+<div class="flex items-start gap-xs">
+<span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+<span class="text-body-md font-body-md text-on-surface-variant">Unlimited Job Postings</span>
+</div>
+<div class="flex items-start gap-xs">
+<span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+<span class="text-body-md font-body-md text-on-surface-variant">Dedicated Account Manager</span>
+</div>
+<div class="flex items-start gap-xs">
+<span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+<span class="text-body-md font-body-md text-on-surface-variant">API Access &amp; Integration</span>
+</div>
+<div class="flex items-start gap-xs">
+<span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+<span class="text-body-md font-body-md text-on-surface-variant">Custom Contract Support</span>
+</div>
+</div>
+<button class="w-full py-3 rounded-lg border-1.5 border-outline text-on-surface-variant font-label-md hover:bg-surface-variant transition-colors">Contact Sales</button>
+</div>
+</div>
+<!-- Bottom Actions -->
+<div class="w-full flex flex-col md:flex-row items-center justify-between gap-md py-md border-t border-surface-variant">
+<div class="flex items-center gap-xs">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">security</span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Secure 256-bit SSL Payment<br/>Cancel anytime without fees.</p>
+</div>
+<div class="flex flex-col md:flex-row gap-md w-full md:w-auto">
+<button class="px-md py-3 text-on-surface-variant font-label-md hover:text-on-surface transition-colors">Start with Starter</button>
+<button class="px-xl py-3 bg-primary-container text-on-primary-container rounded-lg font-label-md font-bold hover:opacity-90 transition-all flex items-center justify-center gap-xs">
+          Continue with Professional
+          <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Side Navigation Drawer (Simulated for Desktop Shell Experience) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-80 bg-surface-container-low border-r border-surface-variant hidden lg:flex flex-col p-md gap-xs">
+<div class="flex items-center gap-sm mb-lg p-xs">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-primary-container">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a Middle Eastern recruiter in a high-end corporate setting, wearing a navy blue tailored suit. The lighting is soft and cinematic with a hint of pink glow from a nearby display. He is smiling confidently, exuding elite professionalism and status." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAT7ehhn1H2TEJd5jhVGMtmXbd9oNjVmI5laM_0CqqYd5nIxIAAtqPP9RdqDDCLXl-5T9NOM1k7LvaRwShEe5BXUdwJbjw2yAZ-SpXeQwHjaIybRfXDS4u2txRA6uK9YTwThBmVBH4006kWWY9sre907WsseSqSozdcpffiJ92dG0_Hgr2EOuuMM1aNDCbgDUW7JDhR3151a8459OhZ1iHKXvQgU6eOgxhwha8rr0H1kKaoxUxCB1i5it-ckyVIzRN9o8QZ8V9P5hso"/>
+</div>
+<div>
+<h4 class="text-body-md font-bold text-on-surface">Khalid Al-Mansouri</h4>
+<p class="text-label-sm text-on-surface-variant">Premium Recruiter</p>
+</div>
+</div>
+<nav class="flex flex-col gap-xs">
+<div class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all cursor-pointer">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md">Dashboard</span>
+</div>
+<div class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all cursor-pointer">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md">Team Management</span>
+</div>
+<div class="flex items-center gap-md p-md bg-secondary-container text-on-secondary-container font-bold rounded-lg translate-x-1 transition-transform">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body-md">Billing &amp; Plans</span>
+</div>
+<div class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all cursor-pointer">
+<span class="material-symbols-outlined">security</span>
+<span class="font-body-md">Security Settings</span>
+</div>
+<div class="mt-xl pt-xl border-t border-surface-variant/30">
+<div class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all cursor-pointer">
+<span class="material-symbols-outlined">help</span>
+<span class="font-body-md">Help Center</span>
+</div>
+<div class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all cursor-pointer text-error">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-md">Logout</span>
+</div>
+</div>
+</nav>
+</aside>
+<!-- Mobile Bottom Nav -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-surface/70 backdrop-blur-xl border-t border-surface-variant">
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-sm font-label-sm">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+<span class="text-label-sm font-label-sm">Search</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">favorite</span>
+<span class="text-label-sm font-label-sm">Interests</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container/15 text-primary rounded-xl px-3 py-1 scale-90 transition-transform">
+<span class="material-symbols-outlined">business_center</span>
+<span class="text-label-sm font-label-sm">Company</span>
+</div>
+</nav>
+<script>
+    // Subtle interaction script
+    document.querySelectorAll('.glass-card').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.style.transform = 'translateY(-4px)';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = card.classList.contains('recommended-border') ? 'scale(1.05)' : 'translateY(0px)';
+      });
+    });
+  </script>
+</body></html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Candidate Onboarding Progress</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container": "#1b1f2f",
+                        "secondary-fixed": "#e5deff",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-secondary": "#2f009c",
+                        "tertiary-container": "#cf7d9d",
+                        "surface-variant": "#303445",
+                        "tertiary": "#ffb0cd",
+                        "surface-bright": "#353849",
+                        "outline": "#a58a91",
+                        "on-secondary-fixed": "#1a0063",
+                        "secondary": "#c9bfff",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-dim": "#0f1322",
+                        "on-tertiary-container": "#541734",
+                        "background": "#0f1322",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "surface-tint": "#ffb0c9",
+                        "surface-container-low": "#171b2a",
+                        "on-primary-container": "#600032",
+                        "secondary-container": "#470cd9",
+                        "primary-fixed": "#ffd9e3",
+                        "on-primary-fixed": "#3e001e",
+                        "inverse-primary": "#ae2565",
+                        "outline-variant": "#574147",
+                        "inverse-on-surface": "#2c3040",
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "on-primary": "#640035",
+                        "surface-container-highest": "#303445",
+                        "surface-container-high": "#252939",
+                        "on-tertiary": "#571936",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#0f1322",
+                        "on-error": "#690005",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#baaeff",
+                        "surface-container-lowest": "#090d1c",
+                        "inverse-surface": "#dfe1f7"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "xs": "8px",
+                        "sm": "16px",
+                        "container-margin-desktop": "80px",
+                        "base": "4px",
+                        "gutter": "24px",
+                        "xl": "64px",
+                        "lg": "40px",
+                        "md": "24px",
+                        "container-margin-mobile": "20px"
+                    },
+                    fontFamily: {
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-md": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-sm": ["Manrope"]
+                    },
+                    fontSize: {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #090B1A;
+            color: #dfe1f7;
+            font-family: 'Manrope', sans-serif;
+        }
+        .card-layer {
+            background-color: #181C35;
+            border: 1px solid #2A2E4A;
+        }
+        .card-hover:hover {
+            background-color: #202542;
+            box-shadow: 0 0 10px rgba(246, 95, 157, 0.2);
+        }
+        .glass-header {
+            background-color: rgba(9, 11, 26, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #2A2E4A;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="glass-header sticky top-0 w-full z-50 flex justify-between items-center px-container-margin-mobile md:px-container-margin-desktop h-16">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary font-headline-md text-headline-md" data-icon="shield_person">shield_person</span>
+<span class="font-headline-md text-headline-md font-bold text-primary">Kaam</span>
+</div>
+<div>
+<button class="text-primary hover:opacity-80 transition-all duration-200 active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center px-container-margin-mobile md:px-container-margin-desktop py-lg">
+<!-- Header Section -->
+<div class="text-center mb-xl max-w-2xl">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface mb-sm">Let’s build your profile</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Complete a few steps so employers can discover you.</p>
+</div>
+<!-- Progress Cards Grid -->
+<div class="w-full max-w-3xl flex flex-col gap-sm">
+<!-- Card 1: Basic Details -->
+<div class="card-layer rounded-xl p-md flex items-center justify-between card-hover transition-all duration-300">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/30">
+<span class="material-symbols-outlined text-outline" data-icon="person">person</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-base">Basic Details</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Pending</p>
+</div>
+</div>
+<button class="bg-primary-container text-white font-label-md text-label-md py-xs px-sm rounded-lg hover:opacity-90 transition-opacity">
+                    Start
+                </button>
+</div>
+<!-- Card 2: Work Preferences -->
+<div class="card-layer rounded-xl p-md flex items-center justify-between card-hover transition-all duration-300 opacity-50 pointer-events-none">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/30">
+<span class="material-symbols-outlined text-outline" data-icon="work">work</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-base">Work Preferences</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Pending</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="lock">lock</span>
+</div>
+<!-- Card 3: Skills & Experience -->
+<div class="card-layer rounded-xl p-md flex items-center justify-between card-hover transition-all duration-300 opacity-50 pointer-events-none">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/30">
+<span class="material-symbols-outlined text-outline" data-icon="school">school</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-base">Skills &amp; Experience</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Pending</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="lock">lock</span>
+</div>
+<!-- Card 4: Documents -->
+<div class="card-layer rounded-xl p-md flex items-center justify-between card-hover transition-all duration-300 opacity-50 pointer-events-none">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/30">
+<span class="material-symbols-outlined text-outline" data-icon="description">description</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-base">Documents</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Pending</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="lock">lock</span>
+</div>
+<!-- Card 5: Privacy Settings -->
+<div class="card-layer rounded-xl p-md flex items-center justify-between card-hover transition-all duration-300 opacity-50 pointer-events-none">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/30">
+<span class="material-symbols-outlined text-outline" data-icon="security">security</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-base">Privacy Settings</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Pending</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="lock">lock</span>
+</div>
+</div>
+</main>
+<!-- Note: BottomNavBar is suppressed due to 'Task-Focused / Linear' intent (Onboarding) -->
+</body></html>

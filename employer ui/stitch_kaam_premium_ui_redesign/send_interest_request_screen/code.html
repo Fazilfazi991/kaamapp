@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Send Interest Request - Kaam</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-container": "#f65f9d",
+            "on-background": "#dfe1f7",
+            "surface-container-high": "#252939",
+            "inverse-on-surface": "#2c3040",
+            "on-tertiary-fixed": "#3c0321",
+            "on-surface": "#dfe1f7",
+            "surface-container-low": "#171b2a",
+            "error-container": "#93000a",
+            "secondary": "#c9bfff",
+            "secondary-container": "#470cd9",
+            "surface-variant": "#303445",
+            "on-primary-fixed-variant": "#8d004d",
+            "on-primary": "#640035",
+            "primary": "#ffb0c9",
+            "tertiary-fixed-dim": "#ffb0cd",
+            "on-surface-variant": "#ddbfc7",
+            "on-secondary-fixed-variant": "#4503d7",
+            "surface-bright": "#353849",
+            "on-tertiary": "#571936",
+            "tertiary-fixed": "#ffd9e4",
+            "surface-container-lowest": "#090d1c",
+            "on-tertiary-container": "#541734",
+            "on-secondary-container": "#baaeff",
+            "inverse-primary": "#ae2565",
+            "primary-fixed-dim": "#ffb0c9",
+            "outline-variant": "#574147",
+            "outline": "#a58a91",
+            "primary-fixed": "#ffd9e3",
+            "surface-container": "#1b1f2f",
+            "surface": "#0f1322",
+            "tertiary-container": "#cf7d9d",
+            "tertiary": "#ffb0cd",
+            "secondary-fixed": "#e5deff",
+            "surface-container-highest": "#303445",
+            "on-primary-fixed": "#3e001e",
+            "on-tertiary-fixed-variant": "#72304d",
+            "secondary-fixed-dim": "#c9bfff",
+            "on-secondary-fixed": "#1a0063",
+            "error": "#ffb4ab",
+            "surface-dim": "#0f1322",
+            "inverse-surface": "#dfe1f7",
+            "on-error-container": "#ffdad6",
+            "on-secondary": "#2f009c",
+            "on-primary-container": "#600032",
+            "surface-tint": "#ffb0c9",
+            "on-error": "#690005",
+            "background": "#0f1322"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "xl": "64px",
+            "gutter": "24px",
+            "container-margin-mobile": "20px",
+            "base": "4px",
+            "sm": "16px",
+            "md": "24px",
+            "container-margin-desktop": "80px",
+            "xs": "8px",
+            "lg": "40px"
+          },
+          "fontFamily": {
+            "body-md": ["Manrope"],
+            "body-lg": ["Manrope"],
+            "label-sm": ["Manrope"],
+            "headline-lg-mobile": ["Manrope"],
+            "display-lg": ["Manrope"],
+            "headline-md": ["Manrope"],
+            "headline-lg": ["Manrope"],
+            "label-md": ["Manrope"]
+          },
+          "fontSize": {
+            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+            "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+            "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+            "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+            "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      background-color: #090B1A;
+      font-family: 'Manrope', sans-serif;
+    }
+    .glass-card {
+      background: rgba(24, 28, 53, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid #2A2E4A;
+    }
+    .input-focus:focus {
+      outline: none;
+      border-color: #F65F9D;
+      box-shadow: 0 0 10px rgba(246, 95, 157, 0.2);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #303445;
+      border-radius: 10px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-on-background min-h-screen pb-32">
+<!-- Top Navigation Shell (Filtered for Transactional context but shown for Brand Identity) -->
+<header class="bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-surface-variant dark:border-surface-variant flex justify-between items-center w-full px-container-margin-mobile z-50 h-16 sticky top-0">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-headline-md">business_center</span>
+<h1 class="text-headline-md font-headline-md font-bold text-on-surface dark:text-on-surface">Kaam</h1>
+</div>
+<div class="flex items-center gap-sm">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full">close</button>
+</div>
+</header>
+<main class="max-w-4xl mx-auto px-container-margin-mobile mt-lg">
+<div class="flex flex-col md:flex-row gap-lg">
+<!-- Left: Candidate Summary & Context -->
+<aside class="w-full md:w-1/3 flex flex-col gap-md">
+<div class="glass-card rounded-xl p-md flex flex-col items-center text-center space-y-4">
+<div class="relative">
+<div class="w-24 h-24 rounded-full border-2 border-primary-container p-1">
+<img class="w-full h-full rounded-full object-cover" data-alt="A cinematic, high-end profile portrait of a professional service supervisor in a clean, modern corporate environment. The lighting is moody with deep navy shadows and soft pink neon highlights, creating a premium matchmaking aesthetic. The subject is blurred to protect privacy, emphasizing the professional silhouette and status within a Midnight Pulse color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuANdTE5T1Fr0vhPYcjjSMXOCcyiv8AHjyHafvj6Fhse8cE9WOv21K4QSi6o3adq6-mCeIG_SIcSKicBV1Our1dSw-17nkXoWq-4SSMxvywI42-iMaOjxM7vyIC9eIoghUnfRG9zjfDGyAbCvmpbAfev_3vIC_22KGqIMh09G0U1yNW2SnQ9nvk49pnqHxwiu2jsgqW8TxW4FZ8diH3lEl_WqoncBqEmycpdO8fdp9ijf3CnnFXcgZef191XwZamk5uuN8-JOfmzAEx4"/>
+</div>
+<div class="absolute bottom-0 right-0 bg-primary p-1 rounded-full border-2 border-surface">
+<span class="material-symbols-outlined text-surface text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div>
+<h2 class="text-headline-md font-headline-md text-on-surface">#KM2048</h2>
+<p class="text-label-md font-label-md text-primary uppercase tracking-widest mt-1">Cleaner Supervisor</p>
+</div>
+<div class="flex flex-wrap justify-center gap-xs mt-2">
+<span class="bg-surface-container-high text-on-surface-variant text-label-sm font-label-sm px-3 py-1 rounded-full border border-outline-variant">8+ Years Exp</span>
+<span class="bg-surface-container-high text-on-surface-variant text-label-sm font-label-sm px-3 py-1 rounded-full border border-outline-variant">Dubai, UAE</span>
+</div>
+<div class="w-full pt-4 border-t border-outline-variant text-left">
+<div class="flex items-center justify-between mb-2">
+<span class="text-label-sm text-on-surface-variant">Profile Privacy</span>
+<span class="text-label-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">lock</span> High
+              </span>
+</div>
+<p class="text-body-md text-on-surface-variant text-xs italic">Candidate identity is protected until the interest is mutual.</p>
+</div>
+</div>
+<!-- Atmospheric Background Element -->
+<div class="hidden md:block relative h-64 rounded-xl overflow-hidden glass-card">
+
+<div class="absolute inset-0 flex items-center justify-center p-md text-center">
+<p class="text-label-md text-on-surface/60">Matching professionals with premium opportunities across the GCC.</p>
+</div>
+</div>
+</aside>
+<!-- Right: Interest Form -->
+<section class="w-full md:w-2/3">
+<div class="glass-card rounded-xl p-md md:p-lg">
+<div class="mb-lg">
+<h3 class="text-headline-md font-headline-md text-primary mb-2">Express Interest</h3>
+<p class="text-body-md text-on-surface-variant">Complete the details below to start a secure conversation with this candidate.</p>
+</div>
+<form class="space-y-md">
+<!-- Grid for Basic Info -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="flex flex-col gap-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Job Title</label>
+<input class="bg-surface-container-low border border-surface-variant rounded-lg px-md py-3 text-on-surface input-focus placeholder:text-outline" placeholder="e.g. Senior Facilities Manager" type="text"/>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Salary Range (Monthly)</label>
+<select class="bg-surface-container-low border border-surface-variant rounded-lg px-md py-3 text-on-surface input-focus appearance-none">
+<option>Select Range</option>
+<option>AED 5,000 - 8,000</option>
+<option>AED 8,000 - 12,000</option>
+<option>AED 12,000+</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="flex flex-col gap-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Work Location</label>
+<input class="bg-surface-container-low border border-surface-variant rounded-lg px-md py-3 text-on-surface input-focus placeholder:text-outline" placeholder="City or District in UAE" type="text"/>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="text-label-md font-label-md text-on-surface-variant">Working Hours</label>
+<input class="bg-surface-container-low border border-surface-variant rounded-lg px-md py-3 text-on-surface input-focus placeholder:text-outline" placeholder="e.g. 8:00 AM - 5:00 PM" type="text"/>
+</div>
+</div>
+<!-- Benefit Toggles -->
+<div class="pt-2">
+<p class="text-label-md font-label-md text-on-surface-variant mb-sm">Offer Details</p>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-sm">
+<label class="flex items-center justify-between p-3 rounded-lg bg-surface-container-lowest border border-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="text-label-md text-on-surface">Accommodation</span>
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary-container bg-surface" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 rounded-lg bg-surface-container-lowest border border-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="text-label-md text-on-surface">Transport</span>
+<input class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary-container bg-surface" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 rounded-lg bg-surface-container-lowest border border-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="text-label-md text-on-surface">Visa Provided</span>
+<input checked="" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary-container bg-surface" type="checkbox"/>
+</label>
+</div>
+</div>
+<!-- Message Area -->
+<div class="flex flex-col gap-xs pt-2">
+<label class="text-label-md font-label-md text-on-surface-variant">Message to candidate</label>
+<textarea class="bg-surface-container-low border border-surface-variant rounded-lg px-md py-3 text-on-surface input-focus placeholder:text-outline resize-none custom-scrollbar" placeholder="Briefly describe the role and why they would be a great fit..." rows="4"></textarea>
+</div>
+<!-- Privacy Note -->
+<div class="flex gap-sm p-4 bg-primary-container/10 border border-primary-container/20 rounded-xl">
+<span class="material-symbols-outlined text-primary-container">info</span>
+<p class="text-label-sm text-on-primary-container">
+                Your company details will only be revealed to #KM2048 once they accept your interest request. This maintains a respectful and private environment for high-end professional connections.
+              </p>
+</div>
+<!-- Action CTA -->
+<div class="pt-4">
+<button class="w-full bg-primary-container text-on-primary font-bold py-4 rounded-xl shadow-lg hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-xs" type="submit">
+<span>Send Interest Request</span>
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</form>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Navigation (Shared Component Logic) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-t border-surface-variant dark:border-surface-variant shadow-lg dark:shadow-none md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-sm font-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/15 text-primary rounded-xl px-3 py-1 scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">search</span>
+<span class="text-label-sm font-label-sm">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="text-label-sm font-label-sm">Interests</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">handshake</span>
+<span class="text-label-sm font-label-sm">Matches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">business_center</span>
+<span class="text-label-sm font-label-sm">Company</span>
+</a>
+</nav>
+<!-- Micro-interactions Script -->
+<script>
+    // Simple toggle effect for form checkboxes
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const parent = this.closest('label');
+        if (this.checked) {
+          parent.classList.add('border-primary-container');
+          parent.classList.add('bg-primary-container/5');
+        } else {
+          parent.classList.remove('border-primary-container');
+          parent.classList.remove('bg-primary-container/5');
+        }
+      });
+      // Trigger once on load for default checked items
+      if (checkbox.checked) {
+        const parent = checkbox.closest('label');
+        parent.classList.add('border-primary-container');
+        parent.classList.add('bg-primary-container/5');
+      }
+    });
+
+    // Handle form submission (UI only)
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const btn = this.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Sending...';
+      btn.disabled = true;
+      
+      setTimeout(() => {
+        btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Sent Successfully';
+        btn.classList.replace('bg-primary-container', 'bg-secondary-container');
+      }, 1500);
+    });
+  </script>
+</body></html>

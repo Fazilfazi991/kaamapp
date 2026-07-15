@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Match Unlocked | Kaam</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(24, 28, 53, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid #2A2E4A;
+        }
+        .match-glow {
+            box-shadow: 0 0 40px -10px rgba(246, 95, 157, 0.3);
+        }
+        @keyframes celebrate {
+            0% { transform: scale(0.95); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-celebrate {
+            animation: celebrate 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .confetti-canvas {
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "surface-container-high": "#252939",
+                        "inverse-on-surface": "#2c3040",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-container-low": "#171b2a",
+                        "error-container": "#93000a",
+                        "secondary": "#c9bfff",
+                        "secondary-container": "#470cd9",
+                        "surface-variant": "#303445",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-primary": "#640035",
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "surface-bright": "#353849",
+                        "on-tertiary": "#571936",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container-lowest": "#090d1c",
+                        "on-tertiary-container": "#541734",
+                        "on-secondary-container": "#baaeff",
+                        "inverse-primary": "#ae2565",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "outline-variant": "#574147",
+                        "outline": "#a58a91",
+                        "primary-fixed": "#ffd9e3",
+                        "surface-container": "#1b1f2f",
+                        "surface": "#0f1322",
+                        "tertiary-container": "#cf7d9d",
+                        "tertiary": "#ffb0cd",
+                        "secondary-fixed": "#e5deff",
+                        "surface-container-highest": "#303445",
+                        "on-primary-fixed": "#3e001e",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "on-secondary-fixed": "#1a0063",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#0f1322",
+                        "inverse-surface": "#dfe1f7",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary": "#2f009c",
+                        "on-primary-container": "#600032",
+                        "surface-tint": "#ffb0c9",
+                        "on-error": "#690005",
+                        "background": "#0f1322"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "64px",
+                        "gutter": "24px",
+                        "container-margin-mobile": "20px",
+                        "base": "4px",
+                        "sm": "16px",
+                        "md": "24px",
+                        "container-margin-desktop": "80px",
+                        "xs": "8px",
+                        "lg": "40px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-sm": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md overflow-x-hidden">
+<!-- Top Navigation Header -->
+<header class="sticky top-0 z-50 h-16 w-full flex justify-between items-center px-container-margin-mobile backdrop-blur-xl border-b border-surface-variant bg-surface/70">
+<div class="flex items-center gap-xs">
+<div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-[20px]">business_center</span>
+</div>
+<span class="text-headline-md font-headline-md font-bold text-on-surface">Kaam</span>
+</div>
+<button class="hover:bg-surface-container-high transition-colors p-2 rounded-full">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+</header>
+<main class="flex-grow flex flex-col items-center justify-center px-container-margin-mobile py-xl relative">
+<!-- Background Atmospheric Shader -->
+<div class="absolute inset-0 z-0">
+
+</div>
+<canvas class="confetti-canvas" id="confetti"></canvas>
+<div class="max-w-xl w-full z-10 animate-celebrate">
+<!-- Header Section -->
+<div class="text-center mb-lg">
+<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary-container/20 text-primary-container mb-md match-glow">
+<span class="material-symbols-outlined text-[48px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg mb-xs text-on-surface">Match Unlocked 🎉</h1>
+<p class="text-body-md text-on-surface-variant max-w-sm mx-auto">The candidate accepted your interest request. You can now chat securely.</p>
+</div>
+<!-- Bento-style Match Card -->
+<div class="glass-card rounded-xl overflow-hidden shadow-xl mb-xl">
+<div class="p-md border-b border-surface-variant flex items-center gap-md">
+<div class="w-16 h-16 rounded-full overflow-hidden border-2 border-primary-container p-0.5">
+<img class="w-full h-full object-cover rounded-full" data-alt="A professional headshot of a middle-eastern software engineer in a modern office environment, wearing business casual attire. The lighting is soft and corporate with a midnight pulse aesthetic, featuring deep navy and vibrant pink subtle backlighting. High-end professional photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDH7ku96EgcqrWFA5j59ZiGMQsBDk8lAVfYIXjWTLK41XYRC3WcAlGdOAxgcxjEvgC35v7zKlE4P41HqVLhHoZEPgwyc9h2sUO4VcO6hN5svOrp1iztxrMykzZ6yropWHTzbS7jamLmCBNMJ5fc_8sr2VfOHW7nDzorOx7V2FwUDP-e6G3KMRhE3xQ-Nte2o97Il2T8TmYF_xNWfreOSRfMuJp5kTvdpTAYRSavOu2BtRMxYEWJijCLkDJO1h42lVRMQ8pxT1LQZmhk"/>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Khalid Al-Hashemi</h3>
+<div class="flex items-center gap-xs">
+<span class="text-label-md font-label-md text-primary bg-primary-container/10 px-2 py-0.5 rounded-full">ID: #49201-DXB</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-0 divide-x divide-y divide-surface-variant">
+<div class="p-md flex flex-col gap-xs border-t md:border-t-0 border-surface-variant">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Role</span>
+<span class="text-body-md font-bold text-on-surface">Lead Data Architect</span>
+</div>
+<div class="p-md flex flex-col gap-xs border-t md:border-t-0 border-surface-variant">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Expected Salary</span>
+<span class="text-body-md font-bold text-on-surface">AED 45k - 55k</span>
+</div>
+<div class="p-md flex flex-col gap-xs border-t md:border-t-0 border-surface-variant col-span-2 md:col-span-1">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Match Date</span>
+<span class="text-body-md font-bold text-on-surface">Today, 2:45 PM</span>
+</div>
+</div>
+<!-- Match Strengths / Quick Info -->
+<div class="bg-surface-container-low p-md flex flex-wrap gap-xs">
+<div class="flex items-center gap-xs bg-surface-variant/50 px-3 py-1.5 rounded-lg border border-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-primary">verified</span>
+<span class="text-label-md font-label-md text-on-surface">98% Match Score</span>
+</div>
+<div class="flex items-center gap-xs bg-surface-variant/50 px-3 py-1.5 rounded-lg border border-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
+<span class="text-label-md font-label-md text-on-surface">Dubai, UAE</span>
+</div>
+<div class="flex items-center gap-xs bg-surface-variant/50 px-3 py-1.5 rounded-lg border border-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-primary">history</span>
+<span class="text-label-md font-label-md text-on-surface">12+ Years Exp.</span>
+</div>
+</div>
+</div>
+<!-- Action Cluster -->
+<div class="flex flex-col gap-sm">
+<button class="w-full bg-primary-container text-white font-bold h-14 rounded-xl flex items-center justify-center gap-sm active:scale-95 transition-all shadow-lg shadow-primary-container/20 group">
+<span class="material-symbols-outlined transition-transform group-hover:translate-x-1">chat</span>
+<span class="text-body-lg font-body-lg">Start Chat</span>
+</button>
+<button class="w-full border-1.5 border-secondary text-on-surface font-semibold h-14 rounded-xl flex items-center justify-center gap-sm hover:bg-surface-variant transition-colors active:scale-95">
+<span class="material-symbols-outlined">person</span>
+<span class="text-body-lg font-body-lg">View Candidate Profile</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Hidden on Web per instructions, shown on mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-surface/70 backdrop-blur-xl border-t border-surface-variant">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-sm font-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="text-label-sm font-label-sm">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="text-label-sm font-label-sm">Interests</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/15 text-primary rounded-xl px-3 py-1 scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">handshake</span>
+<span class="text-label-sm font-label-sm">Matches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">business_center</span>
+<span class="text-label-sm font-label-sm">Company</span>
+</a>
+</nav>
+<script>
+        // Simple Confetti Effect
+        const canvas = document.getElementById('confetti');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = canvas.width / 2;
+                this.y = canvas.height / 2;
+                this.size = Math.random() * 8 + 4;
+                this.speedX = Math.random() * 10 - 5;
+                this.speedY = Math.random() * -15 - 5;
+                this.gravity = 0.4;
+                this.color = ['#f65f9d', '#6e4cff', '#ffb0c9', '#ffffff'][Math.floor(Math.random() * 4)];
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 10 - 5;
+                this.life = 100;
+            }
+
+            update() {
+                this.speedY += this.gravity;
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.rotation += this.rotationSpeed;
+                this.life -= 0.8;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        function spawn() {
+            for(let i = 0; i < 100; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for(let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                if(particles[i].life <= 0) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        setTimeout(spawn, 300);
+        animate();
+
+        // Optional: Interactive micro-interaction on button
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                // Potential for slight haptic feedback or sound effect if desired
+            });
+        });
+    </script>
+</body></html>

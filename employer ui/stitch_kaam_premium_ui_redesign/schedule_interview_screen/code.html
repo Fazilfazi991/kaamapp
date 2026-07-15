@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Schedule Interview - Kaam</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#f65f9d",
+                    "on-background": "#dfe1f7",
+                    "surface-container-high": "#252939",
+                    "inverse-on-surface": "#2c3040",
+                    "on-tertiary-fixed": "#3c0321",
+                    "on-surface": "#dfe1f7",
+                    "surface-container-low": "#171b2a",
+                    "error-container": "#93000a",
+                    "secondary": "#c9bfff",
+                    "secondary-container": "#470cd9",
+                    "surface-variant": "#303445",
+                    "on-primary-fixed-variant": "#8d004d",
+                    "on-primary": "#640035",
+                    "primary": "#ffb0c9",
+                    "tertiary-fixed-dim": "#ffb0cd",
+                    "on-surface-variant": "#ddbfc7",
+                    "on-secondary-fixed-variant": "#4503d7",
+                    "surface-bright": "#353849",
+                    "on-tertiary": "#571936",
+                    "tertiary-fixed": "#ffd9e4",
+                    "surface-container-lowest": "#090d1c",
+                    "on-tertiary-container": "#541734",
+                    "on-secondary-container": "#baaeff",
+                    "inverse-primary": "#ae2565",
+                    "primary-fixed-dim": "#ffb0c9",
+                    "outline-variant": "#574147",
+                    "outline": "#a58a91",
+                    "primary-fixed": "#ffd9e3",
+                    "surface-container": "#1b1f2f",
+                    "surface": "#0f1322",
+                    "tertiary-container": "#cf7d9d",
+                    "tertiary": "#ffb0cd",
+                    "secondary-fixed": "#e5deff",
+                    "surface-container-highest": "#303445",
+                    "on-primary-fixed": "#3e001e",
+                    "on-tertiary-fixed-variant": "#72304d",
+                    "secondary-fixed-dim": "#c9bfff",
+                    "on-secondary-fixed": "#1a0063",
+                    "error": "#ffb4ab",
+                    "surface-dim": "#0f1322",
+                    "inverse-surface": "#dfe1f7",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary": "#2f009c",
+                    "on-primary-container": "#600032",
+                    "surface-tint": "#ffb0c9",
+                    "on-error": "#690005",
+                    "background": "#0f1322"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "64px",
+                    "gutter": "24px",
+                    "container-margin-mobile": "20px",
+                    "base": "4px",
+                    "sm": "16px",
+                    "md": "24px",
+                    "container-margin-desktop": "80px",
+                    "xs": "8px",
+                    "lg": "40px"
+            },
+            "fontFamily": {
+                    "body-md": ["Manrope"],
+                    "body-lg": ["Manrope"],
+                    "label-sm": ["Manrope"],
+                    "headline-lg-mobile": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "label-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #090B1A;
+            color: #dfe1f7;
+            font-family: 'Manrope', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-panel {
+            background: rgba(17, 20, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid #2A2E4A;
+        }
+        .input-glow:focus {
+            box-shadow: 0 0 15px rgba(246, 95, 157, 0.2);
+            border-color: #f65f9d;
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #f65f9d 0%, #ae2565 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(246, 95, 157, 0.3);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.8) sepia(100%) saturate(1000%) hue-rotate(290deg);
+            cursor: pointer;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-32">
+<!-- Top Navigation Bar -->
+<header class="bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-surface-variant dark:border-surface-variant docked full-width top-0 sticky flex justify-between items-center w-full px-container-margin-mobile z-50 h-16">
+<div class="flex items-center gap-sm">
+<button class="material-symbols-outlined text-on-surface hover:bg-surface-container-high p-2 rounded-full transition-colors">arrow_back</button>
+<h1 class="text-headline-md font-headline-md font-bold text-on-surface">Schedule Interview</h1>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">notifications</span>
+<div class="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional corporate headshot of a Middle Eastern recruiter in a high-end office. The lighting is soft and cinematic, with a deep navy and pink color palette reflecting a midnight pulse aesthetic. The atmosphere is elite and professional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFFNx2VJK9a0wB6dnxNStOiibdhjjVnfWkdoVQ3-8gMb7Q3vRrpULLDbhlYSbEMbtKW3sYrzeSZH5lbioa-QTWGs082X2iGxa1rwVWKNau9Ngcq6VXHb3oFgarJMShChVTZEetBpWMOtIT5fk9xc2MqSVZCoWGRtjIFOOG5M-jKOuvHCrXzDMef_jk8Bi0spCAzHyZ9r9uKygcy_PNDouxDeyW6QUiDWzLNetieMxKMn6_c7zDUXwIx8O9HUsRjHksWoq2rnlk4Cy_"/>
+</div>
+</div>
+</header>
+<main class="max-w-4xl mx-auto px-container-margin-mobile mt-lg grid grid-cols-1 lg:grid-cols-12 gap-lg">
+<!-- Candidate Preview Card (Bento Style) -->
+<section class="lg:col-span-4 flex flex-col gap-sm">
+<div class="glass-panel p-md rounded-xl">
+<div class="flex flex-col items-center text-center">
+<div class="w-24 h-24 rounded-2xl overflow-hidden mb-sm border-2 border-surface-variant">
+<img class="w-full h-full object-cover" data-alt="A high-quality portrait of a young professional candidate, a software engineer with a modern and confident look. The background is a blurred tech office with soft pink neon accents and deep navy shadows, fitting the premium matchmaking aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2t_i7CzhpE86P7dLWebLOyfNv5ZpjielFHMbrZ7M6M5yTViXnKtUvR0_ddwHwgSPI1VQ1Rc82Nn4Nvsa9yxF5iD5PituAi26KMw-1GK8dGHjo_p8XI3anvzwC1HP3zLyECO5x6NvvhpfoAnRAcSTSnpT6x246D-z75CGK6bxBpw1J_4fMqK75v3G5CGxElg__CKwDnCQmvmA1QfQ7p-Ikxh_v8J17VFkJyFtzdyb7g8LaOELaiP3eXtzAVbO8jfFL6TvHjTMGlkIM"/>
+</div>
+<h2 class="text-headline-md font-headline-md">Sarah Al-Farsi</h2>
+<p class="text-label-md font-label-md text-on-surface-variant">Senior UX Researcher</p>
+<div class="flex gap-xs mt-sm">
+<span class="px-3 py-1 bg-primary-container/10 text-primary text-label-sm font-label-sm rounded-full">98% Match</span>
+<span class="px-3 py-1 bg-surface-container-high text-on-surface-variant text-label-sm font-label-sm rounded-full">Dubai, UAE</span>
+</div>
+</div>
+</div>
+<div class="glass-panel p-md rounded-xl flex items-center justify-between">
+<div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Status</p>
+<p class="text-body-md font-body-md text-primary">Reviewing</p>
+</div>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</section>
+<!-- Form Section -->
+<section class="lg:col-span-8">
+<form class="glass-panel p-lg rounded-2xl flex flex-col gap-md" id="interviewForm">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- Date Picker -->
+<div class="flex flex-col gap-xs">
+<label class="text-label-md font-label-md text-on-surface-variant px-1">Interview Date</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border border-surface-variant rounded-xl px-md py-3 text-body-md font-body-md focus:outline-none input-glow transition-all" type="date"/>
+</div>
+</div>
+<!-- Time Picker -->
+<div class="flex flex-col gap-xs">
+<label class="text-label-md font-label-md text-on-surface-variant px-1">Interview Time (GST)</label>
+<input class="w-full bg-surface-container-low border border-surface-variant rounded-xl px-md py-3 text-body-md font-body-md focus:outline-none input-glow transition-all" type="time"/>
+</div>
+</div>
+<!-- Interview Mode -->
+<div class="flex flex-col gap-xs">
+<label class="text-label-md font-label-md text-on-surface-variant px-1">Interview Mode</label>
+<div class="grid grid-cols-3 gap-sm">
+<label class="cursor-pointer">
+<input checked="" class="hidden peer" name="mode" type="radio" value="Call"/>
+<div class="flex flex-col items-center gap-xs py-4 rounded-xl border border-surface-variant bg-surface-container-low peer-checked:border-primary-container peer-checked:bg-primary-container/10 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant peer-checked:text-primary">call</span>
+<span class="text-label-sm font-label-sm">Call</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="hidden peer" name="mode" type="radio" value="WhatsApp"/>
+<div class="flex flex-col items-center gap-xs py-4 rounded-xl border border-surface-variant bg-surface-container-low peer-checked:border-primary-container peer-checked:bg-primary-container/10 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant peer-checked:text-primary">chat</span>
+<span class="text-label-sm font-label-sm">WhatsApp</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="hidden peer" name="mode" type="radio" value="In-person"/>
+<div class="flex flex-col items-center gap-xs py-4 rounded-xl border border-surface-variant bg-surface-container-low peer-checked:border-primary-container peer-checked:bg-primary-container/10 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant peer-checked:text-primary">person_pin_circle</span>
+<span class="text-label-sm font-label-sm">In-person</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Location / Link -->
+<div class="flex flex-col gap-xs">
+<label class="text-label-md font-label-md text-on-surface-variant px-1">Location or Meeting Link</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-on-surface-variant">location_on</span>
+<input class="w-full bg-surface-container-low border border-surface-variant rounded-xl pl-12 pr-md py-3 text-body-md font-body-md focus:outline-none input-glow transition-all" placeholder="e.g. Google Meet Link or Office Address" type="text"/>
+</div>
+</div>
+<!-- Notes -->
+<div class="flex flex-col gap-xs">
+<label class="text-label-md font-label-md text-on-surface-variant px-1">Notes for candidate</label>
+<textarea class="w-full bg-surface-container-low border border-surface-variant rounded-xl px-md py-3 text-body-md font-body-md focus:outline-none input-glow transition-all resize-none" placeholder="Mention any specific preparation or documents needed..." rows="4"></textarea>
+</div>
+<!-- Action -->
+<div class="mt-sm">
+<button class="w-full btn-gradient py-4 rounded-xl text-headline-md font-headline-md text-white flex items-center justify-center gap-sm" type="submit">
+<span>Send Interview Request</span>
+<span class="material-symbols-outlined">send</span>
+</button>
+<p class="text-center text-label-sm font-label-sm text-on-surface-variant mt-md">
+                        The candidate will receive an invitation and can accept or request a reschedule.
+                    </p>
+</div>
+</form>
+</section>
+</main>
+<!-- Navigation Bar Logic Implementation -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-t border-surface-variant dark:border-surface-variant shadow-lg dark:shadow-none md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-label-sm font-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="text-label-sm font-label-sm">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="text-label-sm font-label-sm">Interests</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/15 text-primary rounded-xl px-3 py-1 scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="handshake" style="font-variation-settings: 'FILL' 1;">handshake</span>
+<span class="text-label-sm font-label-sm">Matches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="business_center">business_center</span>
+<span class="text-label-sm font-label-sm">Company</span>
+</a>
+</nav>
+<!-- Side Navigation for Web (Hidden on Mobile) -->
+<aside class="hidden md:flex fixed left-0 top-16 h-[calc(100vh-4rem)] w-72 bg-surface-container-low border-r border-surface-variant flex-col p-md gap-xs">
+<div class="mb-lg p-md flex items-center gap-sm bg-surface-variant/30 rounded-xl border border-surface-variant">
+<div class="w-12 h-12 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A stylized company logo for a high-end tech firm in Dubai, featuring abstract geometric lines in primary pink and deep navy blue. The design is sleek, modern, and minimalist." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDU2McSNqmSr0B_pghnzVOU_9-OHEm7rSOg0d6i4JStdznaCYIainB65kJRmpkWjG_Ba8-oKedk7YiOJOwzBo8Y1fwPkMaOVSSxAxQm8E1hIebx8_6wkI5XVys7Ujng8PibHpb5Sl8YtYt9b7c0DCydAT885ALZhvoV5FIg9R8DZsBtBbnP6ZqTolput1O3LVt2DD2vHTzdn-aSyA0qgXb8caYKm-CPolgbS9Xu_6oFsE7C23j-qPJWNvOpQvnl9rOK2HLAK9T4Eo-m"/>
+</div>
+<div>
+<h3 class="text-label-md font-label-md text-on-surface">Khalid Al-Mansouri</h3>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Premium Recruiter</p>
+</div>
+</div>
+<nav class="flex flex-col gap-xs">
+<a class="flex items-center gap-sm px-md py-3 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-body-md font-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-sm px-md py-3 bg-secondary-container text-on-secondary-container font-bold rounded-lg translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">handshake</span>
+<span class="text-body-md font-body-md">Active Matches</span>
+</a>
+<a class="flex items-center gap-sm px-md py-3 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-body-md font-body-md">Team Management</span>
+</a>
+<a class="flex items-center gap-sm px-md py-3 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-body-md font-body-md">Billing &amp; Plans</span>
+</a>
+<div class="h-px bg-surface-variant my-md"></div>
+<a class="flex items-center gap-sm px-md py-3 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="text-body-md font-body-md">Help Center</span>
+</a>
+<a class="flex items-center gap-sm px-md py-3 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-body-md font-body-md">Logout</span>
+</a>
+</nav>
+</aside>
+<script>
+        // Simple form interaction
+        document.getElementById('interviewForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalContent = btn.innerHTML;
+            
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> <span>Sending...</span>';
+            btn.style.opacity = '0.7';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> <span>Request Sent</span>';
+                btn.classList.replace('btn-gradient', 'bg-emerald-500');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                    btn.classList.replace('bg-emerald-500', 'btn-gradient');
+                    btn.style.opacity = '1';
+                    btn.disabled = false;
+                }, 3000);
+            }, 1500);
+        });
+
+        // Add visual feedback for mode selection
+        const modeLabels = document.querySelectorAll('input[name="mode"]');
+        modeLabels.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                // Potential to update location placeholder based on mode
+                const locationInput = document.querySelector('input[placeholder*="Google Meet"]');
+                if(e.target.value === 'In-person') {
+                    locationInput.placeholder = "Enter Office Address in Dubai/GCC";
+                } else if(e.target.value === 'WhatsApp') {
+                    locationInput.placeholder = "Enter phone number with country code";
+                } else {
+                    locationInput.placeholder = "e.g. Google Meet Link or Zoom URL";
+                }
+            });
+        });
+    </script>
+</body></html>

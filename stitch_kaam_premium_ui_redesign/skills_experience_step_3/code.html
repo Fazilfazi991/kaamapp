@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kaam - Skills &amp; Experience</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body {
+            background-color: #090B1A; /* Canvas background */
+            color: #dfe1f7;
+            font-family: 'Manrope', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Hide scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        /* Glassmorphism utilities */
+        .glass-panel {
+            background: rgba(17, 20, 42, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid #2A2E4A;
+        }
+
+        .glass-card {
+            background-color: #181C35;
+            border: 1px solid #2A2E4A;
+        }
+
+        .glass-card:hover {
+            background-color: #202542;
+            box-shadow: 0 0 15px rgba(246, 95, 157, 0.1);
+            border-color: rgba(246, 95, 157, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .input-glass {
+            background-color: #11142A;
+            border: 1px solid #2A2E4A;
+            color: #dfe1f7;
+        }
+        
+        .input-glass:focus {
+            border-color: #f65f9d;
+            box-shadow: 0 0 8px rgba(246, 95, 157, 0.2);
+            outline: none;
+        }
+        
+        .input-glass::placeholder {
+            color: #7E829F;
+        }
+        
+        /* Chip styles */
+        .chip-default {
+            background-color: #202542;
+            color: #B8BBD0;
+            transition: all 0.2s ease;
+        }
+        
+        .chip-selected {
+            background-color: rgba(246, 95, 157, 0.15);
+            color: #f65f9d;
+            border: 1px solid rgba(246, 95, 157, 0.3);
+        }
+
+        /* Progress Bar Animation */
+        @keyframes fillProgress {
+            from { width: 40%; }
+            to { width: 60%; }
+        }
+        .progress-fill {
+            animation: fillProgress 1s ease-out forwards;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#ffb0c9",
+                      "tertiary-fixed": "#ffd9e4",
+                      "surface-container": "#1b1f2f",
+                      "secondary-fixed": "#e5deff",
+                      "error-container": "#93000a",
+                      "on-primary-fixed-variant": "#8d004d",
+                      "on-secondary": "#2f009c",
+                      "tertiary-container": "#cf7d9d",
+                      "surface-variant": "#303445",
+                      "tertiary": "#ffb0cd",
+                      "surface-bright": "#353849",
+                      "outline": "#a58a91",
+                      "on-secondary-fixed": "#1a0063",
+                      "secondary": "#c9bfff",
+                      "primary-fixed-dim": "#ffb0c9",
+                      "on-tertiary-fixed-variant": "#72304d",
+                      "on-tertiary-fixed": "#3c0321",
+                      "on-surface": "#dfe1f7",
+                      "surface-dim": "#0f1322",
+                      "on-tertiary-container": "#541734",
+                      "background": "#0f1322",
+                      "secondary-fixed-dim": "#c9bfff",
+                      "surface-tint": "#ffb0c9",
+                      "surface-container-low": "#171b2a",
+                      "on-primary-container": "#600032",
+                      "secondary-container": "#470cd9",
+                      "primary-fixed": "#ffd9e3",
+                      "on-primary-fixed": "#3e001e",
+                      "inverse-primary": "#ae2565",
+                      "outline-variant": "#574147",
+                      "inverse-on-surface": "#2c3040",
+                      "primary-container": "#f65f9d",
+                      "on-background": "#dfe1f7",
+                      "on-secondary-fixed-variant": "#4503d7",
+                      "on-primary": "#640035",
+                      "surface-container-highest": "#303445",
+                      "surface-container-high": "#252939",
+                      "on-tertiary": "#571936",
+                      "on-error-container": "#ffdad6",
+                      "surface": "#0f1322",
+                      "on-error": "#690005",
+                      "tertiary-fixed-dim": "#ffb0cd",
+                      "on-surface-variant": "#ddbfc7",
+                      "error": "#ffb4ab",
+                      "on-secondary-container": "#baaeff",
+                      "surface-container-lowest": "#090d1c",
+                      "inverse-surface": "#dfe1f7"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "8px",
+                      "sm": "16px",
+                      "container-margin-desktop": "80px",
+                      "base": "4px",
+                      "gutter": "24px",
+                      "xl": "64px",
+                      "lg": "40px",
+                      "md": "24px",
+                      "container-margin-mobile": "20px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Manrope"],
+                      "display-lg": ["Manrope"],
+                      "body-lg": ["Manrope"],
+                      "label-md": ["Manrope"],
+                      "headline-md": ["Manrope"],
+                      "body-md": ["Manrope"],
+                      "headline-lg": ["Manrope"],
+                      "label-sm": ["Manrope"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#090B1A] text-on-surface min-h-screen flex flex-col items-center justify-center py-xl px-container-margin-mobile md:px-container-margin-desktop">
+<!-- Top Navigation / Header (Suppressed as per rules for linear flow, but we keep a simple back/close intent header if needed. For strict linear onboarding, we just show a back button and progress) -->
+<header class="w-full max-w-3xl flex items-center justify-between mb-xl">
+<button aria-label="Go back" class="w-10 h-10 rounded-full flex items-center justify-center bg-[#11142A] border border-[#2A2E4A] hover:bg-[#202542] transition-colors">
+<span class="material-symbols-outlined text-[#B8BBD0]" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="text-center flex-1">
+<h1 class="font-headline-md text-headline-md text-primary font-bold">Kaam</h1>
+</div>
+<div class="w-10"></div> <!-- Spacer for balance -->
+</header>
+<!-- Main Content Container -->
+<main class="w-full max-w-2xl flex flex-col gap-lg">
+<!-- Header & Progress -->
+<div class="flex flex-col gap-sm text-center md:text-left">
+<div class="flex items-center justify-between mb-xs">
+<span class="font-label-md text-label-md text-primary-container uppercase tracking-wider">Step 3 of 5</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-2 bg-[#11142A] rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-[#cf7d9d] to-[#f65f9d] rounded-full progress-fill" style="width: 60%;"></div>
+</div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mt-md">Skills &amp; Experience</h2>
+<p class="font-body-lg text-body-lg text-[#B8BBD0]">Tell us about your professional background to find the best matches.</p>
+</div>
+<!-- Form Area (Bento-style grid) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- Experience & Job Title (Full width on mobile, split on desktop) -->
+<div class="col-span-1 md:col-span-2 glass-card rounded-xl p-md flex flex-col gap-md">
+<!-- Stepper for Years of Experience -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface">Years of Experience</label>
+<div class="flex items-center justify-between bg-[#11142A] border border-[#2A2E4A] rounded-lg p-xs">
+<button class="w-10 h-10 rounded-md bg-[#202542] hover:bg-surface-variant flex items-center justify-center text-[#B8BBD0] transition-colors" onclick="document.getElementById('exp-val').innerText = Math.max(0, parseInt(document.getElementById('exp-val').innerText) - 1)">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<div class="font-headline-md text-headline-md text-primary"><span id="exp-val">3</span> <span class="text-[#B8BBD0] text-sm">Years</span></div>
+<button class="w-10 h-10 rounded-md bg-[#202542] hover:bg-surface-variant flex items-center justify-center text-[#B8BBD0] transition-colors" onclick="document.getElementById('exp-val').innerText = parseInt(document.getElementById('exp-val').innerText) + 1">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- Job Title -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface">Previous Job Title</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#7E829F]" data-icon="work">work</span>
+<input class="w-full input-glass rounded-lg py-3 pl-10 pr-4 font-body-md text-body-md" placeholder="e.g. Senior Product Designer" type="text"/>
+</div>
+</div>
+<!-- Company -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface flex justify-between">
+<span>Previous Company</span>
+<span class="text-[#7E829F] font-normal">Optional</span>
+</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#7E829F]" data-icon="apartment">apartment</span>
+<input class="w-full input-glass rounded-lg py-3 pl-10 pr-4 font-body-md text-body-md" placeholder="e.g. Acme Corp" type="text"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Skills Chips (Addable) -->
+<div class="col-span-1 md:col-span-2 glass-card rounded-xl p-md flex flex-col gap-md">
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface">Core Skills</label>
+<p class="font-label-sm text-label-sm text-[#7E829F]">Add up to 10 skills relevant to your role.</p>
+<div class="relative mt-2">
+<input class="w-full input-glass rounded-lg py-3 px-4 font-body-md text-body-md mb-3" placeholder="Type a skill and press Enter..." type="text"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-primary-container text-white rounded-md hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+<div class="flex flex-wrap gap-2 mt-2">
+<div class="chip-selected px-4 py-2 rounded-full font-label-md text-label-md flex items-center gap-1 cursor-pointer">
+                            UI Design <span class="material-symbols-outlined text-[16px]" data-icon="close">close</span>
+</div>
+<div class="chip-selected px-4 py-2 rounded-full font-label-md text-label-md flex items-center gap-1 cursor-pointer">
+                            Figma <span class="material-symbols-outlined text-[16px]" data-icon="close">close</span>
+</div>
+<div class="chip-selected px-4 py-2 rounded-full font-label-md text-label-md flex items-center gap-1 cursor-pointer">
+                            Prototyping <span class="material-symbols-outlined text-[16px]" data-icon="close">close</span>
+</div>
+<div class="chip-default px-4 py-2 rounded-full font-label-md text-label-md cursor-pointer hover:bg-surface-variant">
+                            + User Research
+                        </div>
+<div class="chip-default px-4 py-2 rounded-full font-label-md text-label-md cursor-pointer hover:bg-surface-variant">
+                            + HTML/CSS
+                        </div>
+</div>
+</div>
+</div>
+<!-- Languages (Multi-select) -->
+<div class="col-span-1 glass-card rounded-xl p-md flex flex-col gap-sm">
+<label class="font-label-md text-label-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container" data-icon="language">language</span>
+                    Languages
+                </label>
+<div class="flex flex-col gap-2 mt-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-5 h-5 rounded border border-primary-container flex items-center justify-center bg-[rgba(246,95,157,0.2)]">
+<span class="material-symbols-outlined text-[16px] text-primary-container" data-icon="check">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">English (Fluent)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-5 h-5 rounded border border-[#2A2E4A] flex items-center justify-center group-hover:border-[#7E829F] transition-colors">
+<span class="material-symbols-outlined text-[16px] text-transparent" data-icon="check">check</span>
+</div>
+<span class="font-body-md text-body-md text-[#B8BBD0] group-hover:text-on-surface transition-colors">Arabic (Native)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-5 h-5 rounded border border-[#2A2E4A] flex items-center justify-center group-hover:border-[#7E829F] transition-colors">
+<span class="material-symbols-outlined text-[16px] text-transparent" data-icon="check">check</span>
+</div>
+<span class="font-body-md text-body-md text-[#B8BBD0] group-hover:text-on-surface transition-colors">French (Basic)</span>
+</label>
+<button class="text-left font-label-md text-label-md text-[#7E829F] hover:text-primary transition-colors mt-1">+ Add Language</button>
+</div>
+</div>
+<!-- Work Type (Chips) -->
+<div class="col-span-1 glass-card rounded-xl p-md flex flex-col gap-sm">
+<label class="font-label-md text-label-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container" data-icon="schedule">schedule</span>
+                    Preferred Work Type
+                </label>
+<div class="flex flex-wrap gap-2 mt-2">
+<div class="chip-selected px-4 py-2 rounded-full font-label-md text-label-md cursor-pointer text-center flex-1 min-w-[100px]">
+                        Full-Time
+                    </div>
+<div class="chip-default px-4 py-2 rounded-full font-label-md text-label-md cursor-pointer hover:bg-surface-variant text-center flex-1 min-w-[100px]">
+                        Part-Time
+                    </div>
+<div class="chip-default px-4 py-2 rounded-full font-label-md text-label-md cursor-pointer hover:bg-surface-variant text-center flex-1 min-w-[100px]">
+                        Contract
+                    </div>
+<div class="chip-default px-4 py-2 rounded-full font-label-md text-label-md cursor-pointer hover:bg-surface-variant text-center flex-1 min-w-[100px]">
+                        Freelance
+                    </div>
+</div>
+</div>
+</div>
+<!-- CTA Area -->
+<div class="mt-xl flex flex-col gap-4">
+<button class="w-full bg-gradient-to-r from-[#cf7d9d] to-[#f65f9d] text-white font-label-md text-label-md py-4 rounded-xl shadow-[0_0_20px_rgba(246,95,157,0.3)] hover:shadow-[0_0_30px_rgba(246,95,157,0.5)] transform hover:-translate-y-1 transition-all duration-300 flex justify-center items-center gap-2">
+                Continue
+                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<button class="w-full text-center font-label-md text-label-md text-[#B8BBD0] hover:text-white transition-colors py-2">
+                Skip for now
+            </button>
+</div>
+</main>
+<!-- Interactive script for chips toggle -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleChips = document.querySelectorAll('.chip-default, .chip-selected');
+            toggleChips.forEach(chip => {
+                // Ignore the pre-selected closeable skill chips for simple toggle logic, 
+                // focusing on the work type and suggested skills.
+                if(!chip.querySelector('.material-symbols-outlined')) {
+                    chip.addEventListener('click', function() {
+                        if (this.classList.contains('chip-default')) {
+                            this.classList.remove('chip-default');
+                            this.classList.add('chip-selected');
+                            // Add check or change style logic if needed
+                        } else {
+                            this.classList.remove('chip-selected');
+                            this.classList.add('chip-default');
+                        }
+                    });
+                }
+            });
+
+            // Language checkboxes
+            const checkboxes = document.querySelectorAll('.group');
+            checkboxes.forEach(label => {
+                label.addEventListener('click', function(e) {
+                    if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+                        const box = this.querySelector('div');
+                        const icon = this.querySelector('span.material-symbols-outlined');
+                        const text = this.querySelector('span.font-body-md');
+                        
+                        if (box.classList.contains('border-primary-container')) {
+                            box.classList.remove('border-primary-container', 'bg-[rgba(246,95,157,0.2)]');
+                            box.classList.add('border-[#2A2E4A]');
+                            icon.classList.remove('text-primary-container');
+                            icon.classList.add('text-transparent');
+                            text.classList.remove('text-on-surface');
+                            text.classList.add('text-[#B8BBD0]');
+                        } else {
+                            box.classList.remove('border-[#2A2E4A]');
+                            box.classList.add('border-primary-container', 'bg-[rgba(246,95,157,0.2)]');
+                            icon.classList.remove('text-transparent');
+                            icon.classList.add('text-primary-container');
+                            text.classList.remove('text-[#B8BBD0]');
+                            text.classList.add('text-on-surface');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body></html>

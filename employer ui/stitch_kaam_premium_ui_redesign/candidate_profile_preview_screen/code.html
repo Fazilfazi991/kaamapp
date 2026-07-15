@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Candidate Profile Preview - Kaam</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "surface-container-high": "#252939",
+                        "inverse-on-surface": "#2c3040",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-container-low": "#171b2a",
+                        "error-container": "#93000a",
+                        "secondary": "#c9bfff",
+                        "secondary-container": "#470cd9",
+                        "surface-variant": "#303445",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-primary": "#640035",
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "surface-bright": "#353849",
+                        "on-tertiary": "#571936",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container-lowest": "#090d1c",
+                        "on-tertiary-container": "#541734",
+                        "on-secondary-container": "#baaeff",
+                        "inverse-primary": "#ae2565",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "outline-variant": "#574147",
+                        "outline": "#a58a91",
+                        "primary-fixed": "#ffd9e3",
+                        "surface-container": "#1b1f2f",
+                        "surface": "#0f1322",
+                        "tertiary-container": "#cf7d9d",
+                        "tertiary": "#ffb0cd",
+                        "secondary-fixed": "#e5deff",
+                        "surface-container-highest": "#303445",
+                        "on-primary-fixed": "#3e001e",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "on-secondary-fixed": "#1a0063",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#0f1322",
+                        "inverse-surface": "#dfe1f7",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary": "#2f009c",
+                        "on-primary-container": "#600032",
+                        "surface-tint": "#ffb0c9",
+                        "on-error": "#690005",
+                        "background": "#0f1322"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "64px",
+                        "gutter": "24px",
+                        "container-margin-mobile": "20px",
+                        "base": "4px",
+                        "sm": "16px",
+                        "md": "24px",
+                        "container-margin-desktop": "80px",
+                        "xs": "8px",
+                        "lg": "40px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-sm": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #090B1A;
+            color: #dfe1f7;
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-header {
+            background: rgba(15, 19, 34, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #2A2E4A;
+        }
+        .card-match {
+            background: #181C35;
+            border: 1px solid #2A2E4A;
+            transition: all 0.3s ease;
+        }
+        .card-match:hover {
+            background: #202542;
+            box-shadow: 0 0 15px rgba(246, 95, 157, 0.1);
+            border-color: #f65f9d;
+        }
+        .premium-gradient-text {
+            background: linear-gradient(135deg, #f65f9d 0%, #6E4CFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sidebar-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .shimmer {
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background">
+<!-- TopAppBar -->
+<header class="glass-header sticky top-0 z-50 h-16 flex justify-between items-center px-container-margin-mobile md:px-lg w-full">
+<div class="flex items-center gap-sm">
+<span class="text-headline-md font-headline-md font-bold text-primary">Kaam</span>
+</div>
+<div class="flex items-center gap-md">
+<div class="hidden md:flex gap-md items-center text-label-md font-label-md text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="hover:text-primary transition-colors" href="#">Search talent</a>
+<a class="hover:text-primary transition-colors" href="#">Matches</a>
+</div>
+<button class="material-symbols-outlined text-primary p-xs hover:bg-surface-container-high rounded-full transition-colors">notifications</button>
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container text-label-sm font-bold">KM</div>
+</div>
+</header>
+<div class="flex min-h-screen">
+<!-- NavigationDrawer (Hidden on Mobile) -->
+<aside class="hidden md:flex flex-col h-[calc(100vh-64px)] w-80 bg-surface-container-low border-r border-surface-variant p-md gap-xs sticky top-16">
+<div class="flex items-center gap-sm mb-lg p-xs">
+<div class="w-12 h-12 rounded-xl bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional corporate headshot of a Middle Eastern recruiter with a warm expression, wearing a navy blue blazer, in a modern, brightly lit office environment with glass walls and minimalist decor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDB0ifzkv2InMPYAw3hrUkRcHzt2rgXXHaQIun9m3DWymdNTCTebJSkzwXZI4F4IzQPnu4n9QlLM7Cv6T-prtoyMEkvJJ3tXcwiifKdStsVSfVl3HywvFbQWr5nCslsJVpefG9qSA0Inton9Rkgt0LBOIzoo9WJpY7yn02kD8l4mKEp6_-rso6M1nnG5cwtJZEHW6iYOzG4c8Qme5qoLqwyRMN1AJBi7mpBIBRJH8Hl0oTf7hxEPLTw94S77gESAjQkqc409RSU8nws"/>
+</div>
+<div>
+<h3 class="text-label-md font-bold text-on-surface">Khalid Al-Mansouri</h3>
+<p class="text-label-sm text-on-surface-variant">Premium Recruiter</p>
+</div>
+</div>
+<nav class="flex flex-col gap-xs">
+<a class="sidebar-item flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="sidebar-item flex items-center gap-md p-md bg-secondary-container text-on-secondary-container font-bold rounded-lg translate-x-1" href="#">
+<span class="material-symbols-outlined">person_search</span>
+<span class="font-body-md text-body-md">Candidate Search</span>
+</a>
+<a class="sidebar-item flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant rounded-lg" href="#">
+<span class="material-symbols-outlined">handshake</span>
+<span class="font-body-md text-body-md">Matches</span>
+</a>
+<a class="sidebar-item flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant rounded-lg" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body-md text-body-md">Billing &amp; Plans</span>
+</a>
+<div class="my-md border-t border-surface-variant"></div>
+<a class="sidebar-item flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-variant rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-body-md text-body-md">Help Center</span>
+</a>
+<a class="sidebar-item flex items-center gap-md p-md text-error hover:bg-error-container/20 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-md text-body-md">Logout</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 w-full max-w-5xl mx-auto px-container-margin-mobile md:px-lg py-lg mb-24 md:mb-0">
+<!-- Breadcrumbs -->
+<div class="flex items-center gap-xs text-label-sm text-on-surface-variant mb-md">
+<span class="material-symbols-outlined text-[16px]">arrow_back</span>
+<a class="hover:text-primary" href="#">Back to Search</a>
+<span>/</span>
+<span class="text-primary font-bold">#KM2048</span>
+</div>
+<!-- Profile Header Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-lg">
+<!-- ID & Role Card -->
+<div class="md:col-span-8 card-match p-md rounded-xl relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+<div class="relative z-10">
+<div class="flex justify-between items-start">
+<div>
+<span class="px-sm py-xs bg-primary-container/10 text-primary-container rounded-full text-label-sm font-bold mb-sm inline-block">ID #KM2048</span>
+<h1 class="text-headline-lg font-headline-lg mt-xs text-on-surface">Cleaner Supervisor</h1>
+<div class="flex flex-wrap gap-md mt-sm text-on-surface-variant">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="text-label-md">Dubai, UAE</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+<span class="text-label-md font-bold text-secondary">AED 2,500 / month</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="text-label-md text-primary">Available Immediately</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+<!-- Action Card -->
+<div class="md:col-span-4 flex flex-col gap-sm">
+<button class="w-full h-1/2 bg-primary-container text-on-primary-container rounded-xl font-bold text-headline-md flex items-center justify-center gap-sm active:scale-95 transition-all shadow-lg">
+<span class="material-symbols-outlined">send</span>
+                        Send Interest
+                    </button>
+<button class="w-full h-1/2 border-1.5 border-secondary text-secondary rounded-xl font-bold text-body-lg flex items-center justify-center gap-sm hover:bg-secondary/10 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">bookmark</span>
+                        Save Candidate
+                    </button>
+</div>
+</div>
+<!-- Profile Details Asymmetric Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Left Column: Bio & Skills -->
+<div class="md:col-span-2 space-y-gutter">
+<!-- Experience Section -->
+<section class="card-match p-md rounded-xl">
+<h2 class="text-headline-md font-headline-md mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">work</span>
+                            Professional Experience
+                        </h2>
+<div class="space-y-lg">
+<div class="relative pl-lg border-l-2 border-surface-variant">
+<div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-primary border-4 border-surface"></div>
+<h3 class="text-body-lg font-bold text-on-surface">Cleaning Supervisor</h3>
+<p class="text-label-sm text-on-surface-variant mb-xs">Facility Management Co. | 2019 - Present</p>
+<p class="text-body-md text-on-surface-variant leading-relaxed">
+                                    Managing a team of 15+ cleaners in a high-traffic corporate environment. Responsible for quality control, inventory management, and scheduling. Ensured 100% compliance with Dubai municipality health and safety standards.
+                                </p>
+</div>
+<div class="relative pl-lg border-l-2 border-surface-variant">
+<div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-surface-variant border-4 border-surface"></div>
+<h3 class="text-body-lg font-bold text-on-surface">Senior Housekeeper</h3>
+<p class="text-label-sm text-on-surface-variant mb-xs">Hospitality Group | 2016 - 2019</p>
+<p class="text-body-md text-on-surface-variant leading-relaxed">
+                                    Provided premium cleaning services for high-end residential suites. Specialized in deep cleaning techniques and specialized surface care.
+                                </p>
+</div>
+</div>
+</section>
+<!-- Skills & Tags -->
+<section class="card-match p-md rounded-xl">
+<h2 class="text-headline-md font-headline-md mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">psychology</span>
+                            Skills &amp; Expertise
+                        </h2>
+<div class="flex flex-wrap gap-xs">
+<span class="px-md py-xs bg-surface-container-high rounded-full text-label-md border border-surface-variant">Team Leadership</span>
+<span class="px-md py-xs bg-primary-container/15 text-primary rounded-full text-label-md border border-primary/20">Quality Control</span>
+<span class="px-md py-xs bg-surface-container-high rounded-full text-label-md border border-surface-variant">Inventory Management</span>
+<span class="px-md py-xs bg-primary-container/15 text-primary rounded-full text-label-md border border-primary/20">Dubai Health Standards</span>
+<span class="px-md py-xs bg-surface-container-high rounded-full text-label-md border border-surface-variant">Deep Cleaning</span>
+<span class="px-md py-xs bg-surface-container-high rounded-full text-label-md border border-surface-variant">Chemical Safety</span>
+<span class="px-md py-xs bg-surface-container-high rounded-full text-label-md border border-surface-variant">Scheduling</span>
+</div>
+</section>
+<!-- Languages -->
+<section class="card-match p-md rounded-xl">
+<h2 class="text-headline-md font-headline-md mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">translate</span>
+                            Languages
+                        </h2>
+<div class="grid grid-cols-2 gap-md">
+<div class="flex justify-between items-center p-sm bg-surface-container-low rounded-lg border border-surface-variant">
+<span class="text-label-md font-bold">English</span>
+<span class="text-label-sm text-primary">Professional</span>
+</div>
+<div class="flex justify-between items-center p-sm bg-surface-container-low rounded-lg border border-surface-variant">
+<span class="text-label-md font-bold">Hindi</span>
+<span class="text-label-sm text-primary">Native</span>
+</div>
+<div class="flex justify-between items-center p-sm bg-surface-container-low rounded-lg border border-surface-variant">
+<span class="text-label-md font-bold">Arabic</span>
+<span class="text-label-sm text-on-surface-variant">Basic</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Privacy & Meta -->
+<div class="space-y-gutter">
+<!-- Privacy Locking Card -->
+<div class="card-match p-md rounded-xl border-dashed border-primary/40 bg-primary-container/5 relative overflow-hidden">
+<div class="relative z-10 flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-[48px] text-primary mb-sm">lock</span>
+<h3 class="text-headline-md font-bold text-primary mb-xs">Privacy Guard Active</h3>
+<p class="text-body-md text-on-surface-variant mb-md">
+                                Private details like full name, phone number, and original CV are hidden for candidate security.
+                            </p>
+<div class="w-full bg-surface-container-high rounded-lg p-sm space-y-sm">
+<div class="flex items-center gap-sm text-label-sm opacity-50">
+<span class="material-symbols-outlined text-[16px]">call</span>
+<span>+971 • • • • • • • •</span>
+</div>
+<div class="flex items-center gap-sm text-label-sm opacity-50">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+<span>k••••@gmail.com</span>
+</div>
+</div>
+<p class="text-label-sm text-on-surface-variant mt-md italic">Unlock documents automatically after a mutual match.</p>
+</div>
+<div class="shimmer absolute inset-0 opacity-10"></div>
+</div>
+<!-- Location Visualizer -->
+<div class="card-match p-0 rounded-xl overflow-hidden h-48 relative">
+<div class="absolute inset-0 z-0 grayscale opacity-40">
+<div class="w-full h-full bg-cover bg-center" data-location="Dubai" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCuJ_RXu8TMSnCQmQBUvQQIAD5-o0cYEEbUe60gCscwpbhWSy-Jnjk5UfPIVBN4d4LXNRvUWKecgsIf8-TPjwLJN3DQF8FijBj7Any3NRoUI0Y4Ib0Ai5NItBEwE-wDcgUYE206Yb4z7BhNnvSr0RIrCy-grJWcmEZFDc2P4wmpOO3NIKyNSNLEKzGf1w99aYGdETnPrcsVwjxxSB1fppkmKfqURWgzW4K9VCfw7Oe_oSYHvkcnHY3fSKjbgEeQs8Im95wkic6T01QF')"></div>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent"></div>
+<div class="absolute bottom-md left-md">
+<p class="text-label-sm text-primary font-bold">Current Vicinity</p>
+<p class="text-body-lg font-bold">Al Barsha, Dubai</p>
+</div>
+</div>
+<!-- Verified Status -->
+<div class="card-match p-md rounded-xl flex items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div>
+<p class="text-label-md font-bold text-on-surface">Verified Identity</p>
+<p class="text-label-sm text-on-surface-variant">Passport &amp; UAE Visa scanned.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe glass-header rounded-t-xl">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-sm font-label-sm">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container/15 text-primary rounded-xl px-3 py-1">
+<span class="material-symbols-outlined">search</span>
+<span class="text-label-sm font-label-sm">Search</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">favorite</span>
+<span class="text-label-sm font-label-sm">Interests</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">handshake</span>
+<span class="text-label-sm font-label-sm">Matches</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">business_center</span>
+<span class="text-label-sm font-label-sm">Company</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction for buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.classList.add('scale-95');
+            });
+            button.addEventListener('mouseup', () => {
+                button.classList.remove('scale-95');
+            });
+            button.addEventListener('mouseleave', () => {
+                button.classList.remove('scale-95');
+            });
+        });
+
+        // Simple parallax effect for the map
+        window.addEventListener('scroll', () => {
+            const scroll = window.pageYOffset;
+            const map = document.querySelector('[data-location]');
+            if(map) {
+                map.style.transform = `translateY(${scroll * 0.05}px)`;
+            }
+        });
+    </script>
+</body></html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Schedule Interview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#ffb0c9",
+                      "tertiary-fixed": "#ffd9e4",
+                      "surface-container": "#1b1f2f",
+                      "secondary-fixed": "#e5deff",
+                      "error-container": "#93000a",
+                      "on-primary-fixed-variant": "#8d004d",
+                      "on-secondary": "#2f009c",
+                      "tertiary-container": "#cf7d9d",
+                      "surface-variant": "#303445",
+                      "tertiary": "#ffb0cd",
+                      "surface-bright": "#353849",
+                      "outline": "#a58a91",
+                      "on-secondary-fixed": "#1a0063",
+                      "secondary": "#c9bfff",
+                      "primary-fixed-dim": "#ffb0c9",
+                      "on-tertiary-fixed-variant": "#72304d",
+                      "on-tertiary-fixed": "#3c0321",
+                      "on-surface": "#dfe1f7",
+                      "surface-dim": "#0f1322",
+                      "on-tertiary-container": "#541734",
+                      "background": "#0f1322",
+                      "secondary-fixed-dim": "#c9bfff",
+                      "surface-tint": "#ffb0c9",
+                      "surface-container-low": "#171b2a",
+                      "on-primary-container": "#600032",
+                      "secondary-container": "#470cd9",
+                      "primary-fixed": "#ffd9e3",
+                      "on-primary-fixed": "#3e001e",
+                      "inverse-primary": "#ae2565",
+                      "outline-variant": "#574147",
+                      "inverse-on-surface": "#2c3040",
+                      "primary-container": "#f65f9d",
+                      "on-background": "#dfe1f7",
+                      "on-secondary-fixed-variant": "#4503d7",
+                      "on-primary": "#640035",
+                      "surface-container-highest": "#303445",
+                      "surface-container-high": "#252939",
+                      "on-tertiary": "#571936",
+                      "on-error-container": "#ffdad6",
+                      "surface": "#0f1322",
+                      "on-error": "#690005",
+                      "tertiary-fixed-dim": "#ffb0cd",
+                      "on-surface-variant": "#ddbfc7",
+                      "error": "#ffb4ab",
+                      "on-secondary-container": "#baaeff",
+                      "surface-container-lowest": "#090d1c",
+                      "inverse-surface": "#dfe1f7"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "8px",
+                      "sm": "16px",
+                      "container-margin-desktop": "80px",
+                      "base": "4px",
+                      "gutter": "24px",
+                      "xl": "64px",
+                      "lg": "40px",
+                      "md": "24px",
+                      "container-margin-mobile": "20px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Manrope"],
+                      "display-lg": ["Manrope"],
+                      "body-lg": ["Manrope"],
+                      "label-md": ["Manrope"],
+                      "headline-md": ["Manrope"],
+                      "body-md": ["Manrope"],
+                      "headline-lg": ["Manrope"],
+                      "label-sm": ["Manrope"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body {
+            background-color: #090B1A;
+            color: #dfe1f7;
+        }
+        .glass-header {
+            background: rgba(9, 11, 26, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #2A2E4A;
+        }
+        .form-card {
+            background-color: #181C35;
+            border: 1px solid #2A2E4A;
+        }
+        .input-field {
+            background-color: #11142A;
+            border: 1px solid #2A2E4A;
+            color: #dfe1f7;
+        }
+        .input-field:focus {
+            border-color: #F65F9D;
+            box-shadow: 0 0 0 2px rgba(246, 95, 157, 0.2);
+            outline: none;
+        }
+        .chip {
+            background-color: #202542;
+            color: #B8BBD0;
+        }
+        .chip.active {
+            background-color: rgba(246, 95, 157, 0.15);
+            color: #F65F9D;
+            border: 1px solid rgba(246, 95, 157, 0.3);
+        }
+        
+        /* Custom scrollbar for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090B1A; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #303445; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #574147; 
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col font-body-md antialiased overflow-x-hidden selection:bg-primary-container selection:text-white">
+<!-- Top App Bar - Linear/Transactional Page (Navigation suppressed, close action) -->
+<header class="glass-header sticky top-0 w-full z-50 flex justify-between items-center px-container-margin-mobile md:px-container-margin-desktop h-16">
+<button class="text-on-surface hover:opacity-80 transition-opacity p-2 -ml-2 flex items-center justify-center rounded-full active:scale-95">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary absolute left-1/2 -translate-x-1/2">Schedule Interview</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center pt-md pb-xl px-container-margin-mobile md:px-container-margin-desktop relative">
+<!-- Decorative Ambient Light -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-64 bg-primary-container/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
+<div class="w-full max-w-xl mx-auto space-y-md">
+<!-- Context Card -->
+<div class="form-card rounded-xl p-md flex items-center gap-sm transition-colors duration-300">
+<div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant/30 flex-shrink-0 bg-surface-variant flex items-center justify-center">
+<img alt="Candidate avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a corporate candidate in a modern, dark-themed office setting with subtle pink neon accent lighting. High quality, corporate modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCN8pglf0mPBCsUk-rNoGL5WcSmB3NMjzO3ZuaXc9gD2fKyvKgz3JXK06iO169afG3nXu293PNijWJaXQIVf8yN00R3c8-Es8069UdgpvtSBOiSNUpKg6sZoWPwMsdmIsnre8ZerA2e9WiDB3Zx098NpDZ6q_vBBthu_Iy0DPbf3UfeOpNfI-9iOlYq7ro99DB6xPACMDwBYYsJQbmDw_ma8dhhGhkKbWExIsliIdidD8eTQDLEliQLvvudNIntuL_YUTB4QjOvoesu"/>
+</div>
+<div>
+<h2 class="font-label-md text-label-md text-on-surface">Alex Mercer</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Senior Product Designer • TechFlow</p>
+</div>
+</div>
+<!-- Form Container -->
+<form class="form-card rounded-xl p-md space-y-gutter shadow-lg">
+<!-- Date Selection -->
+<div class="space-y-sm">
+<label class="block font-label-md text-label-md text-on-surface">Preferred Date</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">calendar_month</span>
+</div>
+<input class="input-field w-full rounded-lg pl-10 pr-4 py-3 font-body-md transition-all duration-200" required="" type="date"/>
+</div>
+</div>
+<!-- Time Selection -->
+<div class="space-y-sm">
+<label class="block font-label-md text-label-md text-on-surface">Preferred Time</label>
+<div class="grid grid-cols-2 gap-sm">
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">schedule</span>
+</div>
+<input class="input-field w-full rounded-lg pl-10 pr-4 py-3 font-body-md transition-all duration-200" required="" type="time"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant pointer-events-none">Start</span>
+</div>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">update</span>
+</div>
+<input class="input-field w-full rounded-lg pl-10 pr-4 py-3 font-body-md transition-all duration-200" required="" type="time"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant pointer-events-none">End</span>
+</div>
+</div>
+</div>
+<!-- Interview Mode -->
+<div class="space-y-sm">
+<label class="block font-label-md text-label-md text-on-surface">Interview Mode</label>
+<div class="flex flex-wrap gap-xs">
+<button class="chip active px-4 py-2 rounded-full font-label-md text-label-md flex items-center gap-2 transition-all duration-200 hover:opacity-90" onclick="toggleChip(this)" type="button">
+<span class="material-symbols-outlined text-[18px]">videocam</span>
+                            Video Call
+                        </button>
+<button class="chip px-4 py-2 rounded-full font-label-md text-label-md flex items-center gap-2 transition-all duration-200 hover:opacity-90" onclick="toggleChip(this)" type="button">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+                            WhatsApp
+                        </button>
+<button class="chip px-4 py-2 rounded-full font-label-md text-label-md flex items-center gap-2 transition-all duration-200 hover:opacity-90" onclick="toggleChip(this)" type="button">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+                            In-person
+                        </button>
+</div>
+</div>
+<!-- Notes -->
+<div class="space-y-sm">
+<label class="block font-label-md text-label-md text-on-surface">Additional Notes <span class="text-on-surface-variant font-normal">(Optional)</span></label>
+<textarea class="input-field w-full rounded-lg p-4 font-body-md min-h-[120px] resize-y transition-all duration-200" placeholder="e.g., Please bring a portfolio or specific questions..."></textarea>
+</div>
+</form>
+</div>
+</main>
+<!-- Fixed Bottom Action Bar for Mobile / Centered for Web -->
+<div class="fixed bottom-0 left-0 w-full p-4 pb-safe glass-header md:relative md:bg-transparent md:border-none md:pb-xl md:pt-0 z-40">
+<div class="max-w-xl mx-auto flex gap-4">
+<button class="flex-1 bg-primary-container text-white font-label-md text-label-md py-4 rounded-xl shadow-[0_4px_14px_0_rgba(246,95,157,0.39)] hover:shadow-[0_6px_20px_rgba(246,95,157,0.23)] hover:bg-[#ff72ad] transition-all duration-200 active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">send</span>
+                Send Availability
+            </button>
+</div>
+</div>
+<script>
+        // Simple logic for chip selection
+        function toggleChip(element) {
+            // Remove active class from all chips in the same container
+            const container = element.parentElement;
+            const chips = container.querySelectorAll('.chip');
+            chips.forEach(chip => {
+                chip.classList.remove('active');
+                chip.classList.add('bg-[#202542]', 'text-[#B8BBD0]', 'border-transparent');
+                chip.classList.remove('bg-[rgba(246,95,157,0.15)]', 'text-[#F65F9D]', 'border-[rgba(246,95,157,0.3)]');
+            });
+
+            // Add active class to clicked chip
+            element.classList.add('active');
+            
+            // Re-apply inline styles for active state to ensure specificity if needed, 
+            // though relying on classes is cleaner. Let's just let the CSS handle it based on .active
+        }
+    </script>
+</body></html>

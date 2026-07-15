@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Interest Request Details</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container": "#1b1f2f",
+                        "secondary-fixed": "#e5deff",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-secondary": "#2f009c",
+                        "tertiary-container": "#cf7d9d",
+                        "surface-variant": "#303445",
+                        "tertiary": "#ffb0cd",
+                        "surface-bright": "#353849",
+                        "outline": "#a58a91",
+                        "on-secondary-fixed": "#1a0063",
+                        "secondary": "#c9bfff",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-dim": "#0f1322",
+                        "on-tertiary-container": "#541734",
+                        "background": "#0f1322",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "surface-tint": "#ffb0c9",
+                        "surface-container-low": "#171b2a",
+                        "on-primary-container": "#600032",
+                        "secondary-container": "#470cd9",
+                        "primary-fixed": "#ffd9e3",
+                        "on-primary-fixed": "#3e001e",
+                        "inverse-primary": "#ae2565",
+                        "outline-variant": "#574147",
+                        "inverse-on-surface": "#2c3040",
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "on-primary": "#640035",
+                        "surface-container-highest": "#303445",
+                        "surface-container-high": "#252939",
+                        "on-tertiary": "#571936",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#0f1322",
+                        "on-error": "#690005",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#baaeff",
+                        "surface-container-lowest": "#090d1c",
+                        "inverse-surface": "#dfe1f7"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "xs": "8px",
+                        "sm": "16px",
+                        "container-margin-desktop": "80px",
+                        "base": "4px",
+                        "gutter": "24px",
+                        "xl": "64px",
+                        "lg": "40px",
+                        "md": "24px",
+                        "container-margin-mobile": "20px"
+                    },
+                    fontFamily: {
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-md": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-sm": ["Manrope"]
+                    },
+                    fontSize: {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Glassmorphism utilities */
+        .glass-panel {
+            background: rgba(27, 31, 47, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(87, 65, 71, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background antialiased min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top App Bar (Task-Focused / Linear Flow) -->
+<header class="fixed top-0 w-full z-50 glass-panel border-b-0 shadow-sm flex items-center px-container-margin-mobile h-16">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/50 transition-colors active:scale-95 text-primary">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md ml-2 flex-1 text-on-surface">Request Details</h1>
+<!-- Trailing action space if needed -->
+<div class="w-10 h-10"></div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-32 px-container-margin-mobile max-w-2xl mx-auto flex flex-col gap-sm">
+<!-- Employer Card (Hero) -->
+<div class="bg-surface-container border border-surface-variant rounded-xl p-md relative overflow-hidden group">
+<!-- Subtle pink glow accent -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary-container/10 rounded-full blur-2xl group-hover:bg-primary-container/20 transition-all duration-500"></div>
+<div class="flex items-start gap-sm relative z-10">
+<div class="w-16 h-16 rounded-lg bg-surface-bright border border-surface-variant overflow-hidden shrink-0">
+<img alt="Company Logo" class="w-full h-full object-cover" data-alt="A modern, high-end corporate logo for a cleaning services company, featuring abstract sparkling stars and clean geometric lines in deep navy and bright white, set against a dark premium background. The lighting is crisp and professional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzg12tvH3zyrXl7jNeXIdL2lKWYLdzqCZFoyRGN_hHGAnr5MfDUHFxj4fGr7-Z8RrSJoVt4zXQoo8kbxjGh79E37OXYbkuqfVkpBkTXgP-uWSwGv06Q6V1Bv72-rkvyWpYlSevT38981cduirm4Q6xlHIYI31ga6MBn1kLCrfmwsXrtQKVjBh-TmqXhIWZ3tbkQ_B011nM8b-G7DTEGpd4IutUMSFZymqG9NypX6W3gLxsCiS7TdQlf82xOM7iRMZr2W4DEi8V0Cdv"/>
+</div>
+<div class="flex flex-col flex-1">
+<h2 class="font-headline-md text-headline-md text-on-surface leading-tight">Bright Star Cleaning Services</h2>
+<div class="flex items-center gap-2 mt-2">
+<span class="inline-flex items-center gap-1 px-2 py-1 bg-surface-variant rounded-full font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px] text-primary icon-fill">check_circle</span>
+                            Verified Employer
+                        </span>
+<span class="inline-flex items-center px-2 py-1 bg-surface-container-low border border-surface-variant rounded-full font-label-sm text-label-sm text-on-surface-variant">
+                            Facilities
+                        </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Details Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-sm">
+<!-- Role -->
+<div class="bg-surface-container-low border border-surface-variant/50 rounded-lg p-sm flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined">work</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Role</p>
+<p class="font-body-md text-body-md text-on-surface font-medium">Senior Facility Cleaner</p>
+</div>
+</div>
+<!-- Salary -->
+<div class="bg-surface-container-low border border-surface-variant/50 rounded-lg p-sm flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Salary Range</p>
+<p class="font-body-md text-body-md text-on-surface font-medium">AED 2,500 - 3,200 <span class="text-on-surface-variant text-sm font-normal">/ mo</span></p>
+</div>
+</div>
+<!-- Location -->
+<div class="bg-surface-container-low border border-surface-variant/50 rounded-lg p-sm flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Location</p>
+<p class="font-body-md text-body-md text-on-surface font-medium">Dubai, Business Bay</p>
+</div>
+</div>
+<!-- Working Hours -->
+<div class="bg-surface-container-low border border-surface-variant/50 rounded-lg p-sm flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined">schedule</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Working Hours</p>
+<p class="font-body-md text-body-md text-on-surface font-medium">9 AM - 6 PM (6 Days/Wk)</p>
+</div>
+</div>
+<!-- Perks / Benefits (Full Width) -->
+<div class="bg-surface-container-low border border-surface-variant/50 rounded-lg p-sm flex flex-col gap-3 md:col-span-2">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Provided Benefits</p>
+<div class="flex flex-wrap gap-3">
+<div class="flex items-center gap-2 bg-surface border border-surface-variant rounded px-3 py-2">
+<span class="material-symbols-outlined text-primary text-[18px]">bed</span>
+<span class="font-label-sm text-label-sm text-on-surface">Accommodation</span>
+</div>
+<div class="flex items-center gap-2 bg-surface border border-surface-variant rounded px-3 py-2">
+<span class="material-symbols-outlined text-primary text-[18px]">directions_bus</span>
+<span class="font-label-sm text-label-sm text-on-surface">Transportation</span>
+</div>
+<div class="flex items-center gap-2 bg-surface border border-surface-variant rounded px-3 py-2">
+<span class="material-symbols-outlined text-primary text-[18px]">medical_services</span>
+<span class="font-label-sm text-label-sm text-on-surface">Health Insurance</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Message Block -->
+<div class="mt-sm bg-surface-container border border-surface-variant rounded-xl p-md relative">
+<span class="material-symbols-outlined absolute top-4 right-4 text-surface-variant text-4xl opacity-50">format_quote</span>
+<p class="font-label-sm text-label-sm text-primary mb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">chat</span> Message from Employer
+            </p>
+<p class="font-body-md text-body-md text-on-surface/90 italic leading-relaxed relative z-10">
+                "We were very impressed with your profile and experience in commercial spaces. We are looking for a reliable team lead for our new contract in Business Bay. Let us know if you are interested in discussing this opportunity further."
+            </p>
+</div>
+</main>
+<!-- Bottom Action Bar (Transactional) -->
+<div class="fixed bottom-0 left-0 w-full z-50 glass-panel border-t border-surface-variant/50 px-container-margin-mobile py-4 pb-[max(16px,env(safe-area-inset-bottom))] flex flex-col gap-3">
+<!-- Privacy Note -->
+<div class="flex items-center justify-center gap-1.5 text-on-surface-variant mb-1">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<p class="font-label-sm text-label-sm">Your phone number is hidden until you accept.</p>
+</div>
+<!-- Buttons -->
+<div class="flex gap-4 max-w-2xl mx-auto w-full">
+<button class="flex-1 py-3 px-4 rounded-lg border border-outline text-on-surface font-label-md text-label-md hover:bg-surface-variant/30 active:scale-95 transition-all duration-200">
+                Decline
+            </button>
+<button class="flex-1 py-3 px-4 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md font-bold shadow-[0_4px_20px_rgba(246,95,157,0.25)] hover:bg-primary-container/90 hover:shadow-[0_4px_25px_rgba(246,95,157,0.4)] active:scale-95 transition-all duration-200">
+                Accept Interest
+            </button>
+</div>
+</div>
+</body></html>

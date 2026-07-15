@@ -1,0 +1,73 @@
+class AppRoutes {
+  const AppRoutes._();
+
+  static const home = '/home';
+  static const welcome = '/welcome';
+  static const roleSelection = '/role-selection';
+  static const login = '/login';
+  static const otp = '/otp';
+  static const basicDetails = '/onboarding/basic-details';
+  static const workPreferences = '/onboarding/work-preferences';
+  static const primaryProfession = '/onboarding/primary-profession';
+  static const skillDetails = '/onboarding/skill-details';
+  static const skillsExperience = '/onboarding/skills-experience';
+  static const documentsUpload = '/onboarding/documents';
+  static const identityDocumentReview = '/candidate/documents/review';
+  static const identityDocumentViewer = '/candidate/documents/viewer';
+  static const privacySetup = '/onboarding/privacy';
+  static const profileComplete = '/onboarding/complete';
+  static const dashboard = '/candidate/dashboard';
+  static const membershipPlans = '/candidate/membership';
+  static const profile = '/candidate/profile';
+  static const editProfile = '/candidate/profile/edit';
+  static const requests = '/candidate/requests';
+  static const requestDetails = '/candidate/requests/details';
+  static const matchUnlocked = '/candidate/match-unlocked';
+  static const matches = '/candidate/matches';
+  static const chatList = '/candidate/chat';
+  static const privateChat = '/candidate/chat/private';
+  static const scheduleInterview = '/candidate/chat/schedule';
+  static const profileViews = '/candidate/views';
+  static const notifications = '/candidate/notifications';
+  static const availability = '/candidate/availability';
+  static const privacyVisibility = '/candidate/privacy';
+  static const loginSecurity = '/candidate/login-security';
+  static const languageSettings = '/candidate/language';
+  static const helpSupport = '/candidate/help';
+  static const accountSettings = '/candidate/settings';
+  static const qaTools = '/qa/tools';
+
+  static const employerSplash = '/employer';
+  static const employerLogin = '/employer/login';
+  static const employerOtp = '/employer/otp';
+  static const employerOnboardingOverview = '/employer/onboarding';
+  static const employerCompanyDetails = '/employer/onboarding/company';
+  static const employerBusinessVerification =
+      '/employer/onboarding/verification';
+  static const employerRules = '/employer/onboarding/rules';
+  static const employerProfileComplete = '/employer/onboarding/complete';
+  static const employerDashboard = '/employer/dashboard';
+  static const employerCandidateSearch = '/employer/search';
+  static const employerAdvancedFilters = '/employer/search/filters';
+  static const employerCandidateProfile = '/employer/search/profile';
+  static const employerSavedCandidates = '/employer/search/saved';
+  static const employerHiringRequirements = '/employer/hiring-requirements';
+  static const employerAddHiringRequirement =
+      '/employer/hiring-requirements/add';
+  static const employerSendInterest = '/employer/interests/send';
+  static const employerInterestSent = '/employer/interests/sent-confirmation';
+  static const employerSentRequests = '/employer/interests';
+  static const employerRequestDetails = '/employer/interests/details';
+  static const employerMatchUnlocked = '/employer/match-unlocked';
+  static const employerMatches = '/employer/matches';
+  static const employerPipeline = '/employer/pipeline';
+  static const employerChatList = '/employer/chat';
+  static const employerPrivateChat = '/employer/chat/private';
+  static const employerScheduleInterview = '/employer/chat/schedule';
+  static const employerCompanyProfile = '/employer/company';
+  static const employerEditCompanyProfile = '/employer/company/edit';
+  static const employerVerificationStatus = '/employer/company/verification';
+  static const employerTeamMembers = '/employer/company/team';
+  static const employerNotifications = '/employer/notifications';
+  static const employerSettings = '/employer/settings';
+}

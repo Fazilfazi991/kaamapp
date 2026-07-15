@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Welcome - Role Selection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#ffb0c9",
+                      "tertiary-fixed": "#ffd9e4",
+                      "surface-container": "#1b1f2f",
+                      "secondary-fixed": "#e5deff",
+                      "error-container": "#93000a",
+                      "on-primary-fixed-variant": "#8d004d",
+                      "on-secondary": "#2f009c",
+                      "tertiary-container": "#cf7d9d",
+                      "surface-variant": "#303445",
+                      "tertiary": "#ffb0cd",
+                      "surface-bright": "#353849",
+                      "outline": "#a58a91",
+                      "on-secondary-fixed": "#1a0063",
+                      "secondary": "#c9bfff",
+                      "primary-fixed-dim": "#ffb0c9",
+                      "on-tertiary-fixed-variant": "#72304d",
+                      "on-tertiary-fixed": "#3c0321",
+                      "on-surface": "#dfe1f7",
+                      "surface-dim": "#0f1322",
+                      "on-tertiary-container": "#541734",
+                      "background": "#0f1322",
+                      "secondary-fixed-dim": "#c9bfff",
+                      "surface-tint": "#ffb0c9",
+                      "surface-container-low": "#171b2a",
+                      "on-primary-container": "#600032",
+                      "secondary-container": "#470cd9",
+                      "primary-fixed": "#ffd9e3",
+                      "on-primary-fixed": "#3e001e",
+                      "inverse-primary": "#ae2565",
+                      "outline-variant": "#574147",
+                      "inverse-on-surface": "#2c3040",
+                      "primary-container": "#f65f9d",
+                      "on-background": "#dfe1f7",
+                      "on-secondary-fixed-variant": "#4503d7",
+                      "on-primary": "#640035",
+                      "surface-container-highest": "#303445",
+                      "surface-container-high": "#252939",
+                      "on-tertiary": "#571936",
+                      "on-error-container": "#ffdad6",
+                      "surface": "#0f1322",
+                      "on-error": "#690005",
+                      "tertiary-fixed-dim": "#ffb0cd",
+                      "on-surface-variant": "#ddbfc7",
+                      "error": "#ffb4ab",
+                      "on-secondary-container": "#baaeff",
+                      "surface-container-lowest": "#090d1c",
+                      "inverse-surface": "#dfe1f7"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "8px",
+                      "sm": "16px",
+                      "container-margin-desktop": "80px",
+                      "base": "4px",
+                      "gutter": "24px",
+                      "xl": "64px",
+                      "lg": "40px",
+                      "md": "24px",
+                      "container-margin-mobile": "20px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Manrope"],
+                      "display-lg": ["Manrope"],
+                      "body-lg": ["Manrope"],
+                      "label-md": ["Manrope"],
+                      "headline-md": ["Manrope"],
+                      "body-md": ["Manrope"],
+                      "headline-lg": ["Manrope"],
+                      "label-sm": ["Manrope"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                      "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                      "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                      "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                      "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                      "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                      "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                      "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        /* Ambient Background Glow */
+        .ambient-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 80vh;
+            background: radial-gradient(circle, rgba(246, 95, 157, 0.05) 0%, rgba(15, 19, 34, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-lowest text-on-surface min-h-screen flex flex-col relative overflow-x-hidden antialiased selection:bg-primary-container selection:text-on-primary-container">
+<div class="ambient-glow"></div>
+<main class="flex-1 flex flex-col justify-center px-container-margin-mobile md:px-container-margin-desktop py-xl w-full max-w-7xl mx-auto z-10 relative">
+<!-- Header Section -->
+<header class="text-center mb-xl">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-inverse-surface tracking-tight">
+                What are you here for?
+            </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-sm max-w-md mx-auto">
+                Select your primary goal to help us tailor your experience.
+            </p>
+</header>
+<!-- Role Selection Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md w-full max-w-3xl mx-auto">
+<!-- Selected Card: Find Work -->
+<button class="group relative flex flex-col items-center justify-center p-xl rounded-2xl border-2 border-primary-container bg-surface-container-high overflow-hidden transition-all duration-300 hover:shadow-[0_0_30px_rgba(246,95,157,0.15)] focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-offset-2 focus:ring-offset-background">
+<!-- Selected State Indicator -->
+<div class="absolute top-md right-md text-primary-container bg-surface-container-lowest rounded-full flex items-center justify-center w-8 h-8 shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Inner Glow for Selected State -->
+<div class="absolute inset-0 bg-gradient-to-b from-primary-container/10 to-transparent opacity-50 pointer-events-none"></div>
+<div class="w-16 h-16 rounded-full bg-surface-container-highest border border-surface-variant flex items-center justify-center mb-md group-hover:scale-105 transition-transform duration-300">
+<span class="material-symbols-outlined text-primary-container text-4xl" data-icon="work" data-weight="fill" style="font-variation-settings: 'FILL' 1;">work</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-inverse-surface mb-xs relative z-10">Find Work</h2>
+<p class="font-label-md text-label-md text-on-surface-variant text-center relative z-10">I am a professional looking for new opportunities.</p>
+</button>
+<!-- Unselected Card: Hire Talent -->
+<button class="group relative flex flex-col items-center justify-center p-xl rounded-2xl border border-surface-variant bg-surface-container hover:bg-surface-container-high hover:border-outline-variant transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-offset-2 focus:ring-offset-background">
+<div class="w-16 h-16 rounded-full bg-surface-container-lowest border border-surface-variant flex items-center justify-center mb-md group-hover:scale-105 transition-transform duration-300 shadow-inner">
+<span class="material-symbols-outlined text-on-surface-variant text-4xl group-hover:text-inverse-surface transition-colors duration-300" data-icon="corporate_fare">corporate_fare</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-inverse-surface mb-xs">Hire Talent</h2>
+<p class="font-label-md text-label-md text-on-surface-variant text-center">I am looking to recruit top-tier professionals.</p>
+</button>
+</div>
+<!-- Privacy Note -->
+<div class="mt-xl text-center max-w-lg mx-auto flex flex-col sm:flex-row items-center justify-center gap-xs px-sm py-sm rounded-lg bg-surface-container/50 border border-surface-variant/50 backdrop-blur-md">
+<span class="material-symbols-outlined text-primary-container" style="font-size: 20px;">lock</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant md:font-body-md md:text-body-md">
+                Your contact details stay private until a match is accepted.
+            </p>
+</div>
+<!-- Call to Action -->
+<div class="mt-xl w-full max-w-sm mx-auto flex flex-col gap-sm">
+<button class="w-full py-md px-lg rounded-full bg-primary-container text-white font-label-md text-label-md tracking-wide shadow-[0_4px_14px_0_rgba(246,95,157,0.39)] hover:shadow-[0_6px_20px_rgba(246,95,157,0.23)] hover:bg-[#ff75af] transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-offset-2 focus:ring-offset-background">
+                Continue
+            </button>
+</div>
+</main>
+</body></html>

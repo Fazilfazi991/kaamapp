@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edit Profile - Kaam</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container": "#1b1f2f",
+                        "secondary-fixed": "#e5deff",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-secondary": "#2f009c",
+                        "tertiary-container": "#cf7d9d",
+                        "surface-variant": "#303445",
+                        "tertiary": "#ffb0cd",
+                        "surface-bright": "#353849",
+                        "outline": "#a58a91",
+                        "on-secondary-fixed": "#1a0063",
+                        "secondary": "#c9bfff",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-dim": "#0f1322",
+                        "on-tertiary-container": "#541734",
+                        "background": "#0f1322",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "surface-tint": "#ffb0c9",
+                        "surface-container-low": "#171b2a",
+                        "on-primary-container": "#600032",
+                        "secondary-container": "#470cd9",
+                        "primary-fixed": "#ffd9e3",
+                        "on-primary-fixed": "#3e001e",
+                        "inverse-primary": "#ae2565",
+                        "outline-variant": "#574147",
+                        "inverse-on-surface": "#2c3040",
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "on-primary": "#640035",
+                        "surface-container-highest": "#303445",
+                        "surface-container-high": "#252939",
+                        "on-tertiary": "#571936",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#0f1322",
+                        "on-error": "#690005",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#baaeff",
+                        "surface-container-lowest": "#090d1c",
+                        "inverse-surface": "#dfe1f7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "8px",
+                        "sm": "16px",
+                        "container-margin-desktop": "80px",
+                        "base": "4px",
+                        "gutter": "24px",
+                        "xl": "64px",
+                        "lg": "40px",
+                        "md": "24px",
+                        "container-margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-md": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-sm": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(17, 20, 42, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid #2A2E4A;
+        }
+        .card-hover:hover {
+            background: #202542;
+            box-shadow: 0 0 15px rgba(246, 95, 157, 0.1);
+        }
+        /* Custom styles for progress bars */
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background-color: #2A2E4A;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #F65F9D, #ae2565);
+            border-radius: 9999px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container pb-safe">
+<!-- TopAppBar (Semantic Shell Mandate: Destination Rule - Linear/Transactional -> BottomNavBar suppressed) -->
+<header class="sticky top-0 w-full z-50 flex justify-between items-center px-container-margin-mobile h-16 bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 flat no shadows transition-all duration-200">
+<button class="text-on-surface-variant hover:opacity-80 transition-all duration-200 active:scale-95 flex items-center justify-center p-2 rounded-full hover:bg-surface-variant/30">
+<span class="material-symbols-outlined" data-icon="arrow_back" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<div class="font-headline-md text-headline-md font-bold text-primary">Kaam</div>
+<div class="w-10"></div> <!-- Spacer for center alignment -->
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-[1280px] mx-auto px-container-margin-mobile md:px-lg lg:px-container-margin-desktop py-md md:py-lg flex flex-col gap-gutter">
+<!-- Header Section -->
+<section class="flex flex-col md:flex-row justify-between items-start md:items-end gap-sm mb-sm">
+<div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface mb-2">Edit Profile</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Update your professional details to improve your matchmaking score.</p>
+</div>
+<div class="flex items-center gap-3 bg-surface-container-high px-4 py-2 rounded-full border border-[#2A2E4A]">
+<span class="font-label-md text-label-md text-on-surface">Overall Completion</span>
+<span class="font-headline-md text-headline-md text-primary-container">85%</span>
+</div>
+</section>
+<!-- Bento Grid Layout for Editable Sections -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+<!-- Basic Details -->
+<a class="group glass-panel rounded-xl p-md card-hover transition-all duration-300 flex flex-col h-full relative overflow-hidden" href="#">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-container/5 rounded-full blur-2xl -mr-10 -mt-10 transition-opacity opacity-0 group-hover:opacity-100"></div>
+<div class="flex justify-between items-start mb-sm relative z-10">
+<div class="p-3 bg-surface-container-highest rounded-lg border border-[#2A2E4A]">
+<span class="material-symbols-outlined text-[#B8BBD0] group-hover:text-primary-container transition-colors" data-icon="person">person</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary">100%</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1 relative z-10">Basic Details</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md flex-grow relative z-10">Name, contact info, and current location.</p>
+<div class="progress-bar-container relative z-10">
+<div class="progress-bar-fill" style="width: 100%;"></div>
+</div>
+</a>
+<!-- Work Preferences -->
+<a class="group glass-panel rounded-xl p-md card-hover transition-all duration-300 flex flex-col h-full relative overflow-hidden lg:col-span-2" href="#">
+<div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-surface-container/50 to-transparent pointer-events-none z-0"></div>
+<div class="flex justify-between items-start mb-sm relative z-10">
+<div class="p-3 bg-surface-container-highest rounded-lg border border-[#2A2E4A]">
+<span class="material-symbols-outlined text-[#B8BBD0] group-hover:text-primary-container transition-colors" data-icon="work">work</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary">80%</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1 relative z-10">Work Preferences</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md flex-grow relative z-10">Desired roles, salary expectations, and preferred working models (Remote/Hybrid).</p>
+<div class="flex flex-wrap gap-2 mb-md relative z-10">
+<span class="font-label-sm text-label-sm px-3 py-1 bg-surface-container-highest text-[#B8BBD0] rounded-full border border-[#2A2E4A]">Full-time</span>
+<span class="font-label-sm text-label-sm px-3 py-1 bg-surface-container-highest text-[#B8BBD0] rounded-full border border-[#2A2E4A]">Hybrid</span>
+<span class="font-label-sm text-label-sm px-3 py-1 bg-primary-container/15 text-primary-container rounded-full border border-primary-container/30">+ Add Role</span>
+</div>
+<div class="progress-bar-container relative z-10">
+<div class="progress-bar-fill" style="width: 80%;"></div>
+</div>
+</a>
+<!-- Skills -->
+<a class="group glass-panel rounded-xl p-md card-hover transition-all duration-300 flex flex-col h-full relative overflow-hidden" href="#">
+<div class="flex justify-between items-start mb-sm relative z-10">
+<div class="p-3 bg-surface-container-highest rounded-lg border border-[#2A2E4A]">
+<span class="material-symbols-outlined text-[#B8BBD0] group-hover:text-primary-container transition-colors" data-icon="psychology">psychology</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary">90%</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1 relative z-10">Skills</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md flex-grow relative z-10">Technical and soft skills.</p>
+<div class="progress-bar-container relative z-10">
+<div class="progress-bar-fill" style="width: 90%;"></div>
+</div>
+</a>
+<!-- Experience -->
+<a class="group glass-panel rounded-xl p-md card-hover transition-all duration-300 flex flex-col h-full relative overflow-hidden" href="#">
+<div class="flex justify-between items-start mb-sm relative z-10">
+<div class="p-3 bg-surface-container-highest rounded-lg border border-[#2A2E4A]">
+<span class="material-symbols-outlined text-[#B8BBD0] group-hover:text-primary-container transition-colors" data-icon="history">history</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary">75%</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1 relative z-10">Experience</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md flex-grow relative z-10">Past roles and educational background.</p>
+<div class="progress-bar-container relative z-10">
+<div class="progress-bar-fill" style="width: 75%;"></div>
+</div>
+</a>
+<!-- Documents -->
+<a class="group glass-panel rounded-xl p-md card-hover transition-all duration-300 flex flex-col h-full relative overflow-hidden" href="#">
+<div class="flex justify-between items-start mb-sm relative z-10">
+<div class="p-3 bg-surface-container-highest rounded-lg border border-[#2A2E4A]">
+<span class="material-symbols-outlined text-[#B8BBD0] group-hover:text-primary-container transition-colors" data-icon="description">description</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary">60%</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1 relative z-10">Documents</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md flex-grow relative z-10">Resume, portfolios, and certifications.</p>
+<div class="progress-bar-container relative z-10">
+<div class="progress-bar-fill" style="width: 60%;"></div>
+</div>
+</a>
+<!-- Privacy -->
+<a class="group glass-panel rounded-xl p-md card-hover transition-all duration-300 flex flex-col h-full relative overflow-hidden lg:col-span-3" href="#">
+<div class="absolute top-0 right-0 w-64 h-64 bg-secondary-container/5 rounded-full blur-3xl -mr-20 -mt-20 transition-opacity opacity-0 group-hover:opacity-100"></div>
+<div class="flex justify-between items-start mb-sm relative z-10">
+<div class="p-3 bg-surface-container-highest rounded-lg border border-[#2A2E4A]">
+<span class="material-symbols-outlined text-[#B8BBD0] group-hover:text-primary-container transition-colors" data-icon="lock">lock</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary">100%</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1 relative z-10">Privacy Settings</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md flex-grow relative z-10">Manage who can see your profile and contact you. Your privacy is paramount in the Midnight Pulse ecosystem.</p>
+<div class="progress-bar-container relative z-10">
+<div class="progress-bar-fill" style="width: 100%;"></div>
+</div>
+</a>
+</div>
+</main>
+<!-- Bottom Action Bar for 'Save Changes' (Sticky) -->
+<div class="sticky bottom-0 left-0 w-full z-40 bg-surface/80 backdrop-blur-lg border-t border-[#2A2E4A] p-4 flex justify-end">
+<div class="w-full max-w-[1280px] mx-auto flex justify-end gap-sm px-container-margin-mobile md:px-0">
+<button class="font-label-md text-label-md px-6 py-3 rounded-lg text-[#B8BBD0] hover:text-white transition-colors bg-transparent">
+                Cancel
+            </button>
+<button class="font-label-md text-label-md px-8 py-3 rounded-lg bg-gradient-to-r from-primary-container to-[#ae2565] text-white hover:opacity-90 transition-opacity shadow-lg shadow-primary-container/20 border border-primary-container/50">
+                Save Changes
+            </button>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kaam - Chats</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#ffb0c9",
+                      "tertiary-fixed": "#ffd9e4",
+                      "surface-container": "#1b1f2f",
+                      "secondary-fixed": "#e5deff",
+                      "error-container": "#93000a",
+                      "on-primary-fixed-variant": "#8d004d",
+                      "on-secondary": "#2f009c",
+                      "tertiary-container": "#cf7d9d",
+                      "surface-variant": "#303445",
+                      "tertiary": "#ffb0cd",
+                      "surface-bright": "#353849",
+                      "outline": "#a58a91",
+                      "on-secondary-fixed": "#1a0063",
+                      "secondary": "#c9bfff",
+                      "primary-fixed-dim": "#ffb0c9",
+                      "on-tertiary-fixed-variant": "#72304d",
+                      "on-tertiary-fixed": "#3c0321",
+                      "on-surface": "#dfe1f7",
+                      "surface-dim": "#0f1322",
+                      "on-tertiary-container": "#541734",
+                      "background": "#0f1322",
+                      "secondary-fixed-dim": "#c9bfff",
+                      "surface-tint": "#ffb0c9",
+                      "surface-container-low": "#171b2a",
+                      "on-primary-container": "#600032",
+                      "secondary-container": "#470cd9",
+                      "primary-fixed": "#ffd9e3",
+                      "on-primary-fixed": "#3e001e",
+                      "inverse-primary": "#ae2565",
+                      "outline-variant": "#574147",
+                      "inverse-on-surface": "#2c3040",
+                      "primary-container": "#f65f9d",
+                      "on-background": "#dfe1f7",
+                      "on-secondary-fixed-variant": "#4503d7",
+                      "on-primary": "#640035",
+                      "surface-container-highest": "#303445",
+                      "surface-container-high": "#252939",
+                      "on-tertiary": "#571936",
+                      "on-error-container": "#ffdad6",
+                      "surface": "#0f1322",
+                      "on-error": "#690005",
+                      "tertiary-fixed-dim": "#ffb0cd",
+                      "on-surface-variant": "#ddbfc7",
+                      "error": "#ffb4ab",
+                      "on-secondary-container": "#baaeff",
+                      "surface-container-lowest": "#090d1c",
+                      "inverse-surface": "#dfe1f7"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "8px",
+                      "sm": "16px",
+                      "container-margin-desktop": "80px",
+                      "base": "4px",
+                      "gutter": "24px",
+                      "xl": "64px",
+                      "lg": "40px",
+                      "md": "24px",
+                      "container-margin-mobile": "20px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Manrope"],
+                      "display-lg": ["Manrope"],
+                      "body-lg": ["Manrope"],
+                      "label-md": ["Manrope"],
+                      "headline-md": ["Manrope"],
+                      "body-md": ["Manrope"],
+                      "headline-lg": ["Manrope"],
+                      "label-sm": ["Manrope"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body {
+            background-color: #090B1A;
+            color: #dfe1f7;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            background-color: #181C35;
+            border: 1px solid #2A2E4A;
+        }
+        .glass-header {
+            background-color: rgba(9, 11, 26, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid #2A2E4A;
+        }
+        .search-input:focus {
+            border-color: #F65F9D;
+            box-shadow: 0 0 8px rgba(246, 95, 157, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-50 flex justify-between items-center px-container-margin-mobile h-16 bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 transition-all duration-200">
+<div class="flex items-center gap-4">
+<button class="text-primary hover:opacity-80 transition-all duration-200 active:scale-95 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="shield_person">shield_person</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Kaam</h1>
+</div>
+<button class="text-primary hover:opacity-80 transition-all duration-200 active:scale-95 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-7xl mx-auto px-container-margin-mobile md:px-container-margin-desktop py-md md:py-lg flex flex-col gap-gutter">
+<!-- Search Section -->
+<section class="w-full">
+<div class="relative group w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#7E829F] group-focus-within:text-primary transition-colors duration-200">search</span>
+<input class="search-input w-full bg-[#11142A] border border-[#2A2E4A] rounded-xl py-4 pl-12 pr-4 text-on-surface placeholder-[#7E829F] font-body-md text-body-md outline-none transition-all duration-300" placeholder="Search messages, companies, or roles..." type="text"/>
+</div>
+</section>
+<!-- Chat List -->
+<section class="flex flex-col gap-xs">
+<!-- Chat Item 1 (Unread) -->
+<article class="glass-card rounded-xl p-sm flex items-center gap-4 cursor-pointer hover:bg-[#202542] hover:shadow-[0_0_15px_rgba(246,95,157,0.1)] transition-all duration-300 group">
+<div class="relative shrink-0">
+<img class="w-14 h-14 rounded-full object-cover border border-[#2A2E4A]" data-alt="A sleek, modern, abstract corporate logo for a high-end tech firm, set against a dark background with subtle neon pink and deep purple accents, representing a premium matchmaking aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6SrPxiIJejlm9e1sqIVjlePHFfSJ95yx-3iWgnubqqFtkf2hw5znNMPRM1JcPxK3gZbY5krJ8Zeop05RGJWSB8aU3wVTgIMOj6SeZQIMcHuUE57Uszb73_5Syc4cBxTTgni-IJThyE8HTvJ8G2_L1yP1w2Cy_4sETNb3llHb8MDygZa526C6LBZzM1WLFpRwsdaSftmMzA7-8LHXCFLN2ZcKSXZzpp4uE-hz-pPVdqdfmEArF0zz2G0IJD5n3ptoNVAKnrBK7oa51"/>
+<div class="absolute bottom-0 right-0 w-4 h-4 bg-[#11142A] rounded-full flex items-center justify-center">
+<span class="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+</div>
+</div>
+<div class="flex-grow min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<div class="flex items-center gap-1.5">
+<h2 class="font-headline-md text-body-md font-bold text-on-surface truncate">NexaTech Enterprises</h2>
+<span class="material-symbols-outlined text-primary text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary whitespace-nowrap ml-2">10:42 AM</span>
+</div>
+<div class="font-label-md text-label-sm text-secondary-fixed mb-1 truncate">Senior Product Designer Role</div>
+<div class="flex justify-between items-center gap-2">
+<p class="font-body-md text-label-sm text-on-surface font-medium truncate">We would love to schedule a technical interview this Friday.</p>
+<span class="bg-primary-container text-white font-label-sm text-[10px] px-2 py-0.5 rounded-full font-bold shadow-[0_0_8px_rgba(246,95,157,0.4)]">2</span>
+</div>
+</div>
+</article>
+<!-- Chat Item 2 (Read) -->
+<article class="glass-card rounded-xl p-sm flex items-center gap-4 cursor-pointer hover:bg-[#202542] transition-all duration-300 group">
+<div class="relative shrink-0">
+<img class="w-14 h-14 rounded-full object-cover border border-[#2A2E4A] grayscale group-hover:grayscale-0 transition-all duration-300" data-alt="A sophisticated, minimalist corporate logo featuring geometric shapes in deep blues and silvers, emphasizing trust and stability within a dark, premium digital environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbDr1lmStQSVVySIvYJdRspBhrIuxeZncrX88pQ86tmSacGZ4WxHCpS-ldcSoUfkSOOkLcrzUntAN3ViX7er4OlGr5cE-hE9KfcSnOLC6irfCqlSbeE3kthFrucGZuRDjldMwsPpwhWl7lbBrSTOELvKoi3OowKsUVm2ynjZ9VO-WzcxkRaz78MqX8JHwJG4N_saarwlk8spLENM59gtqdTdOUQSEaLgEx-UtJji0iZa31o1cdWoefjIS_7UmoAcmChEqsFTsbOHYW"/>
+</div>
+<div class="flex-grow min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<div class="flex items-center gap-1.5">
+<h2 class="font-headline-md text-body-md font-bold text-on-surface truncate">Aegis Capital</h2>
+<span class="material-symbols-outlined text-primary text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<span class="font-label-sm text-label-sm text-[#7E829F] whitespace-nowrap ml-2">Yesterday</span>
+</div>
+<div class="font-label-md text-label-sm text-secondary-fixed mb-1 truncate">UX Researcher - FinTech</div>
+<div class="flex justify-between items-center gap-2">
+<p class="font-body-md text-label-sm text-[#7E829F] truncate">Thank you for your time during the portfolio review.</p>
+</div>
+</div>
+</article>
+<!-- Chat Item 3 (Read) -->
+<article class="glass-card rounded-xl p-sm flex items-center gap-4 cursor-pointer hover:bg-[#202542] transition-all duration-300 group">
+<div class="relative shrink-0">
+<div class="w-14 h-14 rounded-full bg-[#11142A] border border-[#2A2E4A] flex items-center justify-center">
+<span class="font-headline-md text-headline-md text-primary font-bold">V</span>
+</div>
+</div>
+<div class="flex-grow min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<div class="flex items-center gap-1.5">
+<h2 class="font-headline-md text-body-md font-bold text-on-surface truncate">Vanguard Media</h2>
+</div>
+<span class="font-label-sm text-label-sm text-[#7E829F] whitespace-nowrap ml-2">Mon</span>
+</div>
+<div class="font-label-md text-label-sm text-secondary-fixed mb-1 truncate">Lead UI Designer</div>
+<div class="flex justify-between items-center gap-2">
+<p class="font-body-md text-label-sm text-[#7E829F] truncate">The contract details have been sent to your email.</p>
+</div>
+</div>
+</article>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-surface-container-low/80 dark:bg-surface-container-low/80 backdrop-blur-lg border-t border-outline-variant/20 shadow-lg md:hidden">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 w-16 gap-1">
+<span class="material-symbols-outlined text-[24px]" data-icon="grid_view">grid_view</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 w-16 gap-1">
+<span class="material-symbols-outlined text-[24px]" data-icon="ads_click">ads_click</span>
+<span class="font-label-sm text-label-sm">Requests</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 w-16 gap-1">
+<span class="material-symbols-outlined text-[24px]" data-icon="handshake">handshake</span>
+<span class="font-label-sm text-label-sm">Matches</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary font-semibold hover:text-primary-container transition-transform duration-200 active:scale-90 w-16 gap-1">
+<div class="relative">
+<span class="material-symbols-outlined text-[24px]" data-icon="chat_bubble" style="font-variation-settings: 'FILL' 1;">chat_bubble</span>
+<span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary-container rounded-full border-2 border-[#171b2a]"></span>
+</div>
+<span class="font-label-sm text-label-sm">Chat</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-transform duration-200 active:scale-90 w-16 gap-1">
+<span class="material-symbols-outlined text-[24px]" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</button>
+</nav>
+</body></html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Messages - Kaam</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#f65f9d",
+                        "on-background": "#dfe1f7",
+                        "surface-container-high": "#252939",
+                        "inverse-on-surface": "#2c3040",
+                        "on-tertiary-fixed": "#3c0321",
+                        "on-surface": "#dfe1f7",
+                        "surface-container-low": "#171b2a",
+                        "error-container": "#93000a",
+                        "secondary": "#c9bfff",
+                        "secondary-container": "#470cd9",
+                        "surface-variant": "#303445",
+                        "on-primary-fixed-variant": "#8d004d",
+                        "on-primary": "#640035",
+                        "primary": "#ffb0c9",
+                        "tertiary-fixed-dim": "#ffb0cd",
+                        "on-surface-variant": "#ddbfc7",
+                        "on-secondary-fixed-variant": "#4503d7",
+                        "surface-bright": "#353849",
+                        "on-tertiary": "#571936",
+                        "tertiary-fixed": "#ffd9e4",
+                        "surface-container-lowest": "#090d1c",
+                        "on-tertiary-container": "#541734",
+                        "on-secondary-container": "#baaeff",
+                        "inverse-primary": "#ae2565",
+                        "primary-fixed-dim": "#ffb0c9",
+                        "outline-variant": "#574147",
+                        "outline": "#a58a91",
+                        "primary-fixed": "#ffd9e3",
+                        "surface-container": "#1b1f2f",
+                        "surface": "#0f1322",
+                        "tertiary-container": "#cf7d9d",
+                        "tertiary": "#ffb0cd",
+                        "secondary-fixed": "#e5deff",
+                        "surface-container-highest": "#303445",
+                        "on-primary-fixed": "#3e001e",
+                        "on-tertiary-fixed-variant": "#72304d",
+                        "secondary-fixed-dim": "#c9bfff",
+                        "on-secondary-fixed": "#1a0063",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#0f1322",
+                        "inverse-surface": "#dfe1f7",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary": "#2f009c",
+                        "on-primary-container": "#600032",
+                        "surface-tint": "#ffb0c9",
+                        "on-error": "#690005",
+                        "background": "#0f1322"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "64px",
+                        "gutter": "24px",
+                        "container-margin-mobile": "20px",
+                        "base": "4px",
+                        "sm": "16px",
+                        "md": "24px",
+                        "container-margin-desktop": "80px",
+                        "xs": "8px",
+                        "lg": "40px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "label-sm": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "label-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-header {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .chat-card {
+            background: #181C35;
+            border: 1px solid #2A2E4A;
+            transition: all 0.3s ease;
+        }
+        .chat-card:hover {
+            background: #202542;
+            box-shadow: 0 0 15px rgba(246, 95, 157, 0.1);
+            transform: translateY(-2px);
+        }
+        .unread-indicator {
+            background: #F65F9D;
+            box-shadow: 0 0 8px rgba(246, 95, 157, 0.5);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24">
+<!-- Top AppBar -->
+<header class="fixed top-0 z-50 w-full h-16 flex justify-between items-center px-container-margin-mobile glass-header bg-surface/70 border-b border-surface-variant">
+<div class="flex items-center gap-xs">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-primary-container/20 flex items-center justify-center">
+<img class="w-full h-full object-cover" data-alt="A professional corporate logo for a premium recruiting agency named Kaam, featuring a minimalist geometric design in shades of primary pink and deep navy blue. The logo is clean and high-status, set against a dark glassmorphic background with subtle glow effects to signify elite matchmaking technology." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaySTTMAcLPyrwcKL36hZiGft5gc14NDv0zkygyRWE_6T5_2LCUFHXz33Vidrjkogub3Um_f4CJe2XHO7K8JuIHeURCjOTk8fRb7Ywn5A8SjOUaFnyWGK9mrqYxafGnexWkrtvVytPH_jcyx-qACYuGC8XFCIzAH1ENCcXGsIOTSmMcrkHgaeKUhq9gyMDiCw46vlCorSaPH-eJvxGIUkiWBFdpw1Fi1PfSoTvvXB7P0CMUiCs0c2Ceq6SG7ENIXtLIHRWvSO4n992"/>
+</div>
+<span class="text-headline-md font-headline-md font-bold text-on-surface">Kaam</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full">notifications</button>
+</div>
+</header>
+<main class="pt-20 px-container-margin-mobile max-w-4xl mx-auto">
+<!-- Search & Title -->
+<div class="mb-lg">
+<h1 class="text-headline-lg font-headline-lg text-on-surface mb-md">Messages</h1>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border border-surface-variant rounded-xl py-3 pl-12 pr-4 text-body-md focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all text-on-surface" placeholder="Search for conversations" type="text"/>
+</div>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-xs mb-lg overflow-x-auto pb-2 scrollbar-hide">
+<span class="px-4 py-2 bg-primary-container/15 text-primary border border-primary-container/30 rounded-full text-label-md cursor-pointer whitespace-nowrap">All Chats</span>
+<span class="px-4 py-2 bg-surface-container text-on-surface-variant border border-surface-variant rounded-full text-label-md cursor-pointer whitespace-nowrap hover:bg-surface-container-high transition-colors">Unread</span>
+<span class="px-4 py-2 bg-surface-container text-on-surface-variant border border-surface-variant rounded-full text-label-md cursor-pointer whitespace-nowrap hover:bg-surface-container-high transition-colors">Matched</span>
+<span class="px-4 py-2 bg-surface-container text-on-surface-variant border border-surface-variant rounded-full text-label-md cursor-pointer whitespace-nowrap hover:bg-surface-container-high transition-colors">Archived</span>
+</div>
+<!-- Conversation List -->
+<div class="flex flex-col gap-sm">
+<!-- Chat Card 1 (Active/Unread) -->
+<div class="chat-card p-md rounded-xl flex gap-md relative cursor-pointer group">
+<div class="relative shrink-0">
+<div class="w-14 h-14 rounded-full overflow-hidden border-2 border-primary-container/30">
+<img class="w-full h-full object-cover" data-alt="Close-up portrait of a professional male candidate for a senior software engineering role, wearing a crisp navy blazer in a modern, brightly lit office environment. The image uses soft, warm focus and a high-end corporate aesthetic with a professional color palette of deep blues and neutral tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvM2ez2GKSDyXVO7T3tQj1ObBBXl_3wMGLAjh9AtrL8rgqqwc_QvzhrvsWJlcnCuE0pUhoo0_c3vnops5ZONCWRA5ENFLtWh7zlDFWSJ47e8mNu0xgI86klNKL4euxRM49jGjBnPR3jGvv-wCx4sDePG8QJ9bA_dWcaUZy3NGXAO0TcNyRz3u1AXHsWeLT-n8AhSaLLvSC3RX9x-p59wb5yyTh0FJmR_pgbI-A21WqkiIJDEIagjp6-5NP4b1_99p7S64y0nL4A31Z"/>
+</div>
+<div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-[#181C35] rounded-full"></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-xs">
+<h3 class="font-headline-md text-on-surface truncate">Ahmed Al-Farsi</h3>
+<span class="text-label-sm text-on-surface-variant opacity-70">#SDE-902</span>
+</div>
+<span class="text-label-sm text-on-surface-variant">2m ago</span>
+</div>
+<p class="text-label-md text-primary mb-2 font-medium">Senior Software Engineer</p>
+<p class="text-body-md text-on-surface-variant truncate pr-6">"Thank you for the opportunity! I've reviewed the project details and..."</p>
+</div>
+<div class="absolute right-4 bottom-4 flex flex-col items-end gap-2">
+<span class="px-2 py-0.5 bg-secondary-container/20 text-secondary border border-secondary/30 rounded text-[10px] font-bold tracking-wider uppercase">Matched</span>
+<div class="unread-indicator w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold text-white">2</div>
+</div>
+</div>
+<!-- Chat Card 2 -->
+<div class="chat-card p-md rounded-xl flex gap-md relative cursor-pointer">
+<div class="relative shrink-0">
+<div class="w-14 h-14 rounded-full overflow-hidden border border-surface-variant">
+<img class="w-full h-full object-cover" data-alt="A professional female candidate, late 20s, with a confident smile, photographed against a minimalist grey architectural background. She represents a high-tier Marketing Manager applicant, styled in professional attire. The lighting is sophisticated, emphasizing a clean and elite tech-industry atmosphere with subtle cool-toned shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnNFFHyRXAGOCI5TuihpKZX-qsqkzCbq7kGevF_XmpPIbuNEoxqC-WyGhuhr7uwXQEM9GVtqxwjxR0Qv_t7PJNROXsjGOD65hcxmTwc-wfkvf62KmRooSpcLvu9dcF4eSy_2RoFyAQTO_auVl2s-YTwbihEoFwQgYrQO4wEJ0hV81s9OZwyIoj6O4NDC54z2LZ4Uol6dHRdNkin4p3oPju-RSvXr0wX90OFZ3g4BkEJsFlZmHeOggQ-6OhF2u0yXVk_W4hxZdqyPJc"/>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-xs">
+<h3 class="font-headline-md text-on-surface truncate">Sarah Jenkins</h3>
+<span class="text-label-sm text-on-surface-variant opacity-70">#MKT-441</span>
+</div>
+<span class="text-label-sm text-on-surface-variant">1h ago</span>
+</div>
+<p class="text-label-md text-primary mb-2 font-medium">Head of Growth</p>
+<p class="text-body-md text-on-surface-variant truncate">I'll send over my portfolio later this evening.</p>
+</div>
+<div class="absolute right-4 bottom-4">
+<span class="px-2 py-0.5 bg-surface-container-high text-on-surface-variant border border-surface-variant rounded text-[10px] font-bold tracking-wider uppercase">Applied</span>
+</div>
+</div>
+<!-- Chat Card 3 -->
+<div class="chat-card p-md rounded-xl flex gap-md relative cursor-pointer">
+<div class="relative shrink-0">
+<div class="w-14 h-14 rounded-full overflow-hidden border border-surface-variant">
+<img class="w-full h-full object-cover" data-alt="Headshot of a middle-aged male executive candidate with glasses, projecting a sense of experience and leadership. The lighting is dramatic and moody, reflecting the Midnight Pulse aesthetic, with a backdrop that hints at a luxury Dubai corporate setting. High-quality professional portraiture for a C-suite position." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyEjRvR-yAQE2_LO8-bHgpcnDlI4m8_pXEHrqC-Sm9clUJzKE_hhfRqOCny50SHVUVq7m9xbXddmBpE89C0FOvUG5Q63WlYtXJwz-Q90YyQ-htlbBi3FyewTTNNY-BXFvNvV5KiyCqIpE9tl10ZcuiHuqZTEeFWo9i4L-0v_HFC8kcTX8Cn4DCUlZAo7JHrp-BycYhjmuEBUyFXl5Fl9InsN4trC5dtESkdE6Jlz2Wg7VbNHoODzjvevsfSR-A-A-mgBj5cLvikg-A"/>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-xs">
+<h3 class="font-headline-md text-on-surface truncate">Omar Khaled</h3>
+<span class="text-label-sm text-on-surface-variant opacity-70">#OPS-112</span>
+</div>
+<span class="text-label-sm text-on-surface-variant">4h ago</span>
+</div>
+<p class="text-label-md text-primary mb-2 font-medium">Operations Director</p>
+<p class="text-body-md text-on-surface-variant truncate">The contract has been signed. Looking forward to joining.</p>
+</div>
+<div class="absolute right-4 bottom-4">
+<span class="px-2 py-0.5 bg-green-500/10 text-green-400 border border-green-500/30 rounded text-[10px] font-bold tracking-wider uppercase">Hired</span>
+</div>
+</div>
+<!-- Chat Card 4 -->
+<div class="chat-card p-md rounded-xl flex gap-md relative cursor-pointer">
+<div class="relative shrink-0">
+<div class="w-14 h-14 rounded-full overflow-hidden border border-surface-variant">
+<img class="w-full h-full object-cover" data-alt="Creative professional female candidate with a stylish, modern look. She is in a creative studio space with soft ambient neon lighting that complements the pink and purple brand accents. The mood is artistic yet professional, suitable for a UI/UX Designer role in a premium tech startup environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4bBgyryWOzPXvNJcbrtvswslf18U0AmTYQgBu6gAC0bLJa6AfNe3o-K9eEbKSBzB3hQ9-yK7K8SsvNT0EcAfdgou-QykSOC4eCCKVpdXxtI3antzCoN8Yu9YsBk2AnwFAv5_Pina6FQwKDHidFE79xwBLe1hyKawoeFR7z0tijfbyl_i2rLkRpO_KL3ktHXq1FZ4CJ6GYHQeqLYOKkDcnHH_dWzflGcF2foJPbVegg4po0QFGluXKmKJIVJmdGdSdX8lhdvKnxs-t"/>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start mb-1">
+<div class="flex items-center gap-xs">
+<h3 class="font-headline-md text-on-surface truncate">Maya Lin</h3>
+<span class="text-label-sm text-on-surface-variant opacity-70">#UI-667</span>
+</div>
+<span class="text-label-sm text-on-surface-variant">Yesterday</span>
+</div>
+<p class="text-label-md text-primary mb-2 font-medium">Senior UX Designer</p>
+<p class="text-body-md text-on-surface-variant truncate">Can we reschedule the interview to tomorrow morning?</p>
+</div>
+<div class="absolute right-4 bottom-4">
+<span class="px-2 py-0.5 bg-secondary-container/20 text-secondary border border-secondary/30 rounded text-[10px] font-bold tracking-wider uppercase">Interviewing</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom NavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe glass-header bg-surface/70 border-t border-surface-variant shadow-lg">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">home</span>
+<span class="text-label-sm font-label-sm">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+<span class="text-label-sm font-label-sm">Search</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container/15 text-primary rounded-xl px-3 py-1 scale-90 transition-transform duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="text-label-sm font-label-sm">Interests</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">handshake</span>
+<span class="text-label-sm font-label-sm">Matches</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">business_center</span>
+<span class="text-label-sm font-label-sm">Company</span>
+</button>
+</nav>
+<script>
+        // Simple micro-interaction for cards
+        document.querySelectorAll('.chat-card').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.style.transform = 'scale(0.98)';
+            });
+            card.addEventListener('mouseup', () => {
+                card.style.transform = 'translateY(-2px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Search bar focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('scale-[1.02]');
+            searchInput.parentElement.style.transition = 'transform 0.3s ease';
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('scale-[1.02]');
+        });
+    </script>
+</body></html>
