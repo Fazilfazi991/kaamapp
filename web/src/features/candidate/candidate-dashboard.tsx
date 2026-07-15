@@ -19,10 +19,17 @@ export function CandidateDashboard({
   profile,
   candidate,
   membership,
+  counts,
 }: {
   profile: ProfileRow | null;
   candidate: CandidateProfileRow | null;
   membership: CandidateMembershipRow | null;
+  counts?: {
+    pendingInterests: number;
+    acceptedInterests: number;
+    matches: number;
+    unreadMessages: number;
+  };
 }) {
   const completion = candidateCompletion({ profile, candidate });
 
@@ -69,6 +76,33 @@ export function CandidateDashboard({
         />
       </div>
 
+      <div className="grid gap-4 md:grid-cols-4">
+        <StatCard
+          title="Pending interests"
+          value={String(counts?.pendingInterests ?? 0)}
+          note="Employer requests waiting for your response."
+          tone={(counts?.pendingInterests ?? 0) > 0 ? "warning" : "neutral"}
+        />
+        <StatCard
+          title="Accepted interests"
+          value={String(counts?.acceptedInterests ?? 0)}
+          note="Accepted requests remain visible in your interest history."
+          tone={(counts?.acceptedInterests ?? 0) > 0 ? "success" : "neutral"}
+        />
+        <StatCard
+          title="Matches"
+          value={String(counts?.matches ?? 0)}
+          note="Matches are created after you accept an interest."
+          tone={(counts?.matches ?? 0) > 0 ? "success" : "neutral"}
+        />
+        <StatCard
+          title="Unread messages"
+          value={String(counts?.unreadMessages ?? 0)}
+          note="Unread matched-chat messages."
+          tone={(counts?.unreadMessages ?? 0) > 0 ? "warning" : "neutral"}
+        />
+      </div>
+
       <section className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-[#201925]">Selected skills</h2>
         <p className="mt-2 text-sm text-[#66616f]">{listSummary(candidate?.skills)}</p>
@@ -76,12 +110,16 @@ export function CandidateDashboard({
 
       <div className="grid gap-4 md:grid-cols-2">
         <EmptyStateCard
-          title="Recent matches"
-          description="No web match records are shown yet. This foundation will connect to the existing matching tables in a later phase."
+          title="Employer interests"
+          description="Review incoming employer interest requests and accept or reject pending requests."
+          actionHref={routes.candidateInterests}
+          actionLabel="View interests"
         />
         <EmptyStateCard
-          title="Employer interest"
-          description="Interest requests will appear here after the web workflow is connected to the existing backend."
+          title="Messages"
+          description="Open conversations for accepted matches when the backend chat rule allows messaging."
+          actionHref={routes.candidateMessages}
+          actionLabel="Open messages"
         />
       </div>
 

@@ -4,6 +4,7 @@ export const candidateNavigation = [
   { href: routes.candidateDashboard, label: "Dashboard" },
   { href: routes.candidateProfile, label: "Profile" },
   { href: routes.candidateOnboarding, label: "Onboarding" },
+  { href: routes.candidateInterests, label: "Interests" },
   { href: routes.candidateJobs, label: "Jobs" },
   { href: routes.candidateMatches, label: "Matches" },
   { href: routes.candidateMessages, label: "Messages" },

@@ -12,6 +12,7 @@ export const routes = {
   candidateDashboard: "/candidate/dashboard",
   candidateProfile: "/candidate/profile",
   candidateProfileEdit: "/candidate/profile/edit",
+  candidateInterests: "/candidate/interests",
   candidateJobs: "/candidate/jobs",
   candidateMatches: "/candidate/matches",
   candidateMessages: "/candidate/messages",

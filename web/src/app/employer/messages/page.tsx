@@ -1,20 +1,15 @@
 import { PageTitle } from "@/components/layout/page-title";
 import { EmptyStateCard } from "@/components/ui/empty-state";
-import { MatchCard } from "@/features/employer/components/match-card";
-import { loadEmployerMatches } from "@/features/employer/server/data";
+import { MessageInbox } from "@/features/messaging/components/inbox";
+import { loadConversationSummaries } from "@/features/messaging/server/data";
 
 export default async function EmployerMessagesPage() {
-  const { matches } = await loadEmployerMatches();
-  const chatEnabled = matches.filter((match) => match.chat_enabled);
+  const conversations = await loadConversationSummaries("employer");
   return (
     <div className="grid gap-6">
       <PageTitle title="Messages" description="Chat access is available only for matches allowed by the existing backend rule." />
-      {chatEnabled.length ? (
-        <div className="grid gap-4">
-          {chatEnabled.map((match) => (
-            <MatchCard key={match.match_id} match={match} />
-          ))}
-        </div>
+      {conversations.length ? (
+        <MessageInbox conversations={conversations} />
       ) : (
         <EmptyStateCard
           title="No available chats"

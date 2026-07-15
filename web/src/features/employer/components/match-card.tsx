@@ -11,7 +11,9 @@ export function MatchCard({ match }: { match: MatchContactRow }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-[#201925]">{match.display_name ?? "Matched candidate"}</h2>
-          <p className="mt-1 text-sm text-[#66616f]">{match.role ?? "Candidate"} · {match.location ?? "Location not set"}</p>
+          <p className="mt-1 text-sm text-[#66616f]">
+            {match.role ?? "Candidate"} - {match.location ?? "Location not set"}
+          </p>
         </div>
         <StatusBadge tone={match.chat_enabled ? "success" : "warning"}>
           {match.chat_enabled ? "Chat available" : "Contact locked"}
@@ -24,18 +26,32 @@ export function MatchCard({ match }: { match: MatchContactRow }) {
       </p>
       {canContact ? (
         <div className="mt-4 grid gap-2 text-sm text-[#3b3340]">
-          {match.phone ? <a className="font-semibold text-[#bc1f55]" href={`tel:${match.phone}`}>Call candidate</a> : <span>Phone not shared</span>}
-          {whatsapp ? <a className="font-semibold text-[#bc1f55]" href={`https://wa.me/${whatsapp}`}>Open WhatsApp</a> : null}
-          {match.email ? <a className="font-semibold text-[#bc1f55]" href={`mailto:${match.email}`}>Email candidate</a> : <span>Email not shared</span>}
+          {match.phone ? (
+            <a className="font-semibold text-[#bc1f55]" href={`tel:${match.phone}`}>
+              Call candidate
+            </a>
+          ) : (
+            <span>Phone not shared</span>
+          )}
+          {whatsapp ? (
+            <a className="font-semibold text-[#bc1f55]" href={`https://wa.me/${whatsapp}`}>
+              Open WhatsApp
+            </a>
+          ) : null}
+          {match.email ? (
+            <a className="font-semibold text-[#bc1f55]" href={`mailto:${match.email}`}>
+              Email candidate
+            </a>
+          ) : (
+            <span>Email not shared</span>
+          )}
         </div>
       ) : null}
       <div className="mt-5 flex flex-wrap gap-3">
         <ButtonLink href={`/employer/candidates/${match.candidate_id}`} variant="secondary">
           View profile
         </ButtonLink>
-        {match.chat_enabled ? (
-          <ButtonLink href="/employer/messages">Open chat</ButtonLink>
-        ) : null}
+        {match.chat_enabled ? <ButtonLink href={`/employer/messages/${match.match_id}`}>Open chat</ButtonLink> : null}
       </div>
     </article>
   );
