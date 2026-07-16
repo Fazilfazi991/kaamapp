@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState, useTransition } from "react";
+import { type FormEvent, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AdminStatus, AdminTable, SafeLink } from "@/features/admin/components/admin-ui";
 import { createAdminNotificationAction } from "./server";
@@ -9,9 +9,11 @@ import {
   audienceOptions,
   type AudienceCounts,
   type AudienceType,
+  type DeliveryChannel,
   initialAdminNotificationActionState,
   type AdminNotificationRow,
   notificationTypeOptions,
+  type PushConfiguration,
   type SelectableUser,
   statusOptions,
 } from "./types";
@@ -21,19 +23,17 @@ export function AdminNotificationsClient({
   candidates,
   employers,
   history,
+  pushConfiguration,
   filters,
 }: {
   counts: AudienceCounts;
   candidates: SelectableUser[];
   employers: SelectableUser[];
   history: AdminNotificationRow[];
+  pushConfiguration: PushConfiguration;
   filters: { q?: string; status?: string; audience?: string; type?: string };
 }) {
-  const [state, formAction, pending] = useActionState(
-    createAdminNotificationAction,
-    initialAdminNotificationActionState,
-  );
-  const [isTransitioning, startTransition] = useTransition();
+  const [state, setState] = useState(initialAdminNotificationActionState);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [audienceType, setAudienceType] = useState<AudienceType>("all_users");
@@ -42,11 +42,14 @@ export function AdminNotificationsClient({
   const [actionValue, setActionValue] = useState("");
   const [scheduleMode, setScheduleMode] = useState<"now" | "later">("now");
   const [scheduledAt, setScheduledAt] = useState("");
-  const [channels, setChannels] = useState(["in_app"]);
+  const [channels, setChannels] = useState<DeliveryChannel[]>(["in_app"]);
   const [candidateSearch, setCandidateSearch] = useState("");
   const [employerSearch, setEmployerSearch] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [confirmMode, setConfirmMode] = useState<"test" | "send" | null>(null);
+  const [idempotencyKey, setIdempotencyKey] = useState("");
+  const [clientError, setClientError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedOptions = audienceType === "selected_candidates" ? candidates : audienceType === "selected_employers" ? employers : [];
   const filteredSelectedOptions = selectedOptions.filter((user) =>
@@ -59,8 +62,9 @@ export function AdminNotificationsClient({
       ? selectedUserIds.length
       : counts[audienceType] ?? 0;
   const selectedAudienceLabel = audienceOptions.find((option) => option.value === audienceType)?.label ?? "Audience";
-  const selectedChannelLabels = channelOptions.filter((option) => channels.includes(option.value)).map((option) => option.label);
-  const canSubmit = title.trim().length > 0 && message.trim().length > 0 && channels.length > 0 && !pending && !isTransitioning;
+  const availableChannels = pushConfiguration.configured ? channels : channels.filter((channel) => channel !== "push");
+  const selectedChannelLabels = channelOptions.filter((option) => availableChannels.includes(option.value)).map((option) => option.label);
+  const canSubmit = title.trim().length > 0 && message.trim().length > 0 && availableChannels.length > 0 && !isSubmitting;
 
   const hiddenFields = useMemo(
     () => (
@@ -73,14 +77,17 @@ export function AdminNotificationsClient({
         <input type="hidden" name="actionValue" value={actionValue} />
         <input type="hidden" name="scheduleMode" value={scheduleMode} />
         <input type="hidden" name="scheduledAt" value={scheduledAt} />
-        {channels.map((channel) => <input key={channel} type="hidden" name="channels" value={channel} />)}
+        <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
+        {availableChannels.map((channel) => <input key={channel} type="hidden" name="channels" value={channel} />)}
         {selectedUserIds.map((id) => <input key={id} type="hidden" name="selectedUserIds" value={id} />)}
       </>
     ),
-    [actionType, actionValue, audienceType, channels, message, notificationType, scheduleMode, scheduledAt, selectedUserIds, title],
+    [actionType, actionValue, audienceType, availableChannels, idempotencyKey, message, notificationType, scheduleMode, scheduledAt, selectedUserIds, title],
   );
 
-  function submitWithMode(mode: "draft" | "test" | "send") {
+  async function submitWithMode(mode: "draft" | "test" | "send") {
+    if (isSubmitting) return;
+    const submissionKey = mode === "draft" ? createIdempotencyKey() : idempotencyKey || createIdempotencyKey();
     const formData = new FormData();
     formData.set("mode", mode);
     formData.set("title", title);
@@ -91,14 +98,87 @@ export function AdminNotificationsClient({
     formData.set("actionValue", actionValue);
     formData.set("scheduleMode", scheduleMode);
     formData.set("scheduledAt", scheduledAt);
-    channels.forEach((channel) => formData.append("channels", channel));
+    formData.set("idempotencyKey", submissionKey);
+    availableChannels.forEach((channel) => formData.append("channels", channel));
     selectedUserIds.forEach((id) => formData.append("selectedUserIds", id));
-    startTransition(() => formAction(formData));
-    setConfirmMode(null);
+    setIsSubmitting(true);
+    setClientError("");
+    try {
+      const result = await createAdminNotificationAction(state, formData);
+      setState(result);
+      if (result.ok) {
+        setConfirmMode(null);
+        resetComposer();
+      }
+    } catch {
+      setState({
+        ok: false,
+        code: "BROADCAST_CREATE_FAILED",
+        message: "Could not submit notification. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function requestConfirmation(mode: "test" | "send") {
+    setClientError("");
+    if (availableChannels.length === 0) {
+      setClientError("Select at least one notification channel.");
+      return;
+    }
+    if (mode === "send" && recipientCount === 0) {
+      setClientError("No recipients match this audience.");
+      return;
+    }
+    if (scheduleMode === "later" && (!scheduledAt || new Date(scheduledAt).getTime() <= Date.now())) {
+      setClientError("Choose a future scheduled date and time.");
+      return;
+    }
+    setIdempotencyKey(createIdempotencyKey());
+    setConfirmMode(mode);
+  }
+
+  function handleConfirmSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (confirmMode) void submitWithMode(confirmMode);
+  }
+
+  function toggleChannel(channel: DeliveryChannel, checked: boolean) {
+    setClientError("");
+    if (channel === "push" && !pushConfiguration.configured) {
+      setChannels((current) => current.filter((item) => item !== "push"));
+      setClientError(pushConfiguration.reason);
+      return;
+    }
+    setChannels((current) => checked ? [...current, channel] : current.filter((item) => item !== channel));
+  }
+
+  function resetComposer() {
+    setTitle("");
+    setMessage("");
+    setAudienceType("all_users");
+    setNotificationType("general_announcement");
+    setActionType("none");
+    setActionValue("");
+    setScheduleMode("now");
+    setScheduledAt("");
+    setChannels(["in_app"]);
+    setSelectedUserIds([]);
+    setCandidateSearch("");
+    setEmployerSearch("");
+    setIdempotencyKey("");
+    setClientError("");
   }
 
   return (
     <div className="grid gap-6">
+      {clientError ? (
+        <div className="rounded-lg border border-[#f1b6c8] bg-[#fff4f7] p-4 text-sm font-medium text-[#8f1741]">
+          {clientError}
+        </div>
+      ) : null}
+
       {state.message ? (
         <div className={`rounded-lg border p-4 text-sm font-medium ${state.ok ? "border-[#a8d8ba] bg-[#f1fbf5] text-[#246b3d]" : "border-[#f1b6c8] bg-[#fff4f7] text-[#8f1741]"}`}>
           {state.message}
@@ -214,18 +294,21 @@ export function AdminNotificationsClient({
                     <input
                       type="checkbox"
                       checked={channels.includes(option.value)}
-                      onChange={(event) =>
-                        setChannels((current) =>
-                          event.target.checked ? [...current, option.value] : current.filter((channel) => channel !== option.value),
-                        )
-                      }
+                      disabled={option.value === "push" && !pushConfiguration.configured}
+                      onChange={(event) => toggleChannel(option.value, event.target.checked)}
                       className="h-4 w-4"
                     />
                     {option.label}
-                    {option.value !== "in_app" ? <span className="text-xs text-[#8a7c88]">Not configured</span> : null}
+                    {option.value === "push" && !pushConfiguration.configured ? <span className="text-xs text-[#8a7c88]">Not configured</span> : null}
+                    {option.value !== "in_app" && option.value !== "push" ? <span className="text-xs text-[#8a7c88]">Not configured</span> : null}
                   </label>
                 ))}
               </div>
+              {!pushConfiguration.configured ? (
+                <p className="text-xs font-medium text-[#8a7c88]">
+                  {pushConfiguration.reason} {pushConfiguration.setupHint}
+                </p>
+              ) : null}
             </fieldset>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -280,10 +363,10 @@ export function AdminNotificationsClient({
               <Button type="button" variant="secondary" disabled={!canSubmit} onClick={() => submitWithMode("draft")}>
                 Save as draft
               </Button>
-              <Button type="button" variant="secondary" disabled={!canSubmit} onClick={() => setConfirmMode("test")}>
+              <Button type="button" variant="secondary" disabled={!canSubmit} onClick={() => requestConfirmation("test")}>
                 Send test notification
               </Button>
-              <Button type="button" disabled={!canSubmit} onClick={() => setConfirmMode("send")}>
+              <Button type="button" disabled={!canSubmit} onClick={() => requestConfirmation("send")}>
                 Send notification
               </Button>
             </div>
@@ -308,14 +391,26 @@ export function AdminNotificationsClient({
               <SummaryItem label="Channels" value={selectedChannelLabels.join(", ")} />
               <SummaryItem label="Schedule" value={scheduleMode === "later" ? scheduledAt : "Send now"} />
             </dl>
-            <form action={formAction} className="mt-5 flex flex-wrap justify-end gap-3">
+            {!state.ok && state.message ? (
+              <div className="mt-4 rounded-lg border border-[#f1b6c8] bg-[#fff4f7] p-3 text-sm font-medium text-[#8f1741]">
+                {state.message}
+              </div>
+            ) : null}
+            <form
+              className="mt-5 flex flex-wrap justify-end gap-3"
+              onSubmit={handleConfirmSubmit}
+            >
               {hiddenFields}
               <input type="hidden" name="mode" value={confirmMode} />
-              <Button type="button" variant="secondary" onClick={() => setConfirmMode(null)}>
+              <Button type="button" variant="secondary" disabled={isSubmitting} onClick={() => setConfirmMode(null)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={pending}>
-                Confirm and send
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting
+                  ? scheduleMode === "later"
+                    ? "Scheduling..."
+                    : "Sending..."
+                  : "Confirm and send"}
               </Button>
             </form>
           </section>
@@ -383,13 +478,18 @@ function NotificationHistory({
         <Button type="submit" className="min-h-11 py-2">Filter</Button>
       </form>
       <AdminTable
-        headers={["Title", "Audience", "Channels", "Recipients", "Status", "Created by", "Created date", "Scheduled date", "Actions"]}
+        headers={["Title", "Audience", "Requested", "Completed", "Recipients", "Status", "Created by", "Created date", "Scheduled date", "Actions"]}
         empty="No admin notifications found."
         rows={history.map((item) => (
           <tr key={item.id} className="block rounded-lg border border-[#eadde3] p-4 md:table-row md:border-0 md:p-0">
             <td className="px-4 py-3 font-semibold text-[#201925]">{item.title}</td>
             <td className="px-4 py-3 text-[#66616f]">{labelFor(audienceOptions, item.audience_type)}</td>
             <td className="px-4 py-3 text-[#66616f]">{(item.channels ?? []).join(", ")}</td>
+            <td className="px-4 py-3 text-[#66616f]">
+              In-app {item.in_app_success_count ?? 0}
+              <br />
+              Push {item.push_success_count ?? 0}/{item.push_failure_count ?? 0} failed
+            </td>
             <td className="px-4 py-3 text-[#66616f]">{item.recipient_count ?? 0}</td>
             <td className="px-4 py-3"><AdminStatus status={item.status} /></td>
             <td className="px-4 py-3 text-[#66616f]">{item.profiles?.email ?? item.created_by}</td>
@@ -435,3 +535,8 @@ const channelOptions = [
   { value: "email", label: "Email" },
   { value: "whatsapp", label: "WhatsApp" },
 ] as const;
+
+function createIdempotencyKey() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}

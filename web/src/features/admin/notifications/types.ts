@@ -37,7 +37,7 @@ export const actionOptions = [
 export const statusOptions = [
   { value: "draft", label: "Draft" },
   { value: "scheduled", label: "Scheduled" },
-  { value: "sending", label: "Sending" },
+  { value: "sending", label: "Processing" },
   { value: "sent", label: "Sent" },
   { value: "partially_sent", label: "Partially sent" },
   { value: "failed", label: "Failed" },
@@ -67,6 +67,11 @@ export type AdminNotificationRow = {
   created_by: string;
   sent_by: string | null;
   created_at: string;
+  idempotency_key?: string | null;
+  in_app_success_count?: number | null;
+  push_success_count?: number | null;
+  push_failure_count?: number | null;
+  failure_summary?: string | null;
   profiles?: { email: string | null; full_name: string | null } | null;
 };
 
@@ -78,9 +83,22 @@ export type SelectableUser = {
   email: string | null;
 };
 
+export type PushConfiguration = {
+  configured: boolean;
+  reason: string;
+  setupHint: string;
+};
+
 export type AdminNotificationActionState = {
   ok: boolean;
   message: string;
+  code?: string;
+  broadcastId?: string;
+  inAppRecipientCount?: number;
+  pushEligibleDeviceCount?: number;
+  scheduled?: boolean;
+  warning?: string;
+  idempotencyKey?: string;
 };
 
 export const initialAdminNotificationActionState: AdminNotificationActionState = {
