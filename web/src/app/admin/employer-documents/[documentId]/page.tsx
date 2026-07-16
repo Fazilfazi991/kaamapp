@@ -1,13 +1,14 @@
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { approveEmployerDocument, rejectEmployerDocument } from "@/features/admin/server/actions";
 import { AdminPageHeader, AdminStatus, DetailSection, Field } from "@/features/admin/components/admin-ui";
+import { EmployerDocumentReviewActions } from "@/features/admin/components/employer-review-actions";
 import { loadEmployerDocument } from "@/features/admin/server/data";
+import { getEmployerDocumentReviewState } from "@/features/admin/validation/review";
 
 export default async function AdminEmployerDocumentDetailPage({ params }: { params: Promise<{ documentId: string }> }) {
   const { documentId } = await params;
   const document = await loadEmployerDocument(documentId);
   if (!document) notFound();
+  const reviewState = getEmployerDocumentReviewState(document);
   return (
     <>
       <AdminPageHeader title={document.document_type} description="Employer document preview and review action. Company approval is a separate explicit action." />
@@ -24,18 +25,13 @@ export default async function AdminEmployerDocumentDetailPage({ params }: { para
         <iframe title="Employer document preview" src={`/admin/employer-documents/preview/${document.id}`} className="h-[520px] w-full rounded-lg border border-[#eadde3]" />
       </DetailSection>
       <DetailSection title="Review action">
-        <div className="grid gap-3 md:grid-cols-2">
-          <form action={approveEmployerDocument}>
-            <input type="hidden" name="documentId" value={document.id} />
-            <Button type="submit" className="w-full">Approve document</Button>
-          </form>
-          <form action={rejectEmployerDocument} className="grid gap-3">
-            <input type="hidden" name="documentId" value={document.id} />
-            <label className="text-sm font-semibold text-[#201925]" htmlFor="reason">Public rejection reason</label>
-            <textarea id="reason" name="reason" required className="focus-ring min-h-24 rounded-lg border border-[#ded2da] p-3 text-sm" />
-            <Button type="submit" variant="secondary">Request resubmission</Button>
-          </form>
-        </div>
+        <p>{reviewState.message}</p>
+        <EmployerDocumentReviewActions
+          documentId={document.id}
+          companyId={document.company_id}
+          canApprove={reviewState.canApprove}
+          canRequestResubmission={reviewState.canRequestResubmission}
+        />
       </DetailSection>
     </>
   );
