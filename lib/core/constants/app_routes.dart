@@ -6,6 +6,7 @@ class AppRoutes {
   static const roleSelection = '/role-selection';
   static const login = '/login';
   static const otp = '/otp';
+  static const accountBlocked = '/account/blocked';
   static const basicDetails = '/onboarding/basic-details';
   static const workPreferences = '/onboarding/work-preferences';
   static const primaryProfession = '/onboarding/primary-profession';

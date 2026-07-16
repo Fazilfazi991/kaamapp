@@ -43,10 +43,6 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
     'Other',
   ];
 
-  static const countries = ['UAE', 'India'];
-  static const uaeEmirates = ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Umm Al Quwain', 'Ras Al Khaimah', 'Fujairah'];
-  static const indianStates = ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Puducherry', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Lakshadweep', 'Andaman and Nicobar Islands'];
-
   @override
   void initState() {
     super.initState();
@@ -76,11 +72,18 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
       fullNameController.text =
           profile.fullName.isNotEmpty ? profile.fullName : identity.fullName;
       phoneController.text = profile.phone;
-      nationalityController.text =
-          profile.nationality.isNotEmpty ? profile.nationality : identity.nationality;
-      final savedCountry = profile.currentCountry.isNotEmpty ? profile.currentCountry : profile.preferredCountry;
-      preferredLocationController.text = countries.contains(savedCountry) ? savedCountry : '';
-      currentLocationController.text = preferredLocationController.text.isEmpty ? '' : profile.currentCity;
+      nationalityController.text = profile.nationality.isNotEmpty
+          ? profile.nationality
+          : identity.nationality;
+      final savedCountry = profile.currentCountry.isNotEmpty
+          ? profile.currentCountry
+          : profile.preferredCountry;
+      preferredLocationController.text =
+          CandidateLocationOptions.countries.contains(savedCountry)
+              ? savedCountry
+              : '';
+      currentLocationController.text =
+          preferredLocationController.text.isEmpty ? '' : profile.currentCity;
       dobController.text = identity.dob;
       genderController.text = identity.gender;
       passportNumberController.text = identity.passportNumber;
@@ -105,7 +108,8 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
       missing.add('country');
     }
     if (currentLocationController.text.trim().isEmpty) {
-      missing.add(preferredLocationController.text == 'India' ? 'state' : 'emirate');
+      missing.add(
+          preferredLocationController.text == 'India' ? 'state' : 'emirate');
     }
     if (missing.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -120,7 +124,9 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
         fullName: titleCase(fullNameController.text),
         phone: phoneController.text,
         nationality: titleCase(nationalityController.text),
-        currentLocation: preferredLocationController.text.trim(),
+        currentCountry: preferredLocationController.text.trim(),
+        currentLocation: titleCase(currentLocationController.text),
+        preferredCountry: preferredLocationController.text.trim(),
         preferredLocation: titleCase(currentLocationController.text),
       );
       if (!mounted) return;
@@ -148,9 +154,41 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (context) => SafeArea(child: StatefulBuilder(builder: (context, setSheetState) {
-        final query = search.text.toLowerCase(); final visible = options.where((item) => item.toLowerCase().contains(query)).toList();
-        return Padding(padding: EdgeInsets.only(left: 16, right: 16, bottom: MediaQuery.viewInsetsOf(context).bottom + 24), child: SizedBox(height: MediaQuery.sizeOf(context).height * .7, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: AppTextStyles.title), const SizedBox(height: 12), if (options.length > 10) AppTextField(controller: search, label: 'Search', hint: 'Search', onChanged: (_) => setSheetState(() {})), Expanded(child: ListView(children: [for (final option in visible) ListTile(title: Text(option), trailing: controller.text == option ? const Icon(Icons.check) : null, onTap: () => Navigator.of(context).pop(option))]))])));
+      builder: (context) =>
+          SafeArea(child: StatefulBuilder(builder: (context, setSheetState) {
+        final query = search.text.toLowerCase();
+        final visible = options
+            .where((item) => item.toLowerCase().contains(query))
+            .toList();
+        return Padding(
+            padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                bottom: MediaQuery.viewInsetsOf(context).bottom + 24),
+            child: SizedBox(
+                height: MediaQuery.sizeOf(context).height * .7,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: AppTextStyles.title),
+                      const SizedBox(height: 12),
+                      if (options.length > 10)
+                        AppTextField(
+                            controller: search,
+                            label: 'Search',
+                            hint: 'Search',
+                            onChanged: (_) => setSheetState(() {})),
+                      Expanded(
+                          child: ListView(children: [
+                        for (final option in visible)
+                          ListTile(
+                              title: Text(option),
+                              trailing: controller.text == option
+                                  ? const Icon(Icons.check)
+                                  : null,
+                              onTap: () => Navigator.of(context).pop(option))
+                      ]))
+                    ])));
       })),
     );
     if (value == null) return;
@@ -168,12 +206,16 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
         const SizedBox(height: 22),
         const Text('Check Your Details', style: AppTextStyles.headline),
         const SizedBox(height: 8),
-        const Text('We filled what we could from your passport. You can edit anything.',
+        const Text(
+            'We filled what we could from your passport. You can edit anything.',
             style: AppTextStyles.body),
         const SizedBox(height: 18),
         if (loading) const LinearProgressIndicator(),
         if (loading) const SizedBox(height: 12),
-        AppTextField(controller: fullNameController, label: 'Full name', hint: 'Your full name'),
+        AppTextField(
+            controller: fullNameController,
+            label: 'Full name',
+            hint: 'Your full name'),
         const SizedBox(height: 12),
         AppTextField(
           controller: dobController,
@@ -244,7 +286,8 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
         const SizedBox(height: 20),
         const Text('Location', style: AppTextStyles.title),
         const SizedBox(height: 8),
-        const Text('Select your country, then your emirate or state.', style: AppTextStyles.body),
+        const Text('Select your country, then your emirate or state.',
+            style: AppTextStyles.body),
         const SizedBox(height: 12),
         AppTextField(
           controller: preferredLocationController,
@@ -256,7 +299,7 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
             final previous = preferredLocationController.text;
             await _pickOption(
               title: 'Select country',
-              options: countries,
+              options: CandidateLocationOptions.countries,
               controller: preferredLocationController,
             );
             if (preferredLocationController.text != previous) {
@@ -267,16 +310,24 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
         if (preferredLocationController.text.isNotEmpty) ...[
           const SizedBox(height: 12),
           AppTextField(
-          controller: currentLocationController,
-          label: preferredLocationController.text == 'India' ? 'State *' : 'Emirate *',
-          hint: preferredLocationController.text == 'India' ? 'Select state' : 'Select emirate',
-          readOnly: true,
-          suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded),
-          onTap: () => _pickOption(
-            title: preferredLocationController.text == 'India' ? 'Select state' : 'Select emirate',
-            options: preferredLocationController.text == 'India' ? indianStates : uaeEmirates,
             controller: currentLocationController,
-          ),
+            label: preferredLocationController.text == 'India'
+                ? 'State *'
+                : 'Emirate *',
+            hint: preferredLocationController.text == 'India'
+                ? 'Select state'
+                : 'Select emirate',
+            readOnly: true,
+            suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded),
+            onTap: () => _pickOption(
+              title: preferredLocationController.text == 'India'
+                  ? 'Select state'
+                  : 'Select emirate',
+              options: CandidateLocationOptions.regionsForCountry(
+                preferredLocationController.text,
+              ),
+              controller: currentLocationController,
+            ),
           ),
         ],
         const SizedBox(height: 24),
