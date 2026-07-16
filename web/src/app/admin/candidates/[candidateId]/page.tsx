@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { AdminPageHeader, AdminStatus, DetailSection, Field, SafeLink } from "@/features/admin/components/admin-ui";
+import { candidateOperationalStatusLabel } from "@/features/admin/server/candidate-accounts";
 import { loadCandidate } from "@/features/admin/server/data";
 
 type CandidateNotification = {
@@ -26,7 +27,9 @@ export default async function AdminCandidateDetailPage({
         <div className="grid gap-4 md:grid-cols-3">
           <Field label="Email" value={candidate.profiles?.email} />
           <Field label="Location" value={[candidate.current_city, candidate.current_country].filter(Boolean).join(", ")} />
-          <Field label="Profile status" value={<AdminStatus status={candidate.profiles?.status} />} />
+          <Field label="Account status" value={<AdminStatus status={candidate.profiles?.status} />} />
+          <Field label="Candidate status" value={candidateOperationalStatusLabel(candidate.operational_status)} />
+          <Field label="Profile completion" value={`${candidate.profile_completion}%`} />
           <Field label="Headline" value={candidate.headline} />
           <Field label="Experience" value={candidate.experience_years} />
           <Field label="Availability" value={candidate.availability} />
@@ -34,6 +37,13 @@ export default async function AdminCandidateDetailPage({
           <Field label="Languages" value={candidate.languages?.join(", ")} />
           <Field label="Membership" value={membership?.status ?? "No membership"} />
         </div>
+        {!candidate.has_candidate_profile ? (
+          <p className="rounded-lg border border-dashed border-[#d8c8d1] bg-[#fffafc] p-4 text-sm text-[#66616f]">
+            This candidate has not completed their profile yet.
+          </p>
+        ) : candidate.missing_sections.length ? (
+          <p className="text-sm text-[#66616f]">Missing sections: {candidate.missing_sections.join(", ")}</p>
+        ) : null}
       </DetailSection>
       <DetailSection title="Verification summary">
         <div className="grid gap-4 md:grid-cols-2">

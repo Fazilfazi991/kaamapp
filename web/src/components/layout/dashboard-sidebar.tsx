@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import { signOutAction } from "@/lib/auth/session";
 import { Button } from "@/components/ui/button";
+import { ActiveDashboardLink } from "./active-dashboard-link";
 
 export function DashboardSidebar({
   items,
@@ -18,13 +18,13 @@ export function DashboardSidebar({
       </p>
       <nav className="mt-3 grid gap-1" aria-label={`${title} navigation`}>
         {items.map((item) => (
-          <Link
+          <ActiveDashboardLink
             key={item.href}
             href={item.href}
+            label={item.label}
             className="focus-ring rounded-lg px-3 py-3 text-sm font-semibold text-[#3b3340] hover:bg-[#fff0f5] hover:text-[#bc1f55]"
-          >
-            {item.label}
-          </Link>
+            activeClassName="bg-[#fff0f5] text-[#bc1f55]"
+          />
         ))}
       </nav>
       <form action={signOutAction} className="mt-8">

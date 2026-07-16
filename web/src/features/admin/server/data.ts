@@ -1,19 +1,35 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type {
   AdminCandidateDocumentSummary,
+  AdminCandidateProfileData,
   AdminCandidateRow,
   AdminProfileRow,
   CandidateDocumentVersionRow,
   EmployerCompanyAdminRow,
   EmployerDocumentAdminRow,
 } from "@/features/admin/types";
+import {
+  composeCandidateAccount,
+  filterCandidateAccounts,
+  finalizeCandidateAccount,
+  paginateCandidateAccounts,
+} from "./candidate-accounts";
 
 const PAGE_SIZE = 20;
+const CANDIDATE_PROFILE_SELECT =
+  "id,headline,nationality,current_country,current_city,preferred_country,preferred_city,job_categories,skills,languages,availability,experience_years,visa_status,is_visible,is_verified,created_at,updated_at";
 
 export type AdminListParams = {
   q?: string;
   status?: string;
   page?: number;
+};
+
+type AdminListResult<T> = {
+  rows: T[];
+  count: number;
+  error: unknown;
+  errorMessage?: string;
 };
 
 function rangeFor(page = 1) {
@@ -32,6 +48,12 @@ export async function countRows(table: string, filters: Array<[string, string | 
   return count ?? 0;
 }
 
+function logAdminDataError(operation: string, error: unknown) {
+  if (error) {
+    console.error("[admin_data]", { operation, category: "supabase_error" });
+  }
+}
+
 export async function loadAdminDashboardMetrics() {
   const [
     totalCandidates,
@@ -44,7 +66,7 @@ export async function loadAdminDashboardMetrics() {
     blockedUsers,
     recentMatches,
   ] = await Promise.all([
-    countRows("candidate_profiles"),
+    countRows("profiles", [["role", "candidate"]]),
     countRows("employer_companies"),
     countRows("candidate_document_versions", [["status", "pending_verification"], ["is_active", true]]),
     countRows("verification_documents", [["status", "pending"]]),
@@ -70,33 +92,104 @@ export async function loadAdminDashboardMetrics() {
 
 export async function loadCandidates({ q, status, page }: AdminListParams) {
   const supabase = await createServerSupabaseClient();
-  const { from, to } = rangeFor(page);
-  let query = supabase
-    .from("candidate_profiles")
-    .select(
-      "id,headline,nationality,current_country,current_city,preferred_country,preferred_city,job_categories,skills,languages,availability,experience_years,visa_status,is_visible,is_verified,created_at,updated_at,profiles(full_name,email,status,created_at),candidate_documents(id,candidate_id,passport_status,visa_status,passport_uploaded_at,visa_uploaded_at,passport_expiry_date,visa_expiry_date,passport_version,visa_version,updated_at)",
-      { count: "exact" },
-    )
-    .order("updated_at", { ascending: false })
-    .range(from, to);
+  const { data: profiles, error: profileError } = await supabase
+    .from("profiles")
+    .select("id,role,full_name,email,phone,status,created_at,updated_at")
+    .eq("role", "candidate")
+    .order("created_at", { ascending: false })
+    .limit(1000);
 
-  if (q) query = query.or(`headline.ilike.%${q}%,current_city.ilike.%${q}%,current_country.ilike.%${q}%`);
-  if (status) query = query.eq("profiles.status", status);
+  if (profileError) {
+    logAdminDataError("load_candidate_profiles", profileError);
+    return {
+      rows: [],
+      count: 0,
+      error: profileError,
+      errorMessage: "Candidate accounts could not be loaded. Please try again.",
+    } satisfies AdminListResult<AdminCandidateRow>;
+  }
 
-  const { data, count, error } = await query;
-  return { rows: (data ?? []) as unknown as AdminCandidateRow[], count: count ?? 0, error };
+  const candidateProfiles = (profiles ?? []) as AdminProfileRow[];
+  const candidateIds = candidateProfiles.map((profile) => profile.id);
+  const [{ data: candidateRows, error: candidateError }, { data: documentRows, error: documentError }] =
+    candidateIds.length
+      ? await Promise.all([
+          supabase.from("candidate_profiles").select(CANDIDATE_PROFILE_SELECT).in("id", candidateIds),
+          supabase
+            .from("candidate_documents")
+            .select(
+              "id,candidate_id,passport_status,visa_status,passport_uploaded_at,visa_uploaded_at,passport_expiry_date,visa_expiry_date,passport_version,visa_version,updated_at",
+            )
+            .in("candidate_id", candidateIds),
+        ])
+      : [
+          { data: [], error: null },
+          { data: [], error: null },
+        ];
+
+  if (candidateError || documentError) {
+    logAdminDataError("load_candidate_related_rows", candidateError ?? documentError);
+    return {
+      rows: [],
+      count: candidateProfiles.length,
+      error: candidateError ?? documentError,
+      errorMessage: "Candidate profile details could not be loaded. Please try again.",
+    } satisfies AdminListResult<AdminCandidateRow>;
+  }
+
+  const candidateById = new Map(
+    ((candidateRows ?? []) as AdminCandidateProfileData[]).map((candidate) => [candidate.id, candidate]),
+  );
+  const documentsByCandidateId = new Map<string, AdminCandidateDocumentSummary[]>();
+  for (const document of (documentRows ?? []) as AdminCandidateDocumentSummary[]) {
+    documentsByCandidateId.set(document.candidate_id, [document]);
+  }
+
+  const rows = candidateProfiles
+    .map((profile) =>
+      finalizeCandidateAccount(
+        composeCandidateAccount({
+          profile,
+          candidate: candidateById.get(profile.id) ?? null,
+          documents: documentsByCandidateId.get(profile.id) ?? null,
+        }),
+      ),
+    );
+  const filtered = filterCandidateAccounts(rows, { q, status });
+  const paginated = paginateCandidateAccounts(filtered, Number(page ?? 1));
+  return { ...paginated, error: null } satisfies AdminListResult<AdminCandidateRow>;
 }
 
 export async function loadCandidate(candidateId: string) {
   const supabase = await createServerSupabaseClient();
-  const [{ data: candidate }, { data: membership }, { data: versions }, { data: notifications }] = await Promise.all([
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id,role,full_name,email,phone,status,created_at,updated_at")
+    .eq("id", candidateId)
+    .eq("role", "candidate")
+    .maybeSingle<AdminProfileRow>();
+
+  if (profileError) {
+    logAdminDataError("load_candidate_account", profileError);
+    return { candidate: null, membership: null, versions: [], notifications: [], error: profileError };
+  }
+
+  if (!profile) {
+    return { candidate: null, membership: null, versions: [], notifications: [], error: null };
+  }
+
+  const [{ data: candidate }, { data: documents }, { data: membership }, { data: versions }, { data: notifications }] = await Promise.all([
     supabase
       .from("candidate_profiles")
-      .select(
-        "id,headline,nationality,current_country,current_city,preferred_country,preferred_city,job_categories,skills,languages,availability,experience_years,visa_status,is_visible,is_verified,created_at,updated_at,profiles(full_name,email,status,created_at),candidate_documents(id,candidate_id,passport_status,visa_status,passport_uploaded_at,visa_uploaded_at,passport_expiry_date,visa_expiry_date,passport_version,visa_version,updated_at)",
-      )
+      .select(CANDIDATE_PROFILE_SELECT)
       .eq("id", candidateId)
       .maybeSingle(),
+    supabase
+      .from("candidate_documents")
+      .select(
+        "id,candidate_id,passport_status,visa_status,passport_uploaded_at,visa_uploaded_at,passport_expiry_date,visa_expiry_date,passport_version,visa_version,updated_at",
+      )
+      .eq("candidate_id", candidateId),
     supabase
       .from("candidate_memberships")
       .select("status,plan_code,starts_at,expires_at")
@@ -118,10 +211,17 @@ export async function loadCandidate(candidateId: string) {
   ]);
 
   return {
-    candidate: candidate as unknown as AdminCandidateRow | null,
+    candidate: finalizeCandidateAccount(
+      composeCandidateAccount({
+        profile,
+        candidate: candidate as AdminCandidateProfileData | null,
+        documents: (documents ?? []) as AdminCandidateDocumentSummary[],
+      }),
+    ),
     membership,
     versions: versions ?? [],
     notifications: notifications ?? [],
+    error: null,
   };
 }
 

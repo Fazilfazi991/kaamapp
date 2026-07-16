@@ -31,12 +31,26 @@ export function AdminStatCard({ label, value }: { label: string; value: number |
 export function FilterBar({
   search,
   status,
+  statusOptions,
   children,
 }: {
   search?: string;
   status?: string;
+  statusOptions?: Array<{ value: string; label: string }>;
   children?: React.ReactNode;
 }) {
+  const options = statusOptions ?? [
+    { value: "pending", label: "Pending" },
+    { value: "pending_verification", label: "Pending verification" },
+    { value: "active", label: "Active" },
+    { value: "draft", label: "Draft" },
+    { value: "verified", label: "Verified" },
+    { value: "approved", label: "Approved" },
+    { value: "rejected", label: "Rejected" },
+    { value: "resubmission_requested", label: "Needs resubmission" },
+    { value: "blocked", label: "Blocked" },
+  ];
+
   return (
     <form className="mb-5 grid gap-3 rounded-lg border border-[#eadde3] bg-white p-4 shadow-sm md:grid-cols-[1fr_180px_auto]">
       <input
@@ -51,19 +65,21 @@ export function FilterBar({
         className="focus-ring min-h-11 rounded-lg border border-[#ded2da] px-3 text-sm"
       >
         <option value="">All statuses</option>
-        <option value="pending">Pending</option>
-        <option value="pending_verification">Pending verification</option>
-        <option value="active">Active</option>
-        <option value="draft">Draft</option>
-        <option value="verified">Verified</option>
-        <option value="approved">Approved</option>
-        <option value="rejected">Rejected</option>
-        <option value="resubmission_requested">Needs resubmission</option>
-        <option value="blocked">Blocked</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>{option.label}</option>
+        ))}
       </select>
       <Button type="submit" className="min-h-11 py-2">Filter</Button>
       {children}
     </form>
+  );
+}
+
+export function AdminErrorState({ message }: { message: string }) {
+  return (
+    <div className="rounded-lg border border-[#f1b6c8] bg-[#fff4f7] p-5 text-sm font-medium text-[#8f1741]">
+      {message}
+    </div>
   );
 }
 

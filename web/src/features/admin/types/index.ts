@@ -48,9 +48,18 @@ export type AdminCandidateRow = {
   is_verified: boolean | null;
   created_at: string | null;
   updated_at: string | null;
-  profiles?: Pick<AdminProfileRow, "full_name" | "email" | "status" | "created_at"> | null;
+  profiles?: Pick<AdminProfileRow, "full_name" | "email" | "phone" | "status" | "created_at"> | null;
+  has_candidate_profile: boolean;
+  profile_completion: number;
+  missing_sections: string[];
+  operational_status: string;
   candidate_documents?: AdminCandidateDocumentSummary[] | null;
 };
+
+export type AdminCandidateProfileData = Omit<
+  AdminCandidateRow,
+  "profiles" | "has_candidate_profile" | "profile_completion" | "missing_sections" | "operational_status" | "candidate_documents"
+>;
 
 export type AdminCandidateDocumentSummary = {
   id: string;
