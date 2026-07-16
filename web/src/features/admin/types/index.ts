@@ -5,10 +5,15 @@ export type CandidateDocumentType = "passport" | "visa";
 export type CandidateDocumentStatus =
   | "not_uploaded"
   | "pending_verification"
+  | "pending"
+  | "submitted"
   | "verified"
+  | "approved"
   | "rejected"
+  | "resubmission_requested"
   | "expired"
   | "archived"
+  | "superseded"
   | string;
 export type EmployerDocumentStatus = "pending" | "approved" | "rejected" | "resubmission_requested" | string;
 
@@ -64,6 +69,8 @@ export type AdminCandidateProfileData = Omit<
 export type AdminCandidateDocumentSummary = {
   id: string;
   candidate_id: string;
+  passport_file_url?: string | null;
+  visa_file_url?: string | null;
   passport_status: string;
   visa_status: string;
   passport_uploaded_at: string | null;
@@ -88,6 +95,30 @@ export type CandidateDocumentVersionRow = {
   verified_at?: string | null;
   created_at: string | null;
   updated_at?: string | null;
+  candidate_profiles?: {
+    headline: string | null;
+    current_country: string | null;
+    current_city: string | null;
+    profiles?: Pick<AdminProfileRow, "full_name" | "email" | "status"> | null;
+  } | null;
+};
+
+export type CandidateDocumentQueueRow = {
+  id: string;
+  candidate_document_id: string | null;
+  candidate_id: string;
+  document_type: CandidateDocumentType;
+  file_path: string | null;
+  version_number: number;
+  status: string;
+  is_active: boolean;
+  is_historical: boolean;
+  source: "version" | "summary";
+  extracted_details?: Record<string, unknown> | null;
+  verified_at?: string | null;
+  created_at: string | null;
+  updated_at?: string | null;
+  expiry_date?: string | null;
   candidate_profiles?: {
     headline: string | null;
     current_country: string | null;

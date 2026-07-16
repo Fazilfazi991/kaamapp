@@ -1,13 +1,18 @@
 import { employerRequiredDocumentTypes } from "@/features/employer/profile/completion";
-import type { CandidateDocumentStatus, EmployerCompanyAdminRow, EmployerDocumentAdminRow, EmployerDocumentStatus } from "@/features/admin/types";
+import type { CandidateDocumentStatus, CandidateDocumentVersionRow, EmployerCompanyAdminRow, EmployerDocumentAdminRow, EmployerDocumentStatus } from "@/features/admin/types";
 
 export const candidateDocumentStatuses = [
   "not_uploaded",
   "pending_verification",
+  "pending",
+  "submitted",
   "verified",
+  "approved",
   "rejected",
+  "resubmission_requested",
   "expired",
   "archived",
+  "superseded",
 ] as const;
 
 export const employerDocumentStatuses = [
@@ -18,21 +23,89 @@ export const employerDocumentStatuses = [
 ] as const;
 
 export function statusTone(status?: string | null): "success" | "warning" | "neutral" | "danger" {
-  if (!status) return "neutral";
-  if (["verified", "approved", "active"].includes(status)) return "success";
-  if (["pending", "pending_verification", "draft", "paused", "resubmission_requested"].includes(status)) {
+  const normalized = normalizeCandidateDocumentStatus(status);
+  if (!normalized) return "neutral";
+  if (["verified", "approved", "active"].includes(normalized)) return "success";
+  if (["pending", "pending_verification", "submitted", "draft", "paused", "resubmission_requested"].includes(normalized)) {
     return "warning";
   }
-  if (["rejected", "expired", "blocked", "archived"].includes(status)) return "danger";
+  if (["rejected", "expired", "blocked", "archived", "superseded"].includes(normalized)) return "danger";
   return "neutral";
 }
 
 export function statusLabel(status?: string | null) {
-  return (status || "unknown").replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  const normalized = normalizeCandidateDocumentStatus(status);
+  if (normalized === "pending_verification") return "Pending Verification";
+  if (normalized === "resubmission_requested") return "Resubmission Requested";
+  if (normalized === "verified") return "Approved";
+  return (normalized || "unknown").replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 export function isAllowedCandidateDocumentApproval(status: CandidateDocumentStatus, isActive: boolean) {
-  return isActive && status === "pending_verification";
+  return isActive && normalizeCandidateDocumentStatus(status) === "pending_verification";
+}
+
+export function normalizeCandidateDocumentStatus(status?: string | null) {
+  const value = status?.trim().toLowerCase().replace(/-/g, "_");
+  if (!value) return "";
+  if (["pending", "pending_review", "submitted"].includes(value)) return "pending_verification";
+  if (value === "approved") return "verified";
+  if (value === "needs_resubmission") return "resubmission_requested";
+  return value;
+}
+
+export function candidateDocumentStatusOptions() {
+  return [
+    { value: "pending_verification", label: "Pending Verification" },
+    { value: "verified", label: "Approved" },
+    { value: "rejected", label: "Rejected" },
+    { value: "resubmission_requested", label: "Resubmission Requested" },
+    { value: "expired", label: "Expired" },
+    { value: "archived", label: "Archived" },
+    { value: "superseded", label: "Superseded" },
+  ];
+}
+
+export function getCandidateDocumentReviewState(document?: Pick<CandidateDocumentVersionRow, "status" | "is_active"> & { source?: string } | null) {
+  if (!document) {
+    return { canApprove: false, canRequestResubmission: false, message: "Document was not found." };
+  }
+  if (document.source === "summary") {
+    return {
+      canApprove: false,
+      canRequestResubmission: false,
+      message: "This document has no reviewable version row yet. Ask the candidate to resubmit if review is required.",
+    };
+  }
+  const status = normalizeCandidateDocumentStatus(document.status);
+  const canApprove = isAllowedCandidateDocumentApproval(status, document.is_active);
+  const canRequestResubmission = canApprove;
+  if (status === "verified") {
+    return {
+      canApprove,
+      canRequestResubmission,
+      message: "This document has been approved. No further review action is available.",
+    };
+  }
+  if (["rejected", "resubmission_requested"].includes(status)) {
+    return {
+      canApprove,
+      canRequestResubmission,
+      message: "This document is not pending review. Wait for a new candidate submission before taking action.",
+    };
+  }
+  if (!document.is_active) {
+    return {
+      canApprove,
+      canRequestResubmission,
+      message: "This is a historical version. Review the active version instead.",
+    };
+  }
+  return {
+    canApprove,
+    canRequestResubmission,
+    message: canApprove ? "Pending review." : "This document is not eligible for review.",
+  };
 }
 
 export type AdminActionState = {

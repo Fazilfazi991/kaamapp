@@ -4,10 +4,12 @@ import type {
   AdminCandidateProfileData,
   AdminCandidateRow,
   AdminProfileRow,
+  CandidateDocumentQueueRow,
   CandidateDocumentVersionRow,
   EmployerCompanyAdminRow,
   EmployerDocumentAdminRow,
 } from "@/features/admin/types";
+import { normalizeCandidateDocumentStatus } from "@/features/admin/validation/review";
 import {
   composeCandidateAccount,
   filterCandidateAccounts,
@@ -31,6 +33,12 @@ type AdminListResult<T> = {
   error: unknown;
   errorMessage?: string;
 };
+
+const CANDIDATE_DOCUMENT_SUMMARY_SELECT =
+  "id,candidate_id,passport_file_url,visa_file_url,passport_status,visa_status,passport_uploaded_at,visa_uploaded_at,passport_expiry_date,visa_expiry_date,passport_version,visa_version,updated_at";
+
+const CANDIDATE_DOCUMENT_VERSION_SELECT =
+  "id,candidate_document_id,candidate_id,document_type,file_path,version_number,status,is_active,extracted_details,verified_at,created_at,updated_at";
 
 function rangeFor(page = 1) {
   const safePage = Math.max(1, page);
@@ -117,9 +125,7 @@ export async function loadCandidates({ q, status, page }: AdminListParams) {
           supabase.from("candidate_profiles").select(CANDIDATE_PROFILE_SELECT).in("id", candidateIds),
           supabase
             .from("candidate_documents")
-            .select(
-              "id,candidate_id,passport_status,visa_status,passport_uploaded_at,visa_uploaded_at,passport_expiry_date,visa_expiry_date,passport_version,visa_version,updated_at",
-            )
+            .select(CANDIDATE_DOCUMENT_SUMMARY_SELECT)
             .in("candidate_id", candidateIds),
         ])
       : [
@@ -186,9 +192,7 @@ export async function loadCandidate(candidateId: string) {
       .maybeSingle(),
     supabase
       .from("candidate_documents")
-      .select(
-        "id,candidate_id,passport_status,visa_status,passport_uploaded_at,visa_uploaded_at,passport_expiry_date,visa_expiry_date,passport_version,visa_version,updated_at",
-      )
+      .select(CANDIDATE_DOCUMENT_SUMMARY_SELECT)
       .eq("candidate_id", candidateId),
     supabase
       .from("candidate_memberships")
@@ -199,7 +203,7 @@ export async function loadCandidate(candidateId: string) {
       .maybeSingle(),
     supabase
       .from("candidate_document_versions")
-      .select("id,candidate_document_id,candidate_id,document_type,version_number,status,is_active,verified_at,created_at,updated_at")
+      .select(CANDIDATE_DOCUMENT_VERSION_SELECT)
       .eq("candidate_id", candidateId)
       .order("created_at", { ascending: false }),
     supabase
@@ -219,7 +223,12 @@ export async function loadCandidate(candidateId: string) {
       }),
     ),
     membership,
-    versions: versions ?? [],
+    versions: normalizeCandidateDocumentRows({
+      versions: (versions ?? []) as CandidateDocumentVersionRow[],
+      summaries: (documents ?? []) as AdminCandidateDocumentSummary[],
+      profiles: [profile],
+      includeHistorical: true,
+    }).rows,
     notifications: notifications ?? [],
     error: null,
   };
@@ -228,32 +237,129 @@ export async function loadCandidate(candidateId: string) {
 export async function loadCandidateDocuments({ q, status, page }: AdminListParams) {
   const supabase = await createServerSupabaseClient();
   const { from, to } = rangeFor(page);
-  let query = supabase
-    .from("candidate_document_versions")
-    .select(
-      "id,candidate_document_id,candidate_id,document_type,file_path,version_number,status,is_active,extracted_details,verified_at,created_at,updated_at,candidate_profiles(headline,current_country,current_city,profiles(full_name,email,status))",
-      { count: "exact" },
-    )
-    .order("created_at", { ascending: false })
-    .range(from, to);
+  const [{ data: versionRows, error: versionError }, { data: summaryRows, error: summaryError }] = await Promise.all([
+    supabase
+      .from("candidate_document_versions")
+      .select(CANDIDATE_DOCUMENT_VERSION_SELECT)
+      .order("created_at", { ascending: false })
+      .limit(1000),
+    supabase
+      .from("candidate_documents")
+      .select(CANDIDATE_DOCUMENT_SUMMARY_SELECT)
+      .order("updated_at", { ascending: false })
+      .limit(1000),
+  ]);
 
-  if (status) query = query.eq("status", status);
-  if (q) query = query.eq("candidate_id", q);
+  if (versionError || summaryError) {
+    const error = versionError ?? summaryError;
+    logAdminDataError("load_candidate_documents", error);
+    return {
+      rows: [],
+      count: 0,
+      error,
+      errorMessage: "Candidate documents could not be loaded. Please try again.",
+    } satisfies AdminListResult<CandidateDocumentQueueRow>;
+  }
 
-  const { data, count, error } = await query;
-  return { rows: (data ?? []) as unknown as CandidateDocumentVersionRow[], count: count ?? 0, error };
+  const candidateIds = [
+    ...new Set([
+      ...((versionRows ?? []) as CandidateDocumentVersionRow[]).map((row) => row.candidate_id),
+      ...((summaryRows ?? []) as AdminCandidateDocumentSummary[]).map((row) => row.candidate_id),
+    ]),
+  ];
+  const { data: profileRows, error: profileError } = candidateIds.length
+    ? await supabase
+        .from("profiles")
+        .select("id,role,full_name,email,status,created_at")
+        .in("id", candidateIds)
+    : { data: [], error: null };
+  const { data: candidateRows, error: candidateError } = candidateIds.length
+    ? await supabase
+        .from("candidate_profiles")
+        .select("id,headline,current_country,current_city")
+        .in("id", candidateIds)
+    : { data: [], error: null };
+
+  if (profileError || candidateError) {
+    const error = profileError ?? candidateError;
+    logAdminDataError("load_candidate_document_profiles", error);
+    return {
+      rows: [],
+      count: 0,
+      error,
+      errorMessage: "Candidate document owner details could not be loaded. Please try again.",
+    } satisfies AdminListResult<CandidateDocumentQueueRow>;
+  }
+
+  const normalized = normalizeCandidateDocumentRows({
+    versions: (versionRows ?? []) as CandidateDocumentVersionRow[],
+    summaries: (summaryRows ?? []) as AdminCandidateDocumentSummary[],
+    profiles: (profileRows ?? []) as AdminProfileRow[],
+    candidateProfiles: (candidateRows ?? []) as AdminCandidateProfileData[],
+    includeHistorical: status === "archived" || status === "superseded",
+  }).rows.filter((row) => {
+    const normalizedStatus = normalizeCandidateDocumentStatus(row.status);
+    const expectedStatus = normalizeCandidateDocumentStatus(status);
+    if (expectedStatus && normalizedStatus !== expectedStatus) return false;
+    if (!q?.trim()) return true;
+    const query = q.trim().toLowerCase();
+    const owner = row.candidate_profiles?.profiles;
+    return (
+      row.candidate_id.toLowerCase() === query ||
+      owner?.full_name?.toLowerCase().includes(query) ||
+      owner?.email?.toLowerCase().includes(query) ||
+      row.document_type.toLowerCase().includes(query)
+    );
+  });
+
+  const rows = normalized.slice(from, to + 1);
+  return { rows, count: normalized.length, error: null } satisfies AdminListResult<CandidateDocumentQueueRow>;
 }
 
 export async function loadCandidateDocument(documentId: string) {
   const supabase = await createServerSupabaseClient();
-  const { data } = await supabase
+  const { data: version } = await supabase
     .from("candidate_document_versions")
-    .select(
-      "id,candidate_document_id,candidate_id,document_type,file_path,version_number,status,is_active,extracted_details,verified_at,created_at,updated_at,candidate_profiles(headline,current_country,current_city,profiles(full_name,email,status))",
-    )
+    .select(CANDIDATE_DOCUMENT_VERSION_SELECT)
     .eq("id", documentId)
     .maybeSingle();
-  return data as unknown as CandidateDocumentVersionRow | null;
+  const { data: summaryByVersion } = version?.candidate_document_id
+    ? await supabase
+        .from("candidate_documents")
+        .select(CANDIDATE_DOCUMENT_SUMMARY_SELECT)
+        .eq("id", version.candidate_document_id)
+        .maybeSingle()
+    : { data: null };
+  const { data: summaryById } = !version
+    ? await supabase
+        .from("candidate_documents")
+        .select(CANDIDATE_DOCUMENT_SUMMARY_SELECT)
+        .eq("id", documentId)
+        .maybeSingle()
+    : { data: null };
+  const summary = (summaryByVersion ?? summaryById) as AdminCandidateDocumentSummary | null;
+  const candidateId = (version as CandidateDocumentVersionRow | null)?.candidate_id ?? summary?.candidate_id;
+  if (!candidateId) return null;
+  const [{ data: profile }, { data: candidate }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id,role,full_name,email,status,created_at")
+      .eq("id", candidateId)
+      .maybeSingle<AdminProfileRow>(),
+    supabase
+      .from("candidate_profiles")
+      .select("id,headline,current_country,current_city")
+      .eq("id", candidateId)
+      .maybeSingle<AdminCandidateProfileData>(),
+  ]);
+  const rows = normalizeCandidateDocumentRows({
+    versions: version ? [version as CandidateDocumentVersionRow] : [],
+    summaries: summary ? [summary] : [],
+    profiles: profile ? [profile] : [],
+    candidateProfiles: candidate ? [candidate] : [],
+    includeHistorical: true,
+  }).rows;
+  return rows.find((row) => row.id === documentId) ?? rows[0] ?? null;
 }
 
 export async function loadEmployers({ q, status, page }: AdminListParams) {
@@ -367,4 +473,130 @@ export function extractCandidateDocumentSummary(
   summaries: AdminCandidateDocumentSummary[] | null | undefined,
 ) {
   return summaries?.[0] ?? null;
+}
+
+export function normalizeCandidateDocumentRows({
+  versions,
+  summaries,
+  profiles,
+  candidateProfiles = [],
+  includeHistorical = false,
+}: {
+  versions: CandidateDocumentVersionRow[];
+  summaries: AdminCandidateDocumentSummary[];
+  profiles: AdminProfileRow[];
+  candidateProfiles?: AdminCandidateProfileData[];
+  includeHistorical?: boolean;
+}) {
+  const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
+  const candidateProfileById = new Map(candidateProfiles.map((candidate) => [candidate.id, candidate]));
+  const summaryByCandidateId = new Map(summaries.map((summary) => [summary.candidate_id, summary]));
+  const rows = versions.map((version) =>
+    withCandidateProfile(
+      {
+        ...version,
+        status: normalizeCandidateDocumentStatus(version.status) || version.status,
+        is_historical: !version.is_active,
+        source: "version" as const,
+        expiry_date: expiryFor(summaryByCandidateId.get(version.candidate_id), version.document_type),
+      },
+      profileById,
+      candidateProfileById,
+    ),
+  );
+
+  const versionKeys = new Set(rows.map((row) => `${row.candidate_id}:${row.document_type}`));
+  for (const summary of summaries) {
+    for (const documentType of ["passport", "visa"] as const) {
+      const filePath = documentType === "passport" ? summary.passport_file_url : summary.visa_file_url;
+      const status = documentType === "passport" ? summary.passport_status : summary.visa_status;
+      const versionNumber = documentType === "passport" ? summary.passport_version : summary.visa_version;
+      if (!filePath && normalizeCandidateDocumentStatus(status) === "not_uploaded") continue;
+      if (versionKeys.has(`${summary.candidate_id}:${documentType}`)) continue;
+      rows.push(
+        withCandidateProfile(
+          {
+            id: summary.id,
+            candidate_document_id: summary.id,
+            candidate_id: summary.candidate_id,
+            document_type: documentType,
+            file_path: filePath ?? null,
+            version_number: versionNumber ?? 1,
+            status: normalizeCandidateDocumentStatus(status) || status,
+            is_active: true,
+            is_historical: false,
+            source: "summary" as const,
+            extracted_details: null,
+            verified_at: null,
+            created_at: uploadedAtFor(summary, documentType),
+            updated_at: summary.updated_at,
+            expiry_date: expiryFor(summary, documentType),
+          },
+          profileById,
+          candidateProfileById,
+        ),
+      );
+    }
+  }
+
+  const visibleRows = includeHistorical ? rows : latestRowsByCandidateDocument(rows);
+  visibleRows.sort((a, b) => dateValue(b.created_at ?? b.updated_at) - dateValue(a.created_at ?? a.updated_at));
+  return { rows: visibleRows };
+}
+
+function latestRowsByCandidateDocument(rows: CandidateDocumentQueueRow[]) {
+  const byKey = new Map<string, CandidateDocumentQueueRow>();
+  for (const row of rows) {
+    const key = `${row.candidate_id}:${row.document_type}`;
+    const existing = byKey.get(key);
+    if (!existing) {
+      byKey.set(key, row);
+      continue;
+    }
+    if (row.is_active && !existing.is_active) {
+      byKey.set(key, row);
+      continue;
+    }
+    if (row.is_active === existing.is_active && row.version_number > existing.version_number) {
+      byKey.set(key, row);
+    }
+  }
+  return [...byKey.values()];
+}
+
+function withCandidateProfile(
+  row: Omit<CandidateDocumentQueueRow, "candidate_profiles">,
+  profileById: Map<string, AdminProfileRow>,
+  candidateProfileById: Map<string, AdminCandidateProfileData>,
+): CandidateDocumentQueueRow {
+  const profile = profileById.get(row.candidate_id);
+  const candidate = candidateProfileById.get(row.candidate_id);
+  return {
+    ...row,
+    candidate_profiles: {
+      headline: candidate?.headline ?? null,
+      current_country: candidate?.current_country ?? null,
+      current_city: candidate?.current_city ?? null,
+      profiles: profile
+        ? {
+            full_name: profile.full_name,
+            email: profile.email,
+            status: profile.status,
+          }
+        : null,
+    },
+  };
+}
+
+function uploadedAtFor(summary: AdminCandidateDocumentSummary, type: "passport" | "visa") {
+  return type === "passport" ? summary.passport_uploaded_at : summary.visa_uploaded_at;
+}
+
+function expiryFor(summary: AdminCandidateDocumentSummary | undefined, type: "passport" | "visa") {
+  if (!summary) return null;
+  return type === "passport" ? summary.passport_expiry_date : summary.visa_expiry_date;
+}
+
+function dateValue(value?: string | null) {
+  return value ? Date.parse(value) || 0 : 0;
 }

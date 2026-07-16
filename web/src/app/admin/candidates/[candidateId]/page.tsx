@@ -55,10 +55,19 @@ export default async function AdminCandidateDetailPage({
       </DetailSection>
       <DetailSection title="Submitted documents">
         {versions.length ? versions.map((version) => (
-          <p key={version.id}>
-            <SafeLink href={`/admin/candidate-documents/${version.id}`}>{version.document_type} v{version.version_number}</SafeLink>{" "}
-            <AdminStatus status={version.status} />
-          </p>
+          <div key={`${version.source}:${version.id}:${version.document_type}`} className="flex flex-col gap-2 rounded-lg border border-[#eadde3] p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold text-[#201925]">
+                {version.document_type} v{version.version_number}
+                {version.is_historical ? <span className="ml-2 text-xs text-[#8a7c88]">Historical</span> : null}
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <AdminStatus status={version.status} />
+                <span className="text-xs text-[#66616f]">Submitted {version.created_at?.slice(0, 10) ?? "Unknown"}</span>
+              </div>
+            </div>
+            <SafeLink href={`/admin/candidate-documents/${version.id}`}>View/Review</SafeLink>
+          </div>
         )) : <p>No submitted document versions.</p>}
       </DetailSection>
       <DetailSection title="Review history">
