@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import { secureDocumentPreviewKind } from "@/components/documents/preview-kind";
+import { SecureDocumentViewer } from "@/components/documents/secure-document-viewer";
 import { PageTitle } from "@/components/layout/page-title";
 import { ButtonLink } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -15,7 +17,14 @@ export default async function EmployerDocumentDetailsPage({ params }: { params: 
       <section className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
         <StatusBadge tone={document.status === "approved" ? "success" : "warning"}>{document.status}</StatusBadge>
         <p className="mt-4 text-sm text-[#66616f]">Uploaded {new Date(document.created_at).toLocaleDateString()}</p>
-        <iframe title="Secure document preview" src={`/employer/documents/preview/${document.id}`} className="mt-5 h-[420px] w-full rounded-lg border border-[#eadde3]" />
+        <div className="mt-5">
+          <SecureDocumentViewer
+            documentKey={document.id}
+            kind={secureDocumentPreviewKind(document.file_path)}
+            previewUrl={`/employer/documents/preview/${document.id}`}
+            title={`${document.document_type} document preview`}
+          />
+        </div>
         <div className="mt-5"><ButtonLink href="/employer/documents/upload">Replace / resubmit</ButtonLink></div>
       </section>
     </div>

@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import { secureDocumentPreviewKind } from "@/components/documents/preview-kind";
+import { SecureDocumentViewer } from "@/components/documents/secure-document-viewer";
 import { AdminPageHeader, AdminStatus, DetailSection, Field } from "@/features/admin/components/admin-ui";
 import { EmployerDocumentReviewActions } from "@/features/admin/components/employer-review-actions";
 import { loadEmployerDocument } from "@/features/admin/server/data";
@@ -22,7 +24,12 @@ export default async function AdminEmployerDocumentDetailPage({ params }: { para
         </div>
       </DetailSection>
       <DetailSection title="Private preview">
-        <iframe title="Employer document preview" src={`/admin/employer-documents/preview/${document.id}`} className="h-[520px] w-full rounded-lg border border-[#eadde3]" />
+        <SecureDocumentViewer
+          documentKey={document.id}
+          kind={secureDocumentPreviewKind(document.file_path)}
+          previewUrl={`/admin/employer-documents/preview/${document.id}`}
+          title={`${document.document_type} document preview`}
+        />
       </DetailSection>
       <DetailSection title="Review action">
         <p>{reviewState.message}</p>

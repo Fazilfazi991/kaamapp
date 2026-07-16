@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { secureDocumentPreviewKind } from "@/components/documents/preview-kind";
+import { SecureDocumentViewer } from "@/components/documents/secure-document-viewer";
 import { approveCandidateDocument, rejectCandidateDocument } from "@/features/admin/server/actions";
 import { AdminPageHeader, AdminStatus, DetailSection, Field } from "@/features/admin/components/admin-ui";
 import { loadCandidateDocument } from "@/features/admin/server/data";
@@ -10,6 +12,7 @@ export default async function AdminCandidateDocumentDetailPage({ params }: { par
   const document = await loadCandidateDocument(documentId);
   if (!document) notFound();
   const reviewState = getCandidateDocumentReviewState(document);
+  const previewUrl = `/admin/candidate-documents/preview/${document.id}`;
 
   return (
     <>
@@ -27,13 +30,12 @@ export default async function AdminCandidateDocumentDetailPage({ params }: { par
         </div>
       </DetailSection>
       <DetailSection title="Private preview">
-        {document.file_path ? (
-          <iframe title="Candidate document preview" src={`/admin/candidate-documents/preview/${document.id}`} className="h-[520px] w-full rounded-lg border border-[#eadde3]" />
-        ) : (
-          <p className="rounded-lg border border-dashed border-[#d8c8d1] bg-[#fffafc] p-4 text-sm text-[#66616f]">
-            Preview is unavailable because this document record has no stored file path.
-          </p>
-        )}
+        <SecureDocumentViewer
+          documentKey={document.id}
+          kind={secureDocumentPreviewKind(document.file_path)}
+          previewUrl={document.file_path ? previewUrl : null}
+          title={`${document.document_type} document preview`}
+        />
       </DetailSection>
       <DetailSection title="Review action">
         <p>{reviewState.message}</p>

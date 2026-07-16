@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/session";
+import { secureDocumentPreviewKind } from "@/components/documents/preview-kind";
 import { buildDocumentCards, fieldForDocument } from "@/features/candidate/documents/status";
 import type {
   CandidateDocumentsRow,
@@ -83,11 +84,13 @@ export async function loadCandidateDocumentDetails(type: CandidateDocumentType) 
     .returns<DocumentVersionRow[]>();
 
   const fileField = fieldForDocument(type, "file") as keyof CandidateDocumentsRow;
+  const filePath = String(row?.[fileField] ?? "");
   return {
     row,
     loadError,
     versions: versions ?? [],
-    hasFile: Boolean(String(row?.[fileField] ?? "").trim()),
+    hasFile: Boolean(filePath.trim()),
+    previewKind: secureDocumentPreviewKind(filePath),
   };
 }
 

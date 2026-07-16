@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { requireAdmin } from "@/features/admin/auth/require-admin";
 import { createSignedPreview, loadCandidateDocument } from "@/features/admin/server/data";
 
@@ -19,5 +18,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ doc
 
   const signedUrl = await createSignedPreview({ bucket_id: "kaam-private", file_path: document.file_path });
   if (!signedUrl) return previewUnavailable();
-  return NextResponse.redirect(signedUrl);
+  const file = await fetch(signedUrl);
+  if (!file.ok || !file.body) return previewUnavailable();
+  return new Response(file.body, {
+    headers: {
+      "content-type": file.headers.get("content-type") ?? "application/octet-stream",
+      "cache-control": "private, max-age=0, no-store",
+      "x-robots-tag": "noindex",
+    },
+  });
 }
