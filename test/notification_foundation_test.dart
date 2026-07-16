@@ -52,6 +52,20 @@ void main() {
         ),
         AppRoutes.employerChatList,
       );
+      expect(
+        KaamNotificationDeepLinks.routeFor(
+          role: KaamRole.candidate,
+          type: 'candidate_document_approved',
+        ),
+        AppRoutes.documentsUpload,
+      );
+      expect(
+        KaamNotificationDeepLinks.routeFor(
+          role: KaamRole.employer,
+          type: 'employer_document_approved',
+        ),
+        AppRoutes.employerVerificationStatus,
+      );
     });
   });
 
@@ -96,7 +110,34 @@ void main() {
       expect(sql, contains('notify_interest_request_created'));
       expect(sql, contains('notify_match_created'));
       expect(sql, contains('notify_chat_message_created'));
+      expect(sql, contains('notify_candidate_document_reviewed'));
+      expect(sql, contains('notify_employer_document_reviewed'));
+      expect(sql, contains('notify_company_reviewed'));
+      expect(sql, contains('candidate_document_approved'));
+      expect(sql, contains('employer_document_approved'));
+      expect(
+        sql,
+        isNot(contains(
+            'grant execute on function public.create_notification(uuid, text, text, text, text, jsonb, text, text, uuid) to authenticated')),
+      );
     });
+  });
+
+  test('Dart notification registry only exposes supported foundation types',
+      () {
+    expect(
+        KaamNotificationTypes.supported,
+        containsPair('candidate_document_approved',
+            KaamNotificationType.candidateDocumentApproved));
+    expect(
+        KaamNotificationTypes.supported,
+        containsPair('employer_document_approved',
+            KaamNotificationType.employerDocumentApproved));
+    expect(
+        KaamNotificationTypes.supported, isNot(contains('profile_incomplete')));
+    expect(KaamNotificationTypes.supported, isNot(contains('report_received')));
+    expect(KaamNotificationTypes.supported,
+        isNot(contains('membership_expiring')));
   });
 
   test('edge function does not expose server secrets in client code', () {
@@ -106,5 +147,8 @@ void main() {
     expect(
         source, contains('https://www.googleapis.com/auth/firebase.messaging'));
     expect(source, isNot(contains('private_key_id:')));
+    expect(source, contains('candidate_document_approved'));
+    expect(source, contains('employer_document_approved'));
+    expect(source, isNot(contains('profile_incomplete')));
   });
 }

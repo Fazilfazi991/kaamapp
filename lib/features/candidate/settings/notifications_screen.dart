@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -20,6 +22,8 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
+  static const _pushPermissionExplainedKey =
+      'kaam_push_permission_explained_v1';
   final repository = const KaamNotificationRepository();
   bool unreadOnly = false;
   late Future<_NotificationCenterData> dataFuture = _load();
@@ -69,11 +73,60 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     KaamNotificationPreferences current,
     KaamNotificationPreferences updated,
   ) async {
-    await repository.savePreferences(updated);
+    var preferenceToSave = updated;
     if (updated.pushEnabled && !current.pushEnabled) {
-      await KaamPushNotificationService.instance.requestPermissionAndRegister();
+      final allowed = await _explainAndRequestPushPermission();
+      if (!allowed) {
+        preferenceToSave = updated.copyWith(pushEnabled: false);
+      }
     }
+    await repository.savePreferences(preferenceToSave);
     await _reload();
+  }
+
+  Future<bool> _explainAndRequestPushPermission() async {
+    final prefs = await SharedPreferences.getInstance();
+    final explained = prefs.getBool(_pushPermissionExplainedKey) ?? false;
+    if (!explained && mounted) {
+      final continueRequest = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Enable push notifications?'),
+          content: const Text(
+            'Kaam can notify you about new messages, matches, interests, and verification updates. You can turn this off any time.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Not now'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Continue'),
+            ),
+          ],
+        ),
+      );
+      await prefs.setBool(_pushPermissionExplainedKey, true);
+      if (continueRequest != true) return false;
+    }
+
+    final allowed = await KaamPushNotificationService.instance
+        .requestPermissionAndRegister();
+    if (!allowed && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Notifications are disabled. You can enable them in Android settings.',
+          ),
+          action: SnackBarAction(
+            label: 'Settings',
+            onPressed: openAppSettings,
+          ),
+        ),
+      );
+    }
+    return allowed;
   }
 
   @override

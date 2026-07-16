@@ -7,25 +7,19 @@ enum KaamNotificationType {
   interestRejected,
   matchCreated,
   newMessage,
-  documentPending,
-  documentApproved,
-  documentRejected,
-  documentResubmissionRequested,
-  membershipExpiring,
-  profileIncomplete,
-  profileViewed,
-  weeklyActivitySummary,
+  candidateDocumentPending,
+  candidateDocumentApproved,
+  candidateDocumentRejected,
+  candidateDocumentResubmissionRequested,
   candidateAcceptedInterest,
   candidateRejectedInterest,
-  companyDocumentApproved,
-  companyDocumentRejected,
+  employerDocumentApproved,
+  employerDocumentRejected,
   companyApproved,
   companyRejected,
-  shortlistedCandidateUpdated,
   candidateDocumentSubmitted,
   employerDocumentSubmitted,
   companyReviewSubmitted,
-  reportReceived,
 }
 
 class KaamNotificationTypes {
@@ -37,31 +31,26 @@ class KaamNotificationTypes {
     'interest_rejected': KaamNotificationType.interestRejected,
     'match_created': KaamNotificationType.matchCreated,
     'new_message': KaamNotificationType.newMessage,
-    'document_pending': KaamNotificationType.documentPending,
-    'document_approved': KaamNotificationType.documentApproved,
-    'document_rejected': KaamNotificationType.documentRejected,
-    'document_resubmission_requested':
-        KaamNotificationType.documentResubmissionRequested,
-    'membership_expiring': KaamNotificationType.membershipExpiring,
-    'profile_incomplete': KaamNotificationType.profileIncomplete,
-    'profile_viewed': KaamNotificationType.profileViewed,
-    'weekly_activity_summary': KaamNotificationType.weeklyActivitySummary,
+    'candidate_document_pending': KaamNotificationType.candidateDocumentPending,
+    'candidate_document_approved':
+        KaamNotificationType.candidateDocumentApproved,
+    'candidate_document_rejected':
+        KaamNotificationType.candidateDocumentRejected,
+    'candidate_document_resubmission_requested':
+        KaamNotificationType.candidateDocumentResubmissionRequested,
     'candidate_accepted_interest':
         KaamNotificationType.candidateAcceptedInterest,
     'candidate_rejected_interest':
         KaamNotificationType.candidateRejectedInterest,
-    'company_document_approved': KaamNotificationType.companyDocumentApproved,
-    'company_document_rejected': KaamNotificationType.companyDocumentRejected,
+    'employer_document_approved': KaamNotificationType.employerDocumentApproved,
+    'employer_document_rejected': KaamNotificationType.employerDocumentRejected,
     'company_approved': KaamNotificationType.companyApproved,
     'company_rejected': KaamNotificationType.companyRejected,
-    'shortlisted_candidate_updated':
-        KaamNotificationType.shortlistedCandidateUpdated,
     'candidate_document_submitted':
         KaamNotificationType.candidateDocumentSubmitted,
     'employer_document_submitted':
         KaamNotificationType.employerDocumentSubmitted,
     'company_review_submitted': KaamNotificationType.companyReviewSubmitted,
-    'report_received': KaamNotificationType.reportReceived,
   };
 }
 
@@ -202,30 +191,28 @@ class KaamNotificationDeepLinks {
       (KaamRole.candidate, 'interest_rejected') => AppRoutes.requests,
       (KaamRole.candidate, 'match_created') => AppRoutes.matches,
       (KaamRole.candidate, 'new_message') => AppRoutes.chatList,
-      (KaamRole.candidate, 'document_pending') => AppRoutes.documentsUpload,
-      (KaamRole.candidate, 'document_approved') => AppRoutes.documentsUpload,
-      (KaamRole.candidate, 'document_rejected') => AppRoutes.documentsUpload,
-      (KaamRole.candidate, 'document_resubmission_requested') =>
+      (KaamRole.candidate, 'candidate_document_pending') =>
         AppRoutes.documentsUpload,
-      (KaamRole.candidate, 'membership_expiring') => AppRoutes.membershipPlans,
-      (KaamRole.candidate, 'profile_incomplete') => AppRoutes.editProfile,
-      (KaamRole.candidate, 'profile_viewed') => AppRoutes.profileViews,
+      (KaamRole.candidate, 'candidate_document_approved') =>
+        AppRoutes.documentsUpload,
+      (KaamRole.candidate, 'candidate_document_rejected') =>
+        AppRoutes.documentsUpload,
+      (KaamRole.candidate, 'candidate_document_resubmission_requested') =>
+        AppRoutes.documentsUpload,
       (KaamRole.employer, 'candidate_accepted_interest') =>
         AppRoutes.employerSentRequests,
       (KaamRole.employer, 'candidate_rejected_interest') =>
         AppRoutes.employerSentRequests,
       (KaamRole.employer, 'match_created') => AppRoutes.employerMatches,
       (KaamRole.employer, 'new_message') => AppRoutes.employerChatList,
-      (KaamRole.employer, 'company_document_approved') =>
+      (KaamRole.employer, 'employer_document_approved') =>
         AppRoutes.employerVerificationStatus,
-      (KaamRole.employer, 'company_document_rejected') =>
+      (KaamRole.employer, 'employer_document_rejected') =>
         AppRoutes.employerVerificationStatus,
       (KaamRole.employer, 'company_approved') =>
         AppRoutes.employerCompanyProfile,
       (KaamRole.employer, 'company_rejected') =>
         AppRoutes.employerCompanyProfile,
-      (KaamRole.employer, 'shortlisted_candidate_updated') =>
-        AppRoutes.employerSavedCandidates,
       _ => fallbackForRole(role),
     };
   }

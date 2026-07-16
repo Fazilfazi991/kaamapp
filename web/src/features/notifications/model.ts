@@ -31,8 +31,6 @@ const safeRoutesByRole: Record<UserRole, Set<string>> = {
     routes.candidateMatches,
     routes.candidateMessages,
     routes.candidateDocuments,
-    routes.candidateMembership,
-    routes.candidateProfileEdit,
   ]),
   employer: new Set([
     routes.employerNotifications,
@@ -41,7 +39,6 @@ const safeRoutesByRole: Record<UserRole, Set<string>> = {
     routes.employerMessages,
     routes.employerDocuments,
     routes.employerProfile,
-    routes.employerShortlist,
   ]),
   admin: new Set([
     routes.adminNotifications,
@@ -49,7 +46,6 @@ const safeRoutesByRole: Record<UserRole, Set<string>> = {
     "/admin/employer-documents",
     "/admin/employers",
     "/admin/candidates",
-    "/admin/reports",
   ]),
 };
 
@@ -72,31 +68,53 @@ export function safeNotificationHref({
   if (direct) return direct;
 
   if (role === "candidate") {
-    if (type.includes("interest")) return routes.candidateInterests;
-    if (type.includes("match")) return routes.candidateMatches;
-    if (type.includes("message")) return routes.candidateMessages;
-    if (type.includes("document")) return routes.candidateDocuments;
-    if (type.includes("membership")) return routes.candidateMembership;
-    if (type === "profile_incomplete") return routes.candidateProfileEdit;
+    if (candidateInterestTypes.has(type)) return routes.candidateInterests;
+    if (type === "match_created") return routes.candidateMatches;
+    if (type === "new_message") return routes.candidateMessages;
+    if (candidateDocumentTypes.has(type)) return routes.candidateDocuments;
   }
 
   if (role === "employer") {
-    if (type.includes("interest")) return routes.employerInterests;
-    if (type.includes("match")) return routes.employerMatches;
-    if (type.includes("message")) return routes.employerMessages;
-    if (type.includes("document")) return routes.employerDocuments;
-    if (type.includes("company")) return routes.employerProfile;
+    if (employerInterestTypes.has(type)) return routes.employerInterests;
+    if (type === "match_created") return routes.employerMatches;
+    if (type === "new_message") return routes.employerMessages;
+    if (employerDocumentTypes.has(type)) return routes.employerDocuments;
+    if (employerCompanyTypes.has(type)) return routes.employerProfile;
   }
 
   if (role === "admin") {
     if (type === "candidate_document_submitted") return "/admin/candidate-documents";
     if (type === "employer_document_submitted") return "/admin/employer-documents";
     if (type === "company_review_submitted") return "/admin/employers";
-    if (type === "report_received") return "/admin/reports";
   }
 
   return fallbackByRole[role];
 }
+
+const candidateInterestTypes = new Set([
+  "employer_interest_received",
+  "interest_accepted",
+  "interest_rejected",
+]);
+
+const candidateDocumentTypes = new Set([
+  "candidate_document_pending",
+  "candidate_document_approved",
+  "candidate_document_rejected",
+  "candidate_document_resubmission_requested",
+]);
+
+const employerInterestTypes = new Set([
+  "candidate_accepted_interest",
+  "candidate_rejected_interest",
+]);
+
+const employerDocumentTypes = new Set([
+  "employer_document_approved",
+  "employer_document_rejected",
+]);
+
+const employerCompanyTypes = new Set(["company_approved", "company_rejected"]);
 
 export function sanitizePushPayload(data: Record<string, unknown>) {
   const sensitive = new Set([

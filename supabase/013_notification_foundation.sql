@@ -5,7 +5,28 @@
 create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
   recipient_id uuid not null references public.profiles(id) on delete cascade,
-  type text not null,
+  type text not null check (
+    type in (
+      'employer_interest_received',
+      'interest_accepted',
+      'interest_rejected',
+      'match_created',
+      'new_message',
+      'candidate_document_pending',
+      'candidate_document_approved',
+      'candidate_document_rejected',
+      'candidate_document_resubmission_requested',
+      'candidate_accepted_interest',
+      'candidate_rejected_interest',
+      'employer_document_approved',
+      'employer_document_rejected',
+      'company_approved',
+      'company_rejected',
+      'candidate_document_submitted',
+      'employer_document_submitted',
+      'company_review_submitted'
+    )
+  ),
   title text not null,
   body text not null,
   data jsonb not null default '{}'::jsonb,
@@ -222,7 +243,9 @@ grant update(status, read_at) on public.notifications to authenticated;
 grant select, insert, update on public.user_push_devices to authenticated;
 grant select, insert, update on public.notification_preferences to authenticated;
 grant select on public.admin_push_device_status to authenticated;
-grant execute on function public.create_notification(uuid, text, text, text, text, jsonb, text, text, uuid) to authenticated;
+revoke execute on function public.create_notification(uuid, text, text, text, text, jsonb, text, text, uuid) from public;
+revoke execute on function public.create_notification(uuid, text, text, text, text, jsonb, text, text, uuid) from anon;
+revoke execute on function public.create_notification(uuid, text, text, text, text, jsonb, text, text, uuid) from authenticated;
 
 create or replace function public.notify_interest_request_created()
 returns trigger
@@ -398,6 +421,57 @@ create trigger notifications_candidate_document_submitted
 after insert on public.candidate_document_versions
 for each row execute function public.notify_candidate_document_submitted();
 
+create or replace function public.notify_candidate_document_reviewed()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_type text;
+  v_title text;
+  v_body text;
+begin
+  if old.status is not distinct from new.status then
+    return new;
+  end if;
+
+  if new.status = 'verified' then
+    v_type := 'candidate_document_approved';
+    v_title := 'Document approved';
+    v_body := 'Your document has been approved by Kaam.';
+  elsif new.status = 'rejected' then
+    v_type := 'candidate_document_rejected';
+    v_title := 'Document needs review';
+    v_body := 'Your document was not approved. Please review the request and resubmit.';
+  elsif new.status = 'resubmission_requested' then
+    v_type := 'candidate_document_resubmission_requested';
+    v_title := 'Document resubmission requested';
+    v_body := 'Please review the document request and upload a new version.';
+  else
+    return new;
+  end if;
+
+  perform public.create_notification(
+    new.candidate_id,
+    v_type,
+    v_title,
+    v_body,
+    '/candidate/documents',
+    jsonb_build_object('document_type', new.document_type, 'version_id', new.id),
+    'candidate-document-reviewed:' || new.id::text || ':' || new.status,
+    'candidate_document_versions',
+    new.id
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists notifications_candidate_document_reviewed on public.candidate_document_versions;
+create trigger notifications_candidate_document_reviewed
+after update of status on public.candidate_document_versions
+for each row execute function public.notify_candidate_document_reviewed();
+
 create or replace function public.notify_verification_document_submitted()
 returns trigger
 language plpgsql
@@ -431,3 +505,141 @@ drop trigger if exists notifications_verification_document_submitted on public.v
 create trigger notifications_verification_document_submitted
 after insert on public.verification_documents
 for each row execute function public.notify_verification_document_submitted();
+
+create or replace function public.notify_employer_document_reviewed()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_type text;
+  v_title text;
+  v_body text;
+begin
+  if old.status is not distinct from new.status then
+    return new;
+  end if;
+
+  if new.status = 'approved' then
+    v_type := 'employer_document_approved';
+    v_title := 'Employer document approved';
+    v_body := 'Your employer document has been approved by Kaam.';
+  elsif new.status in ('rejected', 'resubmission_requested') then
+    v_type := 'employer_document_rejected';
+    v_title := 'Employer document needs review';
+    v_body := 'Please review the document request and upload an updated document.';
+  else
+    return new;
+  end if;
+
+  perform public.create_notification(
+    new.owner_id,
+    v_type,
+    v_title,
+    v_body,
+    '/employer/documents',
+    jsonb_build_object('document_type', new.document_type, 'document_id', new.id),
+    'employer-document-reviewed:' || new.id::text || ':' || new.status,
+    'verification_documents',
+    new.id
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists notifications_employer_document_reviewed on public.verification_documents;
+create trigger notifications_employer_document_reviewed
+after update of status on public.verification_documents
+for each row execute function public.notify_employer_document_reviewed();
+
+create or replace function public.notify_company_review_submitted()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.is_verified = true or new.status not in ('pending', 'pending_review') then
+    return new;
+  end if;
+
+  if tg_op = 'UPDATE' then
+    if old.status is not distinct from new.status then
+      return new;
+    end if;
+  end if;
+
+  insert into public.notifications (
+    recipient_id, type, title, body, action_route, data, dedupe_key, source_type, source_id
+  )
+  select
+    p.id,
+    'company_review_submitted',
+    'Company review submitted',
+    'An employer company profile is ready for review.',
+    '/admin/employers',
+    jsonb_build_object('company_id', new.id, 'owner_id', new.owner_id),
+    'company-review-submitted:' || new.id::text || ':' || coalesce(new.status, 'unknown'),
+    'employer_companies',
+    new.id
+  from public.profiles p
+  where p.role = 'admin' and p.status <> 'blocked'
+  on conflict (recipient_id, dedupe_key) where dedupe_key is not null do nothing;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists notifications_company_review_submitted on public.employer_companies;
+create trigger notifications_company_review_submitted
+after insert or update of status on public.employer_companies
+for each row execute function public.notify_company_review_submitted();
+
+create or replace function public.notify_company_reviewed()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_type text;
+  v_title text;
+  v_body text;
+begin
+  if old.status is not distinct from new.status
+    and old.is_verified is not distinct from new.is_verified then
+    return new;
+  end if;
+
+  if new.is_verified = true or new.status = 'active' then
+    v_type := 'company_approved';
+    v_title := 'Company approved';
+    v_body := 'Your company profile has been approved by Kaam.';
+  elsif new.status = 'rejected' then
+    v_type := 'company_rejected';
+    v_title := 'Company needs review';
+    v_body := 'Please review your company profile and verification documents.';
+  else
+    return new;
+  end if;
+
+  perform public.create_notification(
+    new.owner_id,
+    v_type,
+    v_title,
+    v_body,
+    '/employer/profile',
+    jsonb_build_object('company_id', new.id),
+    'company-reviewed:' || new.id::text || ':' || coalesce(new.status, 'unknown') || ':' || coalesce(new.is_verified::text, 'false'),
+    'employer_companies',
+    new.id
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists notifications_company_reviewed on public.employer_companies;
+create trigger notifications_company_reviewed
+after update of status, is_verified on public.employer_companies
+for each row execute function public.notify_company_reviewed();

@@ -24,6 +24,8 @@ This foundation adds shared in-app notifications, Android FCM delivery, device-t
 
 The mobile Firebase config is not a server secret, but never commit server keys, private keys, or service-account JSON to the app.
 
+Current repository state: `android/app/google-services.json` is intentionally absent and the Google Services Gradle plugin is not applied yet. Firebase initialization remains guarded until those Firebase files are added.
+
 ## Supabase Setup
 
 Project: `bhuhojzqxnvwbsypijac`
@@ -48,6 +50,29 @@ Required Supabase secrets, names only:
 
 `FIREBASE_SERVICE_ACCOUNT_JSON` must be the server-side Firebase service account JSON used only by the Edge Function. Do not store it in Flutter, web browser code, GitHub, or public environment variables.
 
+The migration revokes direct `create_notification` execution from normal authenticated clients. In-app records should be created by audited database triggers, admin review actions, or service-role server processes only.
+
+## Supported Notification Types
+
+- `employer_interest_received`
+- `interest_accepted`
+- `interest_rejected`
+- `match_created`
+- `new_message`
+- `candidate_document_pending`
+- `candidate_document_approved`
+- `candidate_document_rejected`
+- `candidate_document_resubmission_requested`
+- `candidate_accepted_interest`
+- `candidate_rejected_interest`
+- `employer_document_approved`
+- `employer_document_rejected`
+- `company_approved`
+- `company_rejected`
+- `candidate_document_submitted`
+- `employer_document_submitted`
+- `company_review_submitted`
+
 ## Android Behavior
 
 - Android notification channel: `kaam_notifications`
@@ -64,7 +89,7 @@ Push payloads must stay minimal:
 - Safe: notification ID, notification type, safe internal route, safe resource IDs
 - Not allowed: passport number, DOB, phone, private email, storage path, signed URL, OTP, access token, private chat message body
 
-Chat pushes use generic copy such as “You received a new message.”
+Chat pushes use generic copy such as "You received a new message."
 
 ## QA Procedure
 
@@ -82,6 +107,9 @@ Chat pushes use generic copy such as “You received a new message.”
    - chat message
    - candidate document submission
    - employer document submission
+   - candidate document approval/rejection/resubmission request
+   - employer document approval/resubmission request
+   - company approval/rejection
 9. Confirm in-app records appear for the recipient only.
 10. Invoke the Edge Function with one test notification ID and confirm one Android push.
 11. Confirm disabled push preferences skip push while preserving the in-app record.

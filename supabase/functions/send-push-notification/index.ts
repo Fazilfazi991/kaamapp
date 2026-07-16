@@ -46,17 +46,17 @@ const categoryByType: Record<string, keyof PreferenceRow> = {
   candidate_accepted_interest: "interests_and_matches_enabled",
   candidate_rejected_interest: "interests_and_matches_enabled",
   match_created: "interests_and_matches_enabled",
-  document_pending: "document_updates_enabled",
-  document_approved: "document_updates_enabled",
-  document_rejected: "document_updates_enabled",
-  document_resubmission_requested: "document_updates_enabled",
+  candidate_document_pending: "document_updates_enabled",
+  candidate_document_approved: "document_updates_enabled",
+  candidate_document_rejected: "document_updates_enabled",
+  candidate_document_resubmission_requested: "document_updates_enabled",
   candidate_document_submitted: "document_updates_enabled",
   employer_document_submitted: "document_updates_enabled",
-  company_document_approved: "document_updates_enabled",
-  company_document_rejected: "document_updates_enabled",
+  employer_document_approved: "document_updates_enabled",
+  employer_document_rejected: "document_updates_enabled",
   company_approved: "document_updates_enabled",
   company_rejected: "document_updates_enabled",
-  profile_incomplete: "account_security_enabled",
+  company_review_submitted: "document_updates_enabled",
 };
 
 Deno.serve(async (request) => {
@@ -139,7 +139,14 @@ Deno.serve(async (request) => {
   const serviceAccount = JSON.parse(firebaseServiceAccountJson);
   const accessToken = await getFirebaseAccessToken(serviceAccount);
   const endpoint = `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`;
-  const payloadData = safePayloadData(notification);
+  let payloadData: Record<string, string>;
+  try {
+    payloadData = safePayloadData(notification);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unsafe notification payload";
+    await markFailed(supabase, notification.id, notification.push_attempts, message);
+    return json({ status: "failed", error: message }, 400);
+  }
   const results = [];
 
   for (const device of activeDevices) {
@@ -234,6 +241,23 @@ async function markSkipped(
   await supabase
     .from("notifications")
     .update({ push_status: "skipped", last_push_error: reason })
+    .eq("id", notificationId);
+}
+
+async function markFailed(
+  supabase: ReturnType<typeof createClient>,
+  notificationId: string,
+  previousAttempts: number,
+  reason: string,
+) {
+  await supabase
+    .from("notifications")
+    .update({
+      push_status: "failed",
+      failed_at: new Date().toISOString(),
+      push_attempts: previousAttempts + 1,
+      last_push_error: reason,
+    })
     .eq("id", notificationId);
 }
 

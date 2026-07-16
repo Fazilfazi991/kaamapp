@@ -32,6 +32,24 @@ describe("notification model", () => {
         type: "employer_document_submitted",
       }),
     ).toBe("/admin/employer-documents");
+    expect(
+      safeNotificationHref({
+        role: "candidate",
+        type: "candidate_document_approved",
+      }),
+    ).toBe("/candidate/documents");
+    expect(
+      safeNotificationHref({
+        role: "employer",
+        type: "employer_document_approved",
+      }),
+    ).toBe("/employer/documents");
+    expect(
+      safeNotificationHref({
+        role: "admin",
+        type: "report_received",
+      }),
+    ).toBe("/admin/notifications");
   });
 
   it("removes sensitive payload fields", () => {
