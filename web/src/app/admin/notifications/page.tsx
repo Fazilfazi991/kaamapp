@@ -32,6 +32,7 @@ export default async function AdminNotificationsPage({
         candidates={data.candidates}
         employers={data.employers}
         history={data.history}
+        pushConfiguration={data.pushConfiguration}
         filters={params}
       />
     </div>

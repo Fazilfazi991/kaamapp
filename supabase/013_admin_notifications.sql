@@ -54,6 +54,11 @@ create table if not exists public.admin_notifications (
     status in ('draft', 'scheduled', 'sending', 'sent', 'partially_sent', 'failed', 'cancelled')
   ),
   recipient_count integer not null default 0 check (recipient_count >= 0),
+  in_app_success_count integer not null default 0 check (in_app_success_count >= 0),
+  push_success_count integer not null default 0 check (push_success_count >= 0),
+  push_failure_count integer not null default 0 check (push_failure_count >= 0),
+  failure_summary text,
+  idempotency_key text,
   scheduled_at timestamptz,
   sent_at timestamptz,
   created_by uuid not null references public.profiles(id) on delete restrict,
@@ -72,6 +77,10 @@ on public.admin_notifications(status, created_at desc);
 
 create index if not exists admin_notifications_created_by_idx
 on public.admin_notifications(created_by, created_at desc);
+
+create unique index if not exists admin_notifications_idempotency_idx
+on public.admin_notifications(created_by, idempotency_key)
+where idempotency_key is not null;
 
 create table if not exists public.admin_notification_recipients (
   id uuid primary key default gen_random_uuid(),

@@ -16,10 +16,10 @@ import {
   type AdminNotificationStatus,
   type AdminNotificationType,
   notificationTypeOptions,
+  type PushConfiguration,
   type SelectableUser,
 } from "./types";
-
-const supportedSendChannels = new Set<DeliveryChannel>(["in_app"]);
+import { normalizeChannels, unavailablePushMessage } from "./logic";
 
 export async function loadAdminNotificationPageData({
   q,
@@ -33,11 +33,12 @@ export async function loadAdminNotificationPageData({
   type?: string;
 }) {
   await requireAdmin();
-  const [counts, candidates, employers, history] = await Promise.all([
+  const [counts, candidates, employers, history, pushConfiguration] = await Promise.all([
     loadAudienceCounts(),
     loadSelectableUsers("candidate"),
     loadSelectableUsers("employer"),
     loadNotificationHistory({ q, status, audience, type }),
+    loadPushConfiguration(),
   ]);
 
   return {
@@ -45,6 +46,7 @@ export async function loadAdminNotificationPageData({
     candidates,
     employers,
     history,
+    pushConfiguration,
   };
 }
 
@@ -56,26 +58,47 @@ export async function createAdminNotificationAction(
   const admin = await requireAdmin();
   const supabase = await createServerSupabaseClient();
   const parsed = parseNotificationForm(formData);
-  if (!parsed.ok) return { ok: false, message: parsed.message };
+  if (!parsed.ok) return failure(parsed.code, parsed.message);
+  const pushConfiguration = await loadPushConfiguration();
+  const normalizedChannels = normalizeChannels(parsed.channels, pushConfiguration);
+  if (!normalizedChannels.ok) return normalizedChannels.state;
 
   const recipientIds =
     parsed.mode === "test" ? [admin.userId] : await resolveRecipientIds(parsed.audienceType, parsed.selectedUserIds);
   if (recipientIds.length === 0 && parsed.mode !== "draft") {
-    return { ok: false, message: "No recipients match this audience." };
+    return failure("NO_ELIGIBLE_RECIPIENTS", "No recipients match this audience.");
   }
 
-  const unsupportedChannels = parsed.channels.filter((channel) => !supportedSendChannels.has(channel));
-  if (parsed.mode !== "draft" && unsupportedChannels.length > 0) {
-    return {
-      ok: false,
-      message:
-        "Push, Email, and WhatsApp delivery are not configured yet. Use in-app only, or save this notification as a draft.",
-    };
-  }
+  const safeWarning = normalizedChannels.warning;
 
   const sendNow = parsed.mode !== "draft" && parsed.scheduleMode === "now";
   const status: AdminNotificationStatus =
     parsed.mode === "draft" ? "draft" : parsed.scheduleMode === "later" ? "scheduled" : "sent";
+  const inAppRecipientCount = normalizedChannels.channels.includes("in_app") && parsed.mode !== "draft" ? recipientIds.length : 0;
+  const idempotencyKey =
+    parsed.idempotencyKey ??
+    `${admin.userId}:${parsed.mode}:${parsed.title}:${parsed.message}:${parsed.audienceType}:${parsed.scheduleMode}:${parsed.scheduledAt ?? ""}`;
+
+  const { data: existingNotification, error: existingError } = await supabase
+    .from("admin_notifications")
+    .select("id,status,recipient_count")
+    .eq("created_by", admin.userId)
+    .eq("idempotency_key", idempotencyKey)
+    .maybeSingle<{ id: string; status: AdminNotificationStatus; recipient_count: number | null }>();
+
+  if (existingError && !isAdminNotificationSchemaMissing(existingError)) {
+    return failure("BROADCAST_CREATE_FAILED", "Could not verify notification submission state. Please try again.");
+  }
+
+  if (existingNotification) {
+    revalidatePath("/admin/notifications");
+    return success("Notification already submitted. History has been refreshed.", existingNotification.id, {
+      inAppRecipientCount: existingNotification.recipient_count ?? 0,
+      scheduled: existingNotification.status === "scheduled",
+      idempotencyKey,
+      warning: safeWarning,
+    });
+  }
 
   const { data: notification, error } = await supabase
     .from("admin_notifications")
@@ -90,9 +113,14 @@ export async function createAdminNotificationAction(
       },
       action_type: parsed.actionType,
       action_value: parsed.actionValue,
-      channels: parsed.channels,
+      channels: normalizedChannels.channels,
       status,
       recipient_count: parsed.mode === "draft" ? recipientIds.length : recipientIds.length,
+      in_app_success_count: sendNow ? inAppRecipientCount : 0,
+      push_success_count: 0,
+      push_failure_count: 0,
+      failure_summary: safeWarning ?? null,
+      idempotency_key: idempotencyKey,
       scheduled_at: parsed.scheduleMode === "later" ? parsed.scheduledAt : null,
       sent_at: sendNow ? new Date().toISOString() : null,
       created_by: admin.userId,
@@ -103,24 +131,23 @@ export async function createAdminNotificationAction(
 
   if (error || !notification) {
     if (isAdminNotificationSchemaMissing(error)) {
-      return {
-        ok: false,
-        message:
-          "Admin notification tables are not applied in Supabase yet. Apply supabase/013_admin_notifications.sql first.",
-      };
+      return failure(
+        "BROADCAST_TABLE_MISSING",
+        "Admin notification tables are not applied in Supabase yet. Apply supabase/013_admin_notifications.sql first.",
+      );
     }
-    return { ok: false, message: "Could not save notification. Please try again." };
+    return failure("BROADCAST_CREATE_FAILED", "Could not save notification. Please try again.");
   }
 
   if (parsed.mode !== "draft") {
     const recipientRows = recipientIds.map((userId) => ({
       notification_id: notification.id,
       user_id: userId,
-      in_app_status: parsed.channels.includes("in_app") && sendNow ? "sent" : "pending",
-      push_status: parsed.channels.includes("push") ? "pending" : "skipped",
-      email_status: parsed.channels.includes("email") ? "pending" : "skipped",
-      whatsapp_status: parsed.channels.includes("whatsapp") ? "pending" : "skipped",
-      delivered_at: parsed.channels.includes("in_app") && sendNow ? new Date().toISOString() : null,
+      in_app_status: normalizedChannels.channels.includes("in_app") && sendNow ? "sent" : "pending",
+      push_status: normalizedChannels.channels.includes("push") ? "pending" : "skipped",
+      email_status: normalizedChannels.channels.includes("email") ? "pending" : "skipped",
+      whatsapp_status: normalizedChannels.channels.includes("whatsapp") ? "pending" : "skipped",
+      delivered_at: normalizedChannels.channels.includes("in_app") && sendNow ? new Date().toISOString() : null,
     }));
 
     if (recipientRows.length > 0) {
@@ -136,7 +163,13 @@ export async function createAdminNotificationAction(
             .eq("id", notification.id);
           return {
             ok: false,
+            code: "PARTIAL_CHANNEL_FAILURE",
             message: "Notification was saved, but some recipient records could not be created.",
+            broadcastId: notification.id,
+            inAppRecipientCount,
+            pushEligibleDeviceCount: 0,
+            warning: "Some recipient records failed. No raw backend error was exposed.",
+            idempotencyKey,
           };
         }
       }
@@ -144,10 +177,32 @@ export async function createAdminNotificationAction(
   }
 
   revalidatePath("/admin/notifications");
-  if (parsed.mode === "draft") return { ok: true, message: "Draft saved." };
-  if (parsed.mode === "test") return { ok: true, message: "Test in-app notification recorded for your admin account." };
-  if (status === "scheduled") return { ok: true, message: "Notification scheduled." };
-  return { ok: true, message: "In-app notification sent." };
+  if (parsed.mode === "draft") {
+    return success("Draft saved.", notification.id, {
+      idempotencyKey,
+      warning: safeWarning,
+    });
+  }
+  if (parsed.mode === "test") {
+    return success("Test in-app notification recorded for your admin account.", notification.id, {
+      inAppRecipientCount,
+      idempotencyKey,
+      warning: safeWarning,
+    });
+  }
+  if (status === "scheduled") {
+    return success("Notification scheduled.", notification.id, {
+      inAppRecipientCount,
+      scheduled: true,
+      idempotencyKey,
+      warning: safeWarning,
+    });
+  }
+  return success("In-app notification sent.", notification.id, {
+    inAppRecipientCount,
+    idempotencyKey,
+    warning: safeWarning,
+  });
 }
 
 export async function loadAudienceCounts(): Promise<AudienceCounts> {
@@ -195,7 +250,7 @@ async function loadNotificationHistory({
   let query = supabase
     .from("admin_notifications")
     .select(
-      "id,title,message,notification_type,audience_type,audience_filters,action_type,action_value,channels,status,recipient_count,scheduled_at,sent_at,created_by,sent_by,created_at,profiles:created_by(email,full_name)",
+      "id,title,message,notification_type,audience_type,audience_filters,action_type,action_value,channels,status,recipient_count,in_app_success_count,push_success_count,push_failure_count,failure_summary,idempotency_key,scheduled_at,sent_at,created_by,sent_by,created_at,profiles:created_by(email,full_name)",
     )
     .order("created_at", { ascending: false })
     .limit(25);
@@ -297,21 +352,25 @@ function parseNotificationForm(formData: FormData) {
   const scheduleMode = String(formData.get("scheduleMode") ?? "now") as "now" | "later";
   const scheduledAt = String(formData.get("scheduledAt") ?? "").trim() || null;
   const selectedUserIds = formData.getAll("selectedUserIds").map(String);
+  const idempotencyKey = String(formData.get("idempotencyKey") ?? "").trim() || null;
 
-  if (!["draft", "test", "send"].includes(mode)) return fail("Invalid action.");
-  if (title.length === 0 || title.length > 140) return fail("Title must be 1-140 characters.");
-  if (message.length === 0 || message.length > 1200) return fail("Message must be 1-1200 characters.");
-  if (!audienceOptions.some((option) => option.value === audienceType)) return fail("Select a valid audience.");
-  if (!notificationTypeOptions.some((option) => option.value === notificationType)) return fail("Select a valid notification type.");
-  if (channels.length === 0) return fail("Select at least one delivery channel.");
+  if (!["draft", "test", "send"].includes(mode)) return fail("INVALID_ACTION", "Invalid action.");
+  if (title.length === 0 || title.length > 140) return fail("INVALID_TITLE", "Title must be 1-140 characters.");
+  if (message.length === 0 || message.length > 1200) return fail("INVALID_MESSAGE", "Message must be 1-1200 characters.");
+  if (!audienceOptions.some((option) => option.value === audienceType)) return fail("INVALID_AUDIENCE", "Select a valid audience.");
+  if (!notificationTypeOptions.some((option) => option.value === notificationType)) return fail("INVALID_TYPE", "Select a valid notification type.");
+  if (channels.length === 0) return fail("NO_CHANNEL_SELECTED", "Select at least one notification channel.");
   if (!channels.every((channel) => ["in_app", "push", "email", "whatsapp"].includes(channel))) {
-    return fail("Select valid delivery channels.");
+    return fail("INVALID_CHANNEL", "Select valid delivery channels.");
   }
-  if (!actionOptions.some((option) => option.value === actionType)) return fail("Select a valid action link.");
+  if (!actionOptions.some((option) => option.value === actionType)) return fail("INVALID_ACTION_LINK", "Select a valid action link.");
   if (actionValue && (!actionValue.startsWith("/") || actionValue.startsWith("//") || actionValue.includes("://"))) {
-    return fail("Action links must be internal KAAM routes.");
+    return fail("INVALID_ACTION_LINK", "Action links must be internal KAAM routes.");
   }
-  if (scheduleMode === "later" && !scheduledAt) return fail("Select a scheduled date and time.");
+  if (scheduleMode === "later" && !scheduledAt) return fail("INVALID_SCHEDULE", "Select a scheduled date and time.");
+  if (scheduleMode === "later" && scheduledAt && new Date(scheduledAt).getTime() <= Date.now()) {
+    return fail("INVALID_SCHEDULE", "Choose a future scheduled date and time.");
+  }
 
   return {
     ok: true as const,
@@ -326,11 +385,49 @@ function parseNotificationForm(formData: FormData) {
     scheduleMode,
     scheduledAt,
     selectedUserIds,
+    idempotencyKey,
   };
 }
 
-function fail(message: string) {
-  return { ok: false as const, message };
+function fail(code: string, message: string) {
+  return { ok: false as const, code, message };
+}
+
+export async function loadPushConfiguration(): Promise<PushConfiguration> {
+  return {
+    configured: false,
+    reason: unavailablePushMessage,
+    setupHint:
+      "Configure Firebase Android client files, server-side FCM secrets, the push sender Edge Function, and notification migrations before enabling push broadcasts.",
+  };
+}
+
+function failure(code: string, message: string): AdminNotificationActionState {
+  return { ok: false, code, message };
+}
+
+function success(
+  message: string,
+  broadcastId: string,
+  options: {
+    inAppRecipientCount?: number;
+    pushEligibleDeviceCount?: number;
+    scheduled?: boolean;
+    warning?: string;
+    idempotencyKey?: string;
+  } = {},
+): AdminNotificationActionState {
+  return {
+    ok: true,
+    code: "SUCCESS",
+    message: options.warning ? `${message} ${options.warning}` : message,
+    broadcastId,
+    inAppRecipientCount: options.inAppRecipientCount ?? 0,
+    pushEligibleDeviceCount: options.pushEligibleDeviceCount ?? 0,
+    scheduled: options.scheduled ?? false,
+    warning: options.warning,
+    idempotencyKey: options.idempotencyKey,
+  };
 }
 
 function uniqueIds(values: Array<string | null | undefined>) {
