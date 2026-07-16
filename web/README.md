@@ -1,6 +1,6 @@
 # Kaam Web
 
-This folder contains the Kaam Next.js web application foundation for the `web-development` branch. The Flutter mobile app remains at the repository root.
+This folder contains the Kaam Next.js web application, including public, candidate, employer, and admin routes. The Flutter mobile app remains at the repository root.
 
 ## Requirements
 
@@ -21,9 +21,20 @@ Create a local `web/.env.local` file from `web/.env.example`:
 ```text
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_EMAIL_OTP_LENGTH=6
+OCR_EDGE_FUNCTION=
 ```
 
-Only browser-safe Supabase values belong here. Never place service-role keys, database passwords, document URLs, payment references, OTPs, or private candidate data in browser code or committed files.
+Only browser-safe Supabase values belong in `NEXT_PUBLIC_*` variables. Never place service-role keys, database passwords, document URLs, payment references, OTPs, or private candidate data in browser code or committed files. The current admin implementation uses the authenticated Supabase session and does not require a service-role key.
+
+Set these variables in Vercel for Production, Preview, and Development:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_EMAIL_OTP_LENGTH`
+- `OCR_EDGE_FUNCTION` when candidate document OCR is enabled
+
+Supabase Auth URL configuration should include the production site URL `https://kaamapp.vercel.app`, the admin entry URL `https://kaamapp.vercel.app/admin`, and localhost development URLs such as `http://localhost:3000` and `http://localhost:3000/admin`. This app verifies email OTPs in-app, so no separate callback route is required by the current flow.
 
 ## Commands
 
@@ -49,23 +60,27 @@ src/
 ## Current Scope
 
 - Public homepage
-- Login and registration screens prepared for Supabase email OTP
+- Login and registration screens using Supabase email OTP
 - Browser-safe Supabase client
 - Server-side session restoration
 - Candidate and employer dashboard route protection
 - Candidate dashboard shell
 - Employer dashboard shell
 - Employer candidate search UI foundation
-- Admin placeholder notice
+- Admin dashboard under `/admin`
+- Candidate and employer document review routes
+- Admin user, report, and audit surfaces backed by the current schema where available
 
-## Known Incomplete Features
+## Admin Routes
 
-- Full candidate profile editing
-- Web document upload and OCR
-- Real candidate search results
-- Shortlist, messages, matches, and job-post workflows
-- Admin panel
-- Payment or production membership activation
+- `/admin`
+- `/admin/candidates`
+- `/admin/candidate-documents`
+- `/admin/employers`
+- `/admin/employer-documents`
+- `/admin/users`
+- `/admin/reports`
+- `/admin/audit`
 
 ## Authentication QA
 
@@ -75,4 +90,4 @@ See `docs/candidate-onboarding-qa-checklist.md` for candidate onboarding, profil
 
 ## Branch Workflow
 
-Work for this application belongs on `web-development`. Do not merge mobile, admin, or production branches from this task.
+Production deployment currently tracks `main`; feature work may still happen on `web-development` or `admin-development` before being merged through `develop` and into `main`.
