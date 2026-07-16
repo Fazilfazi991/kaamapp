@@ -14,6 +14,7 @@ import '../../../core/widgets/secondary_button.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../supabase_backend/kaam_backend.dart';
+import '../../notifications/notification_repository.dart';
 import '../documents/document_status_service.dart';
 import '../profile/candidate_display_formatters.dart';
 import '../profile/candidate_profile_completion.dart';
@@ -28,6 +29,7 @@ class CandidateDashboardScreen extends StatefulWidget {
 
 class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
   final repository = const CandidateProfileRepository();
+  final notifications = const KaamNotificationRepository();
   final storage = const KaamStorageRepository();
   late Future<CandidateProfileData> profileFuture =
       repository.loadCurrentProfile();
@@ -74,7 +76,14 @@ class _CandidateDashboardScreenState extends State<CandidateDashboardScreen> {
       bottomNavigationBar: const KaamBottomNav(currentIndex: 0),
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications_none_rounded),
+          icon: FutureBuilder<int>(
+            future: notifications.unreadCount(),
+            builder: (context, snapshot) => Badge(
+              isLabelVisible: (snapshot.data ?? 0) > 0,
+              label: Text('${snapshot.data ?? 0}'),
+              child: const Icon(Icons.notifications_none_rounded),
+            ),
+          ),
           onPressed: () =>
               Navigator.of(context).pushNamed(AppRoutes.notifications),
         ),

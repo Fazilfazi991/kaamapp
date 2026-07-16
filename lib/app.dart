@@ -37,6 +37,7 @@ import 'features/candidate/settings/privacy_visibility_screen.dart';
 import 'features/candidate/views/profile_views_screen.dart';
 import 'features/employer/employer_routes.dart';
 import 'features/home/home_screen.dart';
+import 'features/notifications/push_notification_service.dart';
 import 'features/qa/qa_tools_screen.dart';
 import 'features/supabase_backend/kaam_backend.dart';
 
@@ -48,6 +49,7 @@ class KaamApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: KaamPushNotificationService.navigatorKey,
       title: 'Kaam - Perfect Match',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),

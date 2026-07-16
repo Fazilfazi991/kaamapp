@@ -7,6 +7,7 @@ export const adminNavItems = [
   { href: "/admin/candidate-documents", label: "Candidate docs" },
   { href: "/admin/employers", label: "Employers" },
   { href: "/admin/employer-documents", label: "Employer docs" },
+  { href: "/admin/notifications", label: "Notifications" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/reports", label: "Reports" },
   { href: "/admin/audit", label: "Audit" },

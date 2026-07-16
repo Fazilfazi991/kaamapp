@@ -7,46 +7,11 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/screen_scaffold.dart';
 import '../../qa/qa_mode.dart';
 import '../../supabase_backend/kaam_backend.dart';
-import '../data/employer_dummy_data.dart';
+import '../../candidate/settings/notifications_screen.dart';
 
-class EmployerNotificationsScreen extends StatelessWidget {
-  const EmployerNotificationsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ScreenScaffold(
-      title: 'Notifications',
-      showBack: true,
-      children: [
-        ...EmployerDummyData.notifications.map((item) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: AppCard(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.notifications_active_outlined,
-                        color: AppColors.primaryPink),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(item.title, style: AppTextStyles.label),
-                          const SizedBox(height: 4),
-                          Text(item.body, style: AppTextStyles.body),
-                          const SizedBox(height: 4),
-                          Text(item.time, style: AppTextStyles.muted),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )),
-      ],
-    );
-  }
+class EmployerNotificationsScreen extends NotificationsScreen {
+  const EmployerNotificationsScreen({super.key})
+      : super(role: KaamRole.employer);
 }
 
 class EmployerSettingsScreen extends StatelessWidget {

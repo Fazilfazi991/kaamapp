@@ -8,17 +8,20 @@ import '../../../core/widgets/screen_scaffold.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../supabase_backend/kaam_backend.dart';
+import '../../notifications/notification_repository.dart';
 import '../widgets/employer_widgets.dart';
 
 class EmployerDashboardScreen extends StatefulWidget {
   const EmployerDashboardScreen({super.key});
 
   @override
-  State<EmployerDashboardScreen> createState() => _EmployerDashboardScreenState();
+  State<EmployerDashboardScreen> createState() =>
+      _EmployerDashboardScreenState();
 }
 
 class _EmployerDashboardScreenState extends State<EmployerDashboardScreen> {
   final repository = const EmployerRepository();
+  final notifications = const KaamNotificationRepository();
   late Future<EmployerCompanyData?> companyFuture = repository.loadMyCompany();
 
   @override
@@ -29,13 +32,22 @@ class _EmployerDashboardScreenState extends State<EmployerDashboardScreen> {
       actions: [
         IconButton(
           tooltip: 'Search candidates',
-          onPressed: () => Navigator.of(context).pushNamed(AppRoutes.employerCandidateSearch),
+          onPressed: () => Navigator.of(context)
+              .pushNamed(AppRoutes.employerCandidateSearch),
           icon: const Icon(Icons.search_rounded),
         ),
         IconButton(
           tooltip: 'Notifications',
-          onPressed: () => Navigator.of(context).pushNamed(AppRoutes.employerNotifications),
-          icon: const Icon(Icons.notifications_outlined),
+          onPressed: () =>
+              Navigator.of(context).pushNamed(AppRoutes.employerNotifications),
+          icon: FutureBuilder<int>(
+            future: notifications.unreadCount(),
+            builder: (context, snapshot) => Badge(
+              isLabelVisible: (snapshot.data ?? 0) > 0,
+              label: Text('${snapshot.data ?? 0}'),
+              child: const Icon(Icons.notifications_outlined),
+            ),
+          ),
         ),
       ],
       children: [
@@ -62,7 +74,8 @@ class _EmployerDashboardScreenState extends State<EmployerDashboardScreen> {
         ),
         const SizedBox(height: 8),
         AppCard(
-          onTap: () => Navigator.of(context).pushNamed(AppRoutes.employerCandidateSearch),
+          onTap: () => Navigator.of(context)
+              .pushNamed(AppRoutes.employerCandidateSearch),
           padding: const EdgeInsets.all(14),
           child: const Row(
             children: [
@@ -84,28 +97,34 @@ class _EmployerDashboardScreenState extends State<EmployerDashboardScreen> {
           title: 'Hiring Requirements',
           subtitle: 'Add or manage your hiring needs.',
           icon: Icons.work_history_outlined,
-          onTap: () => Navigator.of(context).pushNamed(AppRoutes.employerHiringRequirements),
+          onTap: () => Navigator.of(context)
+              .pushNamed(AppRoutes.employerHiringRequirements),
         ),
         const SizedBox(height: 10),
         EmployerQuickActionCard(
           title: 'Sent Interests',
-          subtitle: 'Track pending, accepted, rejected, and withdrawn requests.',
+          subtitle:
+              'Track pending, accepted, rejected, and withdrawn requests.',
           icon: Icons.outbox_rounded,
-          onTap: () => Navigator.of(context).pushNamed(AppRoutes.employerSentRequests),
+          onTap: () =>
+              Navigator.of(context).pushNamed(AppRoutes.employerSentRequests),
         ),
         const SizedBox(height: 10),
         EmployerQuickActionCard(
           title: 'View Matches',
-          subtitle: 'Open accepted candidates, unread messages, and active chats.',
+          subtitle:
+              'Open accepted candidates, unread messages, and active chats.',
           icon: Icons.handshake_rounded,
-          onTap: () => Navigator.of(context).pushNamed(AppRoutes.employerMatches),
+          onTap: () =>
+              Navigator.of(context).pushNamed(AppRoutes.employerMatches),
         ),
         const SizedBox(height: 10),
         EmployerQuickActionCard(
           title: 'Company Profile',
           subtitle: 'Save company details and verification documents.',
           icon: Icons.business_outlined,
-          onTap: () => Navigator.of(context).pushNamed(AppRoutes.employerCompanyProfile),
+          onTap: () =>
+              Navigator.of(context).pushNamed(AppRoutes.employerCompanyProfile),
         ),
         const SizedBox(height: 18),
         const AppCard(

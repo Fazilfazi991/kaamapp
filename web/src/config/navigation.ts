@@ -8,6 +8,7 @@ export const candidateNavigation = [
   { href: routes.candidateJobs, label: "Jobs" },
   { href: routes.candidateMatches, label: "Matches" },
   { href: routes.candidateMessages, label: "Messages" },
+  { href: routes.candidateNotifications, label: "Notifications" },
   { href: routes.candidateDocuments, label: "Documents" },
   { href: routes.candidateMembership, label: "Membership" },
 ];
@@ -21,5 +22,6 @@ export const employerNavigation = [
   { href: routes.employerInterests, label: "Interests" },
   { href: routes.employerMatches, label: "Matches" },
   { href: routes.employerMessages, label: "Messages" },
+  { href: routes.employerNotifications, label: "Notifications" },
   { href: routes.employerJobPosts, label: "Job Posts" },
 ];

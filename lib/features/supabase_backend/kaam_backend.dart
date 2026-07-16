@@ -5,6 +5,7 @@ import '../../core/supabase/supabase_service.dart';
 import '../../core/config/app_config.dart';
 import '../candidate/models/candidate_models.dart';
 import '../employer/models/employer_models.dart';
+import '../notifications/push_notification_service.dart';
 
 enum KaamRole { candidate, employer }
 
@@ -1014,6 +1015,7 @@ class KaamAuthRepository {
   }
 
   Future<void> signOut() async {
+    await KaamPushNotificationService.instance.deactivateCurrentDevice();
     await SupabaseService.maybeClient?.auth.signOut(scope: SignOutScope.global);
   }
 }
@@ -1044,6 +1046,7 @@ class QaToolsRepository {
   }
 
   Future<void> signOut() async {
+    await KaamPushNotificationService.instance.deactivateCurrentDevice();
     await SupabaseService.maybeClient?.auth.signOut();
   }
 }
@@ -2436,6 +2439,7 @@ Future<void> _ensureCurrentProfileNotBlocked(SupabaseClient client) async {
       .eq('id', user.id)
       .maybeSingle();
   if (KaamAccountStatusPolicy.isBlocked(row?['status'] as String?)) {
+    await KaamPushNotificationService.instance.deactivateCurrentDevice();
     await client.auth.signOut(scope: SignOutScope.global);
     throw StateError(KaamAccountStatusPolicy.blockedMessage);
   }

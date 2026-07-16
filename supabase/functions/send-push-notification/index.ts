@@ -1,0 +1,309 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.6";
+
+type NotificationRow = {
+  id: string;
+  recipient_id: string;
+  type: string;
+  title: string;
+  body: string;
+  data: Record<string, unknown> | null;
+  action_route: string | null;
+  push_attempts: number;
+};
+
+type PreferenceRow = {
+  push_enabled: boolean;
+  new_messages_enabled: boolean;
+  interests_and_matches_enabled: boolean;
+  document_updates_enabled: boolean;
+  account_security_enabled: boolean;
+};
+
+type DeviceRow = {
+  id: string;
+  fcm_token: string;
+  platform: "android" | "web";
+};
+
+const sensitivePayloadKeys = new Set([
+  "passport_number",
+  "dob",
+  "date_of_birth",
+  "phone",
+  "email",
+  "storage_path",
+  "signed_url",
+  "otp",
+  "access_token",
+  "message_body",
+]);
+
+const categoryByType: Record<string, keyof PreferenceRow> = {
+  new_message: "new_messages_enabled",
+  employer_interest_received: "interests_and_matches_enabled",
+  interest_accepted: "interests_and_matches_enabled",
+  interest_rejected: "interests_and_matches_enabled",
+  candidate_accepted_interest: "interests_and_matches_enabled",
+  candidate_rejected_interest: "interests_and_matches_enabled",
+  match_created: "interests_and_matches_enabled",
+  document_pending: "document_updates_enabled",
+  document_approved: "document_updates_enabled",
+  document_rejected: "document_updates_enabled",
+  document_resubmission_requested: "document_updates_enabled",
+  candidate_document_submitted: "document_updates_enabled",
+  employer_document_submitted: "document_updates_enabled",
+  company_document_approved: "document_updates_enabled",
+  company_document_rejected: "document_updates_enabled",
+  company_approved: "document_updates_enabled",
+  company_rejected: "document_updates_enabled",
+  profile_incomplete: "account_security_enabled",
+};
+
+Deno.serve(async (request) => {
+  if (request.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 });
+  }
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const firebaseServiceAccountJson = Deno.env.get("FIREBASE_SERVICE_ACCOUNT_JSON");
+  if (!supabaseUrl || !serviceRoleKey || !firebaseServiceAccountJson) {
+    return json({ error: "Missing required server secrets" }, 500);
+  }
+
+  const authHeader = request.headers.get("authorization") ?? "";
+  if (authHeader !== `Bearer ${serviceRoleKey}`) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+
+  const { notification_id: notificationId } = await request.json().catch(() => ({}));
+  if (typeof notificationId !== "string" || notificationId.length < 10) {
+    return json({ error: "notification_id is required" }, 400);
+  }
+
+  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false },
+  });
+
+  const { data: notification, error: notificationError } = await supabase
+    .from("notifications")
+    .select("id, recipient_id, type, title, body, data, action_route, push_attempts")
+    .eq("id", notificationId)
+    .maybeSingle<NotificationRow>();
+
+  if (notificationError || !notification) {
+    return json({ error: "Notification not found" }, 404);
+  }
+
+  const [{ data: profile }, { data: preferences }, { data: devices }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id, status")
+        .eq("id", notification.recipient_id)
+        .maybeSingle<{ id: string; status: string | null }>(),
+      supabase
+        .from("notification_preferences")
+        .select(
+          "push_enabled, new_messages_enabled, interests_and_matches_enabled, document_updates_enabled, account_security_enabled",
+        )
+        .eq("user_id", notification.recipient_id)
+        .maybeSingle<PreferenceRow>(),
+      supabase
+        .from("user_push_devices")
+        .select("id, fcm_token, platform")
+        .eq("user_id", notification.recipient_id)
+        .eq("is_active", true)
+        .eq("platform", "android")
+        .returns<DeviceRow[]>(),
+    ]);
+
+  if (!profile || profile.status === "blocked") {
+    await markSkipped(supabase, notification.id, "recipient blocked or missing");
+    return json({ status: "skipped", reason: "recipient blocked or missing" });
+  }
+
+  const preference = preferences ?? defaultPreferences();
+  const categoryKey = categoryByType[notification.type];
+  if (!preference.push_enabled || (categoryKey && preference[categoryKey] === false)) {
+    await markSkipped(supabase, notification.id, "push preference disabled");
+    return json({ status: "skipped", reason: "push preference disabled" });
+  }
+
+  const activeDevices = devices ?? [];
+  if (activeDevices.length === 0) {
+    await markSkipped(supabase, notification.id, "no active android devices");
+    return json({ status: "skipped", reason: "no active android devices" });
+  }
+
+  const serviceAccount = JSON.parse(firebaseServiceAccountJson);
+  const accessToken = await getFirebaseAccessToken(serviceAccount);
+  const endpoint = `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`;
+  const payloadData = safePayloadData(notification);
+  const results = [];
+
+  for (const device of activeDevices) {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        message: {
+          token: device.fcm_token,
+          notification: {
+            title: notification.title,
+            body: notification.body,
+          },
+          data: payloadData,
+          android: {
+            priority: "HIGH",
+            notification: {
+              channel_id: "kaam_notifications",
+              click_action: "FLUTTER_NOTIFICATION_CLICK",
+            },
+          },
+        },
+      }),
+    });
+
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const errorCode = String(body?.error?.details?.[0]?.errorCode ?? body?.error?.status ?? "");
+      if (["UNREGISTERED", "NOT_FOUND", "INVALID_ARGUMENT"].includes(errorCode)) {
+        await supabase.from("user_push_devices").update({ is_active: false }).eq("id", device.id);
+      }
+      results.push({ device_id: device.id, ok: false, error: errorCode || "FCM send failed" });
+      continue;
+    }
+
+    results.push({ device_id: device.id, ok: true });
+  }
+
+  const anySuccess = results.some((result) => result.ok);
+  await supabase
+    .from("notifications")
+    .update({
+      push_status: anySuccess ? "sent" : "failed",
+      sent_at: anySuccess ? new Date().toISOString() : null,
+      failed_at: anySuccess ? null : new Date().toISOString(),
+      push_attempts: notification.push_attempts + 1,
+      last_push_error: anySuccess ? null : "All FCM sends failed",
+    })
+    .eq("id", notification.id);
+
+  return json({ status: anySuccess ? "sent" : "failed", results });
+});
+
+function defaultPreferences(): PreferenceRow {
+  return {
+    push_enabled: true,
+    new_messages_enabled: true,
+    interests_and_matches_enabled: true,
+    document_updates_enabled: true,
+    account_security_enabled: true,
+  };
+}
+
+function safePayloadData(notification: NotificationRow): Record<string, string> {
+  const data = notification.data ?? {};
+  for (const key of Object.keys(data)) {
+    if (sensitivePayloadKeys.has(key)) {
+      throw new Error(`Unsafe notification payload key: ${key}`);
+    }
+  }
+
+  return {
+    notification_id: notification.id,
+    type: notification.type,
+    route: notification.action_route ?? "/notifications",
+    ...Object.fromEntries(
+      Object.entries(data)
+        .filter(([key, value]) => !sensitivePayloadKeys.has(key) && value != null)
+        .map(([key, value]) => [key, String(value)]),
+    ),
+  };
+}
+
+async function markSkipped(
+  supabase: ReturnType<typeof createClient>,
+  notificationId: string,
+  reason: string,
+) {
+  await supabase
+    .from("notifications")
+    .update({ push_status: "skipped", last_push_error: reason })
+    .eq("id", notificationId);
+}
+
+async function getFirebaseAccessToken(serviceAccount: {
+  client_email: string;
+  private_key: string;
+  token_uri?: string;
+}) {
+  const now = Math.floor(Date.now() / 1000);
+  const jwtHeader = { alg: "RS256", typ: "JWT" };
+  const jwtClaims = {
+    iss: serviceAccount.client_email,
+    scope: "https://www.googleapis.com/auth/firebase.messaging",
+    aud: serviceAccount.token_uri ?? "https://oauth2.googleapis.com/token",
+    iat: now,
+    exp: now + 3600,
+  };
+  const unsignedJwt = `${base64Url(JSON.stringify(jwtHeader))}.${base64Url(
+    JSON.stringify(jwtClaims),
+  )}`;
+  const key = await importPrivateKey(serviceAccount.private_key);
+  const signature = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    new TextEncoder().encode(unsignedJwt),
+  );
+  const assertion = `${unsignedJwt}.${base64UrlBytes(new Uint8Array(signature))}`;
+  const response = await fetch(serviceAccount.token_uri ?? "https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion,
+    }),
+  });
+  const body = await response.json();
+  if (!response.ok || typeof body.access_token !== "string") {
+    throw new Error("Could not obtain Firebase access token");
+  }
+  return body.access_token as string;
+}
+
+async function importPrivateKey(privateKeyPem: string) {
+  const pem = privateKeyPem
+    .replace("-----BEGIN PRIVATE KEY-----", "")
+    .replace("-----END PRIVATE KEY-----", "")
+    .replace(/\s/g, "");
+  const binary = Uint8Array.from(atob(pem), (char) => char.charCodeAt(0));
+  return crypto.subtle.importKey(
+    "pkcs8",
+    binary,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+}
+
+function base64Url(value: string) {
+  return base64UrlBytes(new TextEncoder().encode(value));
+}
+
+function base64UrlBytes(value: Uint8Array) {
+  let binary = "";
+  for (const byte of value) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
+}
