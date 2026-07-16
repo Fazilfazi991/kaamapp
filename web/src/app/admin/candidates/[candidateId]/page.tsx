@@ -1,0 +1,61 @@
+import { notFound } from "next/navigation";
+import { AdminPageHeader, AdminStatus, DetailSection, Field, SafeLink } from "@/features/admin/components/admin-ui";
+import { loadCandidate } from "@/features/admin/server/data";
+
+type CandidateNotification = {
+  id: string;
+  title: string;
+  body: string;
+  created_at: string | null;
+};
+
+export default async function AdminCandidateDetailPage({
+  params,
+}: {
+  params: Promise<{ candidateId: string }>;
+}) {
+  const { candidateId } = await params;
+  const { candidate, membership, versions, notifications } = await loadCandidate(candidateId);
+  if (!candidate) notFound();
+  const docs = candidate.candidate_documents?.[0];
+
+  return (
+    <>
+      <AdminPageHeader title={candidate.profiles?.full_name ?? "Candidate"} description="Candidate profile, verification summary, review history, and safe account context." />
+      <DetailSection title="Profile summary">
+        <div className="grid gap-4 md:grid-cols-3">
+          <Field label="Email" value={candidate.profiles?.email} />
+          <Field label="Location" value={[candidate.current_city, candidate.current_country].filter(Boolean).join(", ")} />
+          <Field label="Profile status" value={<AdminStatus status={candidate.profiles?.status} />} />
+          <Field label="Headline" value={candidate.headline} />
+          <Field label="Experience" value={candidate.experience_years} />
+          <Field label="Availability" value={candidate.availability} />
+          <Field label="Skills" value={candidate.skills?.join(", ")} />
+          <Field label="Languages" value={candidate.languages?.join(", ")} />
+          <Field label="Membership" value={membership?.status ?? "No membership"} />
+        </div>
+      </DetailSection>
+      <DetailSection title="Verification summary">
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="Passport status" value={<AdminStatus status={docs?.passport_status} />} />
+          <Field label="Visa status" value={<AdminStatus status={docs?.visa_status} />} />
+          <Field label="Passport expiry" value={docs?.passport_expiry_date} />
+          <Field label="Visa expiry" value={docs?.visa_expiry_date} />
+        </div>
+      </DetailSection>
+      <DetailSection title="Submitted documents">
+        {versions.length ? versions.map((version) => (
+          <p key={version.id}>
+            <SafeLink href={`/admin/candidate-documents/${version.id}`}>{version.document_type} v{version.version_number}</SafeLink>{" "}
+            <AdminStatus status={version.status} />
+          </p>
+        )) : <p>No submitted document versions.</p>}
+      </DetailSection>
+      <DetailSection title="Review history">
+        {notifications.length ? (notifications as CandidateNotification[]).map((item) => (
+          <p key={item.id}>{item.created_at?.slice(0, 10)} - {item.title}: {item.body}</p>
+        )) : <p>No candidate document notifications recorded.</p>}
+      </DetailSection>
+    </>
+  );
+}
