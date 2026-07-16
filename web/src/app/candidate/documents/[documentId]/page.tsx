@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { PageTitle } from "@/components/layout/page-title";
+import { SecureDocumentViewer } from "@/components/documents/secure-document-viewer";
 import { ButtonLink } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { documentStatusLabel, documentTone, normalizeStatus } from "@/features/candidate/documents/status";
@@ -23,7 +24,7 @@ export default async function CandidateDocumentDetailsPage({
   const { documentId } = await params;
   const type = safeDocumentType(documentId);
   if (!type) notFound();
-  const { row, versions, hasFile } = await loadCandidateDocumentDetails(type);
+  const { row, versions, hasFile, previewKind } = await loadCandidateDocumentDetails(type);
   const isPassport = type === "passport";
   const status = normalizeStatus(isPassport ? row?.passport_status : row?.visa_status);
 
@@ -48,11 +49,12 @@ export default async function CandidateDocumentDetailsPage({
         </div>
 
         {hasFile ? (
-          <div className="mt-5 overflow-hidden rounded-lg border border-[#eadde3] bg-[#f7f2f5]">
-            <iframe
-              title="Secure document preview"
-              src={`/candidate/documents/preview/${type}`}
-              className="h-[420px] w-full bg-white"
+          <div className="mt-5">
+            <SecureDocumentViewer
+              documentKey={type}
+              kind={previewKind}
+              previewUrl={`/candidate/documents/preview/${type}`}
+              title={`${type} document preview`}
             />
           </div>
         ) : null}
