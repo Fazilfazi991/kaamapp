@@ -28,11 +28,12 @@ class KaamPushNotificationService {
   static final instance = KaamPushNotificationService._();
   static final navigatorKey = GlobalKey<NavigatorState>();
 
-  final _messaging = FirebaseMessaging.instance;
   final _localNotifications = FlutterLocalNotificationsPlugin();
   final _repository = const KaamNotificationRepository();
+  FirebaseMessaging? _messaging;
   StreamSubscription<AuthState>? _authSubscription;
   StreamSubscription<String>? _tokenRefreshSubscription;
+  Future<void>? _initialization;
   bool _firebaseAvailable = false;
   String? _lastToken;
   KaamPushDiagnosticsSnapshot _diagnostics =
@@ -41,8 +42,16 @@ class KaamPushNotificationService {
   KaamPushDiagnosticsSnapshot get diagnostics => _diagnostics;
 
   Future<void> initialize() async {
+    final existingInitialization = _initialization;
+    if (existingInitialization != null) return existingInitialization;
+    _initialization = _initialize();
+    return _initialization;
+  }
+
+  Future<void> _initialize() async {
     try {
       await Firebase.initializeApp();
+      _messaging = FirebaseMessaging.instance;
       _firebaseAvailable = true;
       _setDiagnostics(
         _diagnostics.copyWith(firebaseInitialized: true),
@@ -64,23 +73,60 @@ class KaamPushNotificationService {
 
     FirebaseMessaging.onBackgroundMessage(
         kaamFirebaseMessagingBackgroundHandler);
-    await _configureLocalNotifications();
-    await _createAndroidChannel();
-    _listenForMessages();
-    _listenForAuthChanges();
-    await _handleInitialMessage();
+    await _runOptionalStep(
+      _configureLocalNotifications,
+      category: 'local_notifications_initialization_failed',
+      log: 'Local notifications initialization failed',
+    );
+    await _runOptionalStep(
+      _createAndroidChannel,
+      category: 'android_channel_creation_failed',
+      log: 'Android notification channel creation failed',
+    );
+    _runOptionalSyncStep(
+      _listenForMessages,
+      category: 'message_listener_setup_failed',
+      log: 'Message listener setup failed',
+    );
+    _runOptionalSyncStep(
+      _listenForAuthChanges,
+      category: 'auth_listener_setup_failed',
+      log: 'Auth listener setup failed',
+    );
+    await _runOptionalStep(
+      _handleInitialMessage,
+      category: 'initial_message_handling_failed',
+      log: 'Initial notification handling failed',
+    );
   }
 
   Future<bool> requestPermissionAndRegister() async {
-    if (!_firebaseAvailable || !SupabaseService.isEnabled) return false;
+    final messaging = _messaging;
+    if (!_firebaseAvailable ||
+        messaging == null ||
+        !SupabaseService.isEnabled) {
+      return false;
+    }
     _setDiagnostics(_diagnostics.copyWith(lastSafeErrorCategory: 'none'),
         log: 'Notification permission requested');
-    final settings = await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      provisional: false,
-    );
+    late final NotificationSettings settings;
+    try {
+      settings = await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+    } on Object {
+      _setDiagnostics(
+        _diagnostics.copyWith(
+          notificationPermission: 'Failed',
+          lastSafeErrorCategory: 'notification_permission_failed',
+        ),
+        log: 'Notification permission request failed',
+      );
+      return false;
+    }
     final permission = _permissionLabel(settings.authorizationStatus);
     _setDiagnostics(
       _diagnostics.copyWith(notificationPermission: permission),
@@ -95,10 +141,15 @@ class KaamPushNotificationService {
   }
 
   Future<void> registerCurrentDevice() async {
-    if (!_firebaseAvailable || !SupabaseService.isEnabled) return;
+    final messaging = _messaging;
+    if (!_firebaseAvailable ||
+        messaging == null ||
+        !SupabaseService.isEnabled) {
+      return;
+    }
     if (SupabaseService.maybeClient?.auth.currentUser == null) return;
     try {
-      final token = await _messaging.getToken();
+      final token = await messaging.getToken();
       if (token == null || token.isEmpty) {
         _setDiagnostics(
           _diagnostics.copyWith(
@@ -134,32 +185,51 @@ class KaamPushNotificationService {
   }
 
   Future<void> deactivateCurrentDevice() async {
-    if (!_firebaseAvailable || !SupabaseService.isEnabled) return;
-    final token = _lastToken ?? await _messaging.getToken();
-    await _repository.deactivateDeviceToken(token);
-    _setDiagnostics(
-      _diagnostics.copyWith(supabaseDeviceRegistration: 'Inactive'),
-      log: 'Logout device deactivation requested',
-    );
+    final messaging = _messaging;
+    if (!_firebaseAvailable ||
+        messaging == null ||
+        !SupabaseService.isEnabled) {
+      return;
+    }
+    try {
+      final token = _lastToken ?? await messaging.getToken();
+      await _repository.deactivateDeviceToken(token);
+      _setDiagnostics(
+        _diagnostics.copyWith(supabaseDeviceRegistration: 'Inactive'),
+        log: 'Logout device deactivation requested',
+      );
+    } on Object {
+      _setDiagnostics(
+        _diagnostics.copyWith(
+            lastSafeErrorCategory: 'device_deactivation_failed'),
+        log: 'Device deactivation failed',
+      );
+    }
   }
 
   Future<KaamPushDiagnosticsSnapshot> refreshDiagnostics() async {
-    if (_firebaseAvailable) {
-      final settings = await _messaging.getNotificationSettings();
-      _diagnostics = _diagnostics.copyWith(
-        firebaseInitialized: true,
-        notificationPermission:
-            _permissionLabel(settings.authorizationStatus),
-      );
-    }
-    if (_firebaseAvailable && SupabaseService.isEnabled) {
+    final messaging = _messaging;
+    if (_firebaseAvailable && messaging != null) {
       try {
-        final token = _lastToken ?? await _messaging.getToken();
+        final settings = await messaging.getNotificationSettings();
+        _diagnostics = _diagnostics.copyWith(
+          firebaseInitialized: true,
+          notificationPermission:
+              _permissionLabel(settings.authorizationStatus),
+        );
+      } on Object {
+        _diagnostics = _diagnostics.copyWith(
+          lastSafeErrorCategory: 'notification_settings_failed',
+        );
+      }
+    }
+    if (_firebaseAvailable && messaging != null && SupabaseService.isEnabled) {
+      try {
+        final token = _lastToken ?? await messaging.getToken();
         _lastToken = token;
         _diagnostics = _diagnostics.copyWith(
-          fcmRegistration: token == null || token.isEmpty
-              ? 'Not registered'
-              : 'Registered',
+          fcmRegistration:
+              token == null || token.isEmpty ? 'Not registered' : 'Registered',
         );
         final active = await _repository.currentDeviceActive(token);
         _diagnostics = _diagnostics.copyWith(
@@ -181,7 +251,9 @@ class KaamPushNotificationService {
 
   void _listenForAuthChanges() {
     final client = SupabaseService.maybeClient;
+    final messaging = _messaging;
     if (client == null) return;
+    if (messaging == null) return;
     _authSubscription?.cancel();
     _authSubscription = client.auth.onAuthStateChange.listen((state) async {
       if (state.event == AuthChangeEvent.signedIn ||
@@ -192,21 +264,33 @@ class KaamPushNotificationService {
     });
 
     _tokenRefreshSubscription?.cancel();
-    _tokenRefreshSubscription = _messaging.onTokenRefresh.listen((token) async {
+    _tokenRefreshSubscription = messaging.onTokenRefresh.listen((token) async {
       _lastToken = token;
       _setDiagnostics(_diagnostics.copyWith(fcmRegistration: 'Registered'),
           log: 'FCM token refresh received');
       if (SupabaseService.maybeClient?.auth.currentUser != null) {
-        await _repository.registerDeviceToken(fcmToken: token);
-        _setDiagnostics(
-          _diagnostics.copyWith(supabaseDeviceRegistration: 'Active'),
-          log: 'Supabase device registration updated',
-        );
+        try {
+          await _repository.registerDeviceToken(fcmToken: token);
+          _setDiagnostics(
+            _diagnostics.copyWith(supabaseDeviceRegistration: 'Active'),
+            log: 'Supabase device registration updated',
+          );
+        } on Object {
+          _setDiagnostics(
+            _diagnostics.copyWith(
+              supabaseDeviceRegistration: 'Failed',
+              lastSafeErrorCategory: 'token_refresh_registration_failed',
+            ),
+            log: 'Token refresh device registration failed',
+          );
+        }
       }
     });
   }
 
   void _listenForMessages() {
+    final messaging = _messaging;
+    if (messaging == null) return;
     FirebaseMessaging.onMessage.listen((message) async {
       _setDiagnostics(
         _diagnostics.copyWith(lastPushReceived: 'Foreground'),
@@ -214,28 +298,39 @@ class KaamPushNotificationService {
       );
       final notification = message.notification;
       if (notification == null) return;
-      await _localNotifications.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'kaam_notifications',
-            'Kaam notifications',
-            channelDescription: 'Account, message, and verification updates.',
-            importance: Importance.high,
-            priority: Priority.high,
+      try {
+        await _localNotifications.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'kaam_notifications',
+              'Kaam notifications',
+              channelDescription: 'Account, message, and verification updates.',
+              importance: Importance.high,
+              priority: Priority.high,
+            ),
           ),
-        ),
-        payload: message.data['route'] as String?,
-      );
+          payload: message.data['route'] as String?,
+        );
+      } on Object {
+        _setDiagnostics(
+          _diagnostics.copyWith(
+            lastSafeErrorCategory: 'foreground_notification_failed',
+          ),
+          log: 'Foreground notification display failed',
+        );
+      }
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen(_navigateFromMessage);
   }
 
   Future<void> _handleInitialMessage() async {
-    final message = await _messaging.getInitialMessage();
+    final messaging = _messaging;
+    if (messaging == null) return;
+    final message = await messaging.getInitialMessage();
     if (message != null) {
       _setDiagnostics(
         _diagnostics.copyWith(lastPushReceived: 'Terminated/opened'),
@@ -268,6 +363,36 @@ class KaamPushNotificationService {
     final android = _localNotifications.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
     await android?.createNotificationChannel(channel);
+  }
+
+  Future<void> _runOptionalStep(
+    Future<void> Function() action, {
+    required String category,
+    required String log,
+  }) async {
+    try {
+      await action();
+    } on Object {
+      _setDiagnostics(
+        _diagnostics.copyWith(lastSafeErrorCategory: category),
+        log: log,
+      );
+    }
+  }
+
+  void _runOptionalSyncStep(
+    void Function() action, {
+    required String category,
+    required String log,
+  }) {
+    try {
+      action();
+    } on Object {
+      _setDiagnostics(
+        _diagnostics.copyWith(lastSafeErrorCategory: category),
+        log: log,
+      );
+    }
   }
 
   void _navigateFromMessage(RemoteMessage message) {
@@ -308,7 +433,8 @@ class KaamPushNotificationService {
         deepLinkResult: safeRoute == route ? 'Opened' : 'Fallback',
         lastSafeErrorCategory: 'none',
       ),
-      log: 'Safe deep-link result: ${safeRoute == route ? 'Opened' : 'Fallback'}',
+      log:
+          'Safe deep-link result: ${safeRoute == route ? 'Opened' : 'Fallback'}',
     );
     navigator.pushNamed(safeRoute);
   }
