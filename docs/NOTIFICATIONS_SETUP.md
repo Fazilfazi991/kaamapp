@@ -24,19 +24,23 @@ This foundation adds shared in-app notifications, Android FCM delivery, device-t
 
 The mobile Firebase config is not a server secret, but never commit server keys, private keys, or service-account JSON to the app.
 
-Current repository state: `android/app/google-services.json` is intentionally absent and the Google Services Gradle plugin is not applied yet. Firebase initialization remains guarded until those Firebase files are added.
+Current QA setup: `android/app/google-services.json` is present locally for the QA package `com.kaamperfectmatch.kaam_perfect_match.qa`, and the Google Services Gradle plugin is applied. The file is ignored by Git so environment-specific Firebase client configuration is not committed accidentally.
 
 ## Supabase Setup
 
 Project: `bhuhojzqxnvwbsypijac`
 
-Review and apply the proposed migration manually after QA:
+The notification foundation, admin notification SQL, and admin broadcast push-type compatibility migration were applied to the linked Supabase project `bhuhojzqxnvwbsypijac` during QA setup on 2026-07-17. Verified objects include:
 
-```bash
-supabase db push
-```
+- `notifications`
+- `user_push_devices`
+- `notification_preferences`
+- `admin_notifications`
+- `admin_notification_recipients`
 
-Deploy the Edge Function only after secrets are configured and reviewed:
+All five tables have RLS enabled, with policies and indexes present.
+
+The push Edge Function was deployed after secrets were configured and reviewed:
 
 ```bash
 supabase functions deploy send-push-notification --project-ref bhuhojzqxnvwbsypijac
@@ -49,6 +53,8 @@ Required Supabase secrets, names only:
 - `FIREBASE_SERVICE_ACCOUNT_JSON`
 
 `FIREBASE_SERVICE_ACCOUNT_JSON` must be the server-side Firebase service account JSON used only by the Edge Function. Do not store it in Flutter, web browser code, GitHub, or public environment variables.
+
+Current QA gate: `FIREBASE_SERVICE_ACCOUNT_JSON` is configured as a Supabase secret and `send-push-notification` is deployed with JWT verification enabled. Real foreground, background, and terminated Android delivery still require an attached QA Android device and one selected QA user smoke test.
 
 The migration revokes direct `create_notification` execution from normal authenticated clients. In-app records should be created by audited database triggers, admin review actions, or service-role server processes only.
 

@@ -8,6 +8,7 @@ type NotificationRow = {
   body: string;
   data: Record<string, unknown> | null;
   action_route: string | null;
+  push_status: string;
   push_attempts: number;
 };
 
@@ -57,6 +58,12 @@ const categoryByType: Record<string, keyof PreferenceRow> = {
   company_approved: "document_updates_enabled",
   company_rejected: "document_updates_enabled",
   company_review_submitted: "document_updates_enabled",
+  document_update: "document_updates_enabled",
+  match_update: "interests_and_matches_enabled",
+  account_alert: "account_security_enabled",
+  membership_update: "account_security_enabled",
+  maintenance: "account_security_enabled",
+  urgent_alert: "account_security_enabled",
 };
 
 Deno.serve(async (request) => {
@@ -66,33 +73,49 @@ Deno.serve(async (request) => {
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const firebaseServiceAccountJson = Deno.env.get("FIREBASE_SERVICE_ACCOUNT_JSON");
-  if (!supabaseUrl || !serviceRoleKey || !firebaseServiceAccountJson) {
+  if (!supabaseUrl || !serviceRoleKey || !anonKey || !firebaseServiceAccountJson) {
     return json({ error: "Missing required server secrets" }, 500);
   }
 
   const authHeader = request.headers.get("authorization") ?? "";
-  if (authHeader !== `Bearer ${serviceRoleKey}`) {
-    return json({ error: "Unauthorized" }, 401);
-  }
-
-  const { notification_id: notificationId } = await request.json().catch(() => ({}));
-  if (typeof notificationId !== "string" || notificationId.length < 10) {
-    return json({ error: "notification_id is required" }, 400);
-  }
-
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false },
   });
 
+  if (authHeader !== `Bearer ${serviceRoleKey}`) {
+    const authorized = await isAuthorizedAdminCaller(supabaseUrl, anonKey, supabase, authHeader);
+    if (!authorized) {
+      return json({ error: "Unauthorized" }, 401);
+    }
+  }
+
+  const requestBody = await request.json().catch(() => ({}));
+  if (
+    typeof requestBody !== "object" ||
+    requestBody === null ||
+    Object.keys(requestBody).some((key) => key !== "notification_id")
+  ) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+
+  const { notification_id: notificationId } = requestBody as { notification_id?: unknown };
+  if (typeof notificationId !== "string" || notificationId.length < 10) {
+    return json({ error: "notification_id is required" }, 400);
+  }
+
   const { data: notification, error: notificationError } = await supabase
     .from("notifications")
-    .select("id, recipient_id, type, title, body, data, action_route, push_attempts")
+    .select("id, recipient_id, type, title, body, data, action_route, push_status, push_attempts")
     .eq("id", notificationId)
     .maybeSingle<NotificationRow>();
 
   if (notificationError || !notification) {
     return json({ error: "Notification not found" }, 404);
+  }
+  if (notification.push_status === "sent") {
+    return json({ status: "skipped", reason: "notification already sent" });
   }
 
   const [{ data: profile }, { data: preferences }, { data: devices }] =
@@ -202,6 +225,30 @@ Deno.serve(async (request) => {
 
   return json({ status: anySuccess ? "sent" : "failed", results });
 });
+
+async function isAuthorizedAdminCaller(
+  supabaseUrl: string,
+  anonKey: string,
+  serviceClient: ReturnType<typeof createClient>,
+  authHeader: string,
+) {
+  if (!authHeader.startsWith("Bearer ")) return false;
+  const userClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { authorization: authHeader } },
+    auth: { persistSession: false },
+  });
+  const {
+    data: { user },
+  } = await userClient.auth.getUser();
+  if (!user) return false;
+
+  const { data: profile } = await serviceClient
+    .from("profiles")
+    .select("role,status")
+    .eq("id", user.id)
+    .maybeSingle<{ role: string | null; status: string | null }>();
+  return profile?.role === "admin" && profile.status !== "blocked";
+}
 
 function defaultPreferences(): PreferenceRow {
   return {

@@ -138,6 +138,15 @@ void main() {
     expect(KaamNotificationTypes.supported, isNot(contains('report_received')));
     expect(KaamNotificationTypes.supported,
         isNot(contains('membership_expiring')));
+    expect(
+      KaamNotificationTypes.supported,
+      containsPair('general_announcement',
+          KaamNotificationType.generalAnnouncement),
+    );
+    expect(
+      KaamNotificationTypes.supported,
+      containsPair('urgent_alert', KaamNotificationType.urgentAlert),
+    );
   });
 
   test('edge function does not expose server secrets in client code', () {

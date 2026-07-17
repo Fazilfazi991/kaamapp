@@ -20,6 +20,14 @@ enum KaamNotificationType {
   candidateDocumentSubmitted,
   employerDocumentSubmitted,
   companyReviewSubmitted,
+  generalAnnouncement,
+  documentUpdate,
+  membershipUpdate,
+  matchUpdate,
+  accountAlert,
+  promotional,
+  maintenance,
+  urgentAlert,
 }
 
 class KaamNotificationTypes {
@@ -51,6 +59,14 @@ class KaamNotificationTypes {
     'employer_document_submitted':
         KaamNotificationType.employerDocumentSubmitted,
     'company_review_submitted': KaamNotificationType.companyReviewSubmitted,
+    'general_announcement': KaamNotificationType.generalAnnouncement,
+    'document_update': KaamNotificationType.documentUpdate,
+    'membership_update': KaamNotificationType.membershipUpdate,
+    'match_update': KaamNotificationType.matchUpdate,
+    'account_alert': KaamNotificationType.accountAlert,
+    'promotional': KaamNotificationType.promotional,
+    'maintenance': KaamNotificationType.maintenance,
+    'urgent_alert': KaamNotificationType.urgentAlert,
   };
 }
 
@@ -191,6 +207,10 @@ class KaamNotificationDeepLinks {
       (KaamRole.candidate, 'interest_rejected') => AppRoutes.requests,
       (KaamRole.candidate, 'match_created') => AppRoutes.matches,
       (KaamRole.candidate, 'new_message') => AppRoutes.chatList,
+      (KaamRole.candidate, 'document_update') => AppRoutes.documentsUpload,
+      (KaamRole.candidate, 'membership_update') =>
+        AppRoutes.membershipPlans,
+      (KaamRole.candidate, 'match_update') => AppRoutes.matches,
       (KaamRole.candidate, 'candidate_document_pending') =>
         AppRoutes.documentsUpload,
       (KaamRole.candidate, 'candidate_document_approved') =>
@@ -205,6 +225,9 @@ class KaamNotificationDeepLinks {
         AppRoutes.employerSentRequests,
       (KaamRole.employer, 'match_created') => AppRoutes.employerMatches,
       (KaamRole.employer, 'new_message') => AppRoutes.employerChatList,
+      (KaamRole.employer, 'document_update') =>
+        AppRoutes.employerVerificationStatus,
+      (KaamRole.employer, 'match_update') => AppRoutes.employerMatches,
       (KaamRole.employer, 'employer_document_approved') =>
         AppRoutes.employerVerificationStatus,
       (KaamRole.employer, 'employer_document_rejected') =>
