@@ -104,6 +104,7 @@ export type PushConfiguration = {
   status: PushReadinessStatus;
   reason: string;
   setupHint: string;
+  httpStatus?: number;
 };
 
 export type AdminNotificationActionState = {
