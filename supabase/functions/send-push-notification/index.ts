@@ -75,13 +75,12 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-  const firebaseServiceAccountJson = Deno.env.get("FIREBASE_SERVICE_ACCOUNT_JSON");
 
-  if (!supabaseUrl || !serviceRoleKey || !anonKey || !firebaseServiceAccountJson) {
+  if (!supabaseUrl || !serviceRoleKey || !anonKey) {
     return json({
       status: "SERVER_CONFIG_MISSING",
       configured: false,
-      reason: "Required server push configuration is missing.",
+      reason: "Required Supabase function configuration is missing.",
     }, 200);
   }
 
@@ -93,7 +92,11 @@ Deno.serve(async (request) => {
   if (authHeader !== `Bearer ${serviceRoleKey}`) {
     const authorized = await isAuthorizedAdminCaller(supabaseUrl, anonKey, supabase, authHeader);
     if (!authorized) {
-      return json({ error: "Unauthorized" }, 401);
+      return json({
+        status: "UNAUTHORIZED",
+        configured: false,
+        reason: "Admin authorization is required.",
+      }, 401);
     }
   }
 
@@ -104,6 +107,15 @@ Deno.serve(async (request) => {
     Object.keys(requestBody).some((key) => key !== "notification_id" && key !== "health_check")
   ) {
     return json({ error: "Unauthorized" }, 401);
+  }
+
+  const firebaseServiceAccountJson = Deno.env.get("FIREBASE_SERVICE_ACCOUNT_JSON");
+  if (!firebaseServiceAccountJson) {
+    return json({
+      status: "SERVER_CONFIG_MISSING",
+      configured: false,
+      reason: "Required server push configuration is missing.",
+    }, 200);
   }
 
   if ((requestBody as { health_check?: unknown }).health_check === true) {
@@ -180,7 +192,9 @@ Deno.serve(async (request) => {
     await markFailed(supabase, notification.id, notification.push_attempts, message);
     return json({ status: "failed", error: message }, 400);
   }
-  const results = [];
+  let acceptedCount = 0;
+  let failedCount = 0;
+  let lastSafeError = "";
 
   for (const device of activeDevices) {
     const response = await fetch(endpoint, {
@@ -214,14 +228,15 @@ Deno.serve(async (request) => {
       if (["UNREGISTERED", "NOT_FOUND", "INVALID_ARGUMENT"].includes(errorCode)) {
         await supabase.from("user_push_devices").update({ is_active: false }).eq("id", device.id);
       }
-      results.push({ device_id: device.id, ok: false, error: errorCode || "FCM send failed" });
+      failedCount += 1;
+      lastSafeError = errorCode || "FCM send failed";
       continue;
     }
 
-    results.push({ device_id: device.id, ok: true });
+    acceptedCount += 1;
   }
 
-  const anySuccess = results.some((result) => result.ok);
+  const anySuccess = acceptedCount > 0;
   await supabase
     .from("notifications")
     .update({
@@ -233,7 +248,12 @@ Deno.serve(async (request) => {
     })
     .eq("id", notification.id);
 
-  return json({ status: anySuccess ? "sent" : "failed", results });
+  return json({
+    status: anySuccess ? "sent" : "failed",
+    accepted_count: acceptedCount,
+    failed_count: failedCount,
+    error: anySuccess ? undefined : lastSafeError || "FCM send failed",
+  });
 });
 
 async function healthCheck(

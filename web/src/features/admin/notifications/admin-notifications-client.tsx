@@ -9,6 +9,12 @@ import {
 } from "@/features/admin/components/admin-ui";
 import { createAdminNotificationAction } from "./server";
 import {
+  audienceSupportsPush,
+  canEnablePushChannel,
+  pushReadinessLabel,
+  selectedActiveAndroidDeviceCount,
+} from "./logic";
+import {
   actionOptions,
   audienceOptions,
   type AudienceCounts,
@@ -81,9 +87,17 @@ export function AdminNotificationsClient({
   const selectedAudienceLabel =
     audienceOptions.find((option) => option.value === audienceType)?.label ??
     "Audience";
-  const selectedAudienceSupportsPush =
-    audienceType === "selected_candidates" ||
-    audienceType === "selected_employers";
+  const selectedAudienceSupportsPush = audienceSupportsPush(audienceType);
+  const activeAndroidDeviceCount = selectedActiveAndroidDeviceCount(
+    selectedOptions,
+    selectedUserIds,
+  );
+  const pushChannelEnabled = canEnablePushChannel({
+    audienceType,
+    pushConfiguration,
+    selectedUsers: selectedOptions,
+    selectedUserIds,
+  });
   const availableChannels = channels.filter(
     (channel) =>
       channel !== "push" ||
@@ -92,9 +106,6 @@ export function AdminNotificationsClient({
   const selectedChannelLabels = channelOptions
     .filter((option) => availableChannels.includes(option.value))
     .map((option) => option.label);
-  const selectedUsersHaveActiveDevice = selectedOptions
-    .filter((user) => selectedUserIds.includes(user.id))
-    .some((user) => user.activeAndroidDeviceCount > 0);
   const canSubmit =
     title.trim().length > 0 &&
     message.trim().length > 0 &&
@@ -184,7 +195,10 @@ export function AdminNotificationsClient({
       setClientError("Select one QA user before enabling push.");
       return;
     }
-    if (availableChannels.includes("push") && !selectedUsersHaveActiveDevice) {
+    if (
+      availableChannels.includes("push") &&
+      activeAndroidDeviceCount === 0
+    ) {
       setClientError("No registered Android device");
       return;
     }
@@ -212,6 +226,11 @@ export function AdminNotificationsClient({
     if (channel === "push" && checked && selectedUserIds.length === 0) {
       setChannels((current) => current.filter((item) => item !== "push"));
       setClientError("Select one QA user before enabling push.");
+      return;
+    }
+    if (channel === "push" && checked && activeAndroidDeviceCount === 0) {
+      setChannels((current) => current.filter((item) => item !== "push"));
+      setClientError("No registered Android device");
       return;
     }
     setChannels((current) =>
@@ -400,8 +419,7 @@ export function AdminNotificationsClient({
                       checked={channels.includes(option.value)}
                       disabled={
                         option.value === "push" &&
-                        (!pushConfiguration.configured ||
-                          !selectedAudienceSupportsPush)
+                        !pushChannelEnabled
                       }
                       onChange={(event) =>
                         toggleChannel(option.value, event.target.checked)
@@ -412,7 +430,7 @@ export function AdminNotificationsClient({
                     {option.value === "push" &&
                     !pushConfiguration.configured ? (
                       <span className="text-xs text-[#8a7c88]">
-                        Not configured
+                        {pushReadinessLabel(pushConfiguration)}
                       </span>
                     ) : null}
                     {option.value === "push" &&
@@ -420,6 +438,15 @@ export function AdminNotificationsClient({
                     !selectedAudienceSupportsPush ? (
                       <span className="text-xs text-[#8a7c88]">
                         Selected users only
+                      </span>
+                    ) : null}
+                    {option.value === "push" &&
+                    pushConfiguration.configured &&
+                    selectedAudienceSupportsPush &&
+                    selectedUserIds.length > 0 &&
+                    activeAndroidDeviceCount === 0 ? (
+                      <span className="text-xs text-[#8a7c88]">
+                        No registered Android device
                       </span>
                     ) : null}
                     {option.value !== "in_app" && option.value !== "push" ? (
@@ -431,14 +458,28 @@ export function AdminNotificationsClient({
                 ))}
               </div>
               {!pushConfiguration.configured ? (
-                <p className="text-xs font-medium text-[#8a7c88]">
-                  {pushConfiguration.reason} {pushConfiguration.setupHint}
-                </p>
+                <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-[#8a7c88]">
+                  <span>
+                    Push readiness: {pushReadinessLabel(pushConfiguration)}.
+                    {" "}
+                    {pushConfiguration.reason} {pushConfiguration.setupHint}
+                  </span>
+                  <button
+                    type="button"
+                    className="font-semibold text-[#e53670] underline-offset-4 hover:underline"
+                    onClick={() => window.location.reload()}
+                  >
+                    Retry
+                  </button>
+                </div>
               ) : null}
               {pushConfiguration.configured ? (
                 <p className="text-xs font-medium text-[#8a7c88]">
-                  Push readiness: {pushConfiguration.status}. Push is limited to
-                  explicitly selected QA users.
+                  Push readiness: {pushReadinessLabel(pushConfiguration)}. Push
+                  is limited to explicitly selected QA users.
+                  {selectedAudienceSupportsPush && selectedUserIds.length > 0
+                    ? ` Active Android devices: ${activeAndroidDeviceCount}.`
+                    : ""}
                 </p>
               ) : null}
             </fieldset>

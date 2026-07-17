@@ -857,10 +857,11 @@ export async function loadPushConfiguration(): Promise<PushConfiguration> {
         "Sign in again as an admin user.",
       );
     }
-    const { url } = requireSupabaseConfig();
+    const { url, anonKey } = requireSupabaseConfig();
     const response = await fetch(`${url}/functions/v1/send-push-notification`, {
       method: "POST",
       headers: {
+        apikey: anonKey,
         authorization: `Bearer ${session.access_token}`,
         "content-type": "application/json",
       },
@@ -871,6 +872,7 @@ export async function loadPushConfiguration(): Promise<PushConfiguration> {
         "UNAUTHORIZED",
         "Admin push health check is unauthorized.",
         "Sign in again as an admin user.",
+        response.status,
       );
     }
     if (response.status === 404) {
@@ -878,6 +880,7 @@ export async function loadPushConfiguration(): Promise<PushConfiguration> {
         "FUNCTION_MISSING",
         "Push health check is unavailable.",
         "Deploy the send-push-notification Edge Function.",
+        response.status,
       );
     }
     if (!response.ok) {
@@ -885,12 +888,17 @@ export async function loadPushConfiguration(): Promise<PushConfiguration> {
         "UNREACHABLE",
         "Push health check could not be reached.",
         "Check the Edge Function deployment.",
+        response.status,
       );
     }
     const data = await response.json().catch(() => null);
-    const status = String(
-      (data as { status?: unknown } | null)?.status ?? "UNREACHABLE",
-    ) as PushReadinessStatus;
+    const status = parsePushReadinessStatus(
+      (data as { status?: unknown } | null)?.status,
+    );
+    const safeReason =
+      typeof (data as { reason?: unknown } | null)?.reason === "string"
+        ? String((data as { reason?: unknown }).reason)
+        : null;
     if (status === "READY") {
       return {
         configured: true,
@@ -902,21 +910,32 @@ export async function loadPushConfiguration(): Promise<PushConfiguration> {
     if (status === "SERVER_CONFIG_MISSING") {
       return pushConfiguration(
         status,
-        "Push server configuration is incomplete.",
+        safeReason ?? "Push server configuration is incomplete.",
         "Confirm the Edge Function secret is set.",
+        response.status,
       );
     }
     if (status === "SCHEMA_MISSING") {
       return pushConfiguration(
         status,
-        "Notification schema is not fully available.",
+        safeReason ?? "Notification schema is not fully available.",
         "Apply the notification migrations.",
+        response.status,
+      );
+    }
+    if (status === "UNAUTHORIZED") {
+      return pushConfiguration(
+        status,
+        "Admin push health check is unauthorized.",
+        "Sign in again as an admin user.",
+        response.status,
       );
     }
     return pushConfiguration(
       status,
-      "Push health check did not report ready.",
+      safeReason ?? "Push health check did not report ready.",
       "Check Edge Function logs.",
+      response.status,
     );
   } catch {
     return pushConfiguration(
@@ -931,13 +950,29 @@ function pushConfiguration(
   status: PushReadinessStatus,
   reason: string,
   setupHint: string,
+  httpStatus?: number,
 ): PushConfiguration {
   return {
     configured: false,
     status,
     reason,
     setupHint,
+    httpStatus,
   };
+}
+
+function parsePushReadinessStatus(value: unknown): PushReadinessStatus {
+  return [
+    "READY",
+    "FUNCTION_MISSING",
+    "SERVER_CONFIG_MISSING",
+    "SCHEMA_MISSING",
+    "UNREACHABLE",
+    "UNAUTHORIZED",
+    "UNKNOWN",
+  ].includes(String(value))
+    ? (String(value) as PushReadinessStatus)
+    : "UNKNOWN";
 }
 
 function failure(code: string, message: string): AdminNotificationActionState {
