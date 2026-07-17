@@ -281,9 +281,29 @@ describe("admin notification channel logic", () => {
 
     expect(source).toContain("health_check");
     expect(source).toContain('status: "READY"');
-    expect(source).toContain('status: "UNAUTHORIZED"');
+    expect(source).toContain('"NO_AUTH_HEADER"');
     expect(source).toContain('status: "SERVER_CONFIG_MISSING"');
     expect(source).toContain("accepted_count");
     expect(source).not.toContain("results.push({ device_id");
+  });
+
+  it("keeps Edge Function admin JWT validation explicit and health-only", () => {
+    const source = readFileSync(
+      "../supabase/functions/send-push-notification/index.ts",
+      "utf8",
+    );
+
+    expect(source).toContain('request.headers.get("Authorization")');
+    expect(source).toContain("userClient.auth.getUser(token.accessToken)");
+    expect(source).toContain('"NO_AUTH_HEADER"');
+    expect(source).toContain('"MALFORMED_AUTH_HEADER"');
+    expect(source).toContain('"INVALID_TOKEN"');
+    expect(source).toContain('"EXPIRED_TOKEN"');
+    expect(source).toContain('"PROFILE_NOT_FOUND"');
+    expect(source).toContain('"NOT_ADMIN"');
+    expect(source).toContain('"BLOCKED"');
+    expect(source).toContain('status: "READY", serviceClient');
+    expect(source).toContain('health_check === true');
+    expect(source).not.toContain("authHeader !== `Bearer ${serviceRoleKey}`");
   });
 });

@@ -26,6 +26,25 @@ type DeviceRow = {
   platform: "android" | "web";
 };
 
+type AdminAuthorizationStatus =
+  | "NO_AUTH_HEADER"
+  | "MALFORMED_AUTH_HEADER"
+  | "INVALID_TOKEN"
+  | "EXPIRED_TOKEN"
+  | "PROFILE_NOT_FOUND"
+  | "NOT_ADMIN"
+  | "BLOCKED"
+  | "READY";
+
+type AdminAuthorization =
+  | {
+      status: "READY";
+      serviceClient: ReturnType<typeof createClient>;
+    }
+  | {
+      status: Exclude<AdminAuthorizationStatus, "READY">;
+    };
+
 const sensitivePayloadKeys = new Set([
   "passport_number",
   "dob",
@@ -84,21 +103,18 @@ Deno.serve(async (request) => {
     }, 200);
   }
 
-  const authHeader = request.headers.get("authorization") ?? "";
-  const supabase = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false },
-  });
-
-  if (authHeader !== `Bearer ${serviceRoleKey}`) {
-    const authorized = await isAuthorizedAdminCaller(supabaseUrl, anonKey, supabase, authHeader);
-    if (!authorized) {
-      return json({
-        status: "UNAUTHORIZED",
-        configured: false,
-        reason: "Admin authorization is required.",
-      }, 401);
-    }
+  const authorization = await authorizeAdminCaller(
+    supabaseUrl,
+    anonKey,
+    serviceRoleKey,
+    request.headers.get("Authorization"),
+  );
+  if (authorization.status !== "READY") {
+    logAuthorizationResult(authorization.status);
+    return authorizationFailure(authorization.status);
   }
+  const supabase = authorization.serviceClient;
+  logAuthorizationResult("READY");
 
   const requestBody = await request.json().catch(() => ({}));
   if (
@@ -119,6 +135,7 @@ Deno.serve(async (request) => {
   }
 
   if ((requestBody as { health_check?: unknown }).health_check === true) {
+    console.info("push_readiness health_request=true");
     return await healthCheck(supabase, firebaseServiceAccountJson);
   }
 
@@ -297,28 +314,94 @@ async function healthCheck(
   });
 }
 
-async function isAuthorizedAdminCaller(
+async function authorizeAdminCaller(
   supabaseUrl: string,
   anonKey: string,
-  serviceClient: ReturnType<typeof createClient>,
-  authHeader: string,
-) {
-  if (!authHeader.startsWith("Bearer ")) return false;
+  serviceRoleKey: string,
+  authHeader: string | null,
+): Promise<AdminAuthorization> {
+  const token = parseBearerToken(authHeader);
+  if (token.status !== "READY") return token;
+
   const userClient = createClient(supabaseUrl, anonKey, {
-    global: { headers: { authorization: authHeader } },
     auth: { persistSession: false },
   });
   const {
     data: { user },
-  } = await userClient.auth.getUser();
-  if (!user) return false;
+    error: authError,
+  } = await userClient.auth.getUser(token.accessToken);
+  if (!user) {
+    return {
+      status: isExpiredAuthError(authError?.message) ? "EXPIRED_TOKEN" : "INVALID_TOKEN",
+    };
+  }
+
+  const serviceClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false },
+  });
 
   const { data: profile } = await serviceClient
     .from("profiles")
     .select("role,status")
     .eq("id", user.id)
     .maybeSingle<{ role: string | null; status: string | null }>();
-  return profile?.role === "admin" && profile.status !== "blocked";
+  if (!profile) return { status: "PROFILE_NOT_FOUND" };
+  if (profile.status === "blocked") return { status: "BLOCKED" };
+  if (profile.role !== "admin") return { status: "NOT_ADMIN" };
+
+  return { status: "READY", serviceClient };
+}
+
+function parseBearerToken(
+  authHeader: string | null,
+):
+  | { status: "READY"; accessToken: string }
+  | { status: "NO_AUTH_HEADER" | "MALFORMED_AUTH_HEADER" } {
+  if (!authHeader?.trim()) return { status: "NO_AUTH_HEADER" };
+  const match = /^Bearer\s+([^\s]+)$/.exec(authHeader.trim());
+  if (!match) return { status: "MALFORMED_AUTH_HEADER" };
+  return { status: "READY", accessToken: match[1] };
+}
+
+function isExpiredAuthError(message: string | undefined) {
+  return message?.toLowerCase().includes("expired") ?? false;
+}
+
+function authorizationFailure(status: Exclude<AdminAuthorizationStatus, "READY">) {
+  const forbidden = status === "NOT_ADMIN" || status === "BLOCKED";
+  return json(
+    {
+      status,
+      configured: false,
+      reason: authorizationReason(status),
+    },
+    forbidden ? 403 : 401,
+  );
+}
+
+function authorizationReason(status: Exclude<AdminAuthorizationStatus, "READY">) {
+  switch (status) {
+    case "NO_AUTH_HEADER":
+      return "Admin authorization header is required.";
+    case "MALFORMED_AUTH_HEADER":
+      return "Admin authorization header is malformed.";
+    case "EXPIRED_TOKEN":
+      return "Admin session has expired.";
+    case "INVALID_TOKEN":
+      return "Admin session token is invalid.";
+    case "PROFILE_NOT_FOUND":
+      return "Admin profile is unavailable.";
+    case "NOT_ADMIN":
+      return "Admin access is required.";
+    case "BLOCKED":
+      return "This admin account is unavailable.";
+  }
+}
+
+function logAuthorizationResult(status: AdminAuthorizationStatus) {
+  console.info(
+    `push_readiness authorization_header=${status === "NO_AUTH_HEADER" ? "absent" : "present"} user_validation=${["INVALID_TOKEN", "EXPIRED_TOKEN"].includes(status) ? "failed" : "passed"} profile=${status === "PROFILE_NOT_FOUND" ? "missing" : "checked"} admin=${status === "NOT_ADMIN" ? "no" : status === "READY" ? "yes" : "unchecked"} blocked=${status === "BLOCKED" ? "yes" : "no"} result=${status}`,
+  );
 }
 
 function defaultPreferences(): PreferenceRow {
