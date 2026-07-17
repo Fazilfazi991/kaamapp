@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/admin/auth/require-admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { requireSupabaseConfig } from "@/lib/supabase/env";
 import {
   actionOptions,
   audienceOptions,
@@ -250,6 +251,23 @@ export async function createAdminNotificationAction(
     });
   }
   if (parsed.mode === "test") {
+    if (
+      normalizedChannels.channels.includes("in_app") &&
+      delivery.inAppSuccessCount === 0
+    ) {
+      return {
+        ok: false,
+        code: "RECIPIENT_NOTIFICATION_CREATE_FAILED",
+        message:
+          delivery.failureSummary ??
+          "Could not create recipient notification records.",
+        broadcastId: notification.id,
+        inAppRecipientCount: 0,
+        pushEligibleDeviceCount: delivery.pushEligibleDeviceCount,
+        warning: delivery.failureSummary ?? safeWarning,
+        idempotencyKey,
+      };
+    }
     return success(
       "Test notification sent to your admin account.",
       notification.id,
@@ -268,6 +286,23 @@ export async function createAdminNotificationAction(
       idempotencyKey,
       warning: safeWarning,
     });
+  }
+  if (
+    normalizedChannels.channels.includes("in_app") &&
+    delivery.inAppSuccessCount === 0
+  ) {
+    return {
+      ok: false,
+      code: "RECIPIENT_NOTIFICATION_CREATE_FAILED",
+      message:
+        delivery.failureSummary ??
+        "Could not create recipient notification records.",
+      broadcastId: notification.id,
+      inAppRecipientCount: 0,
+      pushEligibleDeviceCount: delivery.pushEligibleDeviceCount,
+      warning: delivery.failureSummary ?? safeWarning,
+      idempotencyKey,
+    };
   }
   return success(
     normalizedChannels.channels.includes("push")
@@ -659,18 +694,19 @@ async function deliverAdminNotification({
 
   const { data: insertedNotifications, error: insertError } = await supabase
     .from("notifications")
-    .upsert(notificationRows, {
-      onConflict: "recipient_id,dedupe_key",
-      ignoreDuplicates: false,
-    })
+    .insert(notificationRows)
     .select("id,recipient_id");
 
   if (insertError) {
+    const safeError = safeDatabaseError(
+      insertError,
+      "Could not create recipient notification records.",
+    );
     await supabase
       .from("admin_notifications")
       .update({
         status: "failed",
-        failure_summary: "Could not create recipient notification records.",
+        failure_summary: safeError,
       })
       .eq("id", broadcastId);
     return {
@@ -678,7 +714,7 @@ async function deliverAdminNotification({
       pushEligibleDeviceCount,
       pushSuccessCount,
       pushFailureCount: shouldPush ? recipientIds.length : 0,
-      failureSummary: "Could not create recipient notification records.",
+      failureSummary: safeError,
     };
   }
 
@@ -808,21 +844,50 @@ function safeActionRoute(
 }
 
 export async function loadPushConfiguration(): Promise<PushConfiguration> {
+  await requireAdmin();
   const supabase = await createServerSupabaseClient();
   try {
-    const { data, error } = await supabase.functions.invoke(
-      "send-push-notification",
-      {
-        body: { health_check: true },
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      return pushConfiguration(
+        "UNAUTHORIZED",
+        "Admin push health check is unauthorized.",
+        "Sign in again as an admin user.",
+      );
+    }
+    const { url } = requireSupabaseConfig();
+    const response = await fetch(`${url}/functions/v1/send-push-notification`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${session.access_token}`,
+        "content-type": "application/json",
       },
-    );
-    if (error) {
+      body: JSON.stringify({ health_check: true }),
+    });
+    if (response.status === 401 || response.status === 403) {
+      return pushConfiguration(
+        "UNAUTHORIZED",
+        "Admin push health check is unauthorized.",
+        "Sign in again as an admin user.",
+      );
+    }
+    if (response.status === 404) {
       return pushConfiguration(
         "FUNCTION_MISSING",
         "Push health check is unavailable.",
         "Deploy the send-push-notification Edge Function.",
       );
     }
+    if (!response.ok) {
+      return pushConfiguration(
+        "UNREACHABLE",
+        "Push health check could not be reached.",
+        "Check the Edge Function deployment.",
+      );
+    }
+    const data = await response.json().catch(() => null);
     const status = String(
       (data as { status?: unknown } | null)?.status ?? "UNREACHABLE",
     ) as PushReadinessStatus;
@@ -911,6 +976,19 @@ function uniqueIds(values: Array<string | null | undefined>) {
 
 function escapeLike(value: string) {
   return value.replace(/[%_]/g, (match) => `\\${match}`);
+}
+
+function safeDatabaseError(error: unknown, fallback: string) {
+  if (!error || typeof error !== "object") return fallback;
+  const maybeError = error as {
+    code?: string;
+    message?: string;
+    details?: string;
+  };
+  const code = maybeError.code ? ` (${maybeError.code})` : "";
+  const message = maybeError.message?.trim();
+  if (!message) return fallback;
+  return `${fallback}${code}: ${message}`;
 }
 
 function isAdminNotificationSchemaMissing(error: unknown) {

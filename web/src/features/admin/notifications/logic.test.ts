@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { normalizeChannels, unavailablePushMessage } from "./logic";
 import type { PushConfiguration } from "./types";
 
@@ -67,5 +68,29 @@ describe("admin notification channel logic", () => {
       expect(result.state.code).toBe("CHANNEL_NOT_CONFIGURED");
       expect(result.state.message).not.toContain("Supabase");
     }
+  });
+
+  it("keeps readiness states typed instead of collapsing unauthorized to not configured", () => {
+    const unauthorized: PushConfiguration = {
+      configured: false,
+      status: "UNAUTHORIZED",
+      reason: "Admin push health check is unauthorized.",
+      setupHint: "Sign in again as an admin user.",
+    };
+
+    expect(unauthorized.status).toBe("UNAUTHORIZED");
+    expect(unauthorized.reason).toContain("unauthorized");
+  });
+
+  it("uses insert for canonical notification rows to avoid partial-index upsert failure", () => {
+    const source = readFileSync(
+      "src/features/admin/notifications/server.ts",
+      "utf8",
+    );
+
+    expect(source).toContain('.from("notifications")');
+    expect(source).toContain(".insert(notificationRows)");
+    expect(source).not.toContain('onConflict: "recipient_id,dedupe_key"');
+    expect(source).toContain("RECIPIENT_NOTIFICATION_CREATE_FAILED");
   });
 });

@@ -95,7 +95,9 @@ export type PushReadinessStatus =
   | "FUNCTION_MISSING"
   | "SERVER_CONFIG_MISSING"
   | "SCHEMA_MISSING"
-  | "UNREACHABLE";
+  | "UNREACHABLE"
+  | "UNAUTHORIZED"
+  | "UNKNOWN";
 
 export type PushConfiguration = {
   configured: boolean;
