@@ -92,6 +92,10 @@ export type SelectableUser = {
 
 export type PushReadinessStatus =
   | "READY"
+  | "NO_SESSION"
+  | "TOKEN_MISSING"
+  | "NOT_ADMIN"
+  | "EDGE_UNAUTHORIZED"
   | "FUNCTION_MISSING"
   | "SERVER_CONFIG_MISSING"
   | "SCHEMA_MISSING"
