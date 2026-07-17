@@ -844,34 +844,26 @@ function safeActionRoute(
 }
 
 export async function loadPushConfiguration(): Promise<PushConfiguration> {
-  await requireAdmin();
   const supabase = await createServerSupabaseClient();
   try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session?.access_token) {
-      return pushConfiguration(
-        "UNAUTHORIZED",
-        "Admin push health check is unauthorized.",
-        "Sign in again as an admin user.",
-      );
-    }
+    const authContext = await resolveAdminPushAuthContext(supabase);
+    if (!authContext.ok) return authContext.configuration;
+
     const { url, anonKey } = requireSupabaseConfig();
     const response = await fetch(`${url}/functions/v1/send-push-notification`, {
       method: "POST",
       headers: {
         apikey: anonKey,
-        authorization: `Bearer ${session.access_token}`,
+        authorization: `Bearer ${authContext.accessToken}`,
         "content-type": "application/json",
       },
       body: JSON.stringify({ health_check: true }),
     });
     if (response.status === 401 || response.status === 403) {
       return pushConfiguration(
-        "UNAUTHORIZED",
-        "Admin push health check is unauthorized.",
-        "Sign in again as an admin user.",
+        "EDGE_UNAUTHORIZED",
+        "Push service rejected the current admin session.",
+        "Please sign out and sign in again.",
         response.status,
       );
     }
@@ -923,11 +915,11 @@ export async function loadPushConfiguration(): Promise<PushConfiguration> {
         response.status,
       );
     }
-    if (status === "UNAUTHORIZED") {
+    if (status === "UNAUTHORIZED" || status === "EDGE_UNAUTHORIZED") {
       return pushConfiguration(
-        status,
-        "Admin push health check is unauthorized.",
-        "Sign in again as an admin user.",
+        "EDGE_UNAUTHORIZED",
+        "Push service rejected the current admin session.",
+        "Please sign out and sign in again.",
         response.status,
       );
     }
@@ -944,6 +936,73 @@ export async function loadPushConfiguration(): Promise<PushConfiguration> {
       "Check the Edge Function deployment.",
     );
   }
+}
+
+async function resolveAdminPushAuthContext(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+): Promise<
+  | { ok: true; accessToken: string }
+  | { ok: false; configuration: PushConfiguration }
+> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      ok: false,
+      configuration: pushConfiguration(
+        "NO_SESSION",
+        "No active admin session was found.",
+        "Please sign out and sign in again.",
+      ),
+    };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role,status")
+    .eq("id", user.id)
+    .maybeSingle<{ role: string | null; status: string | null }>();
+
+  if (!profile || profile.role !== "admin" || profile.status === "blocked") {
+    return {
+      ok: false,
+      configuration: pushConfiguration(
+        "NOT_ADMIN",
+        "The current account is not authorized for admin push checks.",
+        "Use an active admin account.",
+      ),
+    };
+  }
+
+  const accessToken = await resolveCurrentAccessToken(supabase);
+  if (!accessToken) {
+    return {
+      ok: false,
+      configuration: pushConfiguration(
+        "TOKEN_MISSING",
+        "The admin session could not provide a current access token.",
+        "Please sign out and sign in again.",
+      ),
+    };
+  }
+
+  return { ok: true, accessToken };
+}
+
+async function resolveCurrentAccessToken(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (session?.access_token) return session.access_token;
+
+  const {
+    data: { session: refreshedSession },
+  } = await supabase.auth.refreshSession();
+  return refreshedSession?.access_token ?? null;
 }
 
 function pushConfiguration(
@@ -964,6 +1023,10 @@ function pushConfiguration(
 function parsePushReadinessStatus(value: unknown): PushReadinessStatus {
   return [
     "READY",
+    "NO_SESSION",
+    "TOKEN_MISSING",
+    "NOT_ADMIN",
+    "EDGE_UNAUTHORIZED",
     "FUNCTION_MISSING",
     "SERVER_CONFIG_MISSING",
     "SCHEMA_MISSING",

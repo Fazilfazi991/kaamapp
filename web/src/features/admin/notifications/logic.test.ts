@@ -127,6 +127,38 @@ describe("admin notification channel logic", () => {
     expect(
       pushReadinessLabel({
         configured: false,
+        status: "NO_SESSION",
+        reason: "",
+        setupHint: "",
+      }),
+    ).toBe("Admin session missing");
+    expect(
+      pushReadinessLabel({
+        configured: false,
+        status: "TOKEN_MISSING",
+        reason: "",
+        setupHint: "",
+      }),
+    ).toBe("Admin session needs refresh");
+    expect(
+      pushReadinessLabel({
+        configured: false,
+        status: "NOT_ADMIN",
+        reason: "",
+        setupHint: "",
+      }),
+    ).toBe("Admin access required");
+    expect(
+      pushReadinessLabel({
+        configured: false,
+        status: "EDGE_UNAUTHORIZED",
+        reason: "",
+        setupHint: "",
+      }),
+    ).toBe("Push service rejected admin session");
+    expect(
+      pushReadinessLabel({
+        configured: false,
         status: "UNKNOWN",
         reason: "",
         setupHint: "",
@@ -228,9 +260,17 @@ describe("admin notification channel logic", () => {
       "utf8",
     );
 
+    expect(source).toContain("resolveAdminPushAuthContext");
+    expect(source).toContain("await supabase.auth.getUser()");
+    expect(source).toContain("await supabase.auth.refreshSession()");
+    expect(source).toContain('"NO_SESSION"');
+    expect(source).toContain('"TOKEN_MISSING"');
+    expect(source).toContain('"NOT_ADMIN"');
+    expect(source).toContain('"EDGE_UNAUTHORIZED"');
     expect(source).toContain("apikey: anonKey");
-    expect(source).toContain("authorization: `Bearer ${session.access_token}`");
+    expect(source).toContain("authorization: `Bearer ${authContext.accessToken}`");
     expect(source).not.toContain("authorization: `Bearer ${anonKey}`");
+    expect(source).not.toContain("export async function loadPushConfiguration(): Promise<PushConfiguration> {\n  await requireAdmin();");
   });
 
   it("keeps Edge Function health mode typed and secret-safe", () => {

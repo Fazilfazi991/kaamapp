@@ -15,6 +15,14 @@ export function pushReadinessLabel(pushConfiguration: PushConfiguration) {
   switch (pushConfiguration.status) {
     case "READY":
       return "Ready";
+    case "NO_SESSION":
+      return "Admin session missing";
+    case "TOKEN_MISSING":
+      return "Admin session needs refresh";
+    case "NOT_ADMIN":
+      return "Admin access required";
+    case "EDGE_UNAUTHORIZED":
+      return "Push service rejected admin session";
     case "UNAUTHORIZED":
       return "Admin authentication required";
     case "FUNCTION_MISSING":
