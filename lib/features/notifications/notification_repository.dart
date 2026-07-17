@@ -107,6 +107,21 @@ class KaamNotificationRepository {
         .eq('fcm_token', token);
   }
 
+  Future<bool?> currentDeviceActive(String? fcmToken) async {
+    final token = fcmToken?.trim();
+    if (token == null || token.isEmpty) return null;
+    final user = _client.auth.currentUser;
+    if (user == null) return null;
+    final row = await _client
+        .from('user_push_devices')
+        .select('is_active')
+        .eq('user_id', user.id)
+        .eq('fcm_token', token)
+        .maybeSingle();
+    if (row == null) return null;
+    return row['is_active'] as bool? ?? false;
+  }
+
   User _requireUser() {
     final user = SupabaseService.maybeClient?.auth.currentUser;
     if (user == null) throw StateError('Sign in to manage notifications.');

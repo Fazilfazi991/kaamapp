@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,6 +11,7 @@ import '../../../core/widgets/screen_scaffold.dart';
 import '../../notifications/notification_models.dart';
 import '../../notifications/notification_repository.dart';
 import '../../notifications/push_notification_service.dart';
+import '../../qa/qa_mode.dart';
 import '../../supabase_backend/kaam_backend.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -193,11 +195,159 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   onChanged: (updated) =>
                       _savePreference(data.preferences, updated),
                 ),
+                if (QaMode.enabled) ...[
+                  const SizedBox(height: 18),
+                  _PushDiagnosticsCard(
+                    onRequestPermission: _explainAndRequestPushPermission,
+                  ),
+                ],
               ],
             );
           },
         ),
       ],
+    );
+  }
+}
+
+class _PushDiagnosticsCard extends StatefulWidget {
+  const _PushDiagnosticsCard({required this.onRequestPermission});
+
+  final Future<bool> Function() onRequestPermission;
+
+  @override
+  State<_PushDiagnosticsCard> createState() => _PushDiagnosticsCardState();
+}
+
+class _PushDiagnosticsCardState extends State<_PushDiagnosticsCard> {
+  KaamPushDiagnosticsSnapshot snapshot =
+      KaamPushNotificationService.instance.diagnostics;
+  bool busy = false;
+
+  Future<void> _refresh() async {
+    setState(() => busy = true);
+    final updated =
+        await KaamPushNotificationService.instance.refreshDiagnostics();
+    if (!mounted) return;
+    setState(() {
+      snapshot = updated;
+      busy = false;
+    });
+  }
+
+  Future<void> _requestPermission() async {
+    setState(() => busy = true);
+    await widget.onRequestPermission();
+    await _refresh();
+  }
+
+  Future<void> _registerDevice() async {
+    setState(() => busy = true);
+    await KaamPushNotificationService.instance.registerCurrentDevice();
+    await _refresh();
+  }
+
+  Future<void> _copySummary() async {
+    await Clipboard.setData(ClipboardData(text: snapshot.toSafeSummary()));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Safe diagnostics copied.')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Push diagnostics', style: AppTextStyles.title),
+          const SizedBox(height: 8),
+          _DiagnosticRow(
+            label: 'Firebase initialized',
+            value: snapshot.firebaseInitialized ? 'Yes' : 'No',
+          ),
+          _DiagnosticRow(
+            label: 'Notification permission',
+            value: snapshot.notificationPermission,
+          ),
+          _DiagnosticRow(
+            label: 'FCM registration',
+            value: snapshot.fcmRegistration,
+          ),
+          _DiagnosticRow(
+            label: 'Supabase device registration',
+            value: snapshot.supabaseDeviceRegistration,
+          ),
+          _DiagnosticRow(
+            label: 'Last push received',
+            value: snapshot.lastPushReceived,
+          ),
+          _DiagnosticRow(
+            label: 'Deep-link result',
+            value: snapshot.deepLinkResult,
+          ),
+          _DiagnosticRow(
+            label: 'Last safe error category',
+            value: snapshot.lastSafeErrorCategory,
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton(
+                onPressed: busy ? null : _requestPermission,
+                child: const Text('Request permission'),
+              ),
+              OutlinedButton(
+                onPressed: busy ? null : _refresh,
+                child: const Text('Refresh status'),
+              ),
+              OutlinedButton(
+                onPressed: busy ? null : openAppSettings,
+                child: const Text('Android settings'),
+              ),
+              OutlinedButton(
+                onPressed: busy ? null : _copySummary,
+                child: const Text('Copy summary'),
+              ),
+              OutlinedButton(
+                onPressed: busy ? null : _registerDevice,
+                child: const Text('Re-register device'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DiagnosticRow extends StatelessWidget {
+  const _DiagnosticRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: Text(label, style: AppTextStyles.muted)),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: AppTextStyles.label,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
