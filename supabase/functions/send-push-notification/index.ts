@@ -64,6 +64,7 @@ const categoryByType: Record<string, keyof PreferenceRow> = {
   membership_update: "account_security_enabled",
   maintenance: "account_security_enabled",
   urgent_alert: "account_security_enabled",
+  admin_broadcast: "account_security_enabled",
 };
 
 Deno.serve(async (request) => {
@@ -75,8 +76,13 @@ Deno.serve(async (request) => {
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const firebaseServiceAccountJson = Deno.env.get("FIREBASE_SERVICE_ACCOUNT_JSON");
+
   if (!supabaseUrl || !serviceRoleKey || !anonKey || !firebaseServiceAccountJson) {
-    return json({ error: "Missing required server secrets" }, 500);
+    return json({
+      status: "SERVER_CONFIG_MISSING",
+      configured: false,
+      reason: "Required server push configuration is missing.",
+    }, 200);
   }
 
   const authHeader = request.headers.get("authorization") ?? "";
@@ -95,9 +101,13 @@ Deno.serve(async (request) => {
   if (
     typeof requestBody !== "object" ||
     requestBody === null ||
-    Object.keys(requestBody).some((key) => key !== "notification_id")
+    Object.keys(requestBody).some((key) => key !== "notification_id" && key !== "health_check")
   ) {
     return json({ error: "Unauthorized" }, 401);
+  }
+
+  if ((requestBody as { health_check?: unknown }).health_check === true) {
+    return await healthCheck(supabase, firebaseServiceAccountJson);
   }
 
   const { notification_id: notificationId } = requestBody as { notification_id?: unknown };
@@ -225,6 +235,47 @@ Deno.serve(async (request) => {
 
   return json({ status: anySuccess ? "sent" : "failed", results });
 });
+
+async function healthCheck(
+  supabase: ReturnType<typeof createClient>,
+  firebaseServiceAccountJson: string,
+) {
+  try {
+    const parsed = JSON.parse(firebaseServiceAccountJson);
+    if (!parsed || typeof parsed.project_id !== "string" || typeof parsed.client_email !== "string") {
+      return json({
+        status: "SERVER_CONFIG_MISSING",
+        configured: false,
+        reason: "Firebase service account configuration is incomplete.",
+      });
+    }
+  } catch {
+    return json({
+      status: "SERVER_CONFIG_MISSING",
+      configured: false,
+      reason: "Firebase service account configuration is invalid.",
+    });
+  }
+
+  const [{ error: notificationError }, { error: deviceError }] = await Promise.all([
+    supabase.from("notifications").select("id", { head: true, count: "exact" }).limit(1),
+    supabase.from("admin_push_device_status").select("id", { head: true, count: "exact" }).limit(1),
+  ]);
+
+  if (notificationError || deviceError) {
+    return json({
+      status: "SCHEMA_MISSING",
+      configured: false,
+      reason: "Notification schema is not fully available.",
+    });
+  }
+
+  return json({
+    status: "READY",
+    configured: true,
+    reason: "Push sender is ready.",
+  });
+}
 
 async function isAuthorizedAdminCaller(
   supabaseUrl: string,

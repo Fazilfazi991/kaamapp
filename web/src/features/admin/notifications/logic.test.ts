@@ -4,12 +4,14 @@ import type { PushConfiguration } from "./types";
 
 const pushUnavailable: PushConfiguration = {
   configured: false,
+  status: "SERVER_CONFIG_MISSING",
   reason: unavailablePushMessage,
   setupHint: "setup",
 };
 
 const pushConfigured: PushConfiguration = {
   configured: true,
+  status: "READY",
   reason: "",
   setupHint: "",
 };
@@ -41,7 +43,9 @@ describe("admin notification channel logic", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.state.code).toBe("NO_CHANNEL_SELECTED");
-      expect(result.state.message).toBe("Select at least one notification channel.");
+      expect(result.state.message).toBe(
+        "Select at least one notification channel.",
+      );
     }
   });
 

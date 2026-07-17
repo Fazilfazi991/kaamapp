@@ -28,6 +28,7 @@ enum KaamNotificationType {
   promotional,
   maintenance,
   urgentAlert,
+  adminBroadcast,
 }
 
 class KaamNotificationTypes {
@@ -67,6 +68,7 @@ class KaamNotificationTypes {
     'promotional': KaamNotificationType.promotional,
     'maintenance': KaamNotificationType.maintenance,
     'urgent_alert': KaamNotificationType.urgentAlert,
+    'admin_broadcast': KaamNotificationType.adminBroadcast,
   };
 }
 
@@ -208,8 +210,7 @@ class KaamNotificationDeepLinks {
       (KaamRole.candidate, 'match_created') => AppRoutes.matches,
       (KaamRole.candidate, 'new_message') => AppRoutes.chatList,
       (KaamRole.candidate, 'document_update') => AppRoutes.documentsUpload,
-      (KaamRole.candidate, 'membership_update') =>
-        AppRoutes.membershipPlans,
+      (KaamRole.candidate, 'membership_update') => AppRoutes.membershipPlans,
       (KaamRole.candidate, 'match_update') => AppRoutes.matches,
       (KaamRole.candidate, 'candidate_document_pending') =>
         AppRoutes.documentsUpload,
@@ -219,6 +220,7 @@ class KaamNotificationDeepLinks {
         AppRoutes.documentsUpload,
       (KaamRole.candidate, 'candidate_document_resubmission_requested') =>
         AppRoutes.documentsUpload,
+      (KaamRole.candidate, 'admin_broadcast') => AppRoutes.notifications,
       (KaamRole.employer, 'candidate_accepted_interest') =>
         AppRoutes.employerSentRequests,
       (KaamRole.employer, 'candidate_rejected_interest') =>
@@ -236,6 +238,7 @@ class KaamNotificationDeepLinks {
         AppRoutes.employerCompanyProfile,
       (KaamRole.employer, 'company_rejected') =>
         AppRoutes.employerCompanyProfile,
+      (KaamRole.employer, 'admin_broadcast') => AppRoutes.employerNotifications,
       _ => fallbackForRole(role),
     };
   }

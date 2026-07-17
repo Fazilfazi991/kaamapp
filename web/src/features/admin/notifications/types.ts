@@ -13,6 +13,7 @@ export const audienceOptions = [
 ] as const;
 
 export const notificationTypeOptions = [
+  { value: "admin_broadcast", label: "Admin broadcast" },
   { value: "general_announcement", label: "General announcement" },
   { value: "document_update", label: "Document update" },
   { value: "membership_update", label: "Membership update" },
@@ -41,13 +42,16 @@ export const statusOptions = [
   { value: "sent", label: "Sent" },
   { value: "partially_sent", label: "Partially sent" },
   { value: "failed", label: "Failed" },
+  { value: "no_eligible_devices", label: "No eligible devices" },
   { value: "cancelled", label: "Cancelled" },
 ] as const;
 
 export type AudienceType = (typeof audienceOptions)[number]["value"];
-export type AdminNotificationType = (typeof notificationTypeOptions)[number]["value"];
+export type AdminNotificationType =
+  (typeof notificationTypeOptions)[number]["value"];
 export type AdminNotificationStatus = (typeof statusOptions)[number]["value"];
-export type AdminNotificationActionType = (typeof actionOptions)[number]["value"];
+export type AdminNotificationActionType =
+  (typeof actionOptions)[number]["value"];
 export type DeliveryChannel = "in_app" | "push" | "email" | "whatsapp";
 
 export type AdminNotificationRow = {
@@ -69,8 +73,10 @@ export type AdminNotificationRow = {
   created_at: string;
   idempotency_key?: string | null;
   in_app_success_count?: number | null;
+  push_eligible_device_count?: number | null;
   push_success_count?: number | null;
   push_failure_count?: number | null;
+  push_skipped_count?: number | null;
   failure_summary?: string | null;
   profiles?: { email: string | null; full_name: string | null } | null;
 };
@@ -81,10 +87,19 @@ export type SelectableUser = {
   id: string;
   label: string;
   email: string | null;
+  activeAndroidDeviceCount: number;
 };
+
+export type PushReadinessStatus =
+  | "READY"
+  | "FUNCTION_MISSING"
+  | "SERVER_CONFIG_MISSING"
+  | "SCHEMA_MISSING"
+  | "UNREACHABLE";
 
 export type PushConfiguration = {
   configured: boolean;
+  status: PushReadinessStatus;
   reason: string;
   setupHint: string;
 };
@@ -101,7 +116,8 @@ export type AdminNotificationActionState = {
   idempotencyKey?: string;
 };
 
-export const initialAdminNotificationActionState: AdminNotificationActionState = {
-  ok: false,
-  message: "",
-};
+export const initialAdminNotificationActionState: AdminNotificationActionState =
+  {
+    ok: false,
+    message: "",
+  };

@@ -1,5 +1,5 @@
--- Allow admin broadcast notification types in the central notification feed.
--- This is additive and keeps existing notification rows intact.
+-- Admin broadcast delivery accuracy and canonical mobile broadcast type.
+-- Additive only: keeps existing broadcast/history rows intact.
 
 begin;
 
@@ -39,6 +39,17 @@ alter table public.notifications
       'admin_broadcast'
     )
   );
+
+alter table public.admin_notifications
+  add column if not exists push_eligible_device_count integer not null default 0 check (push_eligible_device_count >= 0),
+  add column if not exists push_skipped_count integer not null default 0 check (push_skipped_count >= 0);
+
+alter table public.admin_notifications
+  drop constraint if exists admin_notifications_status_check;
+
+alter table public.admin_notifications
+  add constraint admin_notifications_status_check
+  check (status in ('draft', 'scheduled', 'sending', 'sent', 'partially_sent', 'failed', 'cancelled', 'no_eligible_devices'));
 
 notify pgrst, 'reload schema';
 

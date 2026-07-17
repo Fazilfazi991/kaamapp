@@ -61,10 +61,24 @@ void main() {
       );
       expect(
         KaamNotificationDeepLinks.routeFor(
+          role: KaamRole.candidate,
+          type: 'admin_broadcast',
+        ),
+        AppRoutes.notifications,
+      );
+      expect(
+        KaamNotificationDeepLinks.routeFor(
           role: KaamRole.employer,
           type: 'employer_document_approved',
         ),
         AppRoutes.employerVerificationStatus,
+      );
+      expect(
+        KaamNotificationDeepLinks.routeFor(
+          role: KaamRole.employer,
+          type: 'admin_broadcast',
+        ),
+        AppRoutes.employerNotifications,
       );
     });
   });
@@ -140,12 +154,16 @@ void main() {
         isNot(contains('membership_expiring')));
     expect(
       KaamNotificationTypes.supported,
-      containsPair('general_announcement',
-          KaamNotificationType.generalAnnouncement),
+      containsPair(
+          'general_announcement', KaamNotificationType.generalAnnouncement),
     );
     expect(
       KaamNotificationTypes.supported,
       containsPair('urgent_alert', KaamNotificationType.urgentAlert),
+    );
+    expect(
+      KaamNotificationTypes.supported,
+      containsPair('admin_broadcast', KaamNotificationType.adminBroadcast),
     );
   });
 
@@ -158,6 +176,8 @@ void main() {
     expect(source, isNot(contains('private_key_id:')));
     expect(source, contains('candidate_document_approved'));
     expect(source, contains('employer_document_approved'));
+    expect(source, contains('admin_broadcast'));
+    expect(source, contains('health_check'));
     expect(source, isNot(contains('profile_incomplete')));
   });
 }

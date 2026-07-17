@@ -24,7 +24,8 @@ create table if not exists public.notifications (
       'company_rejected',
       'candidate_document_submitted',
       'employer_document_submitted',
-      'company_review_submitted'
+      'company_review_submitted',
+      'admin_broadcast'
     )
   ),
   title text not null,

@@ -51,12 +51,14 @@ create table if not exists public.admin_notifications (
   action_value text,
   channels jsonb not null default '["in_app"]'::jsonb,
   status text not null default 'draft' check (
-    status in ('draft', 'scheduled', 'sending', 'sent', 'partially_sent', 'failed', 'cancelled')
+    status in ('draft', 'scheduled', 'sending', 'sent', 'partially_sent', 'failed', 'cancelled', 'no_eligible_devices')
   ),
   recipient_count integer not null default 0 check (recipient_count >= 0),
   in_app_success_count integer not null default 0 check (in_app_success_count >= 0),
+  push_eligible_device_count integer not null default 0 check (push_eligible_device_count >= 0),
   push_success_count integer not null default 0 check (push_success_count >= 0),
   push_failure_count integer not null default 0 check (push_failure_count >= 0),
+  push_skipped_count integer not null default 0 check (push_skipped_count >= 0),
   failure_summary text,
   idempotency_key text,
   scheduled_at timestamptz,
