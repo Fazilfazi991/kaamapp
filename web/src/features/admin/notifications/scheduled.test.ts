@@ -28,6 +28,7 @@ describe("scheduled notification architecture", () => {
 
     expect(processor).toContain("SCHEDULED_NOTIFICATIONS_SECRET");
     expect(processor).toContain("generate_automatic_notification_schedules");
+    expect(processor).toContain("ENABLE_AUTOMATIC_NOTIFICATION_GENERATORS");
     expect(processor).toContain("claim_due_notification_schedules");
     expect(sender).toContain("SCHEDULED_NOTIFICATIONS_SECRET");
     expect(sender).toContain('mode: "scheduler"');

@@ -110,16 +110,23 @@ Deno.serve(async (request) => {
   const requestBody = await request.json().catch(() => ({}));
   const requestedBatchSize = Number((requestBody as { batch_size?: unknown }).batch_size ?? maxBatchSize);
   const batchSize = Math.max(1, Math.min(maxBatchSize, Number.isFinite(requestedBatchSize) ? requestedBatchSize : maxBatchSize));
+  const shouldGenerate =
+    Deno.env.get("ENABLE_AUTOMATIC_NOTIFICATION_GENERATORS") === "true" ||
+    (requestBody as { generate_automatic_schedules?: unknown }).generate_automatic_schedules === true;
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false },
   });
 
-  const { data: generated, error: generatorError } = await supabase.rpc(
-    "generate_automatic_notification_schedules",
-  );
-  if (generatorError) {
-    console.warn("scheduled_notifications generator_failed", safeLog(generatorError.message));
+  let generated: unknown = null;
+  if (shouldGenerate) {
+    const { data, error: generatorError } = await supabase.rpc(
+      "generate_automatic_notification_schedules",
+    );
+    generated = data;
+    if (generatorError) {
+      console.warn("scheduled_notifications generator_failed", safeLog(generatorError.message));
+    }
   }
 
   const { data: schedules, error: claimError } = await supabase.rpc(
@@ -147,6 +154,7 @@ Deno.serve(async (request) => {
   return json({
     status: "OK",
     generated,
+    generators_enabled: shouldGenerate,
     claimed: (schedules ?? []).length,
     results,
   });
