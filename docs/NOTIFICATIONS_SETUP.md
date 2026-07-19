@@ -130,4 +130,4 @@ Before production rollout, keep this feature behind the migration/function deplo
 
 ## Future Scheduled Phase
 
-This foundation is compatible with scheduled notifications through `expires_at`, `push_status`, `push_attempts`, and dedupe keys. Recurring campaigns, marketing blasts, and iOS push setup are intentionally not part of this phase.
+Scheduled and automatic server-side notifications are implemented in `supabase/016_scheduled_notifications.sql` and `supabase/functions/process-scheduled-notifications/index.ts`. See `docs/SCHEDULED_NOTIFICATIONS.md` for cron setup, secrets, QA gates, and rollback SQL.

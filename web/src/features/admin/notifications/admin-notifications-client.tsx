@@ -7,7 +7,11 @@ import {
   AdminTable,
   SafeLink,
 } from "@/features/admin/components/admin-ui";
-import { createAdminNotificationAction } from "./server";
+import {
+  cancelAdminNotificationScheduleAction,
+  createAdminNotificationAction,
+  retryAdminNotificationScheduleAction,
+} from "./server";
 import {
   audienceSupportsPush,
   canEnablePushChannel,
@@ -54,6 +58,7 @@ export function AdminNotificationsClient({
   const [actionValue, setActionValue] = useState("");
   const [scheduleMode, setScheduleMode] = useState<"now" | "later">("now");
   const [scheduledAt, setScheduledAt] = useState("");
+  const [scheduledTimezone, setScheduledTimezone] = useState("Asia/Dubai");
   const [channels, setChannels] = useState<DeliveryChannel[]>(["in_app"]);
   const [candidateSearch, setCandidateSearch] = useState("");
   const [employerSearch, setEmployerSearch] = useState("");
@@ -122,6 +127,11 @@ export function AdminNotificationsClient({
       <input type="hidden" name="actionValue" value={actionValue} />
       <input type="hidden" name="scheduleMode" value={scheduleMode} />
       <input type="hidden" name="scheduledAt" value={scheduledAt} />
+      <input
+        type="hidden"
+        name="scheduledTimezone"
+        value={scheduledTimezone}
+      />
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
       {availableChannels.map((channel) => (
         <input key={channel} type="hidden" name="channels" value={channel} />
@@ -148,6 +158,7 @@ export function AdminNotificationsClient({
     formData.set("actionValue", actionValue);
     formData.set("scheduleMode", scheduleMode);
     formData.set("scheduledAt", scheduledAt);
+    formData.set("scheduledTimezone", scheduledTimezone);
     formData.set("idempotencyKey", submissionKey);
     availableChannels.forEach((channel) =>
       formData.append("channels", channel),
@@ -249,6 +260,7 @@ export function AdminNotificationsClient({
     setActionValue("");
     setScheduleMode("now");
     setScheduledAt("");
+    setScheduledTimezone("Asia/Dubai");
     setChannels(["in_app"]);
     setSelectedUserIds([]);
     setCandidateSearch("");
@@ -535,12 +547,24 @@ export function AdminNotificationsClient({
                 </label>
               </div>
               {scheduleMode === "later" ? (
-                <input
-                  type="datetime-local"
-                  value={scheduledAt}
-                  onChange={(event) => setScheduledAt(event.target.value)}
-                  className="focus-ring min-h-11 max-w-sm rounded-lg border border-[#ded2da] px-3 text-sm"
-                />
+                <div className="grid gap-3 md:grid-cols-[minmax(0,260px)_180px]">
+                  <input
+                    type="datetime-local"
+                    value={scheduledAt}
+                    onChange={(event) => setScheduledAt(event.target.value)}
+                    className="focus-ring min-h-11 rounded-lg border border-[#ded2da] px-3 text-sm"
+                  />
+                  <select
+                    value={scheduledTimezone}
+                    onChange={(event) =>
+                      setScheduledTimezone(event.target.value)
+                    }
+                    className="focus-ring min-h-11 rounded-lg border border-[#ded2da] px-3 text-sm"
+                  >
+                    <option value="Asia/Dubai">UAE time</option>
+                    <option value="UTC">UTC</option>
+                  </select>
+                </div>
               ) : null}
             </fieldset>
 
@@ -696,6 +720,28 @@ function NotificationHistory({
   history: AdminNotificationRow[];
   filters: { q?: string; status?: string; audience?: string; type?: string };
 }) {
+  const [actionMessage, setActionMessage] = useState("");
+  const [busyId, setBusyId] = useState("");
+
+  async function runScheduleAction(
+    id: string,
+    action: "cancel" | "retry",
+  ) {
+    setBusyId(id);
+    setActionMessage("");
+    try {
+      const result =
+        action === "cancel"
+          ? await cancelAdminNotificationScheduleAction(id)
+          : await retryAdminNotificationScheduleAction(id);
+      setActionMessage(result.message);
+    } catch {
+      setActionMessage("Schedule action failed. Please try again.");
+    } finally {
+      setBusyId("");
+    }
+  }
+
   return (
     <section id="notification-history" className="grid gap-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -755,6 +801,11 @@ function NotificationHistory({
           Filter
         </Button>
       </form>
+      {actionMessage ? (
+        <div className="rounded-lg border border-[#eadde3] bg-white p-3 text-sm font-medium text-[#3b3340]">
+          {actionMessage}
+        </div>
+      ) : null}
       <AdminTable
         headers={[
           "Title",
@@ -788,11 +839,26 @@ function NotificationHistory({
               <br />
               Push eligible {item.push_eligible_device_count ?? 0}
               <br />
-              Push accepted {item.push_success_count ?? 0}
+              FCM accepted {item.push_success_count ?? 0}
               <br />
               Push failed {item.push_failure_count ?? 0}
               <br />
               Push skipped {item.push_skipped_count ?? 0}
+              {item.schedule_summary ? (
+                <>
+                  <br />
+                  Scheduled processed {item.schedule_summary.processed}
+                  <br />
+                  Last processed{" "}
+                  {formatDateTime(item.schedule_summary.last_processed_at)}
+                  {item.schedule_summary.last_failure_reason ? (
+                    <>
+                      <br />
+                      Reason {item.schedule_summary.last_failure_reason}
+                    </>
+                  ) : null}
+                </>
+              ) : null}
             </td>
             <td className="px-4 py-3 text-[#66616f]">
               {item.recipient_count ?? 0}
@@ -820,14 +886,24 @@ function NotificationHistory({
                   </SafeLink>
                 ) : null}
                 {item.status === "scheduled" ? (
-                  <span className="font-semibold text-[#8a7c88]">
+                  <button
+                    type="button"
+                    disabled={busyId === item.id}
+                    onClick={() => runScheduleAction(item.id, "cancel")}
+                    className="font-semibold text-[#e53670] underline-offset-4 hover:underline disabled:text-[#8a7c88]"
+                  >
                     Cancel scheduled
-                  </span>
+                  </button>
                 ) : null}
                 {item.status === "failed" ? (
-                  <span className="font-semibold text-[#8a7c88]">
+                  <button
+                    type="button"
+                    disabled={busyId === item.id}
+                    onClick={() => runScheduleAction(item.id, "retry")}
+                    className="font-semibold text-[#e53670] underline-offset-4 hover:underline disabled:text-[#8a7c88]"
+                  >
                     Retry failed
-                  </span>
+                  </button>
                 ) : null}
                 <span className="font-semibold text-[#8a7c88]">View</span>
               </div>
@@ -860,6 +936,11 @@ function labelFor(
 function formatDate(value?: string | null) {
   if (!value) return "-";
   return new Date(value).toLocaleDateString();
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString();
 }
 
 const channelOptions = [

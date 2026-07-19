@@ -16,8 +16,10 @@ import {
   type AdminNotificationRow,
   type AdminNotificationStatus,
   type AdminNotificationType,
+  type NotificationScheduleSummary,
   notificationTypeOptions,
   type PushConfiguration,
+  type ScheduleAdminNotificationActionState,
   type SelectableUser,
   type PushReadinessStatus,
 } from "./types";
@@ -85,6 +87,10 @@ export async function createAdminNotificationAction(
   const safeWarning = normalizedChannels.warning;
 
   const sendNow = parsed.mode !== "draft" && parsed.scheduleMode === "now";
+  const scheduledAtUtc =
+    parsed.scheduleMode === "later" && parsed.scheduledAt
+      ? parseScheduledAtUtc(parsed.scheduledAt, parsed.scheduledTimezone)
+      : null;
   const status: AdminNotificationStatus =
     parsed.mode === "draft"
       ? "draft"
@@ -153,7 +159,7 @@ export async function createAdminNotificationAction(
       push_failure_count: 0,
       failure_summary: safeWarning ?? null,
       idempotency_key: idempotencyKey,
-      scheduled_at: parsed.scheduleMode === "later" ? parsed.scheduledAt : null,
+      scheduled_at: scheduledAtUtc?.toISOString() ?? null,
       sent_at: sendNow ? new Date().toISOString() : null,
       created_by: admin.userId,
       sent_by: sendNow ? admin.userId : null,
@@ -219,6 +225,37 @@ export async function createAdminNotificationAction(
           };
         }
       }
+    }
+  }
+
+  if (parsed.mode !== "draft" && parsed.scheduleMode === "later" && scheduledAtUtc) {
+    const scheduleResult = await scheduleAdminNotificationDeliveries({
+      supabase,
+      broadcastId: notification.id,
+      recipientIds,
+      title: parsed.title,
+      message: parsed.message,
+      notificationType: parsed.notificationType,
+      actionRoute: safeActionRoute(parsed.actionType, parsed.actionValue),
+      channels: normalizedChannels.channels,
+      scheduledAt: scheduledAtUtc,
+    });
+    if (!scheduleResult.ok) {
+      await supabase
+        .from("admin_notifications")
+        .update({
+          status: "failed",
+          failure_summary: scheduleResult.message,
+        })
+        .eq("id", notification.id);
+      return {
+        ok: false,
+        code: scheduleResult.code,
+        message: scheduleResult.message,
+        broadcastId: notification.id,
+        scheduled: true,
+        idempotencyKey,
+      };
     }
   }
 
@@ -399,7 +436,80 @@ async function loadNotificationHistory({
     if (isAdminNotificationSchemaMissing(error)) return [];
     throw error;
   }
-  return (data ?? []) as unknown as AdminNotificationRow[];
+  const rows = (data ?? []) as unknown as AdminNotificationRow[];
+  const summaries = await loadScheduleSummaries(rows.map((row) => row.id));
+  return rows.map((row) => ({
+    ...row,
+    schedule_summary: summaries.get(row.id) ?? null,
+  }));
+}
+
+async function loadScheduleSummaries(notificationIds: string[]) {
+  const summaries = new Map<string, NotificationScheduleSummary>();
+  if (notificationIds.length === 0) return summaries;
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from("notification_schedules")
+    .select(
+      "source_id,status,in_app_created_count,push_eligible_count,fcm_accepted_count,push_failed_count,skipped_count,processed_at,failure_reason",
+    )
+    .eq("source_type", "admin_notification")
+    .in("source_id", notificationIds);
+  if (error) return summaries;
+
+  for (const row of data ?? []) {
+    const sourceId = row.source_id as string | null;
+    if (!sourceId) continue;
+    const current =
+      summaries.get(sourceId) ??
+      ({
+        pending: 0,
+        processing: 0,
+        sent: 0,
+        partially_sent: 0,
+        failed: 0,
+        cancelled: 0,
+        skipped: 0,
+        processed: 0,
+        in_app_created: 0,
+        push_eligible: 0,
+        fcm_accepted: 0,
+        push_failed: 0,
+        skipped_count: 0,
+        last_processed_at: null,
+        last_failure_reason: null,
+      } satisfies NotificationScheduleSummary);
+    const status = String(row.status) as keyof Pick<
+      NotificationScheduleSummary,
+      | "pending"
+      | "processing"
+      | "sent"
+      | "partially_sent"
+      | "failed"
+      | "cancelled"
+      | "skipped"
+    >;
+    if (status in current) current[status] += 1;
+    if (["sent", "partially_sent", "failed", "cancelled", "skipped"].includes(status)) {
+      current.processed += 1;
+    }
+    current.in_app_created += Number(row.in_app_created_count ?? 0);
+    current.push_eligible += Number(row.push_eligible_count ?? 0);
+    current.fcm_accepted += Number(row.fcm_accepted_count ?? 0);
+    current.push_failed += Number(row.push_failed_count ?? 0);
+    current.skipped_count += Number(row.skipped_count ?? 0);
+    const processedAt = (row.processed_at as string | null) ?? null;
+    if (
+      processedAt &&
+      (!current.last_processed_at ||
+        new Date(processedAt) > new Date(current.last_processed_at))
+    ) {
+      current.last_processed_at = processedAt;
+    }
+    if (row.failure_reason) current.last_failure_reason = String(row.failure_reason);
+    summaries.set(sourceId, current);
+  }
+  return summaries;
 }
 
 async function resolveRecipientIds(
@@ -528,6 +638,9 @@ function parseNotificationForm(formData: FormData) {
   const scheduleMode = String(formData.get("scheduleMode") ?? "now") as
     "now" | "later";
   const scheduledAt = String(formData.get("scheduledAt") ?? "").trim() || null;
+  const scheduledTimezone =
+    String(formData.get("scheduledTimezone") ?? "Asia/Dubai").trim() ||
+    "Asia/Dubai";
   const selectedUserIds = formData.getAll("selectedUserIds").map(String);
   const idempotencyKey =
     String(formData.get("idempotencyKey") ?? "").trim() || null;
@@ -593,7 +706,7 @@ function parseNotificationForm(formData: FormData) {
   if (
     scheduleMode === "later" &&
     scheduledAt &&
-    new Date(scheduledAt).getTime() <= Date.now()
+    parseScheduledAtUtc(scheduledAt, scheduledTimezone).getTime() <= Date.now()
   ) {
     return fail("INVALID_SCHEDULE", "Choose a future scheduled date and time.");
   }
@@ -610,6 +723,7 @@ function parseNotificationForm(formData: FormData) {
     actionValue,
     scheduleMode,
     scheduledAt,
+    scheduledTimezone,
     selectedUserIds,
     idempotencyKey,
   };
@@ -834,6 +948,135 @@ async function deliverAdminNotification({
   };
 }
 
+async function scheduleAdminNotificationDeliveries({
+  supabase,
+  broadcastId,
+  recipientIds,
+  title,
+  message,
+  notificationType,
+  actionRoute,
+  channels,
+  scheduledAt,
+}: {
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>;
+  broadcastId: string;
+  recipientIds: string[];
+  title: string;
+  message: string;
+  notificationType: AdminNotificationType;
+  actionRoute: string | null;
+  channels: DeliveryChannel[];
+  scheduledAt: Date;
+}): Promise<ScheduleAdminNotificationActionState> {
+  const supportedChannels = channels.filter((channel) =>
+    ["in_app", "push"].includes(channel),
+  );
+  if (supportedChannels.length === 0) {
+    return {
+      ok: false,
+      code: "NO_SUPPORTED_SCHEDULE_CHANNEL",
+      message: "Scheduled notifications currently support in-app and push.",
+    };
+  }
+
+  for (const recipientId of recipientIds) {
+    const { error } = await supabase.rpc("enqueue_notification_schedule", {
+      p_notification_type: "admin_broadcast",
+      p_recipient_id: recipientId,
+      p_title: title,
+      p_body: message,
+      p_action_route: actionRoute,
+      p_data: {
+        admin_notification_id: broadcastId,
+        admin_notification_type: notificationType,
+      },
+      p_scheduled_at: scheduledAt.toISOString(),
+      p_channels: supportedChannels,
+      p_dedupe_key: `admin:${broadcastId}:${recipientId}`,
+      p_source_type: "admin_notification",
+      p_source_id: broadcastId,
+    });
+    if (error) {
+      return {
+        ok: false,
+        code: "SCHEDULE_CREATE_FAILED",
+        message: "Notification was saved, but scheduled delivery could not be created.",
+      };
+    }
+  }
+  return { ok: true, message: "Scheduled delivery created." };
+}
+
+export async function cancelAdminNotificationScheduleAction(
+  broadcastId: string,
+): Promise<ScheduleAdminNotificationActionState> {
+  await requireAdmin();
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase
+    .from("notification_schedules")
+    .update({
+      status: "cancelled",
+      processed_at: new Date().toISOString(),
+      failure_reason: "Cancelled by admin before processing.",
+    })
+    .eq("source_type", "admin_notification")
+    .eq("source_id", broadcastId)
+    .in("status", ["pending", "failed"]);
+  if (error) {
+    return {
+      ok: false,
+      code: "SCHEDULE_CANCEL_FAILED",
+      message: "Could not cancel the pending schedule.",
+    };
+  }
+  await supabase
+    .from("admin_notifications")
+    .update({
+      status: "cancelled",
+      failure_summary: "Cancelled by admin before processing.",
+    })
+    .eq("id", broadcastId)
+    .eq("status", "scheduled");
+  revalidatePath("/admin/notifications");
+  return { ok: true, message: "Pending schedule cancelled." };
+}
+
+export async function retryAdminNotificationScheduleAction(
+  broadcastId: string,
+): Promise<ScheduleAdminNotificationActionState> {
+  await requireAdmin();
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase
+    .from("notification_schedules")
+    .update({
+      status: "pending",
+      scheduled_at: new Date().toISOString(),
+      last_error_code: null,
+      failure_reason: null,
+      processed_at: null,
+    })
+    .eq("source_type", "admin_notification")
+    .eq("source_id", broadcastId)
+    .eq("status", "failed");
+  if (error) {
+    return {
+      ok: false,
+      code: "SCHEDULE_RETRY_FAILED",
+      message: "Could not queue retry for failed schedule.",
+    };
+  }
+  await supabase
+    .from("admin_notifications")
+    .update({
+      status: "scheduled",
+      failure_summary: null,
+    })
+    .eq("id", broadcastId);
+  revalidatePath("/admin/notifications");
+  return { ok: true, message: "Failed schedule queued for retry." };
+}
+
 function safeActionRoute(
   actionType: AdminNotificationActionType,
   actionValue: string | null,
@@ -841,6 +1084,23 @@ function safeActionRoute(
   if (actionType === "none") return null;
   if (!actionValue) return null;
   return actionValue;
+}
+
+function parseScheduledAtUtc(value: string, timezone: string) {
+  const match =
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value) ??
+    /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/.exec(value);
+  if (!match) return new Date(value);
+  const [, year, month, day, hour, minute] = match.map(Number);
+  const offsetMinutes = timezoneOffsetMinutes(timezone);
+  return new Date(
+    Date.UTC(year, month - 1, day, hour, minute) - offsetMinutes * 60_000,
+  );
+}
+
+function timezoneOffsetMinutes(timezone: string) {
+  if (timezone === "UTC") return 0;
+  return 4 * 60;
 }
 
 export async function loadPushConfiguration(): Promise<PushConfiguration> {

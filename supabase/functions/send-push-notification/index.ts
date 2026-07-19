@@ -40,6 +40,7 @@ type AdminAuthorization =
   | {
       status: "READY";
       serviceClient: ReturnType<typeof createClient>;
+      mode: "admin" | "scheduler";
     }
   | {
       status: Exclude<AdminAuthorizationStatus, "READY">;
@@ -114,7 +115,7 @@ Deno.serve(async (request) => {
     return authorizationFailure(authorization.status);
   }
   const supabase = authorization.serviceClient;
-  logAuthorizationResult("READY");
+  logAuthorizationResult("READY", authorization.mode);
 
   const requestBody = await request.json().catch(() => ({}));
   if (
@@ -323,6 +324,14 @@ async function authorizeAdminCaller(
   const token = parseBearerToken(authHeader);
   if (token.status !== "READY") return token;
 
+  const schedulerSecret = Deno.env.get("SCHEDULED_NOTIFICATIONS_SECRET");
+  if (schedulerSecret && token.accessToken === schedulerSecret) {
+    const serviceClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false },
+    });
+    return { status: "READY", serviceClient, mode: "scheduler" };
+  }
+
   const userClient = createClient(supabaseUrl, anonKey, {
     auth: { persistSession: false },
   });
@@ -349,7 +358,7 @@ async function authorizeAdminCaller(
   if (profile.status === "blocked") return { status: "BLOCKED" };
   if (profile.role !== "admin") return { status: "NOT_ADMIN" };
 
-  return { status: "READY", serviceClient };
+  return { status: "READY", serviceClient, mode: "admin" };
 }
 
 function parseBearerToken(
@@ -398,9 +407,12 @@ function authorizationReason(status: Exclude<AdminAuthorizationStatus, "READY">)
   }
 }
 
-function logAuthorizationResult(status: AdminAuthorizationStatus) {
+function logAuthorizationResult(
+  status: AdminAuthorizationStatus,
+  mode: "admin" | "scheduler" | "unknown" = "unknown",
+) {
   console.info(
-    `push_readiness authorization_header=${status === "NO_AUTH_HEADER" ? "absent" : "present"} user_validation=${["INVALID_TOKEN", "EXPIRED_TOKEN"].includes(status) ? "failed" : "passed"} profile=${status === "PROFILE_NOT_FOUND" ? "missing" : "checked"} admin=${status === "NOT_ADMIN" ? "no" : status === "READY" ? "yes" : "unchecked"} blocked=${status === "BLOCKED" ? "yes" : "no"} result=${status}`,
+    `push_readiness authorization_header=${status === "NO_AUTH_HEADER" ? "absent" : "present"} caller_mode=${mode} user_validation=${["INVALID_TOKEN", "EXPIRED_TOKEN"].includes(status) ? "failed" : "passed"} profile=${status === "PROFILE_NOT_FOUND" ? "missing" : "checked"} admin=${status === "NOT_ADMIN" ? "no" : status === "READY" ? "yes" : "unchecked"} blocked=${status === "BLOCKED" ? "yes" : "no"} result=${status}`,
   );
 }
 

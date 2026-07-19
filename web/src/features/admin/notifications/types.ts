@@ -79,6 +79,25 @@ export type AdminNotificationRow = {
   push_skipped_count?: number | null;
   failure_summary?: string | null;
   profiles?: { email: string | null; full_name: string | null } | null;
+  schedule_summary?: NotificationScheduleSummary | null;
+};
+
+export type NotificationScheduleSummary = {
+  pending: number;
+  processing: number;
+  sent: number;
+  partially_sent: number;
+  failed: number;
+  cancelled: number;
+  skipped: number;
+  processed: number;
+  in_app_created: number;
+  push_eligible: number;
+  fcm_accepted: number;
+  push_failed: number;
+  skipped_count: number;
+  last_processed_at: string | null;
+  last_failure_reason: string | null;
 };
 
 export type AudienceCounts = Record<AudienceType, number | null>;
@@ -121,6 +140,12 @@ export type AdminNotificationActionState = {
   scheduled?: boolean;
   warning?: string;
   idempotencyKey?: string;
+};
+
+export type ScheduleAdminNotificationActionState = {
+  ok: boolean;
+  message: string;
+  code?: string;
 };
 
 export const initialAdminNotificationActionState: AdminNotificationActionState =
