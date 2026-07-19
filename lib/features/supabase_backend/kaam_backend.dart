@@ -63,6 +63,133 @@ class KaamAuthRouteResult {
   final String message;
 }
 
+class KaamRoleMismatchException implements Exception {
+  const KaamRoleMismatchException({
+    required this.actualRole,
+    required this.requestedRole,
+  });
+
+  final KaamRole actualRole;
+  final KaamRole requestedRole;
+
+  String get safeMessage => KaamAuthSessionPolicy.roleMismatchMessage(
+        actualRole: actualRole,
+        requestedRole: requestedRole,
+      );
+
+  @override
+  String toString() => safeMessage;
+}
+
+class KaamPendingOtpContext {
+  const KaamPendingOtpContext({
+    required this.normalizedEmail,
+    required this.role,
+    required this.requestedAt,
+  });
+
+  final String normalizedEmail;
+  final KaamRole? role;
+  final DateTime requestedAt;
+}
+
+class KaamAuthSessionPolicy {
+  const KaamAuthSessionPolicy._();
+
+  static bool shouldClearUserScopedState({
+    required String? previousUserId,
+    required String? nextUserId,
+  }) {
+    return previousUserId != null &&
+        nextUserId != null &&
+        previousUserId != nextUserId;
+  }
+
+  static bool shouldStartOtpForEnteredEmail({
+    required bool hasCurrentSession,
+    required String enteredEmail,
+    required String? currentSessionEmail,
+  }) {
+    if (!hasCurrentSession) return true;
+    return _normalizeEmail(enteredEmail) !=
+        _normalizeEmail(currentSessionEmail);
+  }
+
+  static String roleMismatchMessage({
+    required KaamRole actualRole,
+    required KaamRole requestedRole,
+  }) {
+    final actual = actualRole == KaamRole.candidate ? 'candidate' : 'employer';
+    final correctJourney =
+        actualRole == KaamRole.candidate ? 'Find Work' : 'Hire Talent';
+    final attemptedJourney =
+        requestedRole == KaamRole.candidate ? 'Find Work' : 'Hire Talent';
+    return 'This account is registered as a $actual. You selected $attemptedJourney. Please continue as $correctJourney or use another account.';
+  }
+
+  static String _normalizeEmail(String? email) =>
+      (email ?? '').trim().toLowerCase();
+}
+
+class KaamAuthSessionCoordinator {
+  const KaamAuthSessionCoordinator._();
+
+  static String? _lastAuthenticatedUserId;
+  static bool _explicitLogoutInProgress = false;
+  static KaamPendingOtpContext? _pendingOtp;
+
+  static KaamPendingOtpContext? get pendingOtp => _pendingOtp;
+  static bool get explicitLogoutInProgress => _explicitLogoutInProgress;
+
+  static void markAuthenticatedUser(String? userId) {
+    if (KaamAuthSessionPolicy.shouldClearUserScopedState(
+      previousUserId: _lastAuthenticatedUserId,
+      nextUserId: userId,
+    )) {
+      clearUserScopedState();
+    }
+    _lastAuthenticatedUserId = userId;
+    if (userId != null) _explicitLogoutInProgress = false;
+  }
+
+  static void setPendingOtp({
+    required String email,
+    required KaamRole? role,
+    DateTime? requestedAt,
+  }) {
+    _pendingOtp = KaamPendingOtpContext(
+      normalizedEmail: email.trim().toLowerCase(),
+      role: role,
+      requestedAt: requestedAt ?? DateTime.now().toUtc(),
+    );
+  }
+
+  static void clearPendingOtp() {
+    _pendingOtp = null;
+  }
+
+  static Future<void> beginExplicitLogout() async {
+    _explicitLogoutInProgress = true;
+    clearUserScopedState();
+  }
+
+  static void finishExplicitLogout() {
+    _lastAuthenticatedUserId = null;
+    _explicitLogoutInProgress = false;
+  }
+
+  static void clearUserScopedState() {
+    clearPendingOtp();
+  }
+
+  @visibleForTesting
+  static void resetForTesting() {
+    _lastAuthenticatedUserId = null;
+    _explicitLogoutInProgress = false;
+    _pendingOtp = null;
+  }
+}
+
 class KaamStoredProfile {
   const KaamStoredProfile({required this.role, required this.status});
 
@@ -822,15 +949,27 @@ class KaamAuthRepository {
     required String email,
     KaamRole? role,
   }) async {
-    final trimmedEmail = email.trim();
+    final trimmedEmail = email.trim().toLowerCase();
     if (trimmedEmail.isEmpty) {
       throw ArgumentError('Email address is required.');
+    }
+    final signedInUser = currentUser;
+    if (KaamAuthSessionPolicy.shouldStartOtpForEnteredEmail(
+      hasCurrentSession: signedInUser != null,
+      enteredEmail: trimmedEmail,
+      currentSessionEmail: signedInUser?.email,
+    )) {
+      await signOut();
     }
 
     await _client.auth.signInWithOtp(
       email: trimmedEmail,
       shouldCreateUser: true,
       data: role == null ? null : {'role': role.name},
+    );
+    KaamAuthSessionCoordinator.setPendingOtp(
+      email: trimmedEmail,
+      role: role,
     );
     _debug(
         'Email OTP requested${role == null ? '' : ' for role ${role.name}'}');
@@ -849,7 +988,7 @@ class KaamAuthRepository {
     }
 
     await _client.auth.verifyOTP(
-      email: email.trim(),
+      email: email.trim().toLowerCase(),
       token: trimmedToken,
       type: OtpType.email,
     );
@@ -857,9 +996,12 @@ class KaamAuthRepository {
         _client.auth.currentUser == null) {
       throw StateError('OTP verified but no Supabase session was created.');
     }
+    KaamAuthSessionCoordinator.markAuthenticatedUser(
+        _client.auth.currentUser!.id);
     final existingProfile = await _storedProfile();
     if (existingProfile == null) {
       if (role == null) {
+        KaamAuthSessionCoordinator.clearPendingOtp();
         return const KaamAuthRouteResult(
           destination: KaamAuthDestination.roleSelection,
           message:
@@ -867,7 +1009,9 @@ class KaamAuthRepository {
         );
       }
       await ensureProfile(role: role);
-      return resolvePostOtpDestination(fallbackRole: role);
+      final result = await resolvePostOtpDestination(fallbackRole: role);
+      KaamAuthSessionCoordinator.clearPendingOtp();
+      return result;
     }
     if (KaamAccountStatusPolicy.isBlocked(existingProfile.status)) {
       await signOut();
@@ -877,16 +1021,18 @@ class KaamAuthRepository {
       );
     }
 
+    if (role != null) {
+      if (existingProfile.role != role) {
+        await signOut();
+        throw KaamRoleMismatchException(
+          actualRole: existingProfile.role,
+          requestedRole: role,
+        );
+      }
+    }
     final result =
         await resolvePostOtpDestination(fallbackRole: existingProfile.role);
-    if (role != null) {
-      return KaamAuthRouteResult(
-        destination: result.destination,
-        message: result.destination == KaamAuthDestination.blocked
-            ? result.message
-            : 'This email is already registered as a ${existingProfile.role.name}. Continuing to your account.',
-      );
-    }
+    KaamAuthSessionCoordinator.clearPendingOtp();
     return result;
   }
 
@@ -950,8 +1096,7 @@ class KaamAuthRepository {
   }) async {
     final client = _client;
     final user = _requireUser(client);
-    await _ensureCurrentProfileNotBlocked(client);
-    await _ensureCurrentProfileNotBlocked(client);
+    KaamAuthSessionCoordinator.markAuthenticatedUser(user.id);
     await _ensureCurrentProfileNotBlocked(client);
     final profile = await client
         .from('profiles')
@@ -1015,8 +1160,14 @@ class KaamAuthRepository {
   }
 
   Future<void> signOut() async {
-    await KaamPushNotificationService.instance.deactivateCurrentDevice();
-    await SupabaseService.maybeClient?.auth.signOut(scope: SignOutScope.global);
+    await KaamAuthSessionCoordinator.beginExplicitLogout();
+    try {
+      await KaamPushNotificationService.instance.deactivateCurrentDevice();
+      await SupabaseService.maybeClient?.auth
+          .signOut(scope: SignOutScope.global);
+    } finally {
+      KaamAuthSessionCoordinator.finishExplicitLogout();
+    }
   }
 }
 
@@ -1046,8 +1197,14 @@ class QaToolsRepository {
   }
 
   Future<void> signOut() async {
-    await KaamPushNotificationService.instance.deactivateCurrentDevice();
-    await SupabaseService.maybeClient?.auth.signOut();
+    await KaamAuthSessionCoordinator.beginExplicitLogout();
+    try {
+      await KaamPushNotificationService.instance.deactivateCurrentDevice();
+      await SupabaseService.maybeClient?.auth
+          .signOut(scope: SignOutScope.global);
+    } finally {
+      KaamAuthSessionCoordinator.finishExplicitLogout();
+    }
   }
 }
 
@@ -2439,8 +2596,13 @@ Future<void> _ensureCurrentProfileNotBlocked(SupabaseClient client) async {
       .eq('id', user.id)
       .maybeSingle();
   if (KaamAccountStatusPolicy.isBlocked(row?['status'] as String?)) {
-    await KaamPushNotificationService.instance.deactivateCurrentDevice();
-    await client.auth.signOut(scope: SignOutScope.global);
+    await KaamAuthSessionCoordinator.beginExplicitLogout();
+    try {
+      await KaamPushNotificationService.instance.deactivateCurrentDevice();
+      await client.auth.signOut(scope: SignOutScope.global);
+    } finally {
+      KaamAuthSessionCoordinator.finishExplicitLogout();
+    }
     throw StateError(KaamAccountStatusPolicy.blockedMessage);
   }
 }

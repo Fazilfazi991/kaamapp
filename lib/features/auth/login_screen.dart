@@ -32,43 +32,15 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => loading = true);
     try {
       await SupabaseService.waitForSessionRecovery();
-      if (auth.currentUser != null) {
-        if (requestedRole != null) {
-          final backendRole = await auth.currentBackendRole();
-          if (backendRole != null && backendRole != requestedRole) {
-            await auth.signOut();
-          } else {
-            final result = await auth.resolvePostOtpDestination(
-              fallbackRole: requestedRole,
-            );
-            if (!mounted) return;
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              _routeFor(result.destination),
-              (_) => false,
-            );
-            return;
-          }
-        } else {
-          final result = await auth.resolvePostOtpDestination(
-            fallbackRole: requestedRole ?? KaamRole.candidate,
-          );
-          if (!mounted) return;
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            _routeFor(result.destination),
-            (_) => false,
-          );
-          return;
-        }
-      }
       await auth.signInWithOtp(
         email: contactController.text,
         role: requestedRole,
       );
       if (!mounted) return;
-      Navigator.of(context).pushNamed(
+      Navigator.of(context).pushReplacementNamed(
         AppRoutes.otp,
         arguments: {
-          'email': contactController.text,
+          'email': contactController.text.trim().toLowerCase(),
           'role': requestedRole,
         },
       );
@@ -83,16 +55,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) setState(() => loading = false);
     }
   }
-
-  String _routeFor(KaamAuthDestination destination) => switch (destination) {
-        KaamAuthDestination.roleSelection => AppRoutes.roleSelection,
-        KaamAuthDestination.blocked => AppRoutes.accountBlocked,
-        KaamAuthDestination.candidateOnboarding => AppRoutes.documentsUpload,
-        KaamAuthDestination.candidateDashboard => AppRoutes.dashboard,
-        KaamAuthDestination.employerOnboarding =>
-          AppRoutes.employerOnboardingOverview,
-        KaamAuthDestination.employerDashboard => AppRoutes.employerDashboard,
-      };
 
   KaamRole? get _requestedRole {
     final arguments = ModalRoute.of(context)?.settings.arguments;

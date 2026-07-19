@@ -77,31 +77,15 @@ class _EmployerLoginScreenState extends State<EmployerLoginScreen> {
     setState(() => loading = true);
     try {
       await SupabaseService.waitForSessionRecovery();
-      if (auth.currentUser != null) {
-        final backendRole = await auth.currentBackendRole();
-        if (backendRole != null && backendRole != KaamRole.employer) {
-          await auth.signOut();
-        } else {
-          final result = await auth.resolvePostOtpDestination(
-            fallbackRole: KaamRole.employer,
-          );
-          if (!mounted) return;
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            _routeForSession(result.destination),
-            (_) => false,
-          );
-          return;
-        }
-      }
       await auth.signInWithOtp(
         email: contactController.text,
         role: KaamRole.employer,
       );
       if (!mounted) return;
-      Navigator.of(context).pushNamed(
+      Navigator.of(context).pushReplacementNamed(
         AppRoutes.employerOtp,
         arguments: {
-          'email': contactController.text,
+          'email': contactController.text.trim().toLowerCase(),
           'role': KaamRole.employer,
         },
       );
@@ -114,17 +98,6 @@ class _EmployerLoginScreenState extends State<EmployerLoginScreen> {
       if (mounted) setState(() => loading = false);
     }
   }
-
-  String _routeForSession(KaamAuthDestination destination) =>
-      switch (destination) {
-        KaamAuthDestination.roleSelection => AppRoutes.roleSelection,
-        KaamAuthDestination.blocked => AppRoutes.accountBlocked,
-        KaamAuthDestination.candidateOnboarding => AppRoutes.documentsUpload,
-        KaamAuthDestination.candidateDashboard => AppRoutes.dashboard,
-        KaamAuthDestination.employerOnboarding =>
-          AppRoutes.employerOnboardingOverview,
-        KaamAuthDestination.employerDashboard => AppRoutes.employerDashboard,
-      };
 
   @override
   Widget build(BuildContext context) {
@@ -230,9 +203,8 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
   }
 
   Future<void> _verify() async {
-    final args = ModalRoute.of(context)?.settings.arguments;
-    final data = args is Map ? args : const {};
-    final email = data['email'] as String? ?? '';
+    final otpContext = _otpContext();
+    final email = otpContext.normalizedEmail;
     final token = controllers.map((controller) => controller.text).join();
 
     setState(() => loading = true);
@@ -266,6 +238,12 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
         _routeFor(result.destination),
         (_) => false,
       );
+    } on KaamRoleMismatchException catch (error) {
+      if (!mounted) return;
+      autoSubmitted = false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.safeMessage)),
+      );
     } catch (_) {
       if (!mounted) return;
       autoSubmitted = false;
@@ -281,9 +259,8 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
   }
 
   Future<void> _resend() async {
-    final args = ModalRoute.of(context)?.settings.arguments;
-    final data = args is Map ? args : const {};
-    final email = data['email'] as String? ?? '';
+    final otpContext = _otpContext();
+    final email = otpContext.normalizedEmail;
     setState(() {
       loading = true;
       autoSubmitted = false;
@@ -303,6 +280,22 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
     } finally {
       if (mounted) setState(() => loading = false);
     }
+  }
+
+  KaamPendingOtpContext _otpContext() {
+    final args = ModalRoute.of(context)?.settings.arguments;
+    final data = args is Map ? args : const {};
+    final email = (data['email'] as String? ??
+            KaamAuthSessionCoordinator.pendingOtp?.normalizedEmail ??
+            '')
+        .trim()
+        .toLowerCase();
+    return KaamPendingOtpContext(
+      normalizedEmail: email,
+      role: KaamRole.employer,
+      requestedAt: KaamAuthSessionCoordinator.pendingOtp?.requestedAt ??
+          DateTime.now().toUtc(),
+    );
   }
 
   void _startResendCountdown() {

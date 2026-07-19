@@ -52,10 +52,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   Future<void> _verify() async {
-    final args = ModalRoute.of(context)?.settings.arguments;
-    final data = args is Map ? args : const {};
-    final email = data['email'] as String? ?? '';
-    final role = data['role'] as KaamRole?;
+    final otpContext = _otpContext();
+    final email = otpContext.normalizedEmail;
+    final role = otpContext.role;
     final token = controllers.map((controller) => controller.text).join();
 
     setState(() => loading = true);
@@ -86,6 +85,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         _routeFor(result.destination),
         (_) => false,
       );
+    } on KaamRoleMismatchException catch (error) {
+      if (!mounted) return;
+      resent = false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.safeMessage)),
+      );
     } catch (_) {
       if (!mounted) return;
       resent = false;
@@ -100,10 +105,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   Future<void> _resend() async {
-    final args = ModalRoute.of(context)?.settings.arguments;
-    final data = args is Map ? args : const {};
-    final email = data['email'] as String? ?? '';
-    final role = data['role'] as KaamRole?;
+    final otpContext = _otpContext();
+    final email = otpContext.normalizedEmail;
+    final role = otpContext.role;
     setState(() {
       loading = true;
       resent = false;
@@ -123,6 +127,24 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     } finally {
       if (mounted) setState(() => loading = false);
     }
+  }
+
+  KaamPendingOtpContext _otpContext() {
+    final args = ModalRoute.of(context)?.settings.arguments;
+    final data = args is Map ? args : const {};
+    final email = (data['email'] as String? ??
+            KaamAuthSessionCoordinator.pendingOtp?.normalizedEmail ??
+            '')
+        .trim()
+        .toLowerCase();
+    final role = data['role'] as KaamRole? ??
+        KaamAuthSessionCoordinator.pendingOtp?.role;
+    return KaamPendingOtpContext(
+      normalizedEmail: email,
+      role: role,
+      requestedAt: KaamAuthSessionCoordinator.pendingOtp?.requestedAt ??
+          DateTime.now().toUtc(),
+    );
   }
 
   void _startResendCountdown() {
