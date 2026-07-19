@@ -99,7 +99,7 @@ void main() {
           actualRole: KaamRole.candidate,
           requestedRole: KaamRole.employer,
         ),
-        contains('Please continue as Find Work'),
+        contains('Continue with Find Work or use another account'),
       );
     });
 
@@ -109,8 +109,75 @@ void main() {
           actualRole: KaamRole.employer,
           requestedRole: KaamRole.candidate,
         ),
-        contains('Please continue as Hire Talent'),
+        contains('Continue with Hire Talent or use another account'),
       );
+    });
+  });
+
+  group('shared profile bootstrap and login resolution', () {
+    late final String backendSource;
+    late final String bootstrapSql;
+
+    setUpAll(() {
+      backendSource = File('lib/features/supabase_backend/kaam_backend.dart')
+          .readAsStringSync();
+      bootstrapSql =
+          File('supabase/018_bootstrap_user_profile.sql').readAsStringSync();
+    });
+
+    test('new candidate and employer flows bootstrap by auth user ID', () {
+      expect(backendSource, contains("rpc('bootstrap_user_profile'"));
+      expect(bootstrapSql, contains('v_user_id uuid := auth.uid()'));
+      expect(bootstrapSql,
+          contains("selected_role not in ('candidate', 'employer')"));
+      expect(bootstrapSql, contains("'active'::public.profile_status"));
+      expect(bootstrapSql, contains('insert into public.profiles'));
+      expect(bootstrapSql, contains('on conflict (id) do nothing'));
+    });
+
+    test('profile lookup uses profiles.id, not email ownership matching', () {
+      final authRepositoryStart =
+          backendSource.indexOf('class KaamAuthRepository');
+      final authRepositoryEnd =
+          backendSource.indexOf('class QaToolsRepository');
+      final authRepositorySource =
+          backendSource.substring(authRepositoryStart, authRepositoryEnd);
+
+      expect(authRepositorySource, contains(".eq('id', user.id)"));
+      expect(authRepositorySource, isNot(contains(".eq('email'")));
+    });
+
+    test('login with missing profile enters recoverable role selection', () {
+      expect(
+        KaamMissingProfileRecovery.message,
+        contains('profile setup is incomplete'),
+      );
+      expect(backendSource, contains('KaamMissingProfileRecovery.message'));
+      expect(backendSource,
+          isNot(contains('We could not find a KAAM profile for this email')));
+    });
+
+    test('existing account role cannot be silently changed by bootstrap', () {
+      expect(bootstrapSql, contains('if v_existing.role <> v_role then'));
+      expect(bootstrapSql,
+          contains('Existing KAAM profile uses a different role'));
+      expect(
+          backendSource,
+          isNot(contains(
+              'await signOut();\n        throw KaamRoleMismatchException')));
+    });
+
+    test('session remains valid during missing-profile recovery', () {
+      final missingProfileBlockStart =
+          backendSource.indexOf('if (existingProfile == null)');
+      final missingProfileBlock = backendSource.substring(
+        missingProfileBlockStart,
+        backendSource.indexOf('await bootstrapProfile(role: role);'),
+      );
+
+      expect(
+          missingProfileBlock, contains('KaamMissingProfileRecovery.message'));
+      expect(missingProfileBlock, isNot(contains('signOut')));
     });
   });
 

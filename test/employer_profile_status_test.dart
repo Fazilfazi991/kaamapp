@@ -7,6 +7,7 @@ void main() {
   group('employer company profile status payload', () {
     late final String backendSource;
     late final String employerRepositorySource;
+    late final String candidateRepositorySource;
     late final String onboardingSource;
     late final String companySource;
 
@@ -19,6 +20,10 @@ void main() {
         employerStart,
         storageStart == -1 ? backendSource.length : storageStart,
       );
+      final candidateStart =
+          backendSource.indexOf('class CandidateProfileRepository');
+      candidateRepositorySource =
+          backendSource.substring(candidateStart, employerStart);
       onboardingSource = File(
         'lib/features/employer/onboarding/employer_onboarding_screens.dart',
       ).readAsStringSync();
@@ -41,10 +46,9 @@ void main() {
 
     test('employer company save uses a valid enum-backed profile status', () {
       expect(KaamProfileStatus.employerOnboarding, KaamProfileStatus.active);
-      expect(employerRepositorySource, contains('KaamRole.employer.name'));
       expect(
         employerRepositorySource,
-        contains("'status': KaamProfileStatus.employerOnboarding"),
+        contains('_bootstrapUserProfile(client, role: KaamRole.employer)'),
       );
       expect(employerRepositorySource, isNot(contains("'status': 'pending'")));
     });
@@ -52,11 +56,11 @@ void main() {
     test('candidate onboarding still uses a valid enum-backed profile status',
         () {
       expect(KaamProfileStatus.candidateOnboarding, KaamProfileStatus.active);
-      expect(backendSource, contains('KaamRole.candidate.name'));
       expect(
-        backendSource,
-        contains("'status': KaamProfileStatus.candidateOnboarding"),
+        candidateRepositorySource,
+        contains('_bootstrapUserProfile(client, role: KaamRole.candidate)'),
       );
+      expect(candidateRepositorySource, isNot(contains("'status': 'pending'")));
     });
 
     test(

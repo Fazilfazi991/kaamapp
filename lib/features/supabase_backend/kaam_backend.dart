@@ -164,12 +164,11 @@ class KaamAuthSessionPolicy {
     required KaamRole actualRole,
     required KaamRole requestedRole,
   }) {
-    final actual = actualRole == KaamRole.candidate ? 'candidate' : 'employer';
     final correctJourney =
         actualRole == KaamRole.candidate ? 'Find Work' : 'Hire Talent';
     final attemptedJourney =
         requestedRole == KaamRole.candidate ? 'Find Work' : 'Hire Talent';
-    return 'This account is registered as a $actual. You selected $attemptedJourney. Please continue as $correctJourney or use another account.';
+    return 'This account is registered for $correctJourney. Continue with $correctJourney or use another account. You selected $attemptedJourney.';
   }
 
   static String _normalizeEmail(String? email) =>
@@ -240,6 +239,36 @@ class KaamStoredProfile {
 
   final KaamRole role;
   final String status;
+}
+
+class KaamProfileBootstrapResult {
+  const KaamProfileBootstrapResult({
+    required this.role,
+    required this.status,
+    required this.candidateProfileExists,
+    required this.employerCompanyExists,
+  });
+
+  final KaamRole role;
+  final String status;
+  final bool candidateProfileExists;
+  final bool employerCompanyExists;
+
+  factory KaamProfileBootstrapResult.fromRow(Map<String, dynamic> row) {
+    return KaamProfileBootstrapResult(
+      role: _roleFromName(row['role'] as String? ?? ''),
+      status: row['status'] as String? ?? KaamProfileStatus.draft,
+      candidateProfileExists: row['candidate_profile_exists'] as bool? ?? false,
+      employerCompanyExists: row['employer_company_exists'] as bool? ?? false,
+    );
+  }
+}
+
+class KaamMissingProfileRecovery {
+  const KaamMissingProfileRecovery._();
+
+  static const message =
+      'Your login is verified, but your KAAM profile setup is incomplete. Choose Find Work or Hire Talent to continue setup.';
 }
 
 class CandidatePrivacySettings {
@@ -1044,16 +1073,23 @@ class KaamAuthRepository {
     KaamAuthSessionCoordinator.markAuthenticatedUser(
         _client.auth.currentUser!.id);
     final existingProfile = await _storedProfile();
+    _debugAuthResolution(
+      stage: 'otp_verified',
+      authUserPresent: true,
+      profileFound: existingProfile != null,
+      storedRole: existingProfile?.role,
+      selectedJourney: role,
+      bootstrapAttempted: false,
+    );
     if (existingProfile == null) {
       if (role == null) {
         KaamAuthSessionCoordinator.clearPendingOtp();
         return const KaamAuthRouteResult(
           destination: KaamAuthDestination.roleSelection,
-          message:
-              'We could not find a KAAM profile for this email. Choose how you want to use KAAM to continue.',
+          message: KaamMissingProfileRecovery.message,
         );
       }
-      await ensureProfile(role: role);
+      await bootstrapProfile(role: role);
       final result = await resolvePostOtpDestination(fallbackRole: role);
       KaamAuthSessionCoordinator.clearPendingOtp();
       return result;
@@ -1068,7 +1104,6 @@ class KaamAuthRepository {
 
     if (role != null) {
       if (existingProfile.role != role) {
-        await signOut();
         throw KaamRoleMismatchException(
           actualRole: existingProfile.role,
           requestedRole: role,
@@ -1117,25 +1152,45 @@ class KaamAuthRepository {
     return access;
   }
 
-  Future<void> ensureProfile({required KaamRole role}) async {
+  Future<KaamProfileBootstrapResult> bootstrapProfile({
+    required KaamRole role,
+  }) async {
     final client = _client;
     final user = _requireUser(client);
-    final existing = await client
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .maybeSingle();
-    if (existing != null) return;
-
-    await client.from('profiles').upsert({
-      'id': user.id,
-      'role': role.name,
-      'email': user.email,
-      'phone': user.phone,
-      'status': role == KaamRole.employer
-          ? KaamProfileStatus.employerOnboarding
-          : KaamProfileStatus.candidateOnboarding,
-    }, onConflict: 'id');
+    final existingProfile = await _storedProfile();
+    _debugAuthResolution(
+      stage: 'bootstrap_start',
+      authUserPresent: true,
+      profileFound: existingProfile != null,
+      storedRole: existingProfile?.role,
+      selectedJourney: role,
+      bootstrapAttempted: true,
+    );
+    try {
+      final result = await _bootstrapUserProfile(client, role: role);
+      KaamAuthSessionCoordinator.markAuthenticatedUser(user.id);
+      _debugAuthResolution(
+        stage: 'bootstrap_complete',
+        authUserPresent: true,
+        profileFound: true,
+        storedRole: result.role,
+        selectedJourney: role,
+        bootstrapAttempted: true,
+        bootstrapResult: result,
+      );
+      return result;
+    } on Object catch (error) {
+      _debugAuthResolution(
+        stage: 'bootstrap_failed',
+        authUserPresent: true,
+        profileFound: existingProfile != null,
+        storedRole: existingProfile?.role,
+        selectedJourney: role,
+        bootstrapAttempted: true,
+        safeErrorCode: _safeErrorCode(error),
+      );
+      rethrow;
+    }
   }
 
   Future<KaamAuthRouteResult> resolvePostOtpDestination({
@@ -1150,14 +1205,26 @@ class KaamAuthRepository {
         .select('role,status')
         .eq('id', user.id)
         .maybeSingle();
-    final roleName = profile?['role'] as String?;
-    final role = roleName == null ? fallbackRole : _roleFromName(roleName);
-    final status = profile?['status'] as String?;
-
     if (profile == null) {
+      final bootstrap = await bootstrapProfile(role: fallbackRole);
+      return resolvePostOtpDestination(fallbackRole: bootstrap.role);
+    }
+    final roleName = profile['role'] as String?;
+    final role = roleName == null ? fallbackRole : _roleFromName(roleName);
+    final status = profile['status'] as String?;
+    _debugAuthResolution(
+      stage: 'route_resolve',
+      authUserPresent: true,
+      profileFound: true,
+      storedRole: role,
+      selectedJourney: fallbackRole,
+      bootstrapAttempted: false,
+    );
+
+    if (roleName == null) {
       return const KaamAuthRouteResult(
         destination: KaamAuthDestination.roleSelection,
-        message: 'Account verified. Choose how you want to use KAAM.',
+        message: KaamMissingProfileRecovery.message,
       );
     }
     if (KaamAccountStatusPolicy.isBlocked(status)) {
@@ -1177,11 +1244,13 @@ class KaamAuthRepository {
           .eq('id', user.id)
           .maybeSingle();
       if (_candidateOnboardingComplete(candidate)) {
+        _debugAuthRoute(KaamAuthDestination.candidateDashboard);
         return const KaamAuthRouteResult(
           destination: KaamAuthDestination.candidateDashboard,
           message: 'Welcome back. Continuing to your account.',
         );
       }
+      _debugAuthRoute(KaamAuthDestination.candidateOnboarding);
       return const KaamAuthRouteResult(
         destination: KaamAuthDestination.candidateOnboarding,
         message: 'Account verified. Let\'s create your profile.',
@@ -1195,11 +1264,13 @@ class KaamAuthRepository {
         .limit(1)
         .maybeSingle();
     if ((company?['company_name'] as String? ?? '').trim().isNotEmpty) {
+      _debugAuthRoute(KaamAuthDestination.employerDashboard);
       return const KaamAuthRouteResult(
         destination: KaamAuthDestination.employerDashboard,
         message: 'Welcome back. Continuing to your account.',
       );
     }
+    _debugAuthRoute(KaamAuthDestination.employerOnboarding);
     return const KaamAuthRouteResult(
       destination: KaamAuthDestination.employerOnboarding,
       message: 'Account verified. Let\'s create your company profile.',
@@ -1215,6 +1286,41 @@ class KaamAuthRepository {
     } finally {
       KaamAuthSessionCoordinator.finishExplicitLogout();
     }
+  }
+
+  void _debugAuthRoute(KaamAuthDestination destination) {
+    if (!kDebugMode) return;
+    debugPrint('[AuthResolution] route=${destination.name}');
+  }
+
+  void _debugAuthResolution({
+    required String stage,
+    required bool authUserPresent,
+    required bool profileFound,
+    required KaamRole? storedRole,
+    required KaamRole? selectedJourney,
+    required bool bootstrapAttempted,
+    KaamProfileBootstrapResult? bootstrapResult,
+    Object? safeErrorCode,
+  }) {
+    if (!kDebugMode) return;
+    final bootstrapSummary = bootstrapResult == null
+        ? ''
+        : ' bootstrapRole=${bootstrapResult.role.name}'
+            ' candidateChild=${bootstrapResult.candidateProfileExists}'
+            ' employerCompany=${bootstrapResult.employerCompanyExists}';
+    final error = safeErrorCode == null ? '' : ' error=$safeErrorCode';
+    debugPrint(
+      '[AuthResolution] stage=$stage authUser=$authUserPresent '
+      'profileFound=$profileFound storedRole=${storedRole?.name ?? 'none'} '
+      'selectedJourney=${selectedJourney?.name ?? 'none'} '
+      'bootstrapAttempted=$bootstrapAttempted$bootstrapSummary$error',
+    );
+  }
+
+  Object _safeErrorCode(Object error) {
+    if (error is PostgrestException) return error.code ?? 'postgrest';
+    return error.runtimeType;
   }
 }
 
@@ -1288,14 +1394,12 @@ class CandidateProfileRepository {
     final client = _client;
     final user = _requireUser(client);
 
-    await client.from('profiles').upsert({
-      'id': user.id,
-      'role': KaamRole.candidate.name,
+    await _bootstrapUserProfile(client, role: KaamRole.candidate);
+    await client.from('profiles').update({
       'email': user.email,
       'phone': _nullable(phone),
       'full_name': fullName.trim(),
-      'status': KaamProfileStatus.candidateOnboarding,
-    }, onConflict: 'id');
+    }).eq('id', user.id);
 
     await client.from('candidate_profiles').upsert({
       'id': user.id,
@@ -1913,15 +2017,13 @@ class EmployerRepository {
     var profileExists = false;
     var companyExists = false;
 
+    await _bootstrapUserProfile(client, role: KaamRole.employer);
     try {
-      await client.from('profiles').upsert({
-        'id': user.id,
-        'role': KaamRole.employer.name,
+      await client.from('profiles').update({
         'email': user.email,
         'phone': user.phone,
         'full_name': _nullable(contactName),
-        'status': KaamProfileStatus.employerOnboarding,
-      }, onConflict: 'id');
+      }).eq('id', user.id);
     } on Object catch (error) {
       _debugCompanySaveFailure(
         stage: 'parent_profile_upsert',
@@ -2783,6 +2885,15 @@ User _requireUser(SupabaseClient client) {
     throw StateError('Please sign in again before continuing.');
   }
   return user;
+}
+
+Future<KaamProfileBootstrapResult> _bootstrapUserProfile(
+  SupabaseClient client, {
+  required KaamRole role,
+}) async {
+  final row = await client.rpc('bootstrap_user_profile',
+      params: {'selected_role': role.name}).single();
+  return KaamProfileBootstrapResult.fromRow(Map<String, dynamic>.from(row));
 }
 
 Future<void> _ensureCurrentProfileNotBlocked(SupabaseClient client) async {
