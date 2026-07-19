@@ -1910,22 +1910,75 @@ class EmployerRepository {
   }) async {
     final client = _client;
     final user = _requireUser(client);
+    var profileExists = false;
+    var companyExists = false;
 
-    await client.from('profiles').upsert({
-      'id': user.id,
-      'role': KaamRole.employer.name,
-      'email': user.email,
-      'phone': user.phone,
-      'full_name': _nullable(contactName),
-      'status': KaamProfileStatus.employerOnboarding,
-    }, onConflict: 'id');
+    try {
+      await client.from('profiles').upsert({
+        'id': user.id,
+        'role': KaamRole.employer.name,
+        'email': user.email,
+        'phone': user.phone,
+        'full_name': _nullable(contactName),
+        'status': KaamProfileStatus.employerOnboarding,
+      }, onConflict: 'id');
+    } on Object catch (error) {
+      _debugCompanySaveFailure(
+        stage: 'parent_profile_upsert',
+        table: 'profiles',
+        operation: 'upsert',
+        error: error,
+        authenticated: true,
+        profileExists: profileExists,
+        companyExists: companyExists,
+      );
+      rethrow;
+    }
 
-    final existing = await client
-        .from('employer_companies')
-        .select('id')
-        .eq('owner_id', user.id)
-        .limit(1)
+    final profile = await client
+        .from('profiles')
+        .select('id,role,status')
+        .eq('id', user.id)
         .maybeSingle();
+    profileExists = profile != null;
+    final profileRole = profile?['role'] as String?;
+    final profileStatus = profile?['status'] as String?;
+    if (!profileExists ||
+        profileRole != KaamRole.employer.name ||
+        KaamAccountStatusPolicy.isBlocked(profileStatus)) {
+      _debugCompanySaveFailure(
+        stage: 'parent_profile_verify',
+        table: 'profiles',
+        operation: 'select',
+        error: StateError('invalid_parent_profile'),
+        authenticated: true,
+        profileExists: profileExists,
+        companyExists: companyExists,
+      );
+      throw StateError('Employer profile could not be verified.');
+    }
+
+    late final Map<String, dynamic>? existing;
+    try {
+      existing = await client
+          .from('employer_companies')
+          .select('id')
+          .eq('owner_id', user.id)
+          .limit(1)
+          .maybeSingle();
+      companyExists = existing != null;
+    } on Object catch (error) {
+      _debugCompanySaveFailure(
+        stage: 'company_existing_select',
+        table: 'employer_companies',
+        operation: 'select',
+        error: error,
+        authenticated: true,
+        profileExists: profileExists,
+        companyExists: companyExists,
+      );
+      rethrow;
+    }
 
     final values = {
       'owner_id': user.id,
@@ -1941,17 +1994,114 @@ class EmployerRepository {
       'status': KaamProfileStatus.employerOnboarding,
     };
 
+    late final Map<String, dynamic> saved;
     if (existing == null) {
-      await client.from('employer_companies').insert(values);
+      try {
+        saved = await client
+            .from('employer_companies')
+            .insert(values)
+            .select()
+            .single();
+      } on Object catch (error) {
+        _debugCompanySaveFailure(
+          stage: 'company_insert',
+          table: 'employer_companies',
+          operation: 'insert',
+          error: error,
+          authenticated: true,
+          profileExists: profileExists,
+          companyExists: companyExists,
+        );
+        rethrow;
+      }
     } else {
-      await client
-          .from('employer_companies')
-          .update(values)
-          .eq('id', existing['id']);
+      try {
+        saved = await client
+            .from('employer_companies')
+            .update(values)
+            .eq('id', existing['id'])
+            .eq('owner_id', user.id)
+            .select()
+            .single();
+      } on Object catch (error) {
+        _debugCompanySaveFailure(
+          stage: 'company_update',
+          table: 'employer_companies',
+          operation: 'update',
+          error: error,
+          authenticated: true,
+          profileExists: profileExists,
+          companyExists: companyExists,
+        );
+        rethrow;
+      }
+    }
+
+    if (saved['owner_id'] != user.id) {
+      _debugCompanySaveFailure(
+        stage: 'company_owner_verify',
+        table: 'employer_companies',
+        operation: existing == null ? 'insert' : 'update',
+        error: StateError('saved_company_owner_mismatch'),
+        authenticated: true,
+        profileExists: profileExists,
+        companyExists: companyExists,
+      );
+      throw StateError('Employer company ownership could not be verified.');
     }
 
     _debug('Employer company profile saved');
-    return await loadMyCompany() ?? const EmployerCompanyData();
+    return EmployerCompanyData.fromRow(saved);
+  }
+
+  void _debugCompanySaveFailure({
+    required String stage,
+    required String table,
+    required String operation,
+    required Object error,
+    required bool authenticated,
+    required bool profileExists,
+    required bool companyExists,
+  }) {
+    if (!kDebugMode) return;
+    final code = error is PostgrestException ? error.code : error.runtimeType;
+    final message = error is PostgrestException
+        ? _safePostgrestMessage(error.message)
+        : error.runtimeType.toString();
+    final column = _safeFailingColumn(error);
+    debugPrint(
+      '[EmployerCompanySave] stage=$stage table=$table op=$operation '
+      'code=$code message=$message column=${column ?? 'unknown'} '
+      'authUser=$authenticated parentProfile=$profileExists '
+      'employerCompany=$companyExists',
+    );
+  }
+
+  String _safePostgrestMessage(String message) {
+    if (message.contains('row-level security')) return 'row-level security';
+    if (message.contains('violates not-null constraint')) {
+      return 'not-null constraint';
+    }
+    if (message.contains('violates foreign key constraint')) {
+      return 'foreign key constraint';
+    }
+    if (message.contains('invalid input value for enum')) {
+      return 'invalid enum value';
+    }
+    if (message.contains('duplicate key value')) return 'duplicate key';
+    return 'database rejected request';
+  }
+
+  String? _safeFailingColumn(Object error) {
+    if (error is! PostgrestException) return null;
+    final message = error.message;
+    if (message.contains('profile_status') || message.contains('status')) {
+      return 'status';
+    }
+    if (message.contains('owner_id')) return 'owner_id';
+    if (message.contains('company_name')) return 'company_name';
+    if (message.contains('role')) return 'role';
+    return null;
   }
 
   Future<EmployerCompanyData> updateCompanyLogo(String publicUrl) async {

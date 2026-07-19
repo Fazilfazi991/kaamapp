@@ -561,12 +561,13 @@ security definer
 set search_path = public
 as $$
 begin
-  if new.is_verified = true or new.status not in ('pending', 'pending_review') then
+  if new.is_verified = true or new.status = 'blocked' then
     return new;
   end if;
 
   if tg_op = 'UPDATE' then
-    if old.status is not distinct from new.status then
+    if old.status is not distinct from new.status
+      and old.is_verified is not distinct from new.is_verified then
       return new;
     end if;
   end if;
@@ -581,7 +582,7 @@ begin
     'An employer company profile is ready for review.',
     '/admin/employers',
     jsonb_build_object('company_id', new.id, 'owner_id', new.owner_id),
-    'company-review-submitted:' || new.id::text || ':' || coalesce(new.status, 'unknown'),
+    'company-review-submitted:' || new.id::text || ':' || coalesce(new.status::text, 'unknown'),
     'employer_companies',
     new.id
   from public.profiles p
@@ -603,36 +604,24 @@ language plpgsql
 security definer
 set search_path = public
 as $$
-declare
-  v_type text;
-  v_title text;
-  v_body text;
 begin
   if old.status is not distinct from new.status
     and old.is_verified is not distinct from new.is_verified then
     return new;
   end if;
 
-  if new.is_verified = true or new.status = 'active' then
-    v_type := 'company_approved';
-    v_title := 'Company approved';
-    v_body := 'Your company profile has been approved by Kaam.';
-  elsif new.status = 'rejected' then
-    v_type := 'company_rejected';
-    v_title := 'Company needs review';
-    v_body := 'Please review your company profile and verification documents.';
-  else
+  if new.is_verified is not true then
     return new;
   end if;
 
   perform public.create_notification(
     new.owner_id,
-    v_type,
-    v_title,
-    v_body,
+    'company_approved',
+    'Company approved',
+    'Your company profile has been approved by Kaam.',
     '/employer/profile',
     jsonb_build_object('company_id', new.id),
-    'company-reviewed:' || new.id::text || ':' || coalesce(new.status, 'unknown') || ':' || coalesce(new.is_verified::text, 'false'),
+    'company-reviewed:' || new.id::text || ':' || coalesce(new.status::text, 'unknown') || ':' || coalesce(new.is_verified::text, 'false'),
     'employer_companies',
     new.id
   );

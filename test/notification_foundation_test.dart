@@ -135,6 +135,23 @@ void main() {
             'grant execute on function public.create_notification(uuid, text, text, text, text, jsonb, text, text, uuid) to authenticated')),
       );
     });
+
+    test('employer company triggers use live profile status enum values', () {
+      final sql = migration.readAsStringSync();
+      final submittedStart = sql.indexOf(
+          'create or replace function public.notify_company_review_submitted()');
+      final reviewedStart = sql.indexOf(
+          'create or replace function public.notify_company_reviewed()');
+      final submitted = sql.substring(
+          submittedStart, reviewedStart == -1 ? sql.length : reviewedStart);
+      final reviewed = sql.substring(reviewedStart);
+
+      expect(submitted, isNot(contains("'pending'")));
+      expect(submitted, isNot(contains("'pending_review'")));
+      expect(reviewed, isNot(contains("'rejected'")));
+      expect(reviewed, isNot(contains("new.status = 'active'")));
+      expect(reviewed, contains('new.is_verified is not true'));
+    });
   });
 
   test('Dart notification registry only exposes supported foundation types',
