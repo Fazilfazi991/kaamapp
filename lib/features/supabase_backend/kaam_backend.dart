@@ -20,13 +20,58 @@ enum KaamAuthDestination {
 
 enum KaamProtectedAccess { allowed, blocked, signedOut, wrongRole }
 
+class KaamProfileStatus {
+  const KaamProfileStatus._();
+
+  static const draft = 'draft';
+  static const active = 'active';
+  static const paused = 'paused';
+  static const blocked = 'blocked';
+
+  static const liveEnumValues = {draft, active, paused, blocked};
+  static const employerOnboarding = active;
+  static const candidateOnboarding = active;
+
+  static bool isLiveEnumValue(String value) => liveEnumValues.contains(value);
+}
+
+class KaamSafeErrorMessages {
+  const KaamSafeErrorMessages._();
+
+  static const employerCompanySave =
+      'We could not save your company details. Please try again.';
+
+  static String employerCompanySaveMessage(Object error) {
+    _debugSafeError(
+      stage: 'employer_company_save',
+      error: error,
+      safeField: error is PostgrestException && error.code == '22P02'
+          ? 'status'
+          : null,
+    );
+    return employerCompanySave;
+  }
+
+  static void _debugSafeError({
+    required String stage,
+    required Object error,
+    String? safeField,
+  }) {
+    if (!kDebugMode) return;
+    final code = error is PostgrestException ? error.code : error.runtimeType;
+    final field = safeField == null ? '' : ' field=$safeField';
+    debugPrint('[Backend] stage=$stage code=$code$field');
+  }
+}
+
 class KaamAccountStatusPolicy {
   const KaamAccountStatusPolicy._();
 
   static const blockedMessage =
       'Your Kaam account has been blocked. Please contact support if you believe this is a mistake.';
 
-  static bool isBlocked(String? status) => status?.trim() == 'blocked';
+  static bool isBlocked(String? status) =>
+      status?.trim() == KaamProfileStatus.blocked;
 
   static KaamProtectedAccess protectedAccess({
     required KaamRole? actualRole,
@@ -1087,7 +1132,9 @@ class KaamAuthRepository {
       'role': role.name,
       'email': user.email,
       'phone': user.phone,
-      'status': 'active',
+      'status': role == KaamRole.employer
+          ? KaamProfileStatus.employerOnboarding
+          : KaamProfileStatus.candidateOnboarding,
     }, onConflict: 'id');
   }
 
@@ -1247,7 +1294,7 @@ class CandidateProfileRepository {
       'email': user.email,
       'phone': _nullable(phone),
       'full_name': fullName.trim(),
-      'status': 'active',
+      'status': KaamProfileStatus.candidateOnboarding,
     }, onConflict: 'id');
 
     await client.from('candidate_profiles').upsert({
@@ -1870,7 +1917,7 @@ class EmployerRepository {
       'email': user.email,
       'phone': user.phone,
       'full_name': _nullable(contactName),
-      'status': 'active',
+      'status': KaamProfileStatus.employerOnboarding,
     }, onConflict: 'id');
 
     final existing = await client
@@ -1891,7 +1938,7 @@ class EmployerRepository {
       'contact_role': _nullable(contactRole),
       'hiring_needs': hiringNeeds,
       'description': _nullable(description),
-      'status': 'active',
+      'status': KaamProfileStatus.employerOnboarding,
     };
 
     if (existing == null) {

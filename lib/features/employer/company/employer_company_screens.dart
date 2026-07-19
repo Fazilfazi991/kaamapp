@@ -431,7 +431,10 @@ class _EditCompanyProfileScreenState extends State<EditCompanyProfileScreen> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save company: $error')),
+        SnackBar(
+          content:
+              Text(KaamSafeErrorMessages.employerCompanySaveMessage(error)),
+        ),
       );
     } finally {
       if (mounted) setState(() => saving = false);

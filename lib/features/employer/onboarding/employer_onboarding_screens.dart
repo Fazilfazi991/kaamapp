@@ -20,12 +20,17 @@ class EmployerOnboardingOverviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const steps = ['Company Details', 'Verification Documents', 'Ready / Pending Review'];
+    const steps = [
+      'Company Details',
+      'Verification Documents',
+      'Ready / Pending Review'
+    ];
     return ScreenScaffold(
       title: 'Setup',
       showBack: true,
       children: [
-        const Text('Set up your company profile', style: AppTextStyles.headline),
+        const Text('Set up your company profile',
+            style: AppTextStyles.headline),
         const SizedBox(height: 10),
         const Text(
           'Verified companies get better candidate trust and higher response rates.',
@@ -38,7 +43,8 @@ class EmployerOnboardingOverviewScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    const Icon(Icons.check_circle_outline_rounded, color: AppColors.primaryPink),
+                    const Icon(Icons.check_circle_outline_rounded,
+                        color: AppColors.primaryPink),
                     const SizedBox(width: 12),
                     Expanded(child: Text(step, style: AppTextStyles.label)),
                   ],
@@ -48,7 +54,8 @@ class EmployerOnboardingOverviewScreen extends StatelessWidget {
         const SizedBox(height: 14),
         PrimaryButton(
           label: 'Start Setup',
-          onPressed: () => Navigator.of(context).pushNamed(AppRoutes.employerCompanyDetails),
+          onPressed: () =>
+              Navigator.of(context).pushNamed(AppRoutes.employerCompanyDetails),
         ),
       ],
     );
@@ -138,7 +145,10 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save company: $error')),
+        SnackBar(
+          content:
+              Text(KaamSafeErrorMessages.employerCompanySaveMessage(error)),
+        ),
       );
     } finally {
       if (mounted) setState(() => saving = false);
@@ -155,21 +165,46 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
         const SizedBox(height: 18),
         if (loading) const LinearProgressIndicator(),
         if (loading) const SizedBox(height: 12),
-        AppTextField(controller: companyNameController, label: 'Company name', hint: EmployerDummyData.companyName),
+        AppTextField(
+            controller: companyNameController,
+            label: 'Company name',
+            hint: EmployerDummyData.companyName),
         const SizedBox(height: 12),
-        AppTextField(controller: industryController, label: 'Industry', hint: 'Facilities, Hospitality, Retail'),
+        AppTextField(
+            controller: industryController,
+            label: 'Industry',
+            hint: 'Facilities, Hospitality, Retail'),
         const SizedBox(height: 12),
-        AppTextField(controller: companySizeController, label: 'Company size', hint: '51-200 employees'),
+        AppTextField(
+            controller: companySizeController,
+            label: 'Company size',
+            hint: '51-200 employees'),
         const SizedBox(height: 12),
-        AppTextField(controller: locationController, label: 'Location', hint: 'Dubai, Sharjah, Abu Dhabi, Ajman'),
+        AppTextField(
+            controller: locationController,
+            label: 'Location',
+            hint: 'Dubai, Sharjah, Abu Dhabi, Ajman'),
         const SizedBox(height: 12),
-        AppTextField(controller: branchController, label: 'Office area / branch', hint: 'Al Quoz, Dubai'),
+        AppTextField(
+            controller: branchController,
+            label: 'Office area / branch',
+            hint: 'Al Quoz, Dubai'),
         const SizedBox(height: 12),
-        AppTextField(controller: contactNameController, label: 'Contact person name', hint: 'Nadia Rahman'),
+        AppTextField(
+            controller: contactNameController,
+            label: 'Contact person name',
+            hint: 'Nadia Rahman'),
         const SizedBox(height: 12),
-        AppTextField(controller: contactRoleController, label: 'Contact person role', hint: 'HR Manager'),
+        AppTextField(
+            controller: contactRoleController,
+            label: 'Contact person role',
+            hint: 'HR Manager'),
         const SizedBox(height: 12),
-        AppTextField(controller: descriptionController, label: 'Company description', hint: 'Tell candidates about your company.', maxLines: 4),
+        AppTextField(
+            controller: descriptionController,
+            label: 'Company description',
+            hint: 'Tell candidates about your company.',
+            maxLines: 4),
         const SizedBox(height: 22),
         PrimaryButton(
           label: saving ? 'Saving...' : 'Continue',
@@ -352,7 +387,10 @@ class _LegacyDisabledEmployerHiringSetupScreenState
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save hiring needs: $error')),
+        SnackBar(
+          content:
+              Text(KaamSafeErrorMessages.employerCompanySaveMessage(error)),
+        ),
       );
     } finally {
       if (mounted) setState(() => saving = false);
@@ -361,7 +399,8 @@ class _LegacyDisabledEmployerHiringSetupScreenState
 
   List<String> _selectedHiringRoles() {
     final values = selectedRoles.where((role) => role != 'Other').toList();
-    if (selectedRoles.contains('Other') && otherRoleController.text.trim().isNotEmpty) {
+    if (selectedRoles.contains('Other') &&
+        otherRoleController.text.trim().isNotEmpty) {
       values.addAll(splitCsv(otherRoleController.text));
     }
     return values;
@@ -369,7 +408,8 @@ class _LegacyDisabledEmployerHiringSetupScreenState
 
   String _aboutCompany(String description) {
     final marker = description.indexOf('Legacy Requirement Details:');
-    return (marker == -1 ? description : description.substring(0, marker)).trim();
+    return (marker == -1 ? description : description.substring(0, marker))
+        .trim();
   }
 
   Map<String, String> _hiringDetails(String description) {
@@ -401,7 +441,8 @@ class _LegacyDisabledEmployerHiringSetupScreenState
         const SizedBox(height: 18),
         if (loading) const LinearProgressIndicator(),
         if (loading) const SizedBox(height: 12),
-        const Text('What roles are you hiring for?', style: AppTextStyles.headline),
+        const Text('What roles are you hiring for?',
+            style: AppTextStyles.headline),
         const SizedBox(height: 16),
         Wrap(
           spacing: 8,
@@ -434,16 +475,37 @@ class _LegacyDisabledEmployerHiringSetupScreenState
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         ),
         const SizedBox(height: 12),
-        _GuidedPickerField(controller: salaryController, label: 'Salary range', options: salaryOptions),
+        _GuidedPickerField(
+            controller: salaryController,
+            label: 'Salary range',
+            options: salaryOptions),
         const SizedBox(height: 12),
-        _GuidedPickerField(controller: locationController, label: 'Work location', options: locationOptions),
+        _GuidedPickerField(
+            controller: locationController,
+            label: 'Work location',
+            options: locationOptions),
         const SizedBox(height: 12),
-        _GuidedPickerField(controller: hoursController, label: 'Working hours', options: hoursOptions),
+        _GuidedPickerField(
+            controller: hoursController,
+            label: 'Working hours',
+            options: hoursOptions),
         const SizedBox(height: 12),
-        _SwitchLine(label: 'Accommodation provided?', value: accommodation, onChanged: (v) => setState(() => accommodation = v)),
-        _SwitchLine(label: 'Transport provided?', value: transport, onChanged: (v) => setState(() => transport = v)),
-        _SwitchLine(label: 'Visa provided?', value: visa, onChanged: (v) => setState(() => visa = v)),
-        _SwitchLine(label: 'Immediate hiring?', value: immediate, onChanged: (v) => setState(() => immediate = v)),
+        _SwitchLine(
+            label: 'Accommodation provided?',
+            value: accommodation,
+            onChanged: (v) => setState(() => accommodation = v)),
+        _SwitchLine(
+            label: 'Transport provided?',
+            value: transport,
+            onChanged: (v) => setState(() => transport = v)),
+        _SwitchLine(
+            label: 'Visa provided?',
+            value: visa,
+            onChanged: (v) => setState(() => visa = v)),
+        _SwitchLine(
+            label: 'Immediate hiring?',
+            value: immediate,
+            onChanged: (v) => setState(() => immediate = v)),
         const SizedBox(height: 18),
         PrimaryButton(
           label: saving ? 'Saving...' : 'Continue',
@@ -458,15 +520,18 @@ class BusinessVerificationScreen extends StatefulWidget {
   const BusinessVerificationScreen({super.key});
 
   @override
-  State<BusinessVerificationScreen> createState() => _BusinessVerificationScreenState();
+  State<BusinessVerificationScreen> createState() =>
+      _BusinessVerificationScreenState();
 }
 
-class _BusinessVerificationScreenState extends State<BusinessVerificationScreen> {
+class _BusinessVerificationScreenState
+    extends State<BusinessVerificationScreen> {
   final storage = const KaamStorageRepository();
   final employer = const EmployerRepository();
   String? busyKey;
 
-  Future<void> _upload(String key, String title, {bool publicFile = false}) async {
+  Future<void> _upload(String key, String title,
+      {bool publicFile = false}) async {
     setState(() => busyKey = key);
     try {
       final picked = await FilePicker.platform.pickFiles(withData: true);
@@ -474,8 +539,10 @@ class _BusinessVerificationScreenState extends State<BusinessVerificationScreen>
       final bytes = file?.bytes;
       if (file == null || bytes == null) return;
       final upload = publicFile
-          ? await storage.uploadPublicFile(bytes: bytes, fileName: file.name, folder: key)
-          : await storage.uploadPrivateFile(bytes: bytes, fileName: file.name, folder: key);
+          ? await storage.uploadPublicFile(
+              bytes: bytes, fileName: file.name, folder: key)
+          : await storage.uploadPrivateFile(
+              bytes: bytes, fileName: file.name, folder: key);
       final company = await employer.loadMyCompany();
       if (key == 'company-logo') {
         await employer.updateCompanyLogo(upload.publicUrl ?? upload.path);
@@ -510,26 +577,37 @@ class _BusinessVerificationScreenState extends State<BusinessVerificationScreen>
         const SizedBox(height: 18),
         const Text('Verify your business', style: AppTextStyles.headline),
         const SizedBox(height: 8),
-        const Text('Verification helps candidates trust your company.', style: AppTextStyles.body),
+        const Text('Verification helps candidates trust your company.',
+            style: AppTextStyles.body),
         const SizedBox(height: 18),
         UploadDocumentCard(
-          title: busyKey == 'trade-license' ? 'Uploading trade license...' : 'Trade license',
+          title: busyKey == 'trade-license'
+              ? 'Uploading trade license...'
+              : 'Trade license',
           onTap: () => _upload('trade-license', 'Trade license'),
         ),
         const SizedBox(height: 10),
         UploadDocumentCard(
-          title: busyKey == 'company-logo' ? 'Uploading company logo...' : 'Company logo',
-          onTap: () => _upload('company-logo', 'Company logo', publicFile: true),
+          title: busyKey == 'company-logo'
+              ? 'Uploading company logo...'
+              : 'Company logo',
+          onTap: () =>
+              _upload('company-logo', 'Company logo', publicFile: true),
         ),
         const SizedBox(height: 10),
         UploadDocumentCard(
-          title: busyKey == 'office-photo' ? 'Uploading office photo...' : 'Office photo',
+          title: busyKey == 'office-photo'
+              ? 'Uploading office photo...'
+              : 'Office photo',
           optional: true,
-          onTap: () => _upload('office-photo', 'Office photo', publicFile: true),
+          onTap: () =>
+              _upload('office-photo', 'Office photo', publicFile: true),
         ),
         const SizedBox(height: 10),
         UploadDocumentCard(
-          title: busyKey == 'authorization-letter' ? 'Uploading authorization letter...' : 'Authorization letter',
+          title: busyKey == 'authorization-letter'
+              ? 'Uploading authorization letter...'
+              : 'Authorization letter',
           optional: true,
           onTap: () => _upload('authorization-letter', 'Authorization letter'),
         ),
@@ -548,11 +626,13 @@ class _BusinessVerificationScreenState extends State<BusinessVerificationScreen>
           ),
         ),
         const SizedBox(height: 12),
-        const Text('Your documents are reviewed securely by Kaam.', style: AppTextStyles.muted),
+        const Text('Your documents are reviewed securely by Kaam.',
+            style: AppTextStyles.muted),
         const SizedBox(height: 18),
         PrimaryButton(
           label: 'Submit Verification',
-          onPressed: () => Navigator.of(context).pushNamed(AppRoutes.employerProfileComplete),
+          onPressed: () => Navigator.of(context)
+              .pushNamed(AppRoutes.employerProfileComplete),
         ),
       ],
     );
@@ -590,7 +670,8 @@ class _EmployerRulesScreenState extends State<EmployerRulesScreen> {
               return CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
                 value: entry.value,
-                onChanged: (value) => setState(() => checks[entry.key] = value ?? false),
+                onChanged: (value) =>
+                    setState(() => checks[entry.key] = value ?? false),
                 title: Text(entry.key, style: AppTextStyles.body),
               );
             }).toList(),
@@ -599,7 +680,8 @@ class _EmployerRulesScreenState extends State<EmployerRulesScreen> {
         const SizedBox(height: 20),
         PrimaryButton(
           label: 'Complete Setup',
-          onPressed: () => Navigator.of(context).pushNamed(AppRoutes.employerProfileComplete),
+          onPressed: () => Navigator.of(context)
+              .pushNamed(AppRoutes.employerProfileComplete),
         ),
       ],
     );
@@ -614,26 +696,34 @@ class EmployerProfileCompleteScreen extends StatelessWidget {
     return ScreenScaffold(
       title: 'Profile Ready',
       children: [
-        const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 72),
+        const Icon(Icons.check_circle_rounded,
+            color: AppColors.success, size: 72),
         const SizedBox(height: 18),
         const Text('Company profile ready', style: AppTextStyles.headline),
         const SizedBox(height: 8),
-        const Text('You can now discover candidates and send interest requests.', style: AppTextStyles.body),
+        const Text(
+            'You can now discover candidates and send interest requests.',
+            style: AppTextStyles.body),
         const SizedBox(height: 20),
         const AppCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              StatusBadge(label: 'Verification: Pending Review', color: AppColors.warning),
+              StatusBadge(
+                  label: 'Verification: Pending Review',
+                  color: AppColors.warning),
               SizedBox(height: 10),
-              Text('Your company dashboard is ready while documents are reviewed.', style: AppTextStyles.body),
+              Text(
+                  'Your company dashboard is ready while documents are reviewed.',
+                  style: AppTextStyles.body),
             ],
           ),
         ),
         const SizedBox(height: 22),
         PrimaryButton(
           label: 'Go to Dashboard',
-          onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.employerDashboard, (route) => route.isFirst),
+          onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
+              AppRoutes.employerDashboard, (route) => route.isFirst),
         ),
       ],
     );
@@ -688,7 +778,8 @@ class _GuidedPickerField extends StatelessWidget {
 }
 
 class _SwitchLine extends StatelessWidget {
-  const _SwitchLine({required this.label, required this.value, required this.onChanged});
+  const _SwitchLine(
+      {required this.label, required this.value, required this.onChanged});
 
   final String label;
   final bool value;
@@ -716,7 +807,8 @@ class _Benefit extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 18),
+          const Icon(Icons.check_circle_rounded,
+              color: AppColors.success, size: 18),
           const SizedBox(width: 8),
           Text(label, style: AppTextStyles.body),
         ],
