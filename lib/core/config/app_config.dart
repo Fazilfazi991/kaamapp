@@ -34,19 +34,37 @@ class AppConfig {
   }
 
   static bool get hasSupabaseCredentials {
-    return supabaseUrl.startsWith('https://') &&
-        supabaseAnonKey.isNotEmpty &&
-        !supabaseUrl.contains('your-project-ref') &&
-        !supabaseAnonKey.contains('your-supabase-anon-key');
+    return supabaseConfigurationIssues().isEmpty;
+  }
+
+  static List<String> supabaseConfigurationIssues() {
+    final issues = <String>[];
+    final url = supabaseUrl.trim();
+    final anonKey = supabaseAnonKey.trim();
+    if (url.isEmpty) {
+      issues.add('SUPABASE_URL is missing.');
+    } else if (_isPlaceholder(url)) {
+      issues.add('SUPABASE_URL still contains a placeholder value.');
+    } else if (!url.startsWith('https://')) {
+      issues.add('SUPABASE_URL must be an HTTPS project URL.');
+    }
+    if (anonKey.isEmpty) {
+      issues.add('SUPABASE_ANON_KEY is missing.');
+    } else if (_isPlaceholder(anonKey)) {
+      issues.add('SUPABASE_ANON_KEY still contains a placeholder value.');
+    }
+    return issues;
   }
 
   static String _read(String key) {
     final fromDefine = switch (key) {
       'SUPABASE_URL' => const String.fromEnvironment('SUPABASE_URL'),
       'SUPABASE_ANON_KEY' => const String.fromEnvironment('SUPABASE_ANON_KEY'),
-      'KAAM_USE_DEMO_FALLBACK' => const String.fromEnvironment('KAAM_USE_DEMO_FALLBACK'),
+      'KAAM_USE_DEMO_FALLBACK' =>
+        const String.fromEnvironment('KAAM_USE_DEMO_FALLBACK'),
       'QA_MODE' => const String.fromEnvironment('QA_MODE'),
-      'QA_CANDIDATE_EMAIL' => const String.fromEnvironment('QA_CANDIDATE_EMAIL'),
+      'QA_CANDIDATE_EMAIL' =>
+        const String.fromEnvironment('QA_CANDIDATE_EMAIL'),
       'QA_EMPLOYER_EMAIL' => const String.fromEnvironment('QA_EMPLOYER_EMAIL'),
       'QA_ADMIN_EMAIL' => const String.fromEnvironment('QA_ADMIN_EMAIL'),
       'EMAIL_OTP_LENGTH' => const String.fromEnvironment('EMAIL_OTP_LENGTH'),
@@ -60,7 +78,8 @@ class AppConfig {
   static String _compatRead(String key) {
     return switch (key) {
       'SUPABASE_URL' => dotenv.maybeGet('NEXT_PUBLIC_SUPABASE_URL') ?? '',
-      'SUPABASE_ANON_KEY' => dotenv.maybeGet('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY') ?? '',
+      'SUPABASE_ANON_KEY' =>
+        dotenv.maybeGet('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY') ?? '',
       _ => '',
     };
   }
@@ -69,5 +88,15 @@ class AppConfig {
     if (hasSupabaseCredentials) return 'supabase';
     if (useDemoFallback) return 'demo-fallback';
     return 'missing-config';
+  }
+
+  static bool _isPlaceholder(String value) {
+    final normalized = value.toLowerCase();
+    return normalized.contains('your-project-ref') ||
+        normalized.contains('your-supabase-anon-key') ||
+        normalized.contains('supabase-url') ||
+        normalized.contains('anon-key') ||
+        normalized.contains('placeholder') ||
+        normalized.contains('example');
   }
 }

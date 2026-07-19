@@ -42,12 +42,27 @@ import 'features/qa/qa_tools_screen.dart';
 import 'features/supabase_backend/kaam_backend.dart';
 
 class KaamApp extends StatelessWidget {
-  const KaamApp({super.key, this.initialRoute = AppRoutes.welcome});
+  const KaamApp({
+    super.key,
+    this.initialRoute = AppRoutes.welcome,
+    this.startupConfigurationError,
+  });
 
   final String initialRoute;
+  final String? startupConfigurationError;
 
   @override
   Widget build(BuildContext context) {
+    final configurationError = startupConfigurationError;
+    if (configurationError != null) {
+      return MaterialApp(
+        title: 'Kaam - Perfect Match',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.dark(),
+        home: StartupConfigurationErrorScreen(message: configurationError),
+      );
+    }
+
     return MaterialApp(
       navigatorKey: KaamPushNotificationService.navigatorKey,
       title: 'Kaam - Perfect Match',
@@ -114,5 +129,60 @@ class KaamApp extends StatelessWidget {
 
   static Widget _candidate(Widget child) {
     return ProtectedAccountRoute(role: KaamRole.candidate, child: child);
+  }
+}
+
+class StartupConfigurationErrorScreen extends StatelessWidget {
+  const StartupConfigurationErrorScreen({super.key, required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF070A18),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Build configuration required',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      color: Color(0xFFD7D9E8),
+                      fontSize: 16,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Rebuild from the primary KAAM APP folder with valid ignored environment files. No secret values are shown here.',
+                    style: TextStyle(
+                      color: Color(0xFF9EA4BE),
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

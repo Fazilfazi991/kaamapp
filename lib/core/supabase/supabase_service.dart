@@ -11,8 +11,10 @@ class SupabaseService {
 
   static bool _initialized = false;
   static Future<void>? _sessionRecovery;
+  static String? _startupConfigurationError;
 
   static bool get isEnabled => _initialized && AppConfig.hasSupabaseCredentials;
+  static String? get startupConfigurationError => _startupConfigurationError;
 
   static SupabaseClient? get maybeClient {
     if (!isEnabled) return null;
@@ -28,13 +30,16 @@ class SupabaseService {
     debugPrint('[Build] mode=${_buildModeLabel()}');
     debugPrint('Kaam demo fallback: ${AppConfig.useDemoFallback}');
 
-    if (!AppConfig.hasSupabaseCredentials) {
+    final configurationIssues = AppConfig.supabaseConfigurationIssues();
+    if (configurationIssues.isNotEmpty) {
+      _startupConfigurationError = configurationIssues.join('\n');
       if (kDebugMode) {
         debugPrint(
             'Kaam running without Supabase credentials: ${AppConfig.debugModeLabel()}');
       }
       return;
     }
+    _startupConfigurationError = null;
 
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
