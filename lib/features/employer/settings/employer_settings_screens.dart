@@ -14,10 +14,18 @@ class EmployerNotificationsScreen extends NotificationsScreen {
       : super(role: KaamRole.employer);
 }
 
-class EmployerSettingsScreen extends StatelessWidget {
+class EmployerSettingsScreen extends StatefulWidget {
   const EmployerSettingsScreen({super.key});
 
+  @override
+  State<EmployerSettingsScreen> createState() => _EmployerSettingsScreenState();
+}
+
+class _EmployerSettingsScreenState extends State<EmployerSettingsScreen> {
+  bool loggingOut = false;
+
   Future<void> _logout(BuildContext context) async {
+    if (loggingOut) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -33,10 +41,20 @@ class EmployerSettingsScreen extends StatelessWidget {
       ),
     );
     if (confirmed != true) return;
-    await const KaamAuthRepository().signOut();
-    if (!context.mounted) return;
-    Navigator.of(context)
-        .pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
+    setState(() => loggingOut = true);
+    try {
+      await const KaamAuthRepository().signOut();
+      if (!context.mounted) return;
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(KaamSafeErrorMessages.logout)),
+      );
+    } finally {
+      if (mounted) setState(() => loggingOut = false);
+    }
   }
 
   @override
@@ -100,14 +118,14 @@ class EmployerSettingsScreen extends StatelessWidget {
               ),
             )),
         AppCard(
-          onTap: () => _logout(context),
+          onTap: loggingOut ? null : () => _logout(context),
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
               const Icon(Icons.logout_rounded, color: AppColors.primaryPink),
               const SizedBox(width: 12),
               Expanded(
-                  child: Text('Logout',
+                  child: Text(loggingOut ? 'Logging out...' : 'Logout',
                       style:
                           AppTextStyles.body.copyWith(color: AppColors.white))),
               const Icon(Icons.chevron_right_rounded,

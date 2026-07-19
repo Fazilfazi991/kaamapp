@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/supabase/supabase_service.dart';
@@ -37,6 +38,8 @@ class KaamProfileStatus {
 
 class KaamSafeErrorMessages {
   const KaamSafeErrorMessages._();
+
+  static const logout = 'We could not log you out. Please try again.';
 
   static const employerCompanySave =
       'We could not save your company details. Please try again.';
@@ -178,12 +181,20 @@ class KaamAuthSessionPolicy {
 class KaamAuthSessionCoordinator {
   const KaamAuthSessionCoordinator._();
 
+  static const _explicitLogoutPreferenceKey = 'kaam.explicit_logout_completed';
+
   static String? _lastAuthenticatedUserId;
   static bool _explicitLogoutInProgress = false;
+  static bool _explicitLogoutCompleted = false;
+  static int _sessionEpoch = 0;
   static KaamPendingOtpContext? _pendingOtp;
 
   static KaamPendingOtpContext? get pendingOtp => _pendingOtp;
   static bool get explicitLogoutInProgress => _explicitLogoutInProgress;
+  static bool get explicitLogoutCompleted => _explicitLogoutCompleted;
+  static bool get blocksSessionRestore =>
+      _explicitLogoutInProgress || _explicitLogoutCompleted;
+  static int get sessionEpoch => _sessionEpoch;
 
   static void markAuthenticatedUser(String? userId) {
     if (KaamAuthSessionPolicy.shouldClearUserScopedState(
@@ -193,7 +204,11 @@ class KaamAuthSessionCoordinator {
       clearUserScopedState();
     }
     _lastAuthenticatedUserId = userId;
-    if (userId != null) _explicitLogoutInProgress = false;
+    if (userId != null) {
+      _explicitLogoutInProgress = false;
+      _explicitLogoutCompleted = false;
+      _persistExplicitLogoutCompleted(false);
+    }
   }
 
   static void setPendingOtp({
@@ -213,13 +228,35 @@ class KaamAuthSessionCoordinator {
   }
 
   static Future<void> beginExplicitLogout() async {
+    _sessionEpoch++;
     _explicitLogoutInProgress = true;
+    _explicitLogoutCompleted = false;
     clearUserScopedState();
+    await _persistExplicitLogoutCompleted(true);
   }
 
-  static void finishExplicitLogout() {
+  static Future<void> finishExplicitLogout() async {
+    _sessionEpoch++;
     _lastAuthenticatedUserId = null;
     _explicitLogoutInProgress = false;
+    _explicitLogoutCompleted = true;
+    clearUserScopedState();
+    await _persistExplicitLogoutCompleted(true);
+  }
+
+  static Future<void> abandonExplicitLogout() async {
+    _explicitLogoutInProgress = false;
+    await _persistExplicitLogoutCompleted(_explicitLogoutCompleted);
+  }
+
+  static Future<void> restorePersistentLogoutState() async {
+    final prefs = await SharedPreferences.getInstance();
+    _explicitLogoutCompleted =
+        prefs.getBool(_explicitLogoutPreferenceKey) ?? false;
+    if (_explicitLogoutCompleted) {
+      _lastAuthenticatedUserId = null;
+      clearUserScopedState();
+    }
   }
 
   static void clearUserScopedState() {
@@ -230,7 +267,14 @@ class KaamAuthSessionCoordinator {
   static void resetForTesting() {
     _lastAuthenticatedUserId = null;
     _explicitLogoutInProgress = false;
+    _explicitLogoutCompleted = false;
+    _sessionEpoch = 0;
     _pendingOtp = null;
+  }
+
+  static Future<void> _persistExplicitLogoutCompleted(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_explicitLogoutPreferenceKey, value);
   }
 }
 
@@ -1017,7 +1061,10 @@ class KaamAuthRepository {
 
   SupabaseClient get _client => _requireClient();
 
-  User? get currentUser => SupabaseService.maybeClient?.auth.currentUser;
+  User? get currentUser {
+    if (KaamAuthSessionCoordinator.blocksSessionRestore) return null;
+    return SupabaseService.maybeClient?.auth.currentUser;
+  }
 
   Future<bool> signInWithOtp({
     required String email,
@@ -1027,12 +1074,13 @@ class KaamAuthRepository {
     if (trimmedEmail.isEmpty) {
       throw ArgumentError('Email address is required.');
     }
-    final signedInUser = currentUser;
-    if (KaamAuthSessionPolicy.shouldStartOtpForEnteredEmail(
-      hasCurrentSession: signedInUser != null,
-      enteredEmail: trimmedEmail,
-      currentSessionEmail: signedInUser?.email,
-    )) {
+    final rawSignedInUser = _client.auth.currentUser;
+    if (KaamAuthSessionCoordinator.blocksSessionRestore ||
+        KaamAuthSessionPolicy.shouldStartOtpForEnteredEmail(
+          hasCurrentSession: rawSignedInUser != null,
+          enteredEmail: trimmedEmail,
+          currentSessionEmail: rawSignedInUser?.email,
+        )) {
       await signOut();
     }
 
@@ -1139,6 +1187,9 @@ class KaamAuthRepository {
       KaamRole expectedRole) async {
     final client = _client;
     await SupabaseService.waitForSessionRecovery();
+    if (KaamAuthSessionCoordinator.blocksSessionRestore) {
+      return KaamProtectedAccess.signedOut;
+    }
     if (client.auth.currentUser == null) return KaamProtectedAccess.signedOut;
     final profile = await _storedProfile();
     final access = KaamAccountStatusPolicy.protectedAccess(
@@ -1283,8 +1334,15 @@ class KaamAuthRepository {
       await KaamPushNotificationService.instance.deactivateCurrentDevice();
       await SupabaseService.maybeClient?.auth
           .signOut(scope: SignOutScope.global);
-    } finally {
-      KaamAuthSessionCoordinator.finishExplicitLogout();
+      final client = SupabaseService.maybeClient;
+      if (client?.auth.currentSession != null ||
+          client?.auth.currentUser != null) {
+        throw StateError('Logout did not finish.');
+      }
+      await KaamAuthSessionCoordinator.finishExplicitLogout();
+    } catch (_) {
+      await KaamAuthSessionCoordinator.abandonExplicitLogout();
+      rethrow;
     }
   }
 
@@ -1329,7 +1387,10 @@ class QaToolsRepository {
 
   SupabaseClient get _client => _requireClient();
 
-  User? get currentUser => SupabaseService.maybeClient?.auth.currentUser;
+  User? get currentUser {
+    if (KaamAuthSessionCoordinator.blocksSessionRestore) return null;
+    return SupabaseService.maybeClient?.auth.currentUser;
+  }
 
   Future<String> currentRole() async {
     final user = _requireUser(_client);
@@ -1355,8 +1416,15 @@ class QaToolsRepository {
       await KaamPushNotificationService.instance.deactivateCurrentDevice();
       await SupabaseService.maybeClient?.auth
           .signOut(scope: SignOutScope.global);
-    } finally {
-      KaamAuthSessionCoordinator.finishExplicitLogout();
+      final client = SupabaseService.maybeClient;
+      if (client?.auth.currentSession != null ||
+          client?.auth.currentUser != null) {
+        throw StateError('Logout did not finish.');
+      }
+      await KaamAuthSessionCoordinator.finishExplicitLogout();
+    } catch (_) {
+      await KaamAuthSessionCoordinator.abandonExplicitLogout();
+      rethrow;
     }
   }
 }
@@ -2880,6 +2948,9 @@ SupabaseClient _requireClient() {
 }
 
 User _requireUser(SupabaseClient client) {
+  if (KaamAuthSessionCoordinator.blocksSessionRestore) {
+    throw StateError('Please sign in again before continuing.');
+  }
   final user = client.auth.currentUser;
   if (user == null) {
     throw StateError('Please sign in again before continuing.');
@@ -2908,8 +2979,10 @@ Future<void> _ensureCurrentProfileNotBlocked(SupabaseClient client) async {
     try {
       await KaamPushNotificationService.instance.deactivateCurrentDevice();
       await client.auth.signOut(scope: SignOutScope.global);
-    } finally {
-      KaamAuthSessionCoordinator.finishExplicitLogout();
+      await KaamAuthSessionCoordinator.finishExplicitLogout();
+    } catch (_) {
+      await KaamAuthSessionCoordinator.abandonExplicitLogout();
+      rethrow;
     }
     throw StateError(KaamAccountStatusPolicy.blockedMessage);
   }

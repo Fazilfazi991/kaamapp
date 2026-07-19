@@ -147,6 +147,7 @@ class KaamPushNotificationService {
         !SupabaseService.isEnabled) {
       return;
     }
+    if (KaamAuthSessionCoordinator.blocksSessionRestore) return;
     if (SupabaseService.maybeClient?.auth.currentUser == null) return;
     try {
       final token = await messaging.getToken();
@@ -256,6 +257,7 @@ class KaamPushNotificationService {
     if (messaging == null) return;
     _authSubscription?.cancel();
     _authSubscription = client.auth.onAuthStateChange.listen((state) async {
+      if (KaamAuthSessionCoordinator.blocksSessionRestore) return;
       if (state.event == AuthChangeEvent.signedIn ||
           state.event == AuthChangeEvent.tokenRefreshed ||
           state.event == AuthChangeEvent.initialSession) {
@@ -268,7 +270,8 @@ class KaamPushNotificationService {
       _lastToken = token;
       _setDiagnostics(_diagnostics.copyWith(fcmRegistration: 'Registered'),
           log: 'FCM token refresh received');
-      if (SupabaseService.maybeClient?.auth.currentUser != null) {
+      if (!KaamAuthSessionCoordinator.blocksSessionRestore &&
+          SupabaseService.maybeClient?.auth.currentUser != null) {
         try {
           await _repository.registerDeviceToken(fcmToken: token);
           _setDiagnostics(

@@ -48,7 +48,7 @@ class _LoginSecurityScreenState extends State<LoginSecurityScreen> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not logout: $error')),
+        const SnackBar(content: Text(KaamSafeErrorMessages.logout)),
       );
     } finally {
       if (mounted) setState(() => loggingOut = false);

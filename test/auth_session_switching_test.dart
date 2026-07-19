@@ -2,9 +2,15 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kaam_perfect_match/features/supabase_backend/kaam_backend.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('auth session switching policy', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+      KaamAuthSessionCoordinator.resetForTesting();
+    });
+
     tearDown(KaamAuthSessionCoordinator.resetForTesting);
 
     test('Account A logout clears pending OTP and explicit logout state',
@@ -15,10 +21,12 @@ void main() {
       );
 
       await KaamAuthSessionCoordinator.beginExplicitLogout();
-      KaamAuthSessionCoordinator.finishExplicitLogout();
+      await KaamAuthSessionCoordinator.finishExplicitLogout();
 
       expect(KaamAuthSessionCoordinator.pendingOtp, isNull);
       expect(KaamAuthSessionCoordinator.explicitLogoutInProgress, isFalse);
+      expect(KaamAuthSessionCoordinator.explicitLogoutCompleted, isTrue);
+      expect(KaamAuthSessionCoordinator.blocksSessionRestore, isTrue);
     });
 
     test('Account B login invalidates Account A user-scoped state', () {
@@ -111,6 +119,48 @@ void main() {
         ),
         contains('Continue with Hire Talent or use another account'),
       );
+    });
+
+    test('fresh authentication clears explicit logout restore block', () async {
+      await KaamAuthSessionCoordinator.beginExplicitLogout();
+      await KaamAuthSessionCoordinator.finishExplicitLogout();
+
+      KaamAuthSessionCoordinator.markAuthenticatedUser('account-b');
+
+      expect(KaamAuthSessionCoordinator.explicitLogoutCompleted, isFalse);
+      expect(KaamAuthSessionCoordinator.blocksSessionRestore, isFalse);
+    });
+
+    test('logout epoch changes so delayed profile fetches can be discarded',
+        () async {
+      final beforeLogout = KaamAuthSessionCoordinator.sessionEpoch;
+
+      await KaamAuthSessionCoordinator.beginExplicitLogout();
+      final duringLogout = KaamAuthSessionCoordinator.sessionEpoch;
+      await KaamAuthSessionCoordinator.finishExplicitLogout();
+
+      expect(duringLogout, greaterThan(beforeLogout));
+      expect(
+          KaamAuthSessionCoordinator.sessionEpoch, greaterThan(duringLogout));
+    });
+
+    test('explicit logout survives startup restoration', () async {
+      await KaamAuthSessionCoordinator.beginExplicitLogout();
+      await KaamAuthSessionCoordinator.finishExplicitLogout();
+      KaamAuthSessionCoordinator.resetForTesting();
+
+      await KaamAuthSessionCoordinator.restorePersistentLogoutState();
+
+      expect(KaamAuthSessionCoordinator.explicitLogoutCompleted, isTrue);
+      expect(KaamAuthSessionCoordinator.blocksSessionRestore, isTrue);
+    });
+
+    test('safe logout message hides backend errors', () {
+      expect(
+        KaamSafeErrorMessages.logout,
+        'We could not log you out. Please try again.',
+      );
+      expect(KaamSafeErrorMessages.logout, isNot(contains('Supabase')));
     });
   });
 
@@ -239,6 +289,26 @@ void main() {
       expect(repository, contains("onConflict: 'fcm_token'"));
       expect(repository, contains("'user_id': user.id"));
       expect(repository, contains("'is_active': true"));
+    });
+
+    test('push-device registration ignores stale auth during logout', () {
+      final pushService =
+          File('lib/features/notifications/push_notification_service.dart')
+              .readAsStringSync();
+
+      expect(pushService,
+          contains('KaamAuthSessionCoordinator.blocksSessionRestore'));
+      expect(pushService, contains('if (state.event == AuthChangeEvent'));
+    });
+
+    test('journey selection preserves employer choice after logout', () {
+      final roleSelection = File('lib/features/auth/role_selection_screen.dart')
+          .readAsStringSync();
+
+      expect(roleSelection,
+          contains('KaamAuthSessionCoordinator.blocksSessionRestore'));
+      expect(roleSelection, contains('AppRoutes.employerLogin'));
+      expect(roleSelection, contains("'role': selectedRole"));
     });
   });
 

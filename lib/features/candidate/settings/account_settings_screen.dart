@@ -45,7 +45,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not logout: $error')),
+        const SnackBar(content: Text(KaamSafeErrorMessages.logout)),
       );
     } finally {
       if (mounted) setState(() => loggingOut = false);

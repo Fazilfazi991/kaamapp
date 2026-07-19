@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'app.dart';
 import 'core/supabase/supabase_service.dart';
 import 'features/notifications/push_notification_service.dart';
+import 'features/supabase_backend/kaam_backend.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +21,7 @@ Future<String?> _initializeStartupServices() async {
     if (supabaseError != null) {
       return 'Supabase is not configured for this build.\n$supabaseError';
     }
+    await KaamAuthSessionCoordinator.restorePersistentLogoutState();
     await KaamPushNotificationService.instance.initialize();
     final diagnostics = KaamPushNotificationService.instance.diagnostics;
     if (!diagnostics.firebaseInitialized) {

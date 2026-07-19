@@ -22,11 +22,14 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
   Future<void> _continue() async {
     if (navigating || selectedRole == null) return;
     setState(() => navigating = true);
+    final epoch = KaamAuthSessionCoordinator.sessionEpoch;
     try {
       await SupabaseService.waitForSessionRecovery();
       if (!mounted) return;
+      if (epoch != KaamAuthSessionCoordinator.sessionEpoch) return;
       const auth = KaamAuthRepository();
-      if (auth.currentUser == null) {
+      if (auth.currentUser == null ||
+          KaamAuthSessionCoordinator.blocksSessionRestore) {
         final route = selectedRole == KaamRole.candidate
             ? AppRoutes.login
             : AppRoutes.employerLogin;
@@ -37,6 +40,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       final result =
           await auth.resolvePostOtpDestination(fallbackRole: selectedRole!);
       if (!mounted) return;
+      if (epoch != KaamAuthSessionCoordinator.sessionEpoch) return;
       final route = switch (result.destination) {
         KaamAuthDestination.roleSelection => AppRoutes.roleSelection,
         KaamAuthDestination.blocked => AppRoutes.accountBlocked,

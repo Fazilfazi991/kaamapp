@@ -32,6 +32,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
   late Future<EmployerCompanyData?> companyFuture = repository.loadMyCompany();
   late Future<List<EmployerHiringRequirement>> requirementsFuture =
       repository.hiringRequirements();
+  bool loggingOut = false;
 
   Future<void> _refresh() async {
     setState(() {
@@ -42,6 +43,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
   }
 
   Future<void> _logout() async {
+    if (loggingOut) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -57,10 +59,20 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
       ),
     );
     if (confirmed != true) return;
-    await auth.signOut();
-    if (!mounted) return;
-    Navigator.of(context)
-        .pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
+    setState(() => loggingOut = true);
+    try {
+      await auth.signOut();
+      if (!mounted) return;
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(KaamSafeErrorMessages.logout)),
+      );
+    } finally {
+      if (mounted) setState(() => loggingOut = false);
+    }
   }
 
   @override
@@ -192,8 +204,8 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                 ),
                 const SizedBox(height: 10),
                 SecondaryButton(
-                  label: 'Logout',
-                  onPressed: _logout,
+                  label: loggingOut ? 'Logging out...' : 'Logout',
+                  onPressed: loggingOut ? null : _logout,
                 ),
               ],
             );
