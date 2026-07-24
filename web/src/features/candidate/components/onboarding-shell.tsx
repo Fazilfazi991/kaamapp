@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { NavigationLink } from "@/components/layout/navigation-progress";
 import { routes } from "@/config/routes";
 
 const steps = [
@@ -33,7 +33,7 @@ export function OnboardingShell({
       </div>
       <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Onboarding steps">
         {steps.map((step, index) => (
-          <Link
+          <NavigationLink
             key={step.href}
             href={step.href}
             className={`focus-ring whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold ${
@@ -43,7 +43,7 @@ export function OnboardingShell({
             }`}
           >
             {index + 1}. {step.label}
-          </Link>
+          </NavigationLink>
         ))}
       </nav>
       {children}

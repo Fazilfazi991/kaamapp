@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { NavigationLink } from "@/components/layout/navigation-progress";
 import { routes } from "@/config/routes";
 import { OnboardingShell } from "@/features/candidate/components/onboarding-shell";
 import { ProfileSummary } from "@/features/candidate/components/profile-summary";
@@ -25,13 +26,13 @@ export default async function CandidateOnboardingReviewPage() {
           </h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {completion.missingSections.map((section) => (
-              <a
+              <NavigationLink
                 key={section.id}
                 href={section.href}
                 className="rounded-full bg-[#fff0f5] px-3 py-2 text-sm font-semibold text-[#bc1f55]"
               >
                 {section.label}
-              </a>
+              </NavigationLink>
             ))}
           </div>
         </section>

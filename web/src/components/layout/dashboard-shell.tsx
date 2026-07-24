@@ -24,7 +24,7 @@ export function DashboardShell({
               Signed in
             </p>
             <p className="mt-1 text-sm font-semibold text-[#201925]">
-              {account.email ?? "Email unavailable"}
+              {account.email ?? "Your KAAM workspace"}
             </p>
           </div>
           <div className="flex items-center gap-3">

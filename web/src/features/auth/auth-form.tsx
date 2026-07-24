@@ -187,7 +187,6 @@ export function AuthForm({
     if (!backendRole) {
       setLoading(false);
       router.replace(routes.accountRecovery);
-      router.refresh();
       return;
     }
 
@@ -222,7 +221,6 @@ export function AuthForm({
       destination.searchParams.set("authNotice", "role-redirect");
     }
     router.replace(`${destination.pathname}${destination.search}`);
-    router.refresh();
   }
 
   async function continueSession() {
@@ -252,14 +250,12 @@ export function AuthForm({
     }
     if (!profile?.role) {
       router.replace(routes.accountRecovery);
-      router.refresh();
       return;
     }
 
     router.replace(
       safeReturnPath(searchParams.get("redirectTo")) ?? dashboardForRole(profile.role),
     );
-    router.refresh();
   }
 
   function changeEmail() {

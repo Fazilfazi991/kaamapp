@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
+import { NavigationLink } from "@/components/layout/navigation-progress";
 
 type Variant = "primary" | "secondary" | "ghost";
 
@@ -36,11 +36,11 @@ export function ButtonLink({
   children: ReactNode;
 }) {
   return (
-    <Link
+    <NavigationLink
       className={`${baseClasses} ${variantClasses[variant]} ${className}`}
       {...props}
     >
       {children}
-    </Link>
+    </NavigationLink>
   );
 }
