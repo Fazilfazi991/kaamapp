@@ -1,4 +1,5 @@
 import { EmptyStateCard } from "@/components/ui/empty-state";
+import { CandidateAvatar } from "@/components/ui/candidate-avatar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { StatCard } from "@/components/cards/stat-card";
 import { routes } from "@/config/routes";
@@ -15,7 +16,7 @@ function membershipTone(status?: string | null) {
   return "warning" as const;
 }
 
-export function CandidateDashboard({
+export async function CandidateDashboard({
   profile,
   candidate,
   membership,
@@ -35,6 +36,13 @@ export function CandidateDashboard({
 
   return (
     <div className="grid gap-5">
+      <section className="flex items-center gap-4 rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
+        <CandidateAvatar path={candidate?.profile_photo_url} name={profile?.full_name} size={72} />
+        <div>
+          <h1 className="text-xl font-bold text-[#201925]">{profile?.full_name ?? "Your candidate profile"}</h1>
+          <p className="mt-1 text-sm text-[#66616f]">{candidate?.headline ?? "Add your headline to help employers find you."}</p>
+        </div>
+      </section>
       <section className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>

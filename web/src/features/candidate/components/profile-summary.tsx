@@ -1,4 +1,5 @@
 import { ButtonLink } from "@/components/ui/button";
+import { CandidateAvatar } from "@/components/ui/candidate-avatar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/config/routes";
 import { candidateCompletion } from "@/features/candidate/profile-completion";
@@ -12,7 +13,7 @@ function list(values?: string[] | null) {
   return values?.length ? values.join(", ") : "Not added";
 }
 
-export function ProfileSummary({
+export async function ProfileSummary({
   profile,
   candidate,
   membership,
@@ -26,11 +27,14 @@ export function ProfileSummary({
     <div className="grid gap-5">
       <section className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-[#201925]">
-              {value(profile?.full_name)}
-            </h1>
-            <p className="mt-1 text-sm text-[#66616f]">{value(candidate?.headline)}</p>
+          <div className="flex items-center gap-4">
+            <CandidateAvatar path={candidate?.profile_photo_url} name={profile?.full_name} size={80} />
+            <div>
+              <h1 className="text-2xl font-bold text-[#201925]">
+                {value(profile?.full_name)}
+              </h1>
+              <p className="mt-1 text-sm text-[#66616f]">{value(candidate?.headline)}</p>
+            </div>
           </div>
           <ButtonLink href={routes.candidateProfileEdit}>Edit Profile</ButtonLink>
         </div>

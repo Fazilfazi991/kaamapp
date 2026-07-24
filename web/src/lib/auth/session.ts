@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { cache } from "react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { webPerf } from "@/lib/perf";
+import { accountDebug } from "@/lib/account-debug";
 import { routes } from "@/config/routes";
 import {
   authPageDecision,
@@ -50,7 +51,11 @@ const getAccountState = cache(async () => {
         .select("id, role, full_name, email, status")
         .eq("id", user.id)
         .maybeSingle<ProfileRow>(),
-      supabase.from("candidate_profiles").select("id").eq("id", user.id).maybeSingle(),
+      supabase
+        .from("candidate_profiles")
+        .select("id, profile_photo_url")
+        .eq("id", user.id)
+        .maybeSingle<Pick<CandidateProfileRow, "id" | "profile_photo_url">>(),
       supabase
         .from("employer_companies")
         .select("id")
@@ -61,6 +66,14 @@ const getAccountState = cache(async () => {
 
   webPerf("account profile queries", profileStartedAt);
   webPerf("authenticated account lookup", startedAt);
+  accountDebug({
+    userId: user.id,
+    email: user.email ?? profile?.email ?? null,
+    role: profile?.role ?? null,
+    profileId: profile?.id ?? null,
+    candidateId: candidate?.id ?? null,
+    candidateName: profile?.full_name ?? null,
+  });
 
   return { user, profile, candidate, company };
 });
@@ -114,6 +127,7 @@ export const requireRole = cache(async (role: AppAccountRole): Promise<AccountCo
     profileStatus: profile?.status ?? "draft",
     hasCandidateProfile: snapshot.hasCandidateProfile,
     hasEmployerProfile: snapshot.hasEmployerProfile,
+    candidatePhotoPath: candidate?.profile_photo_url ?? null,
   };
 });
 

@@ -67,7 +67,7 @@ export async function savePersonalDetails(formData: FormData) {
   if (!nationality) safeError("Nationality is required.");
 
   const { account, supabase } = await ensureCandidateRow();
-  let profilePhotoUrl: string | null | undefined;
+  let profilePhotoPath: string | null | undefined;
   if (photo instanceof File && photo.size > 0) {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!allowedTypes.includes(photo.type)) {
@@ -78,23 +78,24 @@ export async function savePersonalDetails(formData: FormData) {
     }
     const extension = photo.name.split(".").pop()?.toLowerCase() || "jpg";
     const safeName = `profile-photo-${Date.now()}.${extension.replace(/[^a-z0-9]/g, "")}`;
-    const path = `${account.userId}/candidate-profile/${safeName}`;
+    // Matches the mobile contract: the database stores a private Storage path,
+    // never a public URL, and RLS scopes the first path segment to auth.uid().
+    const path = `${account.userId}/candidate-profile-photos/${safeName}`;
     const { error: uploadError } = await supabase.storage
-      .from("kaam-public")
+      .from("kaam-private")
       .upload(path, await photo.arrayBuffer(), {
         contentType: photo.type,
-        upsert: true,
+        upsert: false,
       });
     if (uploadError) safeError("Could not upload profile photo.");
-    const { data } = supabase.storage.from("kaam-public").getPublicUrl(path);
-    profilePhotoUrl = data.publicUrl;
+    profilePhotoPath = path;
   }
 
   const candidateValues: Record<string, string | null> = {
     nationality,
     bio: bio || null,
   };
-  if (profilePhotoUrl) candidateValues.profile_photo_url = profilePhotoUrl;
+  if (profilePhotoPath) candidateValues.profile_photo_url = profilePhotoPath;
 
   const [{ error: profileError }, { error: candidateError }] = await Promise.all([
     supabase

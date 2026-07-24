@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
+import { ProfilePhotoField } from "@/features/candidate/components/profile-photo-field";
 import { Label, SelectField, TextInput } from "@/components/ui/form";
 import { routes } from "@/config/routes";
 import { nationalities } from "@/features/candidate/constants";
 import { savePersonalDetails } from "@/features/candidate/server/actions";
 import type { CandidateProfileRow, ProfileRow } from "@/types/domain";
 
-export function PersonalForm({
+export async function PersonalForm({
   profile,
   candidate,
   next = routes.candidateOnboardingSkills,
@@ -66,20 +67,7 @@ export function PersonalForm({
       </label>
       <label className="grid gap-2">
         <Label htmlFor="profilePhoto">Profile photo</Label>
-        {candidate?.profile_photo_url ? (
-          <div
-            role="img"
-            aria-label="Current profile photo"
-            className="h-24 w-24 rounded-lg bg-cover bg-center"
-            style={{ backgroundImage: `url(${candidate.profile_photo_url})` }}
-          />
-        ) : null}
-        <TextInput
-          id="profilePhoto"
-          name="profilePhoto"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-        />
+        <ProfilePhotoField path={candidate?.profile_photo_url} name={profile?.full_name} />
         <p className="text-xs text-[#66616f]">
           JPG, PNG, or WebP. Maximum 4 MB.
         </p>

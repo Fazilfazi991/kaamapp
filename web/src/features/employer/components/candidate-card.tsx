@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { CandidateAvatar } from "@/components/ui/candidate-avatar";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { interestStatusLabel, interestTone } from "@/features/employer/utils";
@@ -9,23 +9,11 @@ import {
 } from "@/features/employer/server/actions";
 import type { EmployerCandidateCardModel } from "@/features/employer/types";
 
-export function EmployerCandidateCard({ candidate }: { candidate: EmployerCandidateCardModel }) {
+export async function EmployerCandidateCard({ candidate }: { candidate: EmployerCandidateCardModel }) {
   return (
     <article className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
       <div className="flex gap-4">
-        {candidate.profilePhotoUrl ? (
-          <Image
-            src={candidate.profilePhotoUrl}
-            alt=""
-            width={64}
-            height={64}
-            className="h-16 w-16 rounded-lg object-cover"
-          />
-        ) : (
-          <div className="grid h-16 w-16 place-items-center rounded-lg bg-[#f7e8ef] text-lg font-bold text-[#bc1f55]">
-            {candidate.displayName.charAt(0)}
-          </div>
-        )}
+        <CandidateAvatar path={candidate.profilePhotoUrl} name={candidate.displayName} size={64} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-lg font-semibold text-[#201925]">{candidate.displayName}</h2>
