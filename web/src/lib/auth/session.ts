@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { cache } from "react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { webPerf } from "@/lib/perf";
 import { routes } from "@/config/routes";
 import {
   authPageDecision,
@@ -24,12 +26,47 @@ function currentPathFromHeaders() {
     .catch(() => "");
 }
 
-export async function getAuthenticatedAccountSnapshot(): Promise<AccountSnapshot> {
+const getAccountState = cache(async () => {
+  const startedAt = performance.now();
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    return {
+      user: null,
+      profile: null,
+      candidate: null,
+      company: null,
+    };
+  }
+
+  const profileStartedAt = performance.now();
+  const [{ data: profile }, { data: candidate }, { data: company }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id, role, full_name, email, status")
+        .eq("id", user.id)
+        .maybeSingle<ProfileRow>(),
+      supabase.from("candidate_profiles").select("id").eq("id", user.id).maybeSingle(),
+      supabase
+        .from("employer_companies")
+        .select("id")
+        .eq("owner_id", user.id)
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+  webPerf("account profile queries", profileStartedAt);
+  webPerf("authenticated account lookup", startedAt);
+
+  return { user, profile, candidate, company };
+});
+
+export const getAuthenticatedAccountSnapshot = cache(async (): Promise<AccountSnapshot> => {
+  const { user, profile, candidate, company } = await getAccountState();
   if (!user) {
     return {
       userId: null,
@@ -40,22 +77,6 @@ export async function getAuthenticatedAccountSnapshot(): Promise<AccountSnapshot
     };
   }
 
-  const [{ data: profile }, { data: candidate }, { data: company }] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("id, role, full_name, email, status")
-        .eq("id", user.id)
-        .maybeSingle<ProfileRow>(),
-      supabase.from("candidate_profiles").select("id").eq("id", user.id).maybeSingle(),
-      supabase
-        .from("employer_companies")
-        .select("id")
-        .eq("owner_id", user.id)
-        .limit(1)
-        .maybeSingle(),
-    ]);
-
   return {
     userId: user.id,
     email: user.email ?? profile?.email ?? null,
@@ -63,49 +84,18 @@ export async function getAuthenticatedAccountSnapshot(): Promise<AccountSnapshot
     hasCandidateProfile: Boolean(candidate),
     hasEmployerProfile: Boolean(company),
   };
-}
+});
 
-export async function getAuthenticatedProfile() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return { user: null, profile: null };
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, role, full_name, email, status")
-    .eq("id", user.id)
-    .maybeSingle<ProfileRow>();
-
+export const getAuthenticatedProfile = cache(async () => {
+  const { user, profile } = await getAccountState();
   return { user, profile };
-}
+});
 
-export async function requireRole(role: AppAccountRole): Promise<AccountContext> {
-  const supabase = await createServerSupabaseClient();
+export const requireRole = cache(async (role: AppAccountRole): Promise<AccountContext> => {
   const currentPath = await currentPathFromHeaders();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user, profile, candidate, company } = await getAccountState();
 
   if (!user) redirect(`${routes.login}?redirectTo=${encodeURIComponent(currentPath)}`);
-
-  const [{ data: profile }, { data: candidate }, { data: company }] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("id, role, full_name, email, status")
-        .eq("id", user.id)
-        .maybeSingle<ProfileRow>(),
-      supabase.from("candidate_profiles").select("id").eq("id", user.id).maybeSingle(),
-      supabase
-        .from("employer_companies")
-        .select("id")
-        .eq("owner_id", user.id)
-        .limit(1)
-        .maybeSingle(),
-    ]);
 
   const snapshot: AccountSnapshot = {
     userId: user.id,
@@ -125,7 +115,7 @@ export async function requireRole(role: AppAccountRole): Promise<AccountContext>
     hasCandidateProfile: snapshot.hasCandidateProfile,
     hasEmployerProfile: snapshot.hasEmployerProfile,
   };
-}
+});
 
 export async function redirectAuthenticatedAuthPage({
   allowMissingProfile = false,
