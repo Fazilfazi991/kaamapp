@@ -1,4 +1,5 @@
 import type { UserRole } from "@/types/domain";
+import type { CandidateVerificationStatus } from "@/features/admin/verification-status";
 
 export type AdminProfileStatus = "draft" | "active" | "paused" | "blocked" | string;
 export type CandidateDocumentType = "passport" | "visa";
@@ -51,6 +52,11 @@ export type AdminCandidateRow = {
   visa_status: string | null;
   is_visible: boolean | null;
   is_verified: boolean | null;
+  verification_status: CandidateVerificationStatus;
+  verified_at: string | null;
+  verified_by: string | null;
+  verification_notes: string | null;
+  verification_updated_at: string | null;
   created_at: string | null;
   updated_at: string | null;
   profiles?: Pick<AdminProfileRow, "full_name" | "email" | "phone" | "status" | "created_at"> | null;
@@ -65,6 +71,18 @@ export type AdminCandidateProfileData = Omit<
   AdminCandidateRow,
   "profiles" | "has_candidate_profile" | "profile_completion" | "missing_sections" | "operational_status" | "candidate_documents"
 >;
+
+export type CandidateVerificationAuditEvent = {
+  id: string;
+  candidate_id: string;
+  admin_id: string | null;
+  previous_status: string | null;
+  new_status: CandidateVerificationStatus;
+  action: string;
+  notes: string | null;
+  created_at: string | null;
+  admin?: Pick<AdminProfileRow, "full_name" | "email"> | null;
+};
 
 export type AdminCandidateDocumentSummary = {
   id: string;

@@ -38,6 +38,11 @@ function candidate(overrides: Partial<AdminCandidateProfileData> = {}): AdminCan
     visa_status: "valid",
     is_visible: true,
     is_verified: false,
+    verification_status: "pending_verification",
+    verified_at: null,
+    verified_by: null,
+    verification_notes: null,
+    verification_updated_at: null,
     created_at: "2026-01-03T00:00:00Z",
     updated_at: "2026-01-04T00:00:00Z",
     ...overrides,
@@ -87,6 +92,7 @@ describe("admin candidate account composition", () => {
     expect(result.has_candidate_profile).toBe(true);
     expect(result.profile_completion).toBe(100);
     expect(result.operational_status).toBe("draft");
+    expect(result.verification_status).toBe("pending_verification");
   });
 
   it("shows a candidate role with incomplete candidate profile", () => {
@@ -115,9 +121,16 @@ describe("admin candidate account composition", () => {
   });
 
   it("verified filter returns only verified candidates", () => {
-    const verified = row({ candidateProfile: candidate({ id: "verified", is_verified: true }) });
+    const verified = row({ candidateProfile: candidate({ id: "verified", verification_status: "verified" }) });
     const incomplete = row({ candidateProfile: candidate({ id: "incomplete", headline: "" }) });
     expect(filterCandidateAccounts([verified, incomplete], { status: "verified" })).toEqual([verified]);
+  });
+
+  it("does not infer manual verification from profile completion or account status", () => {
+    const completeActiveCandidate = row();
+    expect(completeActiveCandidate.profile_completion).toBe(100);
+    expect(completeActiveCandidate.profiles?.status).toBe("active");
+    expect(completeActiveCandidate.verification_status).toBe("pending_verification");
   });
 
   it("empty search does not exclude candidates", () => {

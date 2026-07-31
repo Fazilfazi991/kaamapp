@@ -35,7 +35,7 @@ export function statusTone(status?: string | null): "success" | "warning" | "neu
 
 export function statusLabel(status?: string | null) {
   const normalized = normalizeCandidateDocumentStatus(status);
-  if (normalized === "pending_verification") return "Pending Verification";
+  if (normalized === "pending_verification") return "Pending Review";
   if (normalized === "resubmission_requested") return "Resubmission Requested";
   if (normalized === "verified") return "Approved";
   return (normalized || "unknown").replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());

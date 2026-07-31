@@ -90,6 +90,11 @@ export function composeCandidateAccount({
     visa_status: candidate?.visa_status ?? null,
     is_visible: candidate?.is_visible ?? null,
     is_verified: candidate?.is_verified ?? null,
+    verification_status: candidate?.verification_status ?? "not_submitted",
+    verified_at: candidate?.verified_at ?? null,
+    verified_by: candidate?.verified_by ?? null,
+    verification_notes: candidate?.verification_notes ?? null,
+    verification_updated_at: candidate?.verification_updated_at ?? null,
     created_at: candidate?.created_at ?? profile.created_at ?? null,
     updated_at: candidate?.updated_at ?? profile.updated_at ?? profile.created_at ?? null,
     profiles: {
@@ -130,6 +135,7 @@ export function filterCandidateAccounts(candidates: AdminCandidateRow[], { q, st
     }
 
     if (!cleanedStatus) return true;
+    if (cleanedStatus === candidate.verification_status) return true;
     if (cleanedStatus === candidate.operational_status) return true;
     return cleanedStatus === candidate.profiles?.status;
   });

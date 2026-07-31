@@ -2,6 +2,7 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { statusLabel, statusTone } from "@/features/admin/validation/review";
+import { candidateVerificationLabel, candidateVerificationTone } from "@/features/admin/verification-status";
 
 export function AdminPageHeader({
   title,
@@ -85,6 +86,10 @@ export function AdminErrorState({ message }: { message: string }) {
 
 export function AdminStatus({ status }: { status?: string | null }) {
   return <StatusBadge tone={statusTone(status)}>{statusLabel(status)}</StatusBadge>;
+}
+
+export function ManualVerificationStatus({ status }: { status?: string | null }) {
+  return <StatusBadge tone={candidateVerificationTone(status)}>{candidateVerificationLabel(status)}</StatusBadge>;
 }
 
 export function AdminTable({

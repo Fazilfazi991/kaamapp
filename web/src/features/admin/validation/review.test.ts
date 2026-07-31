@@ -93,7 +93,7 @@ describe("admin review validation", () => {
   });
 
   it("keeps labels and tones aligned with backend statuses", () => {
-    expect(statusLabel("pending_verification")).toBe("Pending Verification");
+    expect(statusLabel("pending_verification")).toBe("Pending Review");
     expect(statusTone("pending_verification")).toBe("warning");
     expect(statusTone("blocked")).toBe("danger");
     expect(statusTone("approved")).toBe("success");

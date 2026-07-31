@@ -8,6 +8,7 @@ import type {
   CandidateDocumentVersionRow,
   EmployerCompanyAdminRow,
   EmployerDocumentAdminRow,
+  CandidateVerificationAuditEvent,
 } from "@/features/admin/types";
 import { normalizeCandidateDocumentStatus } from "@/features/admin/validation/review";
 import {
@@ -19,7 +20,7 @@ import {
 
 const PAGE_SIZE = 20;
 const CANDIDATE_PROFILE_SELECT =
-  "id,headline,nationality,current_country,current_city,preferred_country,preferred_city,job_categories,skills,languages,availability,experience_years,visa_status,is_visible,is_verified,created_at,updated_at";
+  "id,headline,nationality,current_country,current_city,preferred_country,preferred_city,job_categories,skills,languages,availability,experience_years,visa_status,is_visible,is_verified,verification_status,verified_at,verified_by,verification_notes,verification_updated_at,created_at,updated_at";
 
 export type AdminListParams = {
   q?: string;
@@ -177,14 +178,14 @@ export async function loadCandidate(candidateId: string) {
 
   if (profileError) {
     logAdminDataError("load_candidate_account", profileError);
-    return { candidate: null, membership: null, versions: [], notifications: [], error: profileError };
+    return { candidate: null, membership: null, versions: [], notifications: [], verificationAudit: [], error: profileError };
   }
 
   if (!profile) {
-    return { candidate: null, membership: null, versions: [], notifications: [], error: null };
+    return { candidate: null, membership: null, versions: [], notifications: [], verificationAudit: [], error: null };
   }
 
-  const [{ data: candidate }, { data: documents }, { data: membership }, { data: versions }, { data: notifications }] = await Promise.all([
+  const [{ data: candidate }, { data: documents }, { data: membership }, { data: versions }, { data: notifications }, { data: verificationAudit }] = await Promise.all([
     supabase
       .from("candidate_profiles")
       .select(CANDIDATE_PROFILE_SELECT)
@@ -212,6 +213,11 @@ export async function loadCandidate(candidateId: string) {
       .eq("candidate_id", candidateId)
       .order("created_at", { ascending: false })
       .limit(10),
+    supabase
+      .from("candidate_verification_audit_events")
+      .select("id,candidate_id,admin_id,previous_status,new_status,action,notes,created_at,admin:profiles!candidate_verification_audit_events_admin_id_fkey(full_name,email)")
+      .eq("candidate_id", candidateId)
+      .order("created_at", { ascending: false }),
   ]);
 
   return {
@@ -230,6 +236,10 @@ export async function loadCandidate(candidateId: string) {
       includeHistorical: true,
     }).rows,
     notifications: notifications ?? [],
+    verificationAudit: (verificationAudit ?? []).map((event) => ({
+      ...event,
+      admin: Array.isArray(event.admin) ? event.admin[0] ?? null : event.admin ?? null,
+    })) as CandidateVerificationAuditEvent[],
     error: null,
   };
 }
