@@ -2450,7 +2450,8 @@ class EmployerRepository {
         row['preferred_country'] as String?,
       ].whereType<String>().where((value) => value.isNotEmpty).join(', '),
       visaStatus: row['visa_status'] as String? ?? '',
-      isVerified: row['is_verified'] as bool? ?? false,
+      verificationStatus:
+          (row['verification_status'] as String? ?? '').trim().toLowerCase(),
     );
   }
 

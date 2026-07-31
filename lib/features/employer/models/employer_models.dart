@@ -14,7 +14,7 @@ class EmployerCandidate {
     this.currentLocation = '',
     this.preferredLocation = '',
     this.visaStatus = '',
-    this.isVerified = false,
+    this.verificationStatus = '',
     this.isSaved = false,
     this.isMatched = false,
     this.allowedName,
@@ -36,7 +36,10 @@ class EmployerCandidate {
   final String currentLocation;
   final String preferredLocation;
   final String visaStatus;
-  final bool isVerified;
+  final String verificationStatus;
+  bool get isManuallyVerified =>
+      verificationStatus.trim().toLowerCase() == 'verified';
+  bool get isVerified => isManuallyVerified;
   final bool isSaved;
   final bool isMatched;
   final String? allowedName;

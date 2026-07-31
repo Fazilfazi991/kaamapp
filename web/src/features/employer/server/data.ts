@@ -170,14 +170,15 @@ export async function loadEmployerMatches() {
 
 export async function loadEmployerDashboardSummary() {
   const access = await resolveEmployerAccess();
-  if (!access.ok) return { access, counts: null };
   const supabase = await createServerSupabaseClient();
+  if (!access.ok) return { access, counts: null };
   const [{ count: shortlisted }, { count: pending }, { count: accepted }, { count: matches }] = await Promise.all([
     supabase.from("saved_candidates").select("*", { count: "exact", head: true }).eq("employer_id", access.userId),
     supabase.from("interest_requests").select("*", { count: "exact", head: true }).eq("employer_id", access.userId).eq("status", "pending"),
     supabase.from("interest_requests").select("*", { count: "exact", head: true }).eq("employer_id", access.userId).eq("status", "accepted"),
     supabase.from("matches").select("*", { count: "exact", head: true }).eq("employer_id", access.userId),
   ]);
+
   return {
     access,
     counts: {

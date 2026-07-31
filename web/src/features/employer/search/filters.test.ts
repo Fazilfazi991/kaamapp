@@ -34,6 +34,7 @@ const row = {
   profile_photo_url: null,
   bio: "Experienced mason",
   is_verified: true,
+  verification_status: "verified",
   created_at: "2026-01-01",
   updated_at: "2026-01-02",
 };
@@ -143,7 +144,7 @@ describe("employer search and matching helpers", () => {
   });
 
   it("excludes unverified candidates for verified-only searches", () => {
-    expect(candidateMatchesFilters({ ...row, is_verified: false }, parseEmployerSearchParams({ verified: "true" }))).toBe(false);
+    expect(candidateMatchesFilters({ ...row, verification_status: "pending_verification", is_verified: true }, parseEmployerSearchParams({ verified: "true" }))).toBe(false);
   });
 
   it("matches 3+ years", () => {

@@ -190,7 +190,15 @@ class _CandidateMiniProfileCardState extends State<CandidateMiniProfileCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(candidate.displayName, style: AppTextStyles.title),
+                    Row(children: [
+                      Flexible(child: Text(candidate.displayName, style: AppTextStyles.title)),
+                      if (candidate.isManuallyVerified) ...[
+                        const SizedBox(width: 6),
+                        const Icon(Icons.verified_rounded, size: 16, color: AppColors.success),
+                        const SizedBox(width: 3),
+                        const Text('KAAM Verified', style: TextStyle(fontSize: 12, color: AppColors.success)),
+                      ],
+                    ]),
                     const SizedBox(height: 4),
                     Text(candidate.role,
                         style: AppTextStyles.body

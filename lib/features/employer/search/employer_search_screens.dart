@@ -570,6 +570,10 @@ class CandidateProfilePreviewScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(candidate.displayName, style: AppTextStyles.headline),
+              if (candidate.isManuallyVerified) const Padding(
+                padding: EdgeInsets.only(top: 4),
+                child: Text('✓ KAAM Verified', style: TextStyle(color: AppColors.success, fontWeight: FontWeight.w700)),
+              ),
               const SizedBox(height: 6),
               Text(
                   candidate.mainCategory.isEmpty
@@ -609,9 +613,13 @@ class CandidateProfilePreviewScreen extends StatelessWidget {
         const SizedBox(height: 10),
         AppCard(
           child: Text(
-            candidate.isVerified
-                ? 'Verified profile. Private document images remain hidden.'
-                : 'Verification pending. Private documents are hidden before accepted match.',
+            switch (candidate.verificationStatus) {
+              'verified' => 'KAAM Verified profile. Private document images remain hidden.',
+              'pending_verification' => 'Verification is pending. Private document images remain hidden.',
+              'reverification_required' => 'Profile verification requires an update. Private document images remain hidden.',
+              'rejected' => 'Profile is not currently verified. Private document images remain hidden.',
+              _ => 'Verification is pending. Private document images remain hidden.',
+            },
             style: AppTextStyles.body,
           ),
         ),
