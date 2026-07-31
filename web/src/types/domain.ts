@@ -85,5 +85,4 @@ export type AccountContext = {
   profileStatus: string;
   hasCandidateProfile: boolean;
   hasEmployerProfile: boolean;
-  candidatePhotoPath?: string | null;
 };

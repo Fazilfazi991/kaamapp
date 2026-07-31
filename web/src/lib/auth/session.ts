@@ -1,10 +1,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { cache } from "react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { webPerf } from "@/lib/perf";
-import { accountDebug } from "@/lib/account-debug";
 import { routes } from "@/config/routes";
 import {
   authPageDecision,
@@ -27,59 +24,12 @@ function currentPathFromHeaders() {
     .catch(() => "");
 }
 
-const getAccountState = cache(async () => {
-  const startedAt = performance.now();
+export async function getAuthenticatedAccountSnapshot(): Promise<AccountSnapshot> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return {
-      user: null,
-      profile: null,
-      candidate: null,
-      company: null,
-    };
-  }
-
-  const profileStartedAt = performance.now();
-  const [{ data: profile }, { data: candidate }, { data: company }] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("id, role, full_name, email, status")
-        .eq("id", user.id)
-        .maybeSingle<ProfileRow>(),
-      supabase
-        .from("candidate_profiles")
-        .select("id, profile_photo_url")
-        .eq("id", user.id)
-        .maybeSingle<Pick<CandidateProfileRow, "id" | "profile_photo_url">>(),
-      supabase
-        .from("employer_companies")
-        .select("id")
-        .eq("owner_id", user.id)
-        .limit(1)
-        .maybeSingle(),
-    ]);
-
-  webPerf("account profile queries", profileStartedAt);
-  webPerf("authenticated account lookup", startedAt);
-  accountDebug({
-    userId: user.id,
-    email: user.email ?? profile?.email ?? null,
-    role: profile?.role ?? null,
-    profileId: profile?.id ?? null,
-    candidateId: candidate?.id ?? null,
-    candidateName: profile?.full_name ?? null,
-  });
-
-  return { user, profile, candidate, company };
-});
-
-export const getAuthenticatedAccountSnapshot = cache(async (): Promise<AccountSnapshot> => {
-  const { user, profile, candidate, company } = await getAccountState();
   if (!user) {
     return {
       userId: null,
@@ -90,30 +40,79 @@ export const getAuthenticatedAccountSnapshot = cache(async (): Promise<AccountSn
     };
   }
 
+  const [{ data: profile }, { data: candidate }, { data: company }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id, role, full_name, email, status")
+        .eq("id", user.id)
+        .maybeSingle<ProfileRow>(),
+      supabase.from("candidate_profiles").select("id").eq("id", user.id).maybeSingle(),
+      supabase
+        .from("employer_companies")
+        .select("id")
+        .eq("owner_id", user.id)
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
   return {
     userId: user.id,
     email: user.email ?? profile?.email ?? null,
     role: profile?.role ?? null,
+    profileStatus: profile?.status ?? null,
     hasCandidateProfile: Boolean(candidate),
     hasEmployerProfile: Boolean(company),
   };
-});
+}
 
-export const getAuthenticatedProfile = cache(async () => {
-  const { user, profile } = await getAccountState();
+export async function getAuthenticatedProfile() {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { user: null, profile: null };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, role, full_name, email, status")
+    .eq("id", user.id)
+    .maybeSingle<ProfileRow>();
+
   return { user, profile };
-});
+}
 
-export const requireRole = cache(async (role: AppAccountRole): Promise<AccountContext> => {
+export async function requireRole(role: AppAccountRole): Promise<AccountContext> {
+  const supabase = await createServerSupabaseClient();
   const currentPath = await currentPathFromHeaders();
-  const { user, profile, candidate, company } = await getAccountState();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) redirect(`${routes.login}?redirectTo=${encodeURIComponent(currentPath)}`);
+
+  const [{ data: profile }, { data: candidate }, { data: company }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id, role, full_name, email, status")
+        .eq("id", user.id)
+        .maybeSingle<ProfileRow>(),
+      supabase.from("candidate_profiles").select("id").eq("id", user.id).maybeSingle(),
+      supabase
+        .from("employer_companies")
+        .select("id")
+        .eq("owner_id", user.id)
+        .limit(1)
+        .maybeSingle(),
+    ]);
 
   const snapshot: AccountSnapshot = {
     userId: user.id,
     email: user.email ?? profile?.email ?? null,
     role: profile?.role ?? null,
+    profileStatus: profile?.status ?? null,
     hasCandidateProfile: Boolean(candidate),
     hasEmployerProfile: Boolean(company),
   };
@@ -127,9 +126,8 @@ export const requireRole = cache(async (role: AppAccountRole): Promise<AccountCo
     profileStatus: profile?.status ?? "draft",
     hasCandidateProfile: snapshot.hasCandidateProfile,
     hasEmployerProfile: snapshot.hasEmployerProfile,
-    candidatePhotoPath: candidate?.profile_photo_url ?? null,
   };
-});
+}
 
 export async function redirectAuthenticatedAuthPage({
   allowMissingProfile = false,
