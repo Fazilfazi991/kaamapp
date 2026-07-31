@@ -20,7 +20,7 @@ import {
 
 const PAGE_SIZE = 20;
 const CANDIDATE_PROFILE_SELECT =
-  "id,headline,nationality,current_country,current_city,preferred_country,preferred_city,job_categories,skills,languages,availability,experience_years,visa_status,is_visible,is_verified,verification_status,verified_at,verified_by,verification_notes,verification_updated_at,created_at,updated_at";
+  "id,headline,nationality,current_country,current_city,preferred_country,preferred_city,job_categories,skills,languages,availability,experience_years,visa_status,is_visible,is_verified,verification_status,verified_at,verified_by,verification_notes,candidate_message,verification_updated_at,created_at,updated_at";
 
 export type AdminListParams = {
   q?: string;
@@ -215,7 +215,7 @@ export async function loadCandidate(candidateId: string) {
       .limit(10),
     supabase
       .from("candidate_verification_audit_events")
-      .select("id,candidate_id,admin_id,previous_status,new_status,action,notes,created_at,admin:profiles!candidate_verification_audit_events_admin_id_fkey(full_name,email)")
+      .select("id,candidate_id,admin_id,previous_status,new_status,action,notes,notification_id,push_outbox_id,created_at,admin:profiles!candidate_verification_audit_events_admin_id_fkey(full_name,email)")
       .eq("candidate_id", candidateId)
       .order("created_at", { ascending: false }),
   ]);

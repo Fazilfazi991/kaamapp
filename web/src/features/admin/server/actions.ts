@@ -16,7 +16,7 @@ import {
   validatePublicReason,
 } from "@/features/admin/validation/review";
 import type { CandidateDocumentVersionRow, EmployerCompanyAdminRow, EmployerDocumentAdminRow } from "@/features/admin/types";
-import { candidateVerificationEligibility, type CandidateVerificationStatus } from "@/features/admin/verification-status";
+import type { CandidateVerificationStatus } from "@/features/admin/verification-status";
 
 function fail(message: string): never {
   throw new Error(message);
@@ -25,105 +25,62 @@ function fail(message: string): never {
 async function updateCandidateVerification({
   candidateId,
   nextStatus,
-  notes,
-  action,
+  internalNotes,
+  candidateMessage,
 }: {
   candidateId: string;
   nextStatus: CandidateVerificationStatus;
-  notes: string | null;
-  action: "candidate_verified" | "candidate_verification_rejected" | "candidate_reverification_required";
-}) {
-  const admin = await requireAdmin();
+  internalNotes: string | null;
+  candidateMessage: string | null;
+}): Promise<AdminActionState> {
+  await requireAdmin();
   if (!candidateId) fail("Candidate is missing.");
 
   const supabase = await createServerSupabaseClient();
-  const [{ data: candidate }, { data: documents }] = await Promise.all([
-    supabase
-      .from("candidate_profiles")
-      .select("id,verification_status,profile_photo_url,nationality,current_city,preferred_city,job_categories,headline,availability")
-      .eq("id", candidateId)
-      .maybeSingle(),
-    supabase
-      .from("candidate_documents")
-      .select("passport_status")
-      .eq("candidate_id", candidateId)
-      .maybeSingle(),
-  ]);
-  const { data: account } = await supabase.from("profiles").select("status").eq("id", candidateId).maybeSingle();
-  if (!candidate) fail("Candidate profile was not found.");
-
-  if (nextStatus === "verified") {
-    const profileCompletion = [
-      candidate.nationality,
-      candidate.current_city,
-      candidate.preferred_city,
-      candidate.headline,
-      candidate.availability,
-    ].every((value) => Boolean(value?.trim())) && (candidate.job_categories?.length ?? 0) > 0 ? 100 : 0;
-    const eligibility = candidateVerificationEligibility({
-      accountStatus: account?.status,
-      profileCompletion,
-      passportStatus: documents?.passport_status,
-    });
-    if (!eligibility.canVerify) fail(`Candidate cannot be verified yet: ${eligibility.blockers.join(" ")}`);
-  }
-
-  const now = new Date().toISOString();
-  const { error: updateError } = await supabase
-    .from("candidate_profiles")
-    .update({
-      verification_status: nextStatus,
-      verified_by: admin.userId,
-      verified_at: nextStatus === "verified" ? now : null,
-      verification_notes: notes,
-      verification_updated_at: now,
-    })
-    .eq("id", candidateId);
-  if (updateError) fail("Could not update candidate manual verification.");
-
-  const { error: auditError } = await supabase.from("candidate_verification_audit_events").insert({
-    candidate_id: candidateId,
-    admin_id: admin.userId,
-    previous_status: candidate.verification_status ?? "pending_verification",
-    new_status: nextStatus,
-    action,
-    notes,
+  const { data, error } = await supabase.rpc("review_candidate_manual_verification", {
+    p_candidate_id: candidateId,
+    p_next_status: nextStatus,
+    p_internal_notes: internalNotes,
+    p_candidate_message: candidateMessage,
   });
-  if (auditError) fail("Verification status was updated, but its audit event could not be recorded.");
+  if (error) return safeActionResult("Candidate verification could not be completed. No notification was queued.");
 
   revalidatePath("/admin/candidates");
   revalidatePath(`/admin/candidates/${candidateId}`);
+  const result = (data ?? {}) as { already_processed?: boolean; push_queued?: boolean };
+  if (result.already_processed) return safeActionResult("This verification action was already processed. No duplicate notification was created.", true);
+  const actionLabel = nextStatus === "verified" ? "Candidate verified successfully." : nextStatus === "rejected" ? "Verification rejected." : "Reverification requested.";
+  return safeActionResult(`${actionLabel} In-app notification created${result.push_queued ? " and push notification queued." : ". Push was not queued."}`, true);
 }
 
-export async function verifyCandidate(formData: FormData) {
-  const notes = String(formData.get("notes") ?? "").trim() || null;
-  await updateCandidateVerification({
+export async function verifyCandidate(_previousState: AdminActionState, formData: FormData) {
+  return updateCandidateVerification({
     candidateId: String(formData.get("candidateId") ?? ""),
     nextStatus: "verified",
-    notes,
-    action: "candidate_verified",
+    internalNotes: String(formData.get("internalNotes") ?? "").trim() || null,
+    candidateMessage: null,
   });
 }
 
-export async function rejectCandidateVerification(formData: FormData) {
-  const parsedReason = validatePublicReason(String(formData.get("reason") ?? ""));
+export async function rejectCandidateVerification(_previousState: AdminActionState, formData: FormData) {
+  const parsedReason = validatePublicReason(String(formData.get("candidateMessage") ?? ""));
   if (!parsedReason.ok) fail(parsedReason.error);
-  await updateCandidateVerification({
+  return updateCandidateVerification({
     candidateId: String(formData.get("candidateId") ?? ""),
     nextStatus: "rejected",
-    notes: parsedReason.reason,
-    action: "candidate_verification_rejected",
+    internalNotes: String(formData.get("internalNotes") ?? "").trim() || null,
+    candidateMessage: parsedReason.reason,
   });
 }
 
-export async function requireCandidateReverification(formData: FormData) {
-  const parsedReason = validatePublicReason(String(formData.get("reason") ?? ""));
+export async function requireCandidateReverification(_previousState: AdminActionState, formData: FormData) {
+  const parsedReason = validatePublicReason(String(formData.get("candidateMessage") ?? ""));
   if (!parsedReason.ok) fail(parsedReason.error);
-  await updateCandidateVerification({
+  return updateCandidateVerification({
     candidateId: String(formData.get("candidateId") ?? ""),
     nextStatus: "reverification_required",
-    notes: parsedReason.reason,
-    action: "candidate_reverification_required",
+    internalNotes: String(formData.get("internalNotes") ?? "").trim() || null,
+    candidateMessage: parsedReason.reason,
   });
 }
 

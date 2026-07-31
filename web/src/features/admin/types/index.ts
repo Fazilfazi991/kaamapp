@@ -56,6 +56,7 @@ export type AdminCandidateRow = {
   verified_at: string | null;
   verified_by: string | null;
   verification_notes: string | null;
+  candidate_message: string | null;
   verification_updated_at: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -80,6 +81,8 @@ export type CandidateVerificationAuditEvent = {
   new_status: CandidateVerificationStatus;
   action: string;
   notes: string | null;
+  notification_id: string | null;
+  push_outbox_id: string | null;
   created_at: string | null;
   admin?: Pick<AdminProfileRow, "full_name" | "email"> | null;
 };

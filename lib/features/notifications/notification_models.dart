@@ -29,6 +29,9 @@ enum KaamNotificationType {
   maintenance,
   urgentAlert,
   adminBroadcast,
+  candidateVerificationApproved,
+  candidateVerificationRejected,
+  candidateReverificationRequired,
 }
 
 class KaamNotificationTypes {
@@ -69,6 +72,9 @@ class KaamNotificationTypes {
     'maintenance': KaamNotificationType.maintenance,
     'urgent_alert': KaamNotificationType.urgentAlert,
     'admin_broadcast': KaamNotificationType.adminBroadcast,
+    'candidate_verification_approved': KaamNotificationType.candidateVerificationApproved,
+    'candidate_verification_rejected': KaamNotificationType.candidateVerificationRejected,
+    'candidate_reverification_required': KaamNotificationType.candidateReverificationRequired,
   };
 }
 
@@ -220,6 +226,9 @@ class KaamNotificationDeepLinks {
         AppRoutes.documentsUpload,
       (KaamRole.candidate, 'candidate_document_resubmission_requested') =>
         AppRoutes.documentsUpload,
+      (KaamRole.candidate, 'candidate_verification_approved') => AppRoutes.profile,
+      (KaamRole.candidate, 'candidate_verification_rejected') => AppRoutes.profile,
+      (KaamRole.candidate, 'candidate_reverification_required') => AppRoutes.profile,
       (KaamRole.candidate, 'admin_broadcast') => AppRoutes.notifications,
       (KaamRole.employer, 'candidate_accepted_interest') =>
         AppRoutes.employerSentRequests,
@@ -267,6 +276,7 @@ class KaamNotificationDeepLinks {
     AppRoutes.membershipPlans,
     AppRoutes.editProfile,
     AppRoutes.profileViews,
+    AppRoutes.profile,
   };
 
   static const _employerRoutes = {

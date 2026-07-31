@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { initialAdminActionState } from "@/features/admin/validation/review";
-import { approveEmployerCompany, approveEmployerDocument } from "./actions";
+import { approveEmployerCompany, approveEmployerDocument, verifyCandidate } from "./actions";
 
 const mockSupabase = {
   from: vi.fn(),
+  rpc: vi.fn(),
 };
 
 vi.mock("next/cache", () => ({
@@ -117,6 +118,35 @@ describe("admin employer review actions", () => {
     const result = await approveEmployerDocument(initialAdminActionState, formData);
 
     expect(result).toEqual({ ok: false, message: "Document was not found." });
+  });
+});
+
+describe("candidate verification notification action", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("uses the transactional RPC and reports queued push feedback", async () => {
+    mockSupabase.rpc.mockResolvedValue({ data: { notification_created: true, push_queued: true }, error: null });
+    const formData = new FormData();
+    formData.set("candidateId", "candidate-1");
+    formData.set("internalNotes", "Checked by staff");
+
+    const result = await verifyCandidate(initialAdminActionState, formData);
+
+    expect(mockSupabase.rpc).toHaveBeenCalledWith("review_candidate_manual_verification", {
+      p_candidate_id: "candidate-1",
+      p_next_status: "verified",
+      p_internal_notes: "Checked by staff",
+      p_candidate_message: null,
+    });
+    expect(result).toEqual({ ok: true, message: "Candidate verified successfully. In-app notification created and push notification queued." });
+  });
+
+  it("reports idempotent retries without creating a duplicate notification", async () => {
+    mockSupabase.rpc.mockResolvedValue({ data: { already_processed: true, notification_created: false, push_queued: false }, error: null });
+    const formData = new FormData();
+    formData.set("candidateId", "candidate-1");
+    const result = await verifyCandidate(initialAdminActionState, formData);
+    expect(result.message).toContain("No duplicate notification was created");
   });
 });
 
