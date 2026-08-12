@@ -1,5 +1,11 @@
 # KAAM Google Play Data Safety Draft
 
+## Intended audience
+
+- Intended audience: **18+**
+- Children/families audience: **NO**
+- Age-policy decision: **RESOLVED**
+
 Status: internal working draft for the first Play submission. This is not a submitted Data safety form or legal advice. Evidence is the verified inventory in `KAAM_PRIVACY_DATA_INVENTORY.md`, current Flutter/Supabase/Firebase/OCR code, and the deployed deletion workflow.
 
 | Google Play category | Collected | Shared | Required / optional | Purpose | Deletion available | Encryption in transit | Evidence |
@@ -24,4 +30,3 @@ Status: internal working draft for the first Play submission. This is not a subm
 2. Confirm which fields are mandatory in every released Candidate and Employer flow versus conditionally required for a selected feature or verification status.
 3. Confirm the legal/business position on sale or other disclosures; do not infer it from code.
 4. Confirm provider retention and processor terms for Supabase, Google/Firebase and Azure before finalising any policy or Play-form retention statement.
-5. Decide and publish KAAM’s minimum intended age before the Play target-audience declaration.
