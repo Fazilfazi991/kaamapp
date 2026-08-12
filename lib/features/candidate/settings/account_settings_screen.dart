@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_routes.dart';
+import '../../../core/legal/kaam_privacy_policy.dart';
 import '../../../core/widgets/candidate_widgets.dart';
 import '../../../core/widgets/screen_scaffold.dart';
 import '../../qa/qa_mode.dart';
@@ -40,8 +41,9 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     try {
       await auth.signOut();
       if (!mounted) return;
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -50,6 +52,14 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     } finally {
       if (mounted) setState(() => loggingOut = false);
     }
+  }
+
+  Future<void> _openPrivacyPolicy() async {
+    final opened = await openKaamPrivacyPolicy();
+    if (!mounted || opened) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Could not open the Privacy Policy.')),
+    );
   }
 
   @override
@@ -74,6 +84,12 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
           ),
           const SizedBox(height: 10),
         ],
+        SettingsTile(
+          icon: Icons.description_outlined,
+          title: 'Privacy Policy',
+          onTap: _openPrivacyPolicy,
+        ),
+        const SizedBox(height: 10),
         if (QaMode.enabled) ...[
           SettingsTile(
             icon: Icons.build_circle_outlined,

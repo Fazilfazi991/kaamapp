@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_routes.dart';
+import '../../../core/legal/kaam_privacy_policy.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_card.dart';
@@ -32,11 +33,13 @@ class _EmployerSettingsScreenState extends State<EmployerSettingsScreen> {
         title: const Text('Are you sure you want to log out?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
           TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Logout')),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Logout'),
+          ),
         ],
       ),
     );
@@ -45,8 +48,9 @@ class _EmployerSettingsScreenState extends State<EmployerSettingsScreen> {
     try {
       await const KaamAuthRepository().signOut();
       if (!context.mounted) return;
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
     } catch (_) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -57,39 +61,47 @@ class _EmployerSettingsScreenState extends State<EmployerSettingsScreen> {
     }
   }
 
+  Future<void> _openPrivacyPolicy(BuildContext context) async {
+    final opened = await openKaamPrivacyPolicy();
+    if (!context.mounted || opened) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Could not open the Privacy Policy.')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final items = [
       (
         Icons.business_outlined,
         'Company profile',
-        AppRoutes.employerCompanyProfile
+        AppRoutes.employerCompanyProfile,
       ),
       (
         Icons.verified_outlined,
         'Verification',
-        AppRoutes.employerVerificationStatus
-      ),
-      (
-        Icons.work_history_outlined,
-        'Hiring Requirements',
-        AppRoutes.employerHiringRequirements
+        AppRoutes.employerVerificationStatus,
       ),
       (Icons.group_outlined, 'Team members', AppRoutes.employerTeamMembers),
       (
         Icons.notifications_outlined,
         'Notifications',
-        AppRoutes.employerNotifications
+        AppRoutes.employerNotifications,
       ),
       (
         Icons.privacy_tip_outlined,
         'Privacy & hiring rules',
-        AppRoutes.employerRules
+        AppRoutes.employerRules,
       ),
       (
         Icons.help_outline_rounded,
         'Help & support',
-        AppRoutes.employerDashboard
+        AppRoutes.employerDashboard,
+      ),
+      (
+        Icons.delete_forever_outlined,
+        'Delete account',
+        AppRoutes.deleteAccount
       ),
       if (QaMode.enabled)
         (Icons.build_circle_outlined, 'QA Tools', AppRoutes.qaTools),
@@ -98,25 +110,55 @@ class _EmployerSettingsScreenState extends State<EmployerSettingsScreen> {
       title: 'Settings',
       showBack: true,
       children: [
-        ...items.map((item) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: AppCard(
-                onTap: () => Navigator.of(context).pushNamed(item.$3),
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(item.$1, color: AppColors.primaryPink),
-                    const SizedBox(width: 12),
-                    Expanded(
-                        child: Text(item.$2,
-                            style: AppTextStyles.body
-                                .copyWith(color: AppColors.white))),
-                    const Icon(Icons.chevron_right_rounded,
-                        color: AppColors.mutedText),
-                  ],
+        ...items.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: AppCard(
+              onTap: () => Navigator.of(context).pushNamed(item.$3),
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Icon(item.$1, color: AppColors.primaryPink),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      item.$2,
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.white,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.mutedText,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        AppCard(
+          onTap: () => _openPrivacyPolicy(context),
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              const Icon(Icons.description_outlined,
+                  color: AppColors.primaryPink),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Privacy Policy',
+                  style: AppTextStyles.body.copyWith(color: AppColors.white),
                 ),
               ),
-            )),
+              const Icon(
+                Icons.open_in_new_rounded,
+                color: AppColors.mutedText,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
         AppCard(
           onTap: loggingOut ? null : () => _logout(context),
           padding: const EdgeInsets.all(16),
@@ -125,11 +167,15 @@ class _EmployerSettingsScreenState extends State<EmployerSettingsScreen> {
               const Icon(Icons.logout_rounded, color: AppColors.primaryPink),
               const SizedBox(width: 12),
               Expanded(
-                  child: Text(loggingOut ? 'Logging out...' : 'Logout',
-                      style:
-                          AppTextStyles.body.copyWith(color: AppColors.white))),
-              const Icon(Icons.chevron_right_rounded,
-                  color: AppColors.mutedText),
+                child: Text(
+                  loggingOut ? 'Logging out...' : 'Logout',
+                  style: AppTextStyles.body.copyWith(color: AppColors.white),
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.mutedText,
+              ),
             ],
           ),
         ),
