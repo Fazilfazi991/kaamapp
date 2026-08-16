@@ -2,7 +2,7 @@ import { routes } from "@/config/routes";
 import type { CandidateProfileRow, ProfileRow } from "@/types/domain";
 
 export type CompletionSection = {
-  id: "personal" | "skills" | "location" | "experience";
+  id: "personal" | "skills" | "location" | "experience" | "identity";
   label: string;
   complete: boolean;
   href: string;
@@ -15,9 +15,11 @@ function hasText(value?: string | null) {
 export function candidateCompletion({
   profile,
   candidate,
+  hasPassport,
 }: {
   profile: Pick<ProfileRow, "full_name" | "phone"> | null;
   candidate: CandidateProfileRow | null;
+  hasPassport?: boolean;
 }) {
   const sections: CompletionSection[] = [
     {
@@ -53,6 +55,14 @@ export function candidateCompletion({
       label: "Experience",
       href: routes.candidateOnboardingExperience,
       complete: hasText(candidate?.availability),
+    },
+    {
+      id: "identity",
+      label: "Identity document",
+      href: routes.candidateDocuments,
+      // OCR-derived fields never count as an upload: a stored private file is
+      // the only completion signal for the required passport document.
+      complete: hasPassport === true,
     },
   ];
   const completed = sections.filter((section) => section.complete).length;

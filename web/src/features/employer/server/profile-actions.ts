@@ -122,7 +122,7 @@ export async function saveCompanyContact(formData: FormData) {
     contact_role: values.contactRole,
     website: values.website || null,
   });
-  redirect(String(formData.get("next") ?? "/employer/onboarding/documents"));
+  redirect(String(formData.get("next") ?? "/employer/dashboard"));
 }
 
 export async function uploadCompanyLogo(formData: FormData) {
@@ -181,8 +181,7 @@ export async function submitEmployerVerification() {
   if (!completion.infoComplete || !completion.locationComplete || !completion.contactComplete) {
     safeError("Complete company information, location, and contact details before submitting.");
   }
-  if (!completion.documentsComplete) safeError("Upload the required trade licence before submitting.");
-  // Existing schema uses active company status and pending document status; admin review must approve separately.
+  // Verification is optional and an explicit admin decision; it never gates onboarding.
   await upsertCompany({ status: "active" });
   redirect(routes.employerDashboard);
 }

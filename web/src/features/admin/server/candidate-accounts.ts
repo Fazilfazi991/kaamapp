@@ -72,6 +72,7 @@ export function composeCandidateAccount({
           is_verified: candidate.is_verified,
         }
       : null,
+    hasPassport: Boolean(documents?.[0]?.passport_file_url?.trim()),
   });
 
   return {
@@ -94,6 +95,7 @@ export function composeCandidateAccount({
     verified_at: candidate?.verified_at ?? null,
     verified_by: candidate?.verified_by ?? null,
     verification_notes: candidate?.verification_notes ?? null,
+    candidate_message: candidate?.candidate_message ?? null,
     verification_updated_at: candidate?.verification_updated_at ?? null,
     created_at: candidate?.created_at ?? profile.created_at ?? null,
     updated_at: candidate?.updated_at ?? profile.updated_at ?? profile.created_at ?? null,

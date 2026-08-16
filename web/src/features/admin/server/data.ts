@@ -20,7 +20,7 @@ import {
 
 const PAGE_SIZE = 20;
 const CANDIDATE_PROFILE_SELECT =
-  "id,headline,nationality,current_country,current_city,preferred_country,preferred_city,job_categories,skills,languages,availability,experience_years,visa_status,is_visible,is_verified,verification_status,verified_at,verified_by,verification_notes,verification_updated_at,created_at,updated_at";
+  "id,headline,nationality,current_country,current_city,preferred_country,preferred_city,job_categories,skills,languages,availability,experience_years,visa_status,is_visible,is_verified,verification_status,verified_at,verified_by,verification_notes,candidate_message,verification_updated_at,created_at,updated_at";
 
 export type AdminListParams = {
   q?: string;
@@ -36,10 +36,10 @@ type AdminListResult<T> = {
 };
 
 const CANDIDATE_DOCUMENT_SUMMARY_SELECT =
-  "id,candidate_id,passport_file_url,visa_file_url,passport_status,visa_status,passport_uploaded_at,visa_uploaded_at,passport_expiry_date,visa_expiry_date,passport_version,visa_version,updated_at";
+  "id,candidate_id,passport_file_url,passport_back_file_url,visa_file_url,passport_status,visa_status,passport_uploaded_at,visa_uploaded_at,passport_expiry_date,visa_expiry_date,passport_version,visa_version,updated_at";
 
 const CANDIDATE_DOCUMENT_VERSION_SELECT =
-  "id,candidate_document_id,candidate_id,document_type,file_path,version_number,status,is_active,extracted_details,verified_at,created_at,updated_at";
+  "id,candidate_document_id,candidate_id,document_type,file_path,file_paths,version_number,status,is_active,extracted_details,verified_at,created_at,updated_at";
 
 function rangeFor(page = 1) {
   const safePage = Math.max(1, page);
@@ -215,7 +215,7 @@ export async function loadCandidate(candidateId: string) {
       .limit(10),
     supabase
       .from("candidate_verification_audit_events")
-      .select("id,candidate_id,admin_id,previous_status,new_status,action,notes,created_at,admin:profiles!candidate_verification_audit_events_admin_id_fkey(full_name,email)")
+      .select("id,candidate_id,admin_id,previous_status,new_status,action,notes,notification_id,push_outbox_id,created_at,admin:profiles!candidate_verification_audit_events_admin_id_fkey(full_name,email)")
       .eq("candidate_id", candidateId)
       .order("created_at", { ascending: false }),
   ]);
@@ -531,6 +531,13 @@ export function normalizeCandidateDocumentRows({
             candidate_id: summary.candidate_id,
             document_type: documentType,
             file_path: filePath ?? null,
+            file_paths:
+              documentType === "passport"
+                ? {
+                    ...(summary.passport_file_url ? { front: summary.passport_file_url } : {}),
+                    ...(summary.passport_back_file_url ? { back: summary.passport_back_file_url } : {}),
+                  }
+                : null,
             version_number: versionNumber ?? 1,
             status: normalizeCandidateDocumentStatus(status) || status,
             is_active: true,

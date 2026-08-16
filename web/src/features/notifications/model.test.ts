@@ -40,6 +40,12 @@ describe("notification model", () => {
     ).toBe("/candidate/documents");
     expect(
       safeNotificationHref({
+        role: "candidate",
+        type: "candidate_verification_approved",
+      }),
+    ).toBe("/candidate/profile");
+    expect(
+      safeNotificationHref({
         role: "employer",
         type: "employer_document_approved",
       }),

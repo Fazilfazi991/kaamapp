@@ -168,16 +168,29 @@ export async function loadEmployerMatches() {
   return { matches: (data ?? []) as MatchContactRow[], error: error ? "Could not load matches." : null };
 }
 
-export async function loadEmployerDashboardSummary() {
+export async function loadEmployerDashboard() {
   const access = await resolveEmployerAccess();
-  if (!access.ok) return { access, counts: null };
   const supabase = await createServerSupabaseClient();
-  const [{ count: shortlisted }, { count: pending }, { count: accepted }, { count: matches }] = await Promise.all([
-    supabase.from("saved_candidates").select("*", { count: "exact", head: true }).eq("employer_id", access.userId),
-    supabase.from("interest_requests").select("*", { count: "exact", head: true }).eq("employer_id", access.userId).eq("status", "pending"),
-    supabase.from("interest_requests").select("*", { count: "exact", head: true }).eq("employer_id", access.userId).eq("status", "accepted"),
-    supabase.from("matches").select("*", { count: "exact", head: true }).eq("employer_id", access.userId),
-  ]);
+  const documentsQuery = supabase
+    .from("verification_documents")
+    .select("id,owner_id,company_id,document_type,bucket_id,file_path,status,created_at,updated_at")
+    .eq("owner_id", access.userId)
+    .order("created_at", { ascending: false });
+
+  if (!access.ok) {
+    const { data: documents } = await documentsQuery;
+    return { access, counts: null, documents: documents ?? [] };
+  }
+
+  const [{ count: shortlisted }, { count: pending }, { count: accepted }, { count: matches }, { data: documents }] =
+    await Promise.all([
+      supabase.from("saved_candidates").select("*", { count: "exact", head: true }).eq("employer_id", access.userId),
+      supabase.from("interest_requests").select("*", { count: "exact", head: true }).eq("employer_id", access.userId).eq("status", "pending"),
+      supabase.from("interest_requests").select("*", { count: "exact", head: true }).eq("employer_id", access.userId).eq("status", "accepted"),
+      supabase.from("matches").select("*", { count: "exact", head: true }).eq("employer_id", access.userId),
+      documentsQuery,
+    ]);
+
   return {
     access,
     counts: {
@@ -186,5 +199,6 @@ export async function loadEmployerDashboardSummary() {
       acceptedInterests: accepted ?? 0,
       matches: matches ?? 0,
     },
+    documents: documents ?? [],
   };
 }

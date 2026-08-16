@@ -1,4 +1,3 @@
-import { employerRequiredDocumentTypes } from "@/features/employer/profile/completion";
 import type { CandidateDocumentStatus, CandidateDocumentVersionRow, EmployerCompanyAdminRow, EmployerDocumentAdminRow, EmployerDocumentStatus } from "@/features/admin/types";
 
 export const candidateDocumentStatuses = [
@@ -202,7 +201,6 @@ export function isEmployerCompanyProfileComplete(company: Pick<
 >) {
   return Boolean(
     hasText(company.company_name) &&
-      hasText(company.trade_license_number) &&
       hasText(company.industry) &&
       hasText(company.company_size) &&
       hasText(company.country) &&
@@ -239,6 +237,7 @@ export function getEmployerCompanyApprovalState({
   profileComplete: boolean;
   documentStatuses: Record<string, string | undefined>;
 }) {
+  void documentStatuses; // Historical document rows are no longer approval prerequisites.
   if (companyStatus === "blocked") {
     return { canApprove: false, reason: "Company blocked" };
   }
@@ -247,16 +246,6 @@ export function getEmployerCompanyApprovalState({
   }
   if (!profileComplete) {
     return { canApprove: false, reason: "Company profile incomplete" };
-  }
-
-  for (const type of employerRequiredDocumentTypes) {
-    const status = documentStatuses[type];
-    if (!status) return { canApprove: false, reason: "Trade licence not uploaded" };
-    if (status === "pending" || status === "resubmission_requested") {
-      return { canApprove: false, reason: "Trade licence pending review" };
-    }
-    if (status === "rejected") return { canApprove: false, reason: "Trade licence rejected" };
-    if (status !== "approved") return { canApprove: false, reason: "Trade licence approval is required first" };
   }
 
   return { canApprove: true, reason: "Ready for approval" };

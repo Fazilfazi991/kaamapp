@@ -40,33 +40,33 @@ describe("employer profile completion", () => {
     expect(nextEmployerOnboardingPath(null)).toBe("/employer/onboarding/company");
   });
 
-  it("requires company information before location", () => {
-    expect(nextEmployerOnboardingPath({ ...company, trade_license_number: null })).toBe("/employer/onboarding/company");
+  it("does not require an optional trade licence number", () => {
+    expect(nextEmployerOnboardingPath({ ...company, trade_license_number: null })).toBe("/employer/dashboard");
   });
 
   it("requires location before contact", () => {
     expect(nextEmployerOnboardingPath({ ...company, city: null })).toBe("/employer/onboarding/location");
   });
 
-  it("requires contact before documents", () => {
+  it("requires contact before completion", () => {
     expect(nextEmployerOnboardingPath({ ...company, contact_person: null })).toBe("/employer/onboarding/contact");
   });
 
-  it("requires trade licence document before review", () => {
-    expect(nextEmployerOnboardingPath(company, [])).toBe("/employer/onboarding/documents");
+  it("completes onboarding without verification documents", () => {
+    expect(nextEmployerOnboardingPath(company, [])).toBe("/employer/dashboard");
   });
 
-  it("routes complete employer to review", () => {
-    expect(nextEmployerOnboardingPath(company, [document])).toBe("/employer/onboarding/review");
+  it("keeps historical documents independent from onboarding", () => {
+    expect(nextEmployerOnboardingPath(company, [document])).toBe("/employer/dashboard");
   });
 
-  it("does not treat rejected documents as complete", () => {
-    expect(employerCompanyCompletion(company, [{ ...document, status: "rejected" }]).documentsComplete).toBe(false);
+  it("does not let historical document status affect completion", () => {
+    expect(employerCompanyCompletion(company, [{ ...document, status: "rejected" }]).isComplete).toBe(true);
   });
 
   it("separates completion from approval", () => {
     const completion = employerCompanyCompletion(company, [document]);
     expect(completion.isComplete).toBe(true);
-    expect(completion.reviewStatus).toBe("pending_review");
+    expect(completion.reviewStatus).toBe("not_verified");
   });
 });

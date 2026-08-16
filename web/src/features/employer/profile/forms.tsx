@@ -12,7 +12,7 @@ export function CompanyInformationForm({ company, next = "/employer/onboarding/l
       <h2 className="text-lg font-semibold text-[#201925]">Company information</h2>
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         <label className="grid gap-2 text-sm font-semibold text-[#342b38]">Legal company name<TextInput name="companyName" defaultValue={company?.company_name ?? ""} required /></label>
-        <label className="grid gap-2 text-sm font-semibold text-[#342b38]">Trade licence number<TextInput name="tradeLicenseNumber" defaultValue={company?.trade_license_number ?? ""} required /></label>
+        <label className="grid gap-2 text-sm font-semibold text-[#342b38]">Trade licence number (optional)<TextInput name="tradeLicenseNumber" defaultValue={company?.trade_license_number ?? ""} /></label>
         <label className="grid gap-2 text-sm font-semibold text-[#342b38]">Industry<SelectField name="industry" defaultValue={company?.industry ?? ""} required><option value="">Select industry</option>{employerIndustryOptions.map((item) => <option key={item}>{item}</option>)}</SelectField></label>
         <label className="grid gap-2 text-sm font-semibold text-[#342b38]">Company size<SelectField name="companySize" defaultValue={company?.company_size ?? ""} required><option value="">Select size</option>{companySizeOptions.map((item) => <option key={item}>{item}</option>)}</SelectField></label>
       </div>
@@ -40,7 +40,7 @@ export function CompanyLocationForm({ company, next = "/employer/onboarding/cont
   );
 }
 
-export function CompanyContactForm({ company, next = "/employer/onboarding/documents" }: { company: EmployerCompany | null; next?: string }) {
+export function CompanyContactForm({ company, next = "/employer/dashboard" }: { company: EmployerCompany | null; next?: string }) {
   return (
     <form action={saveCompanyContact} className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
       <input type="hidden" name="next" value={next} />

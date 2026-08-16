@@ -29,7 +29,7 @@ const completeCandidate: CandidateProfileRow = {
 
 describe("candidateCompletion", () => {
   it("calculates completed candidate profile", () => {
-    const result = candidateCompletion({ profile, candidate: completeCandidate });
+    const result = candidateCompletion({ profile, candidate: completeCandidate, hasPassport: true });
     expect(result.isComplete).toBe(true);
     expect(result.percentage).toBe(100);
   });
@@ -38,6 +38,7 @@ describe("candidateCompletion", () => {
     const result = candidateCompletion({
       profile,
       candidate: { ...completeCandidate, skills: [], headline: "" },
+      hasPassport: true,
     });
     expect(result.isComplete).toBe(false);
     expect(result.nextHref).toBe(routes.candidateOnboardingSkills);
@@ -47,8 +48,16 @@ describe("candidateCompletion", () => {
     const result = candidateCompletion({
       profile: { ...profile, full_name: "", phone: "" },
       candidate: { ...completeCandidate, nationality: "", availability: "" },
+      hasPassport: false,
     });
     expect(result.isComplete).toBe(false);
     expect(result.percentage).toBeLessThan(100);
+  });
+
+  it("does not treat passport-derived fields as a required document upload", () => {
+    const result = candidateCompletion({ profile, candidate: completeCandidate, hasPassport: false });
+    expect(result.isComplete).toBe(false);
+    expect(result.missingSections.map((section) => section.id)).toContain("identity");
+    expect(result.nextHref).toBe(routes.candidateDocuments);
   });
 });

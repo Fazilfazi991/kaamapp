@@ -33,7 +33,7 @@ export default async function EmployerCandidateDetailsPage({
           <div>
             <dt className="font-semibold text-[#3b3340]">Verification</dt>
             <dd className="mt-1 text-[#66616f]">
-              {candidate.isVerified ? "Identity verified" : "Identity verification pending"}
+              {candidate.isVerified ? "KAAM Verified" : "Verification pending"}
             </dd>
           </div>
           <div>

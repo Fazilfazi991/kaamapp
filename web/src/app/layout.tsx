@@ -8,9 +8,12 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Kaam | Find Work and Hire Trusted Workers",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://kaam.ae"),
+  title: { default: "KAAM | Mutual-interest recruitment", template: "%s | KAAM" },
   description:
-    "Kaam connects verified blue-collar and service workers with trusted employers across the UAE and India.",
+    "KAAM connects workers and employers through skills, requirements and mutual interest.",
+  openGraph: { type: "website", siteName: "KAAM", title: "KAAM | Mutual-interest recruitment", description: "Find work and hire workers through mutual interest." },
+  twitter: { card: "summary", title: "KAAM | Mutual-interest recruitment", description: "Find work and hire workers through mutual interest." },
 };
 
 export default function RootLayout({

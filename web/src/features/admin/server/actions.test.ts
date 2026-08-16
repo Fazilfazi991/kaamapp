@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { initialAdminActionState } from "@/features/admin/validation/review";
-import { approveEmployerCompany, approveEmployerDocument } from "./actions";
+import { approveCandidateDocument, approveEmployerCompany, approveEmployerDocument, rejectCandidateDocument, verifyCandidate } from "./actions";
 
 const mockSupabase = {
   from: vi.fn(),
+  rpc: vi.fn(),
 };
 
 vi.mock("next/cache", () => ({
@@ -28,14 +29,6 @@ function maybeSingleQuery<T>(result: { data: T | null; error: unknown }) {
     select: vi.fn(() => query),
     eq: vi.fn(() => query),
     maybeSingle: vi.fn(async () => result),
-  };
-  return query;
-}
-
-function listQuery<T>(result: { data: T[] | null; error: unknown }) {
-  const query = {
-    select: vi.fn(() => query),
-    eq: vi.fn(async () => result),
   };
   return query;
 }
@@ -98,15 +91,14 @@ describe("admin employer review actions", () => {
           },
           error: null,
         }),
-      )
-      .mockReturnValueOnce(listQuery({ data: [{ document_type: "trade-license", status: "approved" }], error: null }));
+      );
     const formData = new FormData();
     formData.set("companyId", "company-1");
 
     const result = await approveEmployerCompany(initialAdminActionState, formData);
 
     expect(result).toEqual({ ok: true, message: "Company is already approved." });
-    expect(mockSupabase.from).toHaveBeenCalledTimes(2);
+    expect(mockSupabase.from).toHaveBeenCalledTimes(1);
   });
 
   it("missing document returns safe not-found instead of a server crash", async () => {
@@ -117,6 +109,63 @@ describe("admin employer review actions", () => {
     const result = await approveEmployerDocument(initialAdminActionState, formData);
 
     expect(result).toEqual({ ok: false, message: "Document was not found." });
+  });
+});
+
+describe("candidate verification notification action", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("uses the transactional RPC and reports queued push feedback", async () => {
+    mockSupabase.rpc.mockResolvedValue({ data: { notification_created: true, push_queued: true }, error: null });
+    const formData = new FormData();
+    formData.set("candidateId", "candidate-1");
+    formData.set("internalNotes", "Checked by staff");
+
+    const result = await verifyCandidate(initialAdminActionState, formData);
+
+    expect(mockSupabase.rpc).toHaveBeenCalledWith("review_candidate_manual_verification", {
+      p_candidate_id: "candidate-1",
+      p_next_status: "verified",
+      p_internal_notes: "Checked by staff",
+      p_candidate_message: null,
+    });
+    expect(result).toEqual({ ok: true, message: "Candidate verified successfully. In-app notification created and push notification queued." });
+  });
+
+  it("reports idempotent retries without creating a duplicate notification", async () => {
+    mockSupabase.rpc.mockResolvedValue({ data: { already_processed: true, notification_created: false, push_queued: false }, error: null });
+    const formData = new FormData();
+    formData.set("candidateId", "candidate-1");
+    const result = await verifyCandidate(initialAdminActionState, formData);
+    expect(result.message).toContain("No duplicate notification was created");
+  });
+});
+
+describe("candidate document review notification action", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const pendingPassport = {
+    id: "version-1", candidate_document_id: "document-1", candidate_id: "candidate-1",
+    document_type: "passport", status: "pending_verification", is_active: true, version_number: 1,
+  };
+
+  it("uses one canonical RPC with the exact public rejection reason", async () => {
+    mockSupabase.from.mockReturnValue(maybeSingleQuery({ data: pendingPassport, error: null }));
+    mockSupabase.rpc.mockResolvedValue({ data: { notification_created: true }, error: null });
+    const formData = new FormData(); formData.set("documentId", "version-1"); formData.set("reason", "Image is not a passport.");
+    await rejectCandidateDocument(formData);
+    expect(mockSupabase.rpc).toHaveBeenCalledWith("review_candidate_document", expect.objectContaining({
+      p_document_version_id: "version-1", p_action: "rejected", p_public_reason: "Image is not a passport.",
+    }));
+    expect(mockSupabase.from).toHaveBeenCalledTimes(1);
+  });
+
+  it("approves through the same canonical review RPC", async () => {
+    mockSupabase.from.mockReturnValue(maybeSingleQuery({ data: pendingPassport, error: null }));
+    mockSupabase.rpc.mockResolvedValue({ data: { notification_created: true }, error: null });
+    const formData = new FormData(); formData.set("documentId", "version-1");
+    await approveCandidateDocument(formData);
+    expect(mockSupabase.rpc).toHaveBeenCalledWith("review_candidate_document", expect.objectContaining({ p_action: "approved" }));
   });
 });
 

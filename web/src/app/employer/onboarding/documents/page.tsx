@@ -7,9 +7,9 @@ export default async function EmployerDocumentsStepPage() {
   const { documents } = await loadEmployerCompanyBundle();
   return (
     <div className="grid gap-6">
-      <PageTitle title="Verification documents" description="Upload required private business documents for review." />
+      <PageTitle title="Verification documents" description="Optional business documents and historical review records." />
       <EmployerDocumentCards documents={documents} />
-      <ButtonLink href="/employer/onboarding/review" variant="secondary">Continue to review</ButtonLink>
+      <ButtonLink href="/employer/dashboard" variant="secondary">Return to dashboard</ButtonLink>
     </div>
   );
 }

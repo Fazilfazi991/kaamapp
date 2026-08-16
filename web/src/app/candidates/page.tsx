@@ -1,0 +1,8 @@
+import type { Metadata } from "next";
+import { Footer } from "@/components/layout/footer";
+import { Header } from "@/components/layout/header";
+import { MarketingShell, PageHero } from "@/components/marketing/page-hero";
+import { ButtonLink } from "@/components/ui/button";
+import { routes } from "@/config/routes";
+export const metadata: Metadata = { title: "Find jobs", description: "Create a skills-first KAAM profile and receive relevant employer interest." };
+export default function CandidatesPage() { return <><Header/><main><PageHero eyebrow="For candidates" title="Let your skills open the right doors.">Create one clear work profile, control your details, and review employer interest before you connect.</PageHero><MarketingShell><div className="grid gap-5 md:grid-cols-3">{[["A profile that works hard", "Add your skills, experience and work preferences in simple steps."],["Interest before contact", "You decide whether to accept an employer opportunity."],["Your data, handled carefully", "Private contact and identity information remains protected by KAAM rules."]].map(([title, copy])=><article className="rounded-2xl border border-[#eadde3] p-6" key={title}><h2 className="text-xl font-bold text-[#201925]">{title}</h2><p className="mt-3 leading-7 text-[#66616f]">{copy}</p></article>)}</div><div className="mt-10 rounded-2xl bg-[#201925] p-7 text-white sm:p-10"><h2 className="text-2xl font-bold">Create your KAAM profile today.</h2><p className="mt-2 max-w-xl text-white/75">Start on the web now. Complete what you can, then return any time to keep your profile current.</p><ButtonLink href={`${routes.register}?role=candidate`} className="mt-6">Get started</ButtonLink></div></MarketingShell></main><Footer/></> }

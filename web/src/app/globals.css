@@ -36,6 +36,22 @@ a {
   text-decoration: none;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  [aria-busy="true"] .rounded.bg-\[\#eadde3\]\/80 {
+    animation: kaam-skeleton-pulse 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes kaam-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.58;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 button,
 input,
 select {

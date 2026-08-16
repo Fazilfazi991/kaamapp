@@ -29,7 +29,7 @@ export function EmployerCandidateCard({ candidate }: { candidate: EmployerCandid
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-lg font-semibold text-[#201925]">{candidate.displayName}</h2>
-            {candidate.isVerified ? <StatusBadge tone="success">Identity verified</StatusBadge> : null}
+            {candidate.isVerified ? <StatusBadge tone="success">KAAM Verified</StatusBadge> : null}
             {candidate.interestStatus ? (
               <StatusBadge tone={interestTone(candidate.interestStatus)}>
                 {interestStatusLabel(candidate.interestStatus)}

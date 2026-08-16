@@ -56,6 +56,7 @@ export type AdminCandidateRow = {
   verified_at: string | null;
   verified_by: string | null;
   verification_notes: string | null;
+  candidate_message: string | null;
   verification_updated_at: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -80,6 +81,8 @@ export type CandidateVerificationAuditEvent = {
   new_status: CandidateVerificationStatus;
   action: string;
   notes: string | null;
+  notification_id: string | null;
+  push_outbox_id: string | null;
   created_at: string | null;
   admin?: Pick<AdminProfileRow, "full_name" | "email"> | null;
 };
@@ -88,6 +91,7 @@ export type AdminCandidateDocumentSummary = {
   id: string;
   candidate_id: string;
   passport_file_url?: string | null;
+  passport_back_file_url?: string | null;
   visa_file_url?: string | null;
   passport_status: string;
   visa_status: string;
@@ -106,6 +110,7 @@ export type CandidateDocumentVersionRow = {
   candidate_id: string;
   document_type: CandidateDocumentType;
   file_path: string;
+  file_paths?: { front?: string; back?: string } | null;
   version_number: number;
   status: string;
   is_active: boolean;
@@ -127,6 +132,7 @@ export type CandidateDocumentQueueRow = {
   candidate_id: string;
   document_type: CandidateDocumentType;
   file_path: string | null;
+  file_paths?: { front?: string; back?: string } | null;
   version_number: number;
   status: string;
   is_active: boolean;

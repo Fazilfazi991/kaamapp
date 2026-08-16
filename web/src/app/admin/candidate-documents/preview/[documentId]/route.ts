@@ -8,15 +8,27 @@ function previewUnavailable(status = 404) {
   );
 }
 
-export async function GET(_request: Request, { params }: { params: Promise<{ documentId: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ documentId: string }> }) {
   await requireAdmin();
   const { documentId } = await params;
   const document = await loadCandidateDocument(documentId);
-  if (!document || !document.file_path) {
+  if (!document) {
     return previewUnavailable();
   }
 
-  const signedUrl = await createSignedPreview({ bucket_id: "kaam-private", file_path: document.file_path });
+  const requestedSide = new URL(request.url).searchParams.get("side");
+  if (requestedSide && requestedSide !== "front" && requestedSide !== "back") {
+    return previewUnavailable(400);
+  }
+  const filePath =
+    document.document_type === "passport"
+      ? requestedSide === "back"
+        ? document.file_paths?.back
+        : document.file_paths?.front ?? document.file_path
+      : document.file_path;
+  if (!filePath) return previewUnavailable();
+
+  const signedUrl = await createSignedPreview({ bucket_id: "kaam-private", file_path: filePath });
   if (!signedUrl) return previewUnavailable();
   const file = await fetch(signedUrl);
   if (!file.ok || !file.body) return previewUnavailable();

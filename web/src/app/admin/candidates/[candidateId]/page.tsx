@@ -51,7 +51,7 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             <Field label={candidate.verification_status === "verified" ? "Verified by" : "Reviewed by"} value={reviewer ?? "Not yet verified by an administrator"} />
             <Field label={candidate.verification_status === "verified" ? "Verified on" : "Last verification action"} value={formatDate(candidate.verification_updated_at)} />
-            <Field label={candidate.verification_status === "rejected" ? "Rejection reason" : "Verification notes"} value={candidate.verification_notes ?? "No notes recorded"} />
+            <Field label={candidate.verification_status === "rejected" || candidate.verification_status === "reverification_required" ? "Reason shown to candidate" : "Internal verification notes"} value={candidate.candidate_message ?? candidate.verification_notes ?? "No notes recorded"} />
           </div>
         </div>
         <CandidateVerificationActions candidateId={candidate.id} canVerify={eligibility.canVerify} blockers={eligibility.blockers} />
@@ -71,7 +71,7 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
         {notifications.length ? (notifications as CandidateNotification[]).map((item) => <p key={item.id}>{item.created_at?.slice(0, 10)} - {item.title}: {item.body}</p>) : <p>No candidate document notifications recorded.</p>}
       </DetailSection>
       <DetailSection title="Manual verification audit history">
-        {verificationAudit.length ? verificationAudit.map((item) => <p key={item.id}>{formatDate(item.created_at)} - {item.action === "candidate_verified" ? "Candidate manually verified" : item.action === "candidate_verification_rejected" ? "Candidate verification rejected" : "Candidate marked for reverification"}{item.admin?.full_name ? ` by ${item.admin.full_name}` : ""}{item.notes ? `: ${item.notes}` : ""}</p>) : <p>No manual verification actions recorded.</p>}
+        {verificationAudit.length ? verificationAudit.map((item) => <p key={item.id}>{formatDate(item.created_at)} - {item.action === "candidate_verified" ? "Candidate manually verified" : item.action === "candidate_verification_rejected" ? "Candidate verification rejected" : "Candidate marked for reverification"}{item.admin?.full_name ? ` by ${item.admin.full_name}` : ""}{item.notification_id ? " — in-app notification created" : ""}{item.push_outbox_id ? ", push queued" : ""}</p>) : <p>No manual verification actions recorded.</p>}
       </DetailSection>
     </>
   );

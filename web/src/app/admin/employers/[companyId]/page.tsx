@@ -44,7 +44,7 @@ export default async function AdminEmployerDetailPage({ params }: { params: Prom
         )) : <p>No employer documents submitted.</p>}
       </DetailSection>
       <DetailSection title="Company approval">
-        <p>Company approval requires a complete company profile and an approved trade licence.</p>
+        <p>Company approval requires a complete company profile. Verification documents, if present, are historical review evidence and are optional.</p>
         <p className="text-sm text-[#66616f]">{approvalState.reason}</p>
         {company.is_verified ? (
           <p><AdminStatus status="approved" /> Company is already approved.</p>

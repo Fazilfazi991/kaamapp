@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { cache } from "react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { routes } from "@/config/routes";
 import {
@@ -83,7 +84,7 @@ export async function getAuthenticatedProfile() {
   return { user, profile };
 }
 
-export async function requireRole(role: AppAccountRole): Promise<AccountContext> {
+export const requireRole = cache(async function requireRole(role: AppAccountRole): Promise<AccountContext> {
   const supabase = await createServerSupabaseClient();
   const currentPath = await currentPathFromHeaders();
   const {
@@ -127,7 +128,7 @@ export async function requireRole(role: AppAccountRole): Promise<AccountContext>
     hasCandidateProfile: snapshot.hasCandidateProfile,
     hasEmployerProfile: snapshot.hasEmployerProfile,
   };
-}
+});
 
 export async function redirectAuthenticatedAuthPage({
   allowMissingProfile = false,

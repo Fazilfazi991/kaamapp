@@ -5,12 +5,15 @@ import { AuthForm } from "@/features/auth/auth-form";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { redirectAuthenticatedAuthPage } from "@/lib/auth/session";
 import { supabaseConfigError } from "@/lib/supabase/env";
+import type { AppAccountRole } from "@/lib/auth/routing";
 
-export default async function RegisterPage() {
+export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ role?: string }> }) {
   const configError = supabaseConfigError();
   if (!configError) {
     await redirectAuthenticatedAuthPage({ allowMissingProfile: true });
   }
+  const requestedRole = (await searchParams).role;
+  const initialRole: AppAccountRole = requestedRole === "employer" ? "employer" : "candidate";
 
   return (
     <>
@@ -21,7 +24,7 @@ export default async function RegisterPage() {
           description="Choose candidate or employer, then verify your email with OTP. Phone OTP and passwords are intentionally not used in this foundation."
         />
         <Suspense fallback={<LoadingIndicator label="Preparing registration" />}>
-          <AuthForm mode="register" configError={configError} />
+          <AuthForm mode="register" initialRole={initialRole} configError={configError} />
         </Suspense>
       </main>
     </>

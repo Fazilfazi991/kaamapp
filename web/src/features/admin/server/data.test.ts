@@ -69,6 +69,10 @@ describe("admin candidate document queue", () => {
           candidate_id: "candidate-1",
           document_type: "passport",
           file_path: "candidate-1/passport.pdf",
+          file_paths: {
+            front: "candidate-1/passport.pdf",
+            back: "candidate-1/passport-back.jpg",
+          },
           version_number: 1,
           status: "pending_verification",
           is_active: true,
@@ -102,6 +106,10 @@ describe("admin candidate document queue", () => {
       status: "pending_verification",
       expiry_date: "2030-01-01",
       source: "version",
+      file_paths: {
+        front: "candidate-1/passport.pdf",
+        back: "candidate-1/passport-back.jpg",
+      },
     });
   });
 
@@ -113,6 +121,7 @@ describe("admin candidate document queue", () => {
           id: "summary-1",
           candidate_id: "candidate-1",
           passport_file_url: "candidate-1/passport.pdf",
+          passport_back_file_url: "candidate-1/passport-back.jpg",
           visa_file_url: null,
           passport_status: "pending",
           visa_status: "not_uploaded",
@@ -133,6 +142,10 @@ describe("admin candidate document queue", () => {
       source: "summary",
       status: "pending_verification",
       version_number: 1,
+      file_paths: {
+        front: "candidate-1/passport.pdf",
+        back: "candidate-1/passport-back.jpg",
+      },
     });
   });
 

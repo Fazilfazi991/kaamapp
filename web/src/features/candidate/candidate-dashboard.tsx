@@ -19,11 +19,13 @@ export function CandidateDashboard({
   profile,
   candidate,
   membership,
+  hasPassport,
   counts,
 }: {
   profile: ProfileRow | null;
   candidate: CandidateProfileRow | null;
   membership: CandidateMembershipRow | null;
+  hasPassport: boolean;
   counts?: {
     pendingInterests: number;
     acceptedInterests: number;
@@ -31,7 +33,7 @@ export function CandidateDashboard({
     unreadMessages: number;
   };
 }) {
-  const completion = candidateCompletion({ profile, candidate });
+  const completion = candidateCompletion({ profile, candidate, hasPassport });
 
   return (
     <div className="grid gap-5">
@@ -60,7 +62,7 @@ export function CandidateDashboard({
         <StatCard
           title="Profile completion"
           value={`${completion.percentage}%`}
-          note="Complete your headline, location, nationality, and up to three skills."
+          note="Complete your details, skills, work preferences and required identity document."
           tone={completion.isComplete ? "success" : "warning"}
         />
         <StatCard
@@ -107,6 +109,8 @@ export function CandidateDashboard({
         <h2 className="text-lg font-semibold text-[#201925]">Selected skills</h2>
         <p className="mt-2 text-sm text-[#66616f]">{listSummary(candidate?.skills)}</p>
       </section>
+
+      {!completion.isComplete ? <section className="rounded-lg border border-[#eadde3] bg-[#fffafc] p-5"><h2 className="text-lg font-semibold text-[#201925]">Still required</h2><div className="mt-3 flex flex-wrap gap-2">{completion.missingSections.map((section) => <a key={section.id} href={section.href} className="focus-ring rounded-lg border border-[#e53670] bg-white px-3 py-2 text-sm font-semibold text-[#bc1f55]">Complete {section.label}</a>)}</div></section> : null}
 
       <div className="grid gap-4 md:grid-cols-2">
         <EmptyStateCard

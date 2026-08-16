@@ -1,17 +1,18 @@
+import { Suspense } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { employerNavigation } from "@/config/navigation";
-import { requireRole } from "@/lib/auth/session";
+import EmployerLoading from "./loading";
+import { EmployerRoleGate } from "./employer-role-gate";
 
-export default async function EmployerLayout({ children }: { children: React.ReactNode }) {
-  const account = await requireRole("employer");
-
+export default function EmployerLayout({ children }: { children: React.ReactNode }) {
   return (
     <DashboardShell
-      account={{ email: account.email, role: account.role }}
       items={employerNavigation}
       title="Employer"
     >
-      {children}
+      <Suspense fallback={<EmployerLoading />}>
+        <EmployerRoleGate>{children}</EmployerRoleGate>
+      </Suspense>
     </DashboardShell>
   );
 }

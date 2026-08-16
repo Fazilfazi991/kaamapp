@@ -17,17 +17,17 @@ export default async function EmployerProfilePage() {
             <h2 className="text-lg font-semibold text-[#201925]">{company?.company_name ?? "Company profile not created"}</h2>
             <p className="mt-1 text-sm text-[#66616f]">{[company?.industry, company?.city, company?.country].filter(Boolean).join(" - ") || "Complete onboarding to enable employer workflows."}</p>
           </div>
-          <StatusBadge tone={company?.is_verified ? "success" : "warning"}>{company?.is_verified ? "Verified" : "Review pending"}</StatusBadge>
+          <StatusBadge tone={company?.is_verified ? "success" : "neutral"}>{company?.is_verified ? "Verified" : "Not verified"}</StatusBadge>
         </div>
         <dl className="mt-5 grid gap-4 text-sm md:grid-cols-2">
-          <div><dt className="font-semibold text-[#3b3340]">Trade licence</dt><dd className="mt-1 text-[#66616f]">{company?.trade_license_number ? "Saved" : "Missing"}</dd></div>
+          <div><dt className="font-semibold text-[#3b3340]">Trade licence</dt><dd className="mt-1 text-[#66616f]">{company?.trade_license_number ? "Saved" : "Not provided"}</dd></div>
           <div><dt className="font-semibold text-[#3b3340]">Company size</dt><dd className="mt-1 text-[#66616f]">{company?.company_size ?? "Not set"}</dd></div>
           <div><dt className="font-semibold text-[#3b3340]">Contact person</dt><dd className="mt-1 text-[#66616f]">{company?.contact_person ?? "Not set"}</dd></div>
           <div><dt className="font-semibold text-[#3b3340]">Completion</dt><dd className="mt-1 text-[#66616f]">{completion.percentage}%</dd></div>
         </dl>
         <div className="mt-5 flex flex-wrap gap-3">
           <ButtonLink href="/employer/profile/edit">Edit Company Profile</ButtonLink>
-          <ButtonLink href="/employer/documents" variant="secondary">Manage Documents</ButtonLink>
+          <ButtonLink href="/employer/documents" variant="secondary">View Document History</ButtonLink>
           <ButtonLink href="/employer/dashboard" variant="ghost">Return to Dashboard</ButtonLink>
         </div>
       </section>

@@ -36,8 +36,8 @@ export function EmployerDashboard({
                 : "Create a company profile before contacting candidates."}
             </p>
           </div>
-          <StatusBadge tone={company?.is_verified ? "success" : "warning"}>
-            {company?.is_verified ? "Verified" : "Review pending"}
+          <StatusBadge tone={company?.is_verified ? "success" : "neutral"}>
+            {company?.is_verified ? "Verified" : "Not verified"}
           </StatusBadge>
         </div>
         {!access.ok ? (
@@ -46,7 +46,7 @@ export function EmployerDashboard({
           <p className="mt-4 text-sm text-[#66616f]">{access.warning}</p>
         ) : null}
         <p className="mt-4 text-sm text-[#3b3340]">
-          Profile completion: {completion.percentage}% - Documents: {completion.documentsComplete ? "Uploaded" : "Required"}
+          Profile completion: {completion.percentage}% - Verification is optional
         </p>
         <div className="mt-5">
           <ButtonLink href={completion.isComplete ? routes.employerSearch : routes.employerOnboarding}>

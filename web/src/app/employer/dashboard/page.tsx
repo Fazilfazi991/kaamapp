@@ -1,18 +1,14 @@
 import { PageTitle } from "@/components/layout/page-title";
 import { AuthNotice } from "@/components/ui/auth-notice";
 import { EmployerDashboard } from "@/features/employer/employer-dashboard";
-import { loadEmployerDashboardSummary } from "@/features/employer/server/data";
-import { loadEmployerCompanyBundle } from "@/features/employer/server/profile-data";
+import { loadEmployerDashboard } from "@/features/employer/server/data";
 
 export default async function EmployerDashboardPage({
   searchParams,
 }: {
   searchParams: Promise<{ authNotice?: string }>;
 }) {
-  const [{ access, counts }, { documents }] = await Promise.all([
-    loadEmployerDashboardSummary(),
-    loadEmployerCompanyBundle(),
-  ]);
+  const { access, counts, documents } = await loadEmployerDashboard();
   const params = await searchParams;
 
   return (

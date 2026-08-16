@@ -13,6 +13,8 @@ export default async function AdminCandidateDocumentDetailPage({ params }: { par
   if (!document) notFound();
   const reviewState = getCandidateDocumentReviewState(document);
   const previewUrl = `/admin/candidate-documents/preview/${document.id}`;
+  const passportFrontPath = document.file_paths?.front ?? document.file_path;
+  const passportBackPath = document.file_paths?.back;
 
   return (
     <>
@@ -30,12 +32,35 @@ export default async function AdminCandidateDocumentDetailPage({ params }: { par
         </div>
       </DetailSection>
       <DetailSection title="Private preview">
-        <SecureDocumentViewer
-          documentKey={document.id}
-          kind={secureDocumentPreviewKind(document.file_path)}
-          previewUrl={document.file_path ? previewUrl : null}
-          title={`${document.document_type} document preview`}
-        />
+        {document.document_type === "passport" ? (
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-3">
+              <h3 className="font-semibold">Current Passport Front</h3>
+              <SecureDocumentViewer
+                documentKey={`${document.id}-front`}
+                kind={secureDocumentPreviewKind(passportFrontPath)}
+                previewUrl={passportFrontPath ? `${previewUrl}?side=front` : null}
+                title="Current Passport Front"
+              />
+            </div>
+            <div className="grid gap-3">
+              <h3 className="font-semibold">Current Passport Back</h3>
+              <SecureDocumentViewer
+                documentKey={`${document.id}-back`}
+                kind={secureDocumentPreviewKind(passportBackPath)}
+                previewUrl={passportBackPath ? `${previewUrl}?side=back` : null}
+                title="Current Passport Back"
+              />
+            </div>
+          </div>
+        ) : (
+          <SecureDocumentViewer
+            documentKey={document.id}
+            kind={secureDocumentPreviewKind(document.file_path)}
+            previewUrl={document.file_path ? previewUrl : null}
+            title={`${document.document_type} document preview`}
+          />
+        )}
       </DetailSection>
       <DetailSection title="Review action">
         <p>{reviewState.message}</p>

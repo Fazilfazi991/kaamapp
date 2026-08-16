@@ -99,60 +99,51 @@ describe("admin review validation", () => {
     expect(statusTone("approved")).toBe("success");
   });
 
-  it("requires actual employer document prerequisites before company approval", () => {
+  it("does not require employer documents before company approval", () => {
     expect(
       canApproveCompany({
         companyStatus: "draft",
-        requiredDocumentStatuses: {
-          "trade-license": "approved",
-        },
+        requiredDocumentStatuses: {},
       }),
     ).toBe(true);
     expect(
       canApproveCompany({
         companyStatus: "draft",
-        requiredDocumentStatuses: {
-          "trade-license": "approved",
-          "authorization-letter": "pending",
-        },
+        requiredDocumentStatuses: { "authorization-letter": "pending" },
       }),
     ).toBe(true);
     expect(
       canApproveCompany({
         companyStatus: "blocked",
-        requiredDocumentStatuses: {
-          "trade-license": "approved",
-          "authorization-letter": "approved",
-        },
+        requiredDocumentStatuses: {},
       }),
     ).toBe(false);
   });
 
-  it("company can be approved with approved trade licence and no authorization letter", () => {
+  it("company can be approved with no verification documents", () => {
     const state = getEmployerCompanyApprovalState({
       companyStatus: "draft",
       profileComplete: true,
-      documentStatuses: { "trade-license": "approved" },
+      documentStatuses: {},
     });
     expect(state.canApprove).toBe(true);
   });
 
-  it("pending authorization letter does not block approval when optional", () => {
+  it("historical pending documents do not block approval", () => {
     const state = getEmployerCompanyApprovalState({
       companyStatus: "draft",
       profileComplete: true,
       documentStatuses: {
-        "trade-license": "approved",
         "authorization-letter": "pending",
       },
     });
     expect(state.canApprove).toBe(true);
   });
 
-  it("missing, pending, or rejected trade licence blocks company approval", () => {
-    expect(getEmployerCompanyApprovalState({ companyStatus: "draft", profileComplete: true, documentStatuses: {} }).reason).toBe("Trade licence not uploaded");
-    expect(getEmployerCompanyApprovalState({ companyStatus: "draft", profileComplete: true, documentStatuses: { "trade-license": "pending" } }).reason).toBe("Trade licence pending review");
-    expect(getEmployerCompanyApprovalState({ companyStatus: "draft", profileComplete: true, documentStatuses: { "trade-license": "rejected" } }).reason).toBe("Trade licence rejected");
+  it("missing, pending, or rejected trade licences do not block company approval", () => {
+    expect(getEmployerCompanyApprovalState({ companyStatus: "draft", profileComplete: true, documentStatuses: {} }).canApprove).toBe(true);
+    expect(getEmployerCompanyApprovalState({ companyStatus: "draft", profileComplete: true, documentStatuses: { "trade-license": "pending" } }).canApprove).toBe(true);
+    expect(getEmployerCompanyApprovalState({ companyStatus: "draft", profileComplete: true, documentStatuses: { "trade-license": "rejected" } }).canApprove).toBe(true);
   });
 
   it("company profile completeness is checked before approval", () => {
@@ -165,7 +156,7 @@ describe("admin review validation", () => {
       companyStatus: "active",
       isVerified: true,
       profileComplete: true,
-      documentStatuses: { "trade-license": "approved" },
+      documentStatuses: {},
     });
     expect(state.canApprove).toBe(false);
     expect(state.reason).toBe("Company is already approved");

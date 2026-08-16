@@ -97,7 +97,7 @@ export function candidateMatchesFilters(row: Record<string, unknown>, filters: C
     if (!locationText.includes(region.toLowerCase())) return false;
   }
   if (filters.availability && normalize(String(row.availability ?? "")) !== normalize(filters.availability)) return false;
-  if (filters.verified && row.is_verified !== true) return false;
+  if (filters.verified && String(row.verification_status ?? "").trim().toLowerCase() !== "verified") return false;
   if (filters.experience) {
     const years = Number(row.experience_years ?? 0);
     if (filters.experience === "Fresher" && years > 0) return false;

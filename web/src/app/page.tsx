@@ -3,98 +3,65 @@ import { Header } from "@/components/layout/header";
 import { ButtonLink } from "@/components/ui/button";
 import { routes } from "@/config/routes";
 
-const categories = [
-  "Construction",
-  "Cleaning",
-  "Hospitality",
-  "Driving and Delivery",
-  "Maintenance",
-  "Security",
-  "Retail",
-  "Domestic Work",
-];
+const categories = ["Construction", "Hospitality", "Logistics", "Retail", "Manufacturing", "Automotive", "Cleaning & Facilities", "Healthcare Support"];
 
 export default function HomePage() {
   return (
     <>
       <Header />
       <main>
-        <section className="bg-[#fffafc]">
-          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-[1.1fr_0.9fr] md:py-16 lg:px-8">
+        <section className="bg-[#fff6f9]">
+          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 sm:px-6 md:grid-cols-[1.1fr_0.9fr] md:py-18 lg:px-8">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#bc1f55]">
-                UAE and India hiring
+                Recruitment, made mutual
               </p>
               <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-[#201925] sm:text-5xl">
-                Find work faster. Hire trusted workers with confidence.
+                Jobs shouldn&apos;t depend on luck.
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-[#5e5662]">
-                Kaam connects verified candidates and employers through simple profiles,
-                controlled contact sharing, and practical matching for real jobs.
+                KAAM connects workers and employers based on skills, requirements and mutual interest.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <ButtonLink href={routes.candidateDashboard}>Find Work</ButtonLink>
-                <ButtonLink href={routes.employerDashboard} variant="secondary">
-                  Hire Talent
-                </ButtonLink>
-                <ButtonLink href={routes.login} variant="ghost">
-                  Login
+                <ButtonLink href={routes.candidates}>Find jobs</ButtonLink>
+                <ButtonLink href={routes.employers} variant="secondary">
+                  Hire workers
                 </ButtonLink>
               </div>
             </div>
-            <div className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
-              <h2 className="text-lg font-semibold text-[#201925]">Main worker categories</h2>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                {categories.map((category) => (
-                  <div key={category} className="rounded-lg bg-[#f7f2f5] p-4 text-sm font-semibold text-[#342b38]">
-                    {category}
-                  </div>
-                ))}
-              </div>
+            <div className="rounded-2xl border border-[#eadde3] bg-white p-5 shadow-[0_18px_45px_rgba(77,36,54,.12)]">
+              <div className="flex items-center justify-between"><div><h2 className="text-lg font-semibold text-[#201925]">Amina Noor</h2><p className="mt-1 text-sm text-[#66616f]">Hospitality supervisor · Dubai</p></div><span className="rounded-full bg-[#e6f6ee] px-3 py-1 text-xs font-bold text-[#167347]">Profile ready</span></div>
+              <div className="mt-5 border-y border-[#f0e5ea] py-4"><p className="text-xs font-bold uppercase tracking-wider text-[#766b74]">Key skills</p><div className="mt-2 flex flex-wrap gap-2">{["Guest service", "Team leadership", "Food safety"].map((skill) => <span className="rounded-full bg-[#fff0f5] px-3 py-1.5 text-sm font-medium text-[#922144]" key={skill}>{skill}</span>)}</div></div>
+              <div className="mt-5 rounded-xl bg-[#201925] p-4 text-white"><p className="font-semibold">Employer interest</p><p className="mt-1 text-sm text-white/70">A role matching your profile</p></div>
             </div>
+          </div>
+        </section>
+
+        <section className="bg-[#f8f5f7]">
+          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-2 lg:px-8">
+            <Journey
+              title="How candidates use Kaam"
+              steps={["Create your profile", "Add skills & experience", "Receive employer interest", "Accept the opportunity", "Get matched"]}
+            />
+            <Journey
+              title="How employers use Kaam"
+              steps={["Create company profile", "Define your requirement", "Discover candidates", "Show interest", "Connect after matching"]}
+            />
           </div>
         </section>
 
         <section className="bg-white">
-          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-2 lg:px-8">
-            <Journey
-              title="How candidates use Kaam"
-              steps={["Create profile", "Select skills", "Complete verification", "Get matched with employers"]}
-            />
-            <Journey
-              title="How employers use Kaam"
-              steps={["Create company profile", "Search workers", "Send interest", "Connect after matching"]}
-            />
-          </div>
-        </section>
-
-        <section className="bg-[#f7f2f5]">
-          <div className="mx-auto grid max-w-6xl gap-5 px-4 py-12 sm:px-6 md:grid-cols-4 lg:px-8">
-            {[
-              ["Profile verification", "Candidates build trusted work profiles before visibility."],
-              ["Document review", "Identity and support documents remain controlled."],
-              ["Contact sharing", "Private contact details are released only through matching rules."],
-              ["Regional support", "The product is shaped for UAE and India hiring needs."],
-            ].map(([title, text]) => (
-              <article key={title} className="rounded-lg bg-white p-5 shadow-sm">
-                <h2 className="font-semibold text-[#201925]">{title}</h2>
-                <p className="mt-2 text-sm leading-6 text-[#66616f]">{text}</p>
-              </article>
-            ))}
-          </div>
+          <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8"><div className="flex items-end justify-between gap-4"><div><p className="text-sm font-bold uppercase tracking-[.14em] text-[#bc1f55]">Built for real work</p><h2 className="mt-2 text-3xl font-bold text-[#201925]">Find a place for your skills.</h2></div><ButtonLink href={routes.candidates} variant="ghost">Explore all roles</ButtonLink></div><div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">{categories.map((category) => <div key={category} className="rounded-xl border border-[#eadde3] bg-[#fffafc] p-4 text-sm font-semibold text-[#342b38]">{category}</div>)}</div></div>
         </section>
 
         <section className="bg-[#201925]">
           <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-10 text-white sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
             <div>
-              <h2 className="text-2xl font-bold">Ready to start with Kaam?</h2>
-              <p className="mt-2 text-white/75">Choose the path that matches your account.</p>
+              <p className="text-sm font-bold uppercase tracking-[.14em] text-[#ff9dbe]">KAAM mobile app</p><h2 className="mt-2 text-2xl font-bold">Coming soon</h2>
+              <p className="mt-2 text-white/75">Use KAAM on the web today. The KAAM mobile app is coming soon for an even faster experience.</p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href={routes.candidateDashboard}>Find Work</ButtonLink>
-              <ButtonLink href={routes.employerDashboard} variant="secondary">
-                Hire Talent
-              </ButtonLink>
+              <ButtonLink href={routes.register}>Create your KAAM profile</ButtonLink>
             </div>
           </div>
         </section>

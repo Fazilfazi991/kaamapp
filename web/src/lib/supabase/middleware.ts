@@ -57,7 +57,10 @@ export async function updateSession(request: NextRequest) {
   }
 
   const isAuthPage = pathname === routes.login || pathname === routes.register;
-  if (user && (isProtected || isAuthPage || isBlockedPage)) {
+  // Protected routes perform their role/status check in their server layout or page.
+  // Keeping the proxy to session renewal and unauthenticated redirects lets the
+  // application shell start streaming without a second profile request.
+  if (user && (isAuthPage || isBlockedPage)) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role,status")

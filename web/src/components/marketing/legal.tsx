@@ -1,0 +1,1 @@
+export function Legal({ sections }: { sections: Array<[string, string]> }) { return <div className="max-w-3xl space-y-7">{sections.map(([title, copy]) => <section key={title}><h2 className="text-xl font-bold text-[#201925]">{title}</h2><p className="mt-2 leading-7 text-[#5e5662]">{copy}</p></section>)}</div>; }

@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 export function DashboardShell({
   items,
   title,
-  account,
+  account = { email: null, role: title },
   children,
 }: {
   items: Array<{ href: string; label: string }>;
   title: string;
-  account: { email: string | null; role: string };
+  account?: { email: string | null; role: string };
   children: React.ReactNode;
 }) {
   return (
@@ -24,7 +24,7 @@ export function DashboardShell({
               Signed in
             </p>
             <p className="mt-1 text-sm font-semibold text-[#201925]">
-              {account.email ?? "Email unavailable"}
+              {account.email ?? "Your KAAM workspace"}
             </p>
           </div>
           <div className="flex items-center gap-3">

@@ -16,12 +16,14 @@ export function ProfileSummary({
   profile,
   candidate,
   membership,
+  hasPassport,
 }: {
   profile: ProfileRow | null;
   candidate: CandidateProfileRow | null;
   membership?: CandidateMembershipRow | null;
+  hasPassport?: boolean;
 }) {
-  const completion = candidateCompletion({ profile, candidate });
+  const completion = candidateCompletion({ profile, candidate, hasPassport });
   return (
     <div className="grid gap-5">
       <section className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">

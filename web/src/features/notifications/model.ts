@@ -31,6 +31,7 @@ const safeRoutesByRole: Record<UserRole, Set<string>> = {
     routes.candidateMatches,
     routes.candidateMessages,
     routes.candidateDocuments,
+    routes.candidateProfile,
   ]),
   employer: new Set([
     routes.employerNotifications,
@@ -72,6 +73,7 @@ export function safeNotificationHref({
     if (type === "match_created") return routes.candidateMatches;
     if (type === "new_message") return routes.candidateMessages;
     if (candidateDocumentTypes.has(type)) return routes.candidateDocuments;
+    if (candidateVerificationTypes.has(type)) return routes.candidateProfile;
   }
 
   if (role === "employer") {
@@ -102,6 +104,12 @@ const candidateDocumentTypes = new Set([
   "candidate_document_approved",
   "candidate_document_rejected",
   "candidate_document_resubmission_requested",
+]);
+
+const candidateVerificationTypes = new Set([
+  "candidate_verification_approved",
+  "candidate_verification_rejected",
+  "candidate_reverification_required",
 ]);
 
 const employerInterestTypes = new Set([

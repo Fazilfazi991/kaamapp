@@ -53,6 +53,8 @@ export type PublicCandidateSearchRow = {
   visa_status: string | null;
   profile_photo_url: string | null;
   bio: string | null;
+  verification_status: string | null;
+  verified_at: string | null;
   is_verified: boolean | null;
   created_at: string | null;
   updated_at: string | null;
@@ -84,6 +86,7 @@ export type EmployerCandidateCardModel = {
   languages: string[];
   profilePhotoUrl: string | null;
   isVerified: boolean;
+  verificationStatus: string;
   isShortlisted: boolean;
   interestStatus: string | null;
   isMatched: boolean;

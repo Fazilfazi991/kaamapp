@@ -24,7 +24,6 @@ export function validateCompanyInfo(values: {
   tradeLicenseNumber: string;
 }) {
   if (values.companyName.length < 2) return { ok: false as const, error: "Company name is required." };
-  if (!values.tradeLicenseNumber.trim()) return { ok: false as const, error: "Trade licence number is required." };
   if (!employerIndustryOptions.includes(values.industry)) return { ok: false as const, error: "Select a valid industry." };
   if (!companySizeOptions.includes(values.companySize)) return { ok: false as const, error: "Select a valid company size." };
   return { ok: true as const };
