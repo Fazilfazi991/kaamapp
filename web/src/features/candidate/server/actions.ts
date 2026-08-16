@@ -31,6 +31,12 @@ function safeError(message: string): never {
   throw new Error(message);
 }
 
+export type ExperienceActionState = {
+  error: string | null;
+};
+
+export const initialExperienceActionState: ExperienceActionState = { error: null };
+
 async function candidateClient() {
   const account = await requireRole("candidate");
   const supabase = await createServerSupabaseClient();
@@ -139,7 +145,10 @@ export async function saveLocationDetails(formData: FormData) {
   redirect(String(formData.get("next") ?? routes.candidateOnboardingExperience));
 }
 
-export async function saveExperienceDetails(formData: FormData) {
+export async function saveExperienceDetails(
+  _previousState: ExperienceActionState,
+  formData: FormData,
+): Promise<ExperienceActionState> {
   const availability = text(formData, "availability");
   const experienceYears = numberOrNull(text(formData, "experienceYears"));
   const expectedSalaryMin = intOrNull(text(formData, "expectedSalaryMin"));
@@ -150,16 +159,16 @@ export async function saveExperienceDetails(formData: FormData) {
   const hideEmailBeforeMatch = formData.get("hideEmailBeforeMatch") === "on";
   const isVisible = formData.get("isVisible") === "on";
 
-  if (!availability) safeError("Availability is required.");
+  if (!availability) return { error: "Availability is required." };
   if (experienceYears !== null && (experienceYears < 0 || experienceYears > 60)) {
-    safeError("Enter a valid experience value.");
+    return { error: "Enter a valid experience value." };
   }
   if (
     expectedSalaryMin !== null &&
     expectedSalaryMax !== null &&
     expectedSalaryMin > expectedSalaryMax
   ) {
-    safeError("Minimum salary cannot be higher than maximum salary.");
+    return { error: "Minimum salary cannot be higher than maximum salary." };
   }
 
   const { account, supabase } = await ensureCandidateRow();
@@ -185,7 +194,9 @@ export async function saveExperienceDetails(formData: FormData) {
       details: error.details,
       hint: error.hint,
     });
-    safeError("Could not save experience details.");
+    return {
+      error: "We couldn’t save your experience details. Please try again.",
+    };
   }
 
   revalidateCandidatePages();

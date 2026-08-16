@@ -1,3 +1,6 @@
+"use client";
+
+import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label, SelectField, TextInput } from "@/components/ui/form";
 import { routes } from "@/config/routes";
@@ -6,7 +9,10 @@ import {
   languages,
   visaStatusOptions,
 } from "@/features/candidate/constants";
-import { saveExperienceDetails } from "@/features/candidate/server/actions";
+import {
+  initialExperienceActionState,
+  saveExperienceDetails,
+} from "@/features/candidate/server/actions";
 import type { CandidateProfileRow } from "@/types/domain";
 
 export function ExperienceForm({
@@ -16,9 +22,13 @@ export function ExperienceForm({
   candidate: CandidateProfileRow | null;
   next?: string;
 }) {
+  const [state, formAction, pending] = useActionState(
+    saveExperienceDetails,
+    initialExperienceActionState,
+  );
   const selectedLanguages = new Set(candidate?.languages ?? []);
   return (
-    <form action={saveExperienceDetails} className="grid gap-4">
+    <form action={formAction} className="grid gap-4">
       <input type="hidden" name="next" value={next} />
       <label className="grid gap-2">
         <Label htmlFor="availability">Availability *</Label>
@@ -129,8 +139,15 @@ export function ExperienceForm({
           Show my eligible profile to employers.
         </label>
       </fieldset>
+      {state.error ? (
+        <p role="alert" className="rounded-lg border border-[#f1b6c8] bg-[#fff4f7] p-3 text-sm font-medium text-[#8f1741]">
+          {state.error}
+        </p>
+      ) : null}
       <div className="sticky bottom-16 flex gap-3 bg-white/95 py-3 sm:static">
-        <Button type="submit">Save and continue</Button>
+        <Button type="submit" disabled={pending}>
+          {pending ? "Saving..." : "Save and continue"}
+        </Button>
       </div>
     </form>
   );
