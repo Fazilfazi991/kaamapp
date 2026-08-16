@@ -168,25 +168,22 @@ export function AuthForm({
     let backendRole = roleResult.data?.role ?? null;
     let backendStatus = roleResult.data?.status ?? null;
     if (!backendRole && mode === "register") {
-      const insertResult = await supabase.from("profiles").insert({
-        id: data.user.id,
-        role,
-        email: data.user.email,
-        status: "active",
-      });
+      // This is the shared mobile/web account bootstrap contract. It obtains
+      // the authenticated user from auth.uid(), creates exactly one profile,
+      // and creates the candidate shell when appropriate. Do not duplicate
+      // the profile insert in the browser.
+      const bootstrap = await supabase
+        .rpc("bootstrap_user_profile", { selected_role: role })
+        .maybeSingle<{ role: UserRole; status: string | null }>();
 
-      if (insertResult.error) {
-        const retry = await supabase
-          .from("profiles")
-          .select("role,status")
-          .eq("id", data.user.id)
-          .maybeSingle<{ role: UserRole; status: string | null }>();
-        backendRole = retry.data?.role ?? null;
-        backendStatus = retry.data?.status ?? null;
-      } else {
-        backendRole = role;
-        backendStatus = "active";
+      if (bootstrap.error || !bootstrap.data?.role) {
+        setLoading(false);
+        setError("We could not finish setting up your KAAM profile. Please try again.");
+        return;
       }
+
+      backendRole = bootstrap.data.role;
+      backendStatus = bootstrap.data.status;
     }
 
     if (!backendRole) {
