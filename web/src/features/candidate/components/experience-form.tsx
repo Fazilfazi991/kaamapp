@@ -9,10 +9,7 @@ import {
   languages,
   visaStatusOptions,
 } from "@/features/candidate/constants";
-import {
-  initialExperienceActionState,
-  saveExperienceDetails,
-} from "@/features/candidate/server/actions";
+import { saveExperienceDetails } from "@/features/candidate/server/actions";
 import type { CandidateProfileRow } from "@/types/domain";
 
 export function ExperienceForm({
@@ -24,7 +21,7 @@ export function ExperienceForm({
 }) {
   const [state, formAction, pending] = useActionState(
     saveExperienceDetails,
-    initialExperienceActionState,
+    { error: null },
   );
   const selectedLanguages = new Set(candidate?.languages ?? []);
   return (

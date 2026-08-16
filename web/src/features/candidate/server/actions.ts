@@ -31,11 +31,9 @@ function safeError(message: string): never {
   throw new Error(message);
 }
 
-export type ExperienceActionState = {
+type ExperienceActionState = {
   error: string | null;
 };
-
-export const initialExperienceActionState: ExperienceActionState = { error: null };
 
 async function candidateClient() {
   const account = await requireRole("candidate");
