@@ -178,7 +178,15 @@ export async function saveExperienceDetails(formData: FormData) {
       is_visible: isVisible,
     })
     .eq("id", account.userId);
-  if (error) safeError("Could not save experience details.");
+  if (error) {
+    console.error("[candidate_experience_save]", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+    safeError("Could not save experience details.");
+  }
 
   revalidateCandidatePages();
   redirect(String(formData.get("next") ?? routes.candidateOnboardingReview));
