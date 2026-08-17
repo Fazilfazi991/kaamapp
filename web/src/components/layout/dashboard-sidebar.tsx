@@ -12,7 +12,9 @@ export function DashboardSidebar({
 }) {
   return (
     <aside className="hidden min-h-screen w-64 border-r border-[#eadde3] bg-white p-5 lg:block">
-      <Image src="/kaam-logo.webp" alt="Kaam" width={116} height={46} priority />
+      <div className="inline-flex rounded-lg bg-[#342b38] px-3 py-2 shadow-sm">
+        <Image src="/kaam-logo.webp" alt="Kaam" width={116} height={46} priority />
+      </div>
       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-[#8a7c88]">
         {title}
       </p>

@@ -7,7 +7,7 @@ export function Header() {
   return (
     <header className="border-b border-[#eadde3] bg-white/95">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <Link href={routes.home} className="flex items-center gap-3">
+        <Link href={routes.home} className="flex items-center rounded-lg bg-[#342b38] px-3 py-2 shadow-sm">
           <Image src="/kaam-logo.webp" alt="Kaam" width={104} height={42} priority />
         </Link>
         <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
