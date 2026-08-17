@@ -27,6 +27,9 @@ export default function HomePage() {
                 <ButtonLink href={routes.employers} variant="secondary">
                   Hire workers
                 </ButtonLink>
+                <ButtonLink href={routes.login} variant="secondary">
+                  Login
+                </ButtonLink>
               </div>
             </div>
             <div className="rounded-2xl border border-[#eadde3] bg-white p-5 shadow-[0_18px_45px_rgba(77,36,54,.12)]">
