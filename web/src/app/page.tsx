@@ -1,5 +1,6 @@
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { HowItWorks } from "@/components/marketing/how-it-works";
 import { ButtonLink } from "@/components/ui/button";
 import { routes } from "@/config/routes";
 
@@ -38,18 +39,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="bg-[#f8f5f7]">
-          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-2 lg:px-8">
-            <Journey
-              title="How candidates use Kaam"
-              steps={["Create your profile", "Add skills & experience", "Receive employer interest", "Accept the opportunity", "Get matched"]}
-            />
-            <Journey
-              title="How employers use Kaam"
-              steps={["Create company profile", "Define your requirement", "Discover candidates", "Show interest", "Connect after matching"]}
-            />
-          </div>
-        </section>
+        <HowItWorks />
 
         <section className="bg-[#201925]">
           <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-10 text-white sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
@@ -65,23 +55,5 @@ export default function HomePage() {
       </main>
       <Footer />
     </>
-  );
-}
-
-function Journey({ title, steps }: { title: string; steps: string[] }) {
-  return (
-    <article>
-      <h2 className="text-2xl font-bold text-[#201925]">{title}</h2>
-      <ol className="mt-5 grid gap-3">
-        {steps.map((step, index) => (
-          <li key={step} className="flex items-center gap-3 rounded-lg border border-[#eadde3] p-4">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-[#e53670] text-sm font-bold text-white">
-              {index + 1}
-            </span>
-            <span className="font-semibold text-[#342b38]">{step}</span>
-          </li>
-        ))}
-      </ol>
-    </article>
   );
 }
