@@ -23,6 +23,10 @@ function safeError(message: string): never {
   throw new Error(message);
 }
 
+function formText(formData: FormData, key: string) {
+  return String(formData.get(key) ?? "").trim();
+}
+
 async function candidateClient() {
   const account = await requireRole("candidate");
   const supabase = await createServerSupabaseClient();
@@ -238,6 +242,76 @@ async function uploadDocument(formData: FormData, documentType: CandidateDocumen
 export async function uploadPassportDocument(formData: FormData) {
   const result = await uploadDocument(formData, "passport");
   redirect(`${routes.candidateDocuments}/passport/review?ocr=${result.ocrResult}`);
+}
+
+export type PassportSideUploadResult = {
+  ok: boolean;
+  error?: string;
+  path?: string;
+  fields?: Record<string, string>;
+};
+
+/** Canonical passport validation step. This intentionally does not write candidate_documents. */
+export async function uploadPassportSide(formData: FormData): Promise<PassportSideUploadResult> {
+  const file = formData.get("documentFile");
+  const side = String(formData.get("side") ?? "");
+  if (!(file instanceof File) || !["front", "back"].includes(side)) {
+    return { ok: false, error: "Choose a passport image first." };
+  }
+  const validation = validateDocumentFile({ type: "passport", mimeType: file.type, size: file.size });
+  if (!validation.ok) return { ok: false, error: validation.error };
+
+  const { account, supabase } = await candidateClient();
+  const documentType = side === "front" ? "passport" : "passport-back";
+  const path = `${account.userId}/candidate-documents/${documentType}/${Date.now()}_${documentType}.${validation.extension}`;
+  const { error: uploadError } = await supabase.storage.from("kaam-private").upload(path, await file.arrayBuffer(), {
+    contentType: file.type,
+    upsert: false,
+  });
+  if (uploadError) {
+    console.error("[candidate_passport_side_upload]", { code: uploadError.message, statusCode: uploadError.statusCode, side });
+    return { ok: false, error: "We couldn’t upload this image. Please try again." };
+  }
+
+  const response = await supabase.functions.invoke(ocrFunctionName(), {
+    body: { document_type: side === "front" ? "passport" : "passport-back", bucket: "kaam-private", path, file_name: file.name },
+  });
+  const data = response.data as Record<string, unknown> | null;
+  const accepted = data?.success === true && (data.validation as Record<string, unknown> | undefined)?.status === "accepted";
+  if (response.error || !accepted) {
+    console.warn("[candidate_passport_side_validation]", { side, error: response.error?.name ?? null });
+    return { ok: false, error: side === "front" ? "This passport identity page could not be validated. Use a clear passport information page." : "This passport back could not be validated. Use a clear, distinct back image." };
+  }
+  const mapped = side === "front" ? mapPassportOcrResponse(data) : null;
+  return {
+    ok: true,
+    path,
+    fields: mapped ? {
+      full_name: mapped.full_name ?? "", passport_number: mapped.passport_number ?? "", nationality: mapped.nationality ?? "",
+      dob: mapped.dob ?? "", gender: mapped.gender ?? "", passport_issue_date: mapped.passport_issue_date ?? "",
+      passport_expiry_date: mapped.passport_expiry_date ?? "", place_of_birth: mapped.place_of_birth ?? "", country_of_issue: mapped.country_of_issue ?? "",
+    } : {},
+  };
+}
+
+export async function submitPassportIdentityDocuments(formData: FormData): Promise<{ ok: boolean; error?: string }> {
+  const frontPath = formText(formData, "frontPath");
+  const backPath = formText(formData, "backPath");
+  if (!frontPath || !backPath) return { ok: false, error: "Validate both passport front and back before submitting." };
+  const fields = Object.fromEntries(["full_name", "passport_number", "nationality", "dob", "gender", "passport_issue_date", "passport_expiry_date", "place_of_birth", "country_of_issue"].map((key) => [key, formText(formData, key)]));
+  const required = ["full_name", "passport_number", "nationality", "dob", "passport_expiry_date", "country_of_issue"];
+  if (required.some((key) => !fields[key])) return { ok: false, error: "Validated passport details are incomplete. Replace the passport front with a clearer image." };
+  const { supabase } = await candidateClient();
+  const { error } = await supabase.rpc("submit_candidate_identity_documents", {
+    p_document_type: "passport", p_front_path: frontPath, p_back_path: backPath, p_fields: fields, p_profile_fields: {}, p_candidate_fields: {},
+  });
+  if (error) {
+    console.error("[candidate_passport_submit]", { code: error.code, message: error.message, details: error.details, hint: error.hint });
+    return { ok: false, error: error.message.includes("cannot use the same") ? "Passport front and back must be different images." : "We couldn’t submit your passport. Please review both images and try again." };
+  }
+  revalidatePath(routes.candidateDocuments);
+  revalidatePath(routes.candidateDashboard);
+  return { ok: true };
 }
 
 export async function uploadVisaDocument(formData: FormData) {

@@ -1,6 +1,5 @@
 import { PageTitle } from "@/components/layout/page-title";
-import { DocumentUploadForm } from "@/features/candidate/documents/components/document-upload-form";
-import { uploadPassportDocument } from "@/features/candidate/documents/server/actions";
+import { PassportCanonicalUploadForm } from "@/features/candidate/documents/components/passport-canonical-upload-form";
 
 export default function CandidatePassportUploadPage() {
   return (
@@ -9,12 +8,7 @@ export default function CandidatePassportUploadPage() {
         title="Upload passport"
         description="Take a passport photo or choose a clear image from your device."
       />
-      <DocumentUploadForm
-        type="passport"
-        title="Passport image"
-        description="JPG, PNG, or WebP images up to 10 MB are accepted for OCR-assisted review."
-        action={uploadPassportDocument}
-      />
+      <PassportCanonicalUploadForm />
     </div>
   );
 }
