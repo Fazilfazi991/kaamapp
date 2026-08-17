@@ -28,6 +28,7 @@ export const routes = {
   candidateMessages: "/candidate/messages",
   candidateDocuments: "/candidate/documents",
   candidateMembership: "/candidate/membership",
+  candidateMembershipSuccess: "/candidate/membership/success",
   candidateNotifications: "/candidate/notifications",
   employer: "/employer",
   employerOnboarding: "/employer/onboarding",

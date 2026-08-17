@@ -162,7 +162,7 @@ export async function loadCandidateDashboardData(userId: string) {
       .maybeSingle<CandidateProfileRow>(),
     supabase
       .from("candidate_memberships")
-      .select("status, plan_code, starts_at, expires_at")
+      .select("status, plan_code, started_at, expires_at")
       .eq("candidate_id", userId)
       .order("expires_at", { ascending: false })
       .limit(1)

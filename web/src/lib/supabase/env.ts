@@ -28,3 +28,11 @@ export function supabaseConfigError() {
   }
   return null;
 }
+
+export function requireSupabaseServiceRoleKey() {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY for trusted payment fulfillment.");
+  }
+  return serviceRoleKey;
+}

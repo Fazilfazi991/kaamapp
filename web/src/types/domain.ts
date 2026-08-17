@@ -64,7 +64,7 @@ export type CandidateSkillRow = {
 export type CandidateMembershipRow = {
   status: string | null;
   plan_code: string | null;
-  starts_at: string | null;
+  started_at: string | null;
   expires_at: string | null;
 };
 
