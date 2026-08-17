@@ -89,11 +89,11 @@ export function GoogleOAuthComplete() {
     router.refresh();
   }
 
-  if (state === "checking") return <p className="text-sm text-[#66616f]">Completing Google sign-in…</p>;
-
   if (error && state !== "choose-role") {
     return <div className="rounded-lg border border-[#f3c3d3] bg-[#fff7fa] p-5"><p className="text-sm text-[#9a1744]">{error}</p><Button className="mt-4 w-full" onClick={() => router.replace(routes.login)}>Back to login</Button></div>;
   }
+
+  if (state === "checking") return <p className="text-sm text-[#66616f]">Completing Google sign-in…</p>;
 
   return <div className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm"><h2 className="text-xl font-bold text-[#201925]">How will you use KAAM?</h2><p className="mt-2 text-sm leading-6 text-[#66616f]">Choose once to set up your account. This cannot be changed later.</p>{error ? <p className="mt-4 rounded-lg bg-[#ffe4eb] px-3 py-2 text-sm text-[#9a1744]">{error}</p> : null}<div className="mt-5 grid gap-3 sm:grid-cols-2"><Button type="button" onClick={() => chooseRole("candidate")} disabled={Boolean(loadingRole)}>{loadingRole === "candidate" ? "Setting up…" : "I’m looking for work"}</Button><Button type="button" variant="secondary" onClick={() => chooseRole("employer")} disabled={Boolean(loadingRole)}>{loadingRole === "employer" ? "Setting up…" : "I’m hiring"}</Button></div></div>;
 }
