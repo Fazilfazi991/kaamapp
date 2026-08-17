@@ -15,7 +15,7 @@ export function Header() {
           <Link href={routes.candidates} className="focus-ring rounded-md px-3 py-2 text-sm font-medium text-[#453c48] hover:text-[#bc1f55]">For Candidates</Link>
           <Link href={routes.employers} className="focus-ring rounded-md px-3 py-2 text-sm font-medium text-[#453c48] hover:text-[#bc1f55]">For Employers</Link>
           <Link href={routes.howItWorks} className="focus-ring rounded-md px-3 py-2 text-sm font-medium text-[#453c48] hover:text-[#bc1f55]">How it works</Link>
-          <ButtonLink href={routes.login} variant="ghost">
+          <ButtonLink href={routes.login} variant="secondary">
             Login
           </ButtonLink>
           <ButtonLink href={routes.register}>Get started</ButtonLink>
@@ -27,7 +27,7 @@ export function Header() {
             <Link href={routes.candidates} className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[#fff0f5]">For Candidates</Link>
             <Link href={routes.employers} className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[#fff0f5]">For Employers</Link>
             <Link href={routes.howItWorks} className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[#fff0f5]">How it works</Link>
-            <ButtonLink href={routes.login} variant="ghost" className="justify-start">Login</ButtonLink>
+            <ButtonLink href={routes.login} variant="secondary" className="justify-start">Login</ButtonLink>
             <ButtonLink href={routes.register}>Get started</ButtonLink>
           </nav>
         </details>
