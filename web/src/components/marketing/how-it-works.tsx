@@ -32,7 +32,7 @@ export function HowItWorks() {
   const activeSteps = audience === "candidate" ? candidateSteps : employerSteps;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#fffafd] to-[#fff5f9] py-10 sm:py-12" aria-labelledby="how-it-works-heading">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#fffafd] to-[#fff5f9] py-8 sm:py-9" aria-labelledby="how-it-works-heading">
       <div className="pointer-events-none absolute left-5 top-28 hidden h-4 w-4 rotate-45 bg-[#ff82b0] lg:block" />
       <div className="pointer-events-none absolute right-12 top-44 hidden text-4xl text-[#ff82b0] lg:block">✦</div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -61,12 +61,12 @@ export function HowItWorks() {
           </div>
         </div>
 
-        <div className="relative mt-2 hidden h-28 lg:block" aria-hidden="true">
-          <Image src="/kaam/how-it-works/candidate-illustration.png" alt="" width={230} height={230} className="absolute bottom-0 left-0 h-36 w-auto object-contain xl:h-40" />
-          <Image src="/kaam/how-it-works/employer-illustration.png" alt="" width={250} height={250} className="absolute bottom-0 right-0 h-36 w-auto object-contain xl:h-40" />
+        <div className="relative mt-1 hidden h-20 lg:block" aria-hidden="true">
+          <Image src="/kaam/how-it-works/candidate-illustration.png" alt="" width={230} height={230} className="absolute bottom-0 left-0 h-32 w-auto object-contain xl:h-36" />
+          <Image src="/kaam/how-it-works/employer-illustration.png" alt="" width={250} height={250} className="absolute bottom-0 right-0 h-32 w-auto object-contain xl:h-36" />
         </div>
 
-        <div className="relative z-10 mt-4 grid gap-2 rounded-2xl border border-[#f0dce5] bg-white/95 p-3 shadow-[0_8px_24px_rgba(83,37,57,.08)] sm:grid-cols-2 lg:grid-cols-4 lg:gap-0">
+        <div className="relative z-10 mt-3 grid gap-2 rounded-2xl border border-[#f0dce5] bg-white/95 p-3 shadow-[0_8px_24px_rgba(83,37,57,.08)] sm:grid-cols-2 lg:grid-cols-4 lg:gap-0">
           {benefits.map((benefit, index) => <div key={benefit.title} className={`flex items-center gap-2 px-3 py-2.5 ${index > 0 ? "lg:border-l lg:border-[#f0e1e8]" : ""}`}><span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#fff0f6] text-[#e53670]"><LineIcon name={benefit.icon} size={23} /></span><div><h3 className="text-sm font-bold text-[#1b1a31]">{benefit.title}</h3><p className="mt-0.5 text-xs leading-4 text-[#706578]">{benefit.text}</p></div></div>)}
         </div>
       </div>
