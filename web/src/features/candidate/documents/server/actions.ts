@@ -122,7 +122,15 @@ async function uploadDocument(formData: FormData, documentType: CandidateDocumen
       contentType: file.type,
       upsert: false,
     });
-  if (uploadError) safeError("Could not upload the document securely.");
+  if (uploadError) {
+    console.error("[candidate_document_upload]", {
+      code: uploadError.message,
+      documentType,
+      bucket: "kaam-private",
+      statusCode: uploadError.statusCode,
+    });
+    safeError("Could not upload the document securely.");
+  }
 
   const now = new Date().toISOString();
   const isPassport = documentType === "passport";
