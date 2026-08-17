@@ -1,4 +1,5 @@
 import { Footer } from "@/components/layout/footer";
+import Image from "next/image";
 import { Header } from "@/components/layout/header";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { ButtonLink } from "@/components/ui/button";
@@ -10,7 +11,7 @@ export default function HomePage() {
       <Header />
       <main>
         <section className="relative overflow-hidden bg-[radial-gradient(circle_at_82%_25%,rgba(252,189,210,.42),transparent_30%),linear-gradient(135deg,#fffafd,#fff4f8)]">
-          <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:gap-12 lg:px-8 lg:py-18">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[.95fr_1.05fr] lg:items-center lg:gap-10 lg:px-8 lg:py-14">
             <div className="max-w-xl text-left">
               <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#bc1f55]">
                 Recruitment, made mutual
@@ -34,10 +35,10 @@ export default function HomePage() {
                 {[['◈','Verified Employers','Trusted opportunities'],['◉','Skill-Based Matching','Better matches, better jobs'],['▣','Secure & Private','Your data is protected']].map(([icon,title,text]) => <div className="flex items-start gap-2" key={title}><span className="text-xl text-[#e53670]">{icon}</span><div><p className="text-sm font-bold text-[#342b38]">{title}</p><p className="mt-0.5 text-xs text-[#766b74]">{text}</p></div></div>)}
               </div>
             </div>
-            <div className="relative mx-auto w-full max-w-2xl py-3 lg:min-h-[550px]">
+            <div className="relative mx-auto w-full max-w-xl py-3 lg:min-h-[470px]">
               <div className="absolute inset-8 rounded-full border border-[#f49abe]" />
-              <div className="relative z-10 w-[78%] rounded-3xl border border-[#f2e4eb] bg-white p-6 shadow-[0_22px_48px_rgba(92,43,64,.16)] sm:p-7">
-                <div className="flex items-center gap-4"><div className="grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-[#f7c7d7] to-[#b86d87] text-xl font-bold text-white">AN</div><div><h2 className="text-xl font-bold text-[#201925]">Amina Noor</h2><p className="mt-1 text-sm text-[#706578]">Hospitality supervisor · Dubai</p></div><span className="ml-auto rounded-full bg-[#e6f6ee] px-3 py-1 text-xs font-bold text-[#167347]">Profile ready</span></div>
+              <div className="relative z-10 w-[77%] rounded-3xl border border-[#f2e4eb] bg-white p-5 shadow-[0_18px_38px_rgba(92,43,64,.14)] sm:p-6">
+                <div className="flex items-center gap-3"><Image src="/kaam/hero-candidate-avatar.png" alt="Illustrative candidate profile" width={64} height={64} className="h-14 w-14 rounded-full object-cover" /><div><h2 className="text-lg font-bold text-[#201925]">Amina Noor</h2><p className="mt-1 text-sm text-[#706578]">Hospitality supervisor · Dubai</p></div><span className="ml-auto rounded-full bg-[#e6f6ee] px-2.5 py-1 text-[11px] font-bold text-[#167347]">Profile ready</span></div>
                 <div className="mt-6 border-y border-[#f0e5ea] py-4"><p className="text-xs font-bold uppercase tracking-wider text-[#766b74]">Key skills</p><div className="mt-3 flex flex-wrap gap-2">{["Guest service", "Team leadership", "Food safety"].map((skill) => <span className="rounded-full bg-[#fff0f5] px-3 py-1.5 text-sm font-medium text-[#922144]" key={skill}>{skill}</span>)}</div></div>
                 <div className="mt-5 flex items-center justify-between gap-4 rounded-2xl bg-[#201925] p-5 text-white"><div><p className="font-semibold">Open to roles like</p><p className="mt-2 text-sm leading-6 text-white/80">Hospitality Supervisor, Shift Leader, Guest Service Manager</p></div><span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#f6a4c3] text-xl text-[#bc1f55]">↗</span></div>
               </div>
