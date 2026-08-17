@@ -2,6 +2,8 @@ export const routes = {
   home: "/",
   login: "/login",
   register: "/register",
+  authCallback: "/auth/callback",
+  authComplete: "/auth/complete",
   candidates: "/candidates",
   employers: "/employers",
   howItWorks: "/how-it-works",

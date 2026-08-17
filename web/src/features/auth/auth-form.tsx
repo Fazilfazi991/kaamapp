@@ -273,6 +273,26 @@ export function AuthForm({
     router.refresh();
   }
 
+  async function continueWithGoogle() {
+    if (!supabase || loading) return;
+    resetAlerts();
+    setLoading(true);
+
+    const callback = new URL(routes.authCallback, window.location.origin);
+    const returnPath = safeReturnPath(searchParams.get("redirectTo"));
+    if (returnPath) callback.searchParams.set("next", returnPath);
+
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: callback.toString() },
+    });
+
+    if (oauthError) {
+      setLoading(false);
+      setError(friendlyError("google_oauth", oauthError));
+    }
+  }
+
   function changeEmail() {
     setStep("email");
     setOtp("");
@@ -395,9 +415,40 @@ export function AuthForm({
         )}
       </div>
 
+      {step === "email" ? (
+        <div className="mt-6">
+          <div className="flex items-center gap-3" aria-hidden="true">
+            <span className="h-px flex-1 bg-[#eadde3]" />
+            <span className="text-xs font-medium uppercase tracking-wide text-[#766b74]">or</span>
+            <span className="h-px flex-1 bg-[#eadde3]" />
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={continueWithGoogle}
+            disabled={loading || Boolean(configError)}
+            className="mt-4 w-full gap-3 border-[#d9d2d5] text-[#28222b] hover:bg-[#faf8f9]"
+          >
+            <GoogleIcon />
+            {loading ? "Opening Google…" : "Continue with Google"}
+          </Button>
+        </div>
+      ) : null}
+
       <p className="mt-4 text-xs leading-5 text-[#66616f]">
         Your selected tab is only the entry path. Kaam redirects using the backend role on your account.
       </p>
     </form>
+  );
+}
+
+function GoogleIcon() {
+  return (
+    <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24">
+      <path fill="#4285F4" d="M21.35 12.23c0-.71-.06-1.39-.18-2.04H12v3.86h5.24a4.48 4.48 0 0 1-1.94 2.94v2.5h3.14c1.84-1.69 2.91-4.19 2.91-7.26Z" />
+      <path fill="#34A853" d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.4c-.87.58-1.99.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.48A9.75 9.75 0 0 0 12 21.75Z" />
+      <path fill="#FBBC05" d="M6.54 13.88A5.86 5.86 0 0 1 6.24 12c0-.65.11-1.28.3-1.88V7.64H3.3A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.05 4.36l3.24-2.48Z" />
+      <path fill="#EA4335" d="M12 6.09c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.19 14.63 2.25 12 2.25a9.75 9.75 0 0 0-8.7 5.39l3.24 2.48C7.31 7.81 9.46 6.09 12 6.09Z" />
+    </svg>
   );
 }
