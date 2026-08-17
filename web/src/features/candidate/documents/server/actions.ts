@@ -210,7 +210,16 @@ async function uploadDocument(formData: FormData, documentType: CandidateDocumen
     )
     .select("id")
     .single<{ id: string }>();
-  if (saveError) safeError("Could not save document details.");
+  if (saveError) {
+    console.error("[candidate_document_save]", {
+      code: saveError.code,
+      message: saveError.message,
+      details: saveError.details,
+      hint: saveError.hint,
+      documentType,
+    });
+    safeError("Could not save document details.");
+  }
 
   await saveVersion({
     candidateDocumentId: saved.id,
