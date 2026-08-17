@@ -32,13 +32,13 @@ export function HowItWorks() {
   const activeSteps = audience === "candidate" ? candidateSteps : employerSteps;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#fffafd] to-[#fff5f9] py-16 sm:py-20" aria-labelledby="how-it-works-heading">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#fffafd] to-[#fff5f9] py-10 sm:py-12" aria-labelledby="how-it-works-heading">
       <div className="pointer-events-none absolute left-5 top-28 hidden h-4 w-4 rotate-45 bg-[#ff82b0] lg:block" />
       <div className="pointer-events-none absolute right-12 top-44 hidden text-4xl text-[#ff82b0] lg:block">✦</div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h2 id="how-it-works-heading" className="sr-only">How KAAM works</h2>
 
-        <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_330px_minmax(0,1fr)] lg:items-center lg:gap-8 xl:grid-cols-[minmax(0,1fr)_400px_minmax(0,1fr)]">
+        <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_250px_minmax(0,1fr)] lg:items-center lg:gap-5 xl:grid-cols-[minmax(0,1fr)_290px_minmax(0,1fr)] xl:gap-7">
           <Journey title="How candidates use Kaam" subtitle="Simple steps to get noticed and hired" steps={candidateSteps} side="left" />
           <Hub />
           <Journey title="How employers use Kaam" subtitle="Find talent and build your team" steps={employerSteps} side="right" />
@@ -61,13 +61,13 @@ export function HowItWorks() {
           </div>
         </div>
 
-        <div className="relative mt-12 hidden min-h-24 lg:block" aria-hidden="true">
-          <Image src="/kaam/how-it-works/candidate-illustration.png" alt="" width={230} height={230} className="absolute bottom-0 left-0 h-44 w-auto object-contain xl:h-52" />
-          <Image src="/kaam/how-it-works/employer-illustration.png" alt="" width={250} height={250} className="absolute bottom-0 right-0 h-44 w-auto object-contain xl:h-52" />
+        <div className="relative mt-3 hidden h-28 lg:block" aria-hidden="true">
+          <Image src="/kaam/how-it-works/candidate-illustration.png" alt="" width={230} height={230} className="absolute bottom-0 left-2 h-24 w-auto object-contain xl:h-28" />
+          <Image src="/kaam/how-it-works/employer-illustration.png" alt="" width={250} height={250} className="absolute bottom-0 right-2 h-24 w-auto object-contain xl:h-28" />
         </div>
 
-        <div className="relative z-10 mt-8 grid gap-3 rounded-2xl border border-[#f0dce5] bg-white/95 p-4 shadow-[0_12px_35px_rgba(83,37,57,.10)] sm:grid-cols-2 lg:grid-cols-4 lg:gap-0 lg:p-3">
-          {benefits.map((benefit, index) => <div key={benefit.title} className={`flex items-start gap-3 px-3 py-2 ${index > 0 ? "lg:border-l lg:border-[#f0e1e8]" : ""}`}><span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#fff0f6] text-[#e53670]"><LineIcon name={benefit.icon} /></span><div><h3 className="font-bold text-[#1b1a31]">{benefit.title}</h3><p className="mt-1 text-sm leading-5 text-[#706578]">{benefit.text}</p></div></div>)}
+        <div className="relative z-10 mt-4 grid gap-2 rounded-2xl border border-[#f0dce5] bg-white/95 p-2 shadow-[0_8px_24px_rgba(83,37,57,.08)] sm:grid-cols-2 lg:grid-cols-4 lg:gap-0">
+          {benefits.map((benefit, index) => <div key={benefit.title} className={`flex items-center gap-2 px-2 py-2 ${index > 0 ? "lg:border-l lg:border-[#f0e1e8]" : ""}`}><span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#fff0f6] text-[#e53670]"><LineIcon name={benefit.icon} size={21} /></span><div><h3 className="text-sm font-bold text-[#1b1a31]">{benefit.title}</h3><p className="mt-0.5 text-xs leading-4 text-[#706578]">{benefit.text}</p></div></div>)}
         </div>
       </div>
     </section>
@@ -75,15 +75,15 @@ export function HowItWorks() {
 }
 
 function Journey({ title, subtitle, steps, side }: { title: string; subtitle: string; steps: Step[]; side: "left" | "right" }) {
-  return <div><div className={side === "right" ? "pl-4" : "pr-4"}><h3 className="text-3xl font-bold tracking-tight text-[#16152d] xl:text-4xl">{title}</h3><span className="mt-3 block h-1 w-14 rounded-full bg-[#f05b91]" /><p className="mt-3 text-lg text-[#6d6376]">{subtitle}</p></div><div className="relative mt-6 space-y-5 before:absolute before:bottom-8 before:left-8 before:top-8 before:border-l-2 before:border-dashed before:border-[#f3b0c8]">{steps.map((step,index) => <StepCard key={step.title} step={step} index={index} />)}</div></div>;
+  return <div><div className={side === "right" ? "pl-2" : "pr-2"}><h3 className="text-2xl font-bold tracking-tight text-[#16152d] xl:text-3xl">{title}</h3><span className="mt-2 block h-1 w-11 rounded-full bg-[#f05b91]" /><p className="mt-2 text-base text-[#6d6376]">{subtitle}</p></div><div className="relative mt-4 space-y-3 before:absolute before:bottom-6 before:left-7 before:top-6 before:border-l-2 before:border-dashed before:border-[#f3b0c8]">{steps.map((step,index) => <StepCard key={step.title} step={step} index={index} />)}</div></div>;
 }
 
 function StepCard({ step, index }: { step: Step; index: number }) {
-  return <article className="relative z-10 grid grid-cols-[74px_1fr_60px] items-center gap-3 rounded-[1.4rem] border border-[#f2e7ed] bg-white p-3 shadow-[0_8px_24px_rgba(50,30,46,.09)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(50,30,46,.12)]"><span className="relative grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-[#fa76a7] to-[#d80c58] text-2xl font-bold text-white ring-4 ring-[#fff1f6] before:absolute before:-inset-2 before:rounded-full before:border-2 before:border-dashed before:border-[#ffb2ce] before:content-['']">{index + 1}</span><div><h4 className="text-lg font-bold text-[#18172d]">{step.title}</h4><p className="mt-1 text-sm leading-5 text-[#6d6376]">{step.description}</p></div><span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#fff0f6] text-[#e53670]"><LineIcon name={step.icon} /></span></article>;
+  return <article className="relative z-10 grid min-h-[82px] grid-cols-[60px_1fr_48px] items-center gap-2 rounded-2xl border border-[#f2e7ed] bg-white px-2.5 py-2 shadow-[0_6px_18px_rgba(50,30,46,.08)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(50,30,46,.11)]"><span className="relative grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-[#fa76a7] to-[#d80c58] text-xl font-bold text-white ring-3 ring-[#fff1f6] before:absolute before:-inset-1.5 before:rounded-full before:border before:border-dashed before:border-[#ffb2ce] before:content-['']">{index + 1}</span><div><h4 className="text-base font-bold leading-5 text-[#18172d]">{step.title}</h4><p className="mt-0.5 text-xs leading-4 text-[#6d6376]">{step.description}</p></div><span className="grid h-11 w-11 place-items-center rounded-xl bg-[#fff0f6] text-[#e53670]"><LineIcon name={step.icon} size={24} /></span></article>;
 }
 
 function Hub() {
-  return <div className="relative flex min-h-[540px] items-center justify-center"><svg className="absolute inset-0 h-full w-full" viewBox="0 0 400 540" fill="none" aria-hidden="true"><g stroke="#ef3d79" strokeWidth="2"><path d="M0 110h52c27 0 23 90 54 90h36"/><path d="M0 230h70c23 0 8 40 42 40h25"/><path d="M0 350h56c28 0 16-80 52-80h30"/><path d="M400 110h-52c-27 0-23 90-54 90h-36"/><path d="M400 230h-70c-23 0-8 40-42 40h-25"/><path d="M400 350h-56c-28 0-16-80-52-80h-30"/></g><g fill="#ef3d79">{[[100,200],[100,270],[100,350],[300,200],[300,270],[300,350]].map(([cx,cy])=><circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="5"/>)}</g></svg><div className="relative z-10 flex h-48 w-48 items-center justify-center rounded-full bg-[#e53670] p-10 shadow-[0_0_0_18px_rgba(229,54,112,.08),0_0_0_40px_rgba(229,54,112,.05),0_18px_35px_rgba(229,54,112,.25)] ring-2 ring-dashed ring-[#ff9dc2]"><Image src="/kaam-logo.webp" alt="KAAM" width={120} height={48} className="h-auto w-full" /></div><div className="absolute top-8 text-[#e53670]"><LineIcon name="trophy" size={62} /></div><div className="absolute bottom-10 rounded-full border border-[#f5d9e4] bg-white px-5 py-3 text-sm font-semibold text-[#302a39] shadow-sm">✓ Real people. Real opportunities.</div><div className="absolute right-8 top-20 text-xl text-[#f55f95]">✦</div><div className="absolute bottom-24 left-10 text-[#f55f95]"><LineIcon name="send" size={35} /></div></div>;
+  return <div className="relative flex min-h-[410px] items-center justify-center"><svg className="absolute inset-0 h-full w-full" viewBox="0 0 400 540" fill="none" aria-hidden="true"><g stroke="#ef3d79" strokeWidth="2"><path d="M0 110h52c27 0 23 90 54 90h36"/><path d="M0 230h70c23 0 8 40 42 40h25"/><path d="M0 350h56c28 0 16-80 52-80h30"/><path d="M400 110h-52c-27 0-23 90-54 90h-36"/><path d="M400 230h-70c-23 0-8 40-42 40h-25"/><path d="M400 350h-56c-28 0-16-80-52-80h-30"/></g><g fill="#ef3d79">{[[100,200],[100,270],[100,350],[300,200],[300,270],[300,350]].map(([cx,cy])=><circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4"/>)}</g></svg><div className="relative z-10 flex h-36 w-36 items-center justify-center rounded-full bg-[#e53670] p-7 shadow-[0_0_0_12px_rgba(229,54,112,.08),0_0_0_28px_rgba(229,54,112,.05),0_14px_28px_rgba(229,54,112,.20)] ring-2 ring-dashed ring-[#ff9dc2]"><Image src="/kaam-logo.webp" alt="KAAM" width={120} height={48} className="h-auto w-full" /></div><div className="absolute top-3 text-[#e53670]"><LineIcon name="trophy" size={42} /></div><div className="absolute bottom-1 rounded-full border border-[#f5d9e4] bg-white px-3 py-2 text-xs font-semibold text-[#302a39] shadow-sm">✓ Real people. Real opportunities.</div><div className="absolute right-7 top-14 text-base text-[#f55f95]">✦</div><div className="absolute bottom-14 left-7 text-[#f55f95]"><LineIcon name="send" size={25} /></div></div>;
 }
 
 function LineIcon({ name, size = 29 }: { name: IconName; size?: number }) {
