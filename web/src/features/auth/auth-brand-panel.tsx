@@ -14,17 +14,17 @@ export function AuthBrandPanel({ mode }: AuthBrandPanelProps) {
   const isRegister = mode === "register";
 
   return (
-    <aside className="relative overflow-hidden rounded-3xl border border-[#f2dce6] bg-white/80 p-5 shadow-[0_18px_48px_rgba(92,39,62,.08)] sm:p-7 lg:min-h-[540px] lg:p-9">
+    <aside className="relative overflow-hidden rounded-3xl border border-[#f2dce6] bg-white/80 p-4 shadow-[0_18px_48px_rgba(92,39,62,.08)] sm:p-7 lg:min-h-[540px] lg:p-9">
       <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[#fff0f6]" />
       <div className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-48 rounded-full border-[22px] border-[#fff4f8]" />
       <div className="relative flex h-full flex-col">
-        <div className="inline-flex w-fit items-center rounded-xl bg-[#342b38] px-3 py-2 shadow-sm">
-          <Image src="/kaam-logo.webp" alt="KAAM" width={92} height={36} priority />
+        <div className="inline-flex w-fit items-center justify-start">
+          <Image src="/kaam-original-logo.png" alt="KAAM Perfect Match" width={112} height={50} priority className="h-auto w-[112px]" />
         </div>
 
-        <div className="mt-6 max-w-md lg:mt-9">
-          <p className="text-xs font-bold uppercase tracking-[.18em] text-[#d91f64]">Recruitment, made mutual</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1d1923] sm:text-4xl">
+        <div className="mt-4 max-w-md sm:mt-6 lg:mt-9">
+          <p className="text-xs font-bold uppercase tracking-[.18em] text-[#f56ba1]">Recruitment, made mutual</p>
+          <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#160847] sm:text-4xl">
             {isRegister ? "Start your KAAM journey." : "Find the right opportunity. Faster."}
           </h2>
           <p className="mt-4 max-w-lg text-sm leading-6 text-[#6b6071] sm:text-base">
@@ -32,10 +32,10 @@ export function AuthBrandPanel({ mode }: AuthBrandPanelProps) {
           </p>
         </div>
 
-        <ul className="mt-6 grid gap-3" aria-label="KAAM benefits">
+        <ul className="mt-4 grid gap-2 sm:mt-6 sm:gap-3" aria-label="KAAM benefits">
           {benefits.map((benefit, index) => (
             <li key={benefit} className="flex items-center gap-3 text-sm font-medium text-[#3c3441]">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#fff0f6] text-[#d91f64]" aria-hidden="true">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#fce1ec] text-[#160847]" aria-hidden="true">
                 <BenefitIcon index={index} />
               </span>
               {benefit}
@@ -54,7 +54,7 @@ export function AuthBrandPanel({ mode }: AuthBrandPanelProps) {
           <p className="mt-4 text-center text-xs font-semibold text-[#6b6071]">Built for faster hiring across the UAE</p>
         </div>
 
-        <p className="mt-6 border-t border-[#f4e4eb] pt-4 text-xs font-semibold text-[#6b6071] lg:mt-auto">
+        <p className="mt-4 border-t border-[#f4e4eb] pt-3 text-xs font-semibold text-[#6b6071] lg:mt-auto lg:pt-4">
           Profile <span className="px-1 text-[#e53670]">→</span> Match <span className="px-1 text-[#e53670]">→</span> Connect
         </p>
       </div>

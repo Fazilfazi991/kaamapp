@@ -35,7 +35,7 @@ export function HowItWorks() {
     <section className="relative overflow-hidden bg-gradient-to-b from-white via-[#fffafd] to-[#fff5f9] py-8 sm:py-9" aria-labelledby="how-it-works-heading">
       <div className="pointer-events-none absolute left-5 top-28 hidden h-4 w-4 rotate-45 bg-[#ff82b0] lg:block" />
       <div className="pointer-events-none absolute right-12 top-44 hidden text-4xl text-[#ff82b0] lg:block">✦</div>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-[5%]">
         <h2 id="how-it-works-heading" className="sr-only">How KAAM works</h2>
 
         <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_310px_minmax(0,1fr)] lg:items-center lg:gap-5 xl:grid-cols-[minmax(0,1fr)_340px_minmax(0,1fr)] xl:gap-6">
@@ -46,12 +46,12 @@ export function HowItWorks() {
 
         <div className="lg:hidden">
           <div className="text-center">
-            <p className="text-sm font-bold uppercase tracking-[.18em] text-[#d91f64]">Recruitment, made mutual</p>
+            <p className="text-sm font-bold uppercase tracking-[.18em] text-[#f56ba1]">Recruitment, made mutual</p>
             <h3 className="mt-2 text-3xl font-bold tracking-tight text-[#17172d]">How KAAM works</h3>
           </div>
           <div className="mx-auto mt-7 grid max-w-md grid-cols-2 rounded-xl border border-[#f2cddd] bg-white p-1 shadow-sm" role="tablist" aria-label="Choose a KAAM journey">
-            <button type="button" role="tab" aria-selected={audience === "candidate"} onClick={() => setAudience("candidate")} className={`rounded-lg px-4 py-3 text-sm font-bold transition ${audience === "candidate" ? "bg-[#e53670] text-white shadow-sm" : "text-[#5d5364]"}`}>For Candidates</button>
-            <button type="button" role="tab" aria-selected={audience === "employer"} onClick={() => setAudience("employer")} className={`rounded-lg px-4 py-3 text-sm font-bold transition ${audience === "employer" ? "bg-[#e53670] text-white shadow-sm" : "text-[#5d5364]"}`}>For Employers</button>
+            <button type="button" role="tab" aria-selected={audience === "candidate"} onClick={() => setAudience("candidate")} className={`rounded-lg px-4 py-3 text-sm font-bold transition ${audience === "candidate" ? "bg-[#160847] text-white shadow-sm" : "text-[#5d5364]"}`}>For Candidates</button>
+            <button type="button" role="tab" aria-selected={audience === "employer"} onClick={() => setAudience("employer")} className={`rounded-lg px-4 py-3 text-sm font-bold transition ${audience === "employer" ? "bg-[#160847] text-white shadow-sm" : "text-[#5d5364]"}`}>For Employers</button>
           </div>
           <div className="mx-auto mt-7 max-w-xl">
             <p className="mb-4 text-center text-sm text-[#6b6071]">{audience === "candidate" ? "Simple steps to get noticed and hired" : "Find talent and build your team"}</p>
@@ -67,7 +67,7 @@ export function HowItWorks() {
         </div>
 
         <div className="relative z-10 mt-3 grid gap-2 rounded-2xl border border-[#f0dce5] bg-white/95 p-3 shadow-[0_8px_24px_rgba(83,37,57,.08)] sm:grid-cols-2 lg:grid-cols-4 lg:gap-0">
-          {benefits.map((benefit, index) => <div key={benefit.title} className={`flex items-center gap-2 px-3 py-2.5 ${index > 0 ? "lg:border-l lg:border-[#f0e1e8]" : ""}`}><span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#fff0f6] text-[#e53670]"><LineIcon name={benefit.icon} size={23} /></span><div><h3 className="text-sm font-bold text-[#1b1a31]">{benefit.title}</h3><p className="mt-0.5 text-xs leading-4 text-[#706578]">{benefit.text}</p></div></div>)}
+          {benefits.map((benefit, index) => <div key={benefit.title} className={`flex items-center gap-2 px-3 py-2.5 ${index > 0 ? "lg:border-l lg:border-[#eee9ff]" : ""}`}><span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#fce1ec] text-[#160847]"><LineIcon name={benefit.icon} size={23} /></span><div><h3 className="text-sm font-bold text-[#160847]">{benefit.title}</h3><p className="mt-0.5 text-xs leading-4 text-[#706578]">{benefit.text}</p></div></div>)}
         </div>
       </div>
     </section>
@@ -79,7 +79,7 @@ function Journey({ title, subtitle, steps, side }: { title: string; subtitle: st
 }
 
 function StepCard({ step, index }: { step: Step; index: number }) {
-  return <article className="relative z-10 grid min-h-[94px] grid-cols-[64px_1fr_54px] items-center gap-2 rounded-2xl border border-[#f2e7ed] bg-white px-3 py-2.5 shadow-[0_6px_18px_rgba(50,30,46,.08)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(50,30,46,.11)]"><span className="relative grid h-13 w-13 place-items-center rounded-full bg-gradient-to-br from-[#fa76a7] to-[#d80c58] text-xl font-bold text-white ring-3 ring-[#fff1f6] before:absolute before:-inset-1.5 before:rounded-full before:border before:border-dashed before:border-[#ffb2ce] before:content-['']">{index + 1}</span><div><h4 className="text-base font-bold leading-5 text-[#18172d]">{step.title}</h4><p className="mt-1 text-sm leading-5 text-[#6d6376]">{step.description}</p></div><span className="grid h-12 w-12 place-items-center rounded-xl bg-[#fff0f6] text-[#e53670]"><LineIcon name={step.icon} size={25} /></span></article>;
+  return <article className="relative z-10 grid min-h-[94px] grid-cols-[52px_minmax(0,1fr)_42px] items-center gap-2 rounded-2xl border border-[#f2e7ed] bg-white px-3 py-2.5 shadow-[0_6px_18px_rgba(50,30,46,.08)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(50,30,46,.11)] sm:grid-cols-[64px_minmax(0,1fr)_54px]"><span className="relative grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-[#fa76a7] to-[#d80c58] text-lg font-bold text-white ring-3 ring-[#fff1f6] before:absolute before:-inset-1.5 before:rounded-full before:border before:border-dashed before:border-[#ffb2ce] before:content-[''] sm:h-13 sm:w-13 sm:text-xl">{index + 1}</span><div className="min-w-0"><h4 className="text-base font-bold leading-5 text-[#18172d]">{step.title}</h4><p className="mt-1 text-sm leading-5 text-[#6d6376]">{step.description}</p></div><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#fff0f6] text-[#e53670] sm:h-12 sm:w-12"><LineIcon name={step.icon} size={22} /></span></article>;
 }
 
 function Hub() {

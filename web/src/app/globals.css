@@ -4,9 +4,13 @@
   --background: #fffafc;
   --foreground: #1f1f29;
   --muted: #66616f;
-  --brand: #e53670;
-  --brand-dark: #bc1f55;
-  --ink: #19141f;
+  --kaam-purple: #160847;
+  --kaam-purple-hover: #100538;
+  --kaam-pink: #f56ba1;
+  --kaam-white: #ffffff;
+  --brand: var(--kaam-purple);
+  --brand-dark: var(--kaam-purple-hover);
+  --ink: var(--kaam-purple);
   --surface: #ffffff;
   --surface-soft: #f7f2f5;
   --line: #eadde3;
@@ -49,6 +53,32 @@ a {
   }
   50% {
     opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .kaam-trust-track {
+    animation: kaam-trust-marquee 24s linear infinite;
+    will-change: transform;
+  }
+
+  .kaam-trust-marquee:hover .kaam-trust-track {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes kaam-trust-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 640px) and (prefers-reduced-motion: no-preference) {
+  .kaam-trust-track {
+    animation-duration: 18s;
   }
 }
 

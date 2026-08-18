@@ -320,7 +320,7 @@ export function AuthForm({
             aria-pressed={role === item}
             className={`focus-ring rounded-lg px-4 py-3 text-sm font-semibold ${
               role === item
-                ? "bg-[#e53670] text-white shadow-sm"
+                ? "bg-[#160847] text-white shadow-sm"
                 : "text-[#5d5364] hover:bg-white"
             }`}
           >
@@ -349,7 +349,7 @@ export function AuthForm({
               <button
                 type="button"
                 onClick={changeEmail}
-                className="focus-ring rounded-md text-sm font-semibold text-[#bc1f55]"
+                className="focus-ring rounded-md text-sm font-semibold text-[#160847]"
                 disabled={loading}
               >
                 Change email
@@ -427,7 +427,7 @@ export function AuthForm({
             variant="secondary"
             onClick={continueWithGoogle}
             disabled={loading || Boolean(configError)}
-            className="mt-4 w-full gap-3 border-[#d9d2d5] text-[#28222b] hover:bg-[#faf8f9]"
+            className="mt-4 w-full gap-3 border-[#160847] text-[#160847] hover:bg-[#f7f4ff]"
           >
             <GoogleIcon />
             {loading ? "Opening Google…" : "Continue with Google"}

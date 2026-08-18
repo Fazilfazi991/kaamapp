@@ -4,9 +4,9 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "reac
 type Variant = "primary" | "secondary" | "ghost";
 
 const variantClasses: Record<Variant, string> = {
-  primary: "bg-[#e53670] text-white hover:bg-[#bc1f55]",
-  secondary: "border border-[#e53670] bg-white text-[#bc1f55] hover:bg-[#fff0f5]",
-  ghost: "text-[#3b3340] hover:bg-[#f7e8ef]",
+  primary: "bg-[var(--kaam-purple)] text-white hover:bg-[var(--kaam-purple-hover)]",
+  secondary: "border border-[var(--kaam-purple)] bg-white text-[var(--kaam-purple)] hover:bg-[#f7f4ff]",
+  ghost: "text-[var(--kaam-purple)] hover:bg-[#f7f4ff]",
 };
 
 const baseClasses =
