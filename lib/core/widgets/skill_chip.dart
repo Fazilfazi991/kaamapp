@@ -17,7 +17,8 @@ class SkillChip extends StatelessWidget {
         fontWeight: FontWeight.w700,
       ),
       side: BorderSide(
-          color: selected ? AppColors.primaryPink : AppColors.border),
+        color: selected ? AppColors.primaryPink : AppColors.border,
+      ),
       backgroundColor: selected
           ? AppColors.primaryPink.withValues(alpha: 0.12)
           : AppColors.elevatedCard,

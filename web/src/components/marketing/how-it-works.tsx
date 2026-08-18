@@ -61,7 +61,7 @@ export function HowItWorks() {
           </div>
         </div>
 
-        <div className="relative mt-1 hidden h-20 lg:block" aria-hidden="true">
+        <div className="relative mt-2 hidden h-36 lg:block xl:h-40" aria-hidden="true">
           <Image src="/kaam/how-it-works/candidate-illustration.png" alt="" width={230} height={230} className="absolute bottom-0 left-0 h-32 w-auto object-contain xl:h-36" />
           <Image src="/kaam/how-it-works/employer-illustration.png" alt="" width={250} height={250} className="absolute bottom-0 right-0 h-32 w-auto object-contain xl:h-36" />
         </div>

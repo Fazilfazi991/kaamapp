@@ -49,7 +49,7 @@ describe("notification model", () => {
         role: "employer",
         type: "employer_document_approved",
       }),
-    ).toBe("/employer/documents");
+    ).toBe("/employer/onboarding");
     expect(
       safeNotificationHref({
         role: "admin",

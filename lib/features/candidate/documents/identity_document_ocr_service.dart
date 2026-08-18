@@ -11,11 +11,15 @@ class IdentityDocumentReviewArgs {
     required this.type,
     required this.upload,
     required this.extraction,
+    this.backUpload,
+    this.backFileName,
     this.ocrError,
   });
 
   final IdentityDocumentType type;
   final KaamUploadResult upload;
+  final KaamUploadResult? backUpload;
+  final String? backFileName;
   final PassportExtractionResult extraction;
   final String? ocrError;
 
@@ -57,14 +61,14 @@ class PassportExtractionResult {
 
   bool get hasAnyData {
     return [
-      fullName,
-      passportNumber,
-      nationality,
-      gender,
-      placeOfBirth,
-      countryOfIssue,
-      rawText,
-    ].whereType<String>().any((value) => value.trim().isNotEmpty) ||
+          fullName,
+          passportNumber,
+          nationality,
+          gender,
+          placeOfBirth,
+          countryOfIssue,
+          rawText,
+        ].whereType<String>().any((value) => value.trim().isNotEmpty) ||
         dateOfBirth != null ||
         issueDate != null ||
         expiryDate != null;
@@ -85,10 +89,10 @@ class PassportExtractionResult {
   }
 
   String get _joinedName {
-    return [firstName, lastName]
-        .whereType<String>()
-        .where((value) => value.trim().isNotEmpty)
-        .join(' ');
+    return [
+      firstName,
+      lastName,
+    ].whereType<String>().where((value) => value.trim().isNotEmpty).join(' ');
   }
 
   static PassportExtractionResult empty() => const PassportExtractionResult();
@@ -107,14 +111,29 @@ class PassportExtractionResult {
       'mrz_text',
       'mrzText',
     ]);
-    final mrz = _parseMrz(rawText ?? _firstString(data, const ['mrz_text', 'mrzText']));
+    final mrz = _parseMrz(
+      rawText ?? _firstString(data, const ['mrz_text', 'mrzText']),
+    );
 
     return PassportExtractionResult(
-      fullName: _firstString(data, const ['full_name', 'fullName', 'name', 'holder_name', 'holderName']) ??
+      fullName: _firstString(data, const [
+            'full_name',
+            'fullName',
+            'name',
+            'holder_name',
+            'holderName',
+          ]) ??
           mrz.fullName,
-      firstName: _firstString(data, const ['first_name', 'firstName', 'given_names', 'givenNames']) ??
+      firstName: _firstString(data, const [
+            'first_name',
+            'firstName',
+            'given_names',
+            'givenNames',
+          ]) ??
           mrz.firstName,
-      lastName: _firstString(data, const ['last_name', 'lastName', 'surname']) ?? mrz.lastName,
+      lastName:
+          _firstString(data, const ['last_name', 'lastName', 'surname']) ??
+              mrz.lastName,
       passportNumber: _firstString(data, const [
             'passport_number',
             'passportNumber',
@@ -123,16 +142,44 @@ class PassportExtractionResult {
             'number',
           ]) ??
           mrz.passportNumber,
-      nationality: _firstString(data, const ['nationality', 'nationality_code', 'nationalityCode']) ??
+      nationality: _firstString(data, const [
+            'nationality',
+            'nationality_code',
+            'nationalityCode',
+          ]) ??
           mrz.nationality,
-      dateOfBirth: _firstDate(data, const ['date_of_birth', 'dateOfBirth', 'dob', 'birth_date', 'birthDate']) ??
+      dateOfBirth: _firstDate(data, const [
+            'date_of_birth',
+            'dateOfBirth',
+            'dob',
+            'birth_date',
+            'birthDate',
+          ]) ??
           mrz.dateOfBirth,
       gender: _firstString(data, const ['sex', 'gender']) ?? mrz.gender,
-      issueDate: _firstDate(data, const ['issue_date', 'issueDate', 'date_of_issue']),
-      expiryDate: _firstDate(data, const ['expiry_date', 'expiryDate', 'expiration_date', 'date_of_expiry']) ??
+      issueDate: _firstDate(data, const [
+        'issue_date',
+        'issueDate',
+        'date_of_issue',
+      ]),
+      expiryDate: _firstDate(data, const [
+            'expiry_date',
+            'expiryDate',
+            'expiration_date',
+            'date_of_expiry',
+          ]) ??
           mrz.expiryDate,
-      placeOfBirth: _firstString(data, const ['place_of_birth', 'placeOfBirth', 'birth_place']),
-      countryOfIssue: _firstString(data, const ['country_of_issue', 'countryOfIssue', 'issuing_country', 'issuingCountry']) ??
+      placeOfBirth: _firstString(data, const [
+        'place_of_birth',
+        'placeOfBirth',
+        'birth_place',
+      ]),
+      countryOfIssue: _firstString(data, const [
+            'country_of_issue',
+            'countryOfIssue',
+            'issuing_country',
+            'issuingCountry',
+          ]) ??
           mrz.countryOfIssue,
       confidenceScores: confidence,
       rawText: rawText,
@@ -190,7 +237,9 @@ class PassportExtractionResult {
       final day = int.tryParse(parts[0]);
       final month = int.tryParse(parts[1]);
       final year = int.tryParse(parts[2]);
-      if (day != null && month != null && year != null) return DateTime(year, month, day);
+      if (day != null && month != null && year != null) {
+        return DateTime(year, month, day);
+      }
     }
     return null;
   }
@@ -198,7 +247,9 @@ class PassportExtractionResult {
   static Map<String, double> _confidence(dynamic value) {
     final map = _asMap(value);
     return map.map((key, value) {
-      final parsed = value is num ? value.toDouble() : double.tryParse(value.toString()) ?? 0;
+      final parsed = value is num
+          ? value.toDouble()
+          : double.tryParse(value.toString()) ?? 0;
       return MapEntry(key, parsed);
     });
   }
@@ -221,7 +272,10 @@ class PassportExtractionResult {
     final passportNumber = line2.substring(0, 9).replaceAll('<', '');
     final nationality = line2.substring(10, 13).replaceAll('<', '');
     return PassportExtractionResult(
-      fullName: [firstName, lastName].where((value) => value.isNotEmpty).join(' '),
+      fullName: [
+        firstName,
+        lastName,
+      ].where((value) => value.isNotEmpty).join(' '),
       firstName: firstName,
       lastName: lastName,
       passportNumber: passportNumber,
@@ -260,12 +314,18 @@ class PassportExtractionResult {
     return '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  static String _clean(String? value) => value?.replaceAll('<', ' ').replaceAll(RegExp(r'\s+'), ' ').trim() ?? '';
+  static String _clean(String? value) =>
+      value?.replaceAll('<', ' ').replaceAll(RegExp(r'\s+'), ' ').trim() ?? '';
 }
 
 abstract class IdentityDocumentOcrService {
   Future<PassportExtractionResult> extract({
     required IdentityDocumentType type,
+    required KaamUploadResult upload,
+    required String fileName,
+  });
+
+  Future<void> validatePassportBack({
     required KaamUploadResult upload,
     required String fileName,
   });
@@ -304,7 +364,9 @@ class SupabaseIdentityOcrService implements IdentityDocumentOcrService {
     if (kDebugMode) {
       debugPrint('Kaam OCR: response status ${response.status}');
     }
-    if (response.status >= 400) {
+    if (response.status >= 400 ||
+        response.data is! Map ||
+        response.data['success'] != true) {
       throw StateError('OCR request failed with status ${response.status}.');
     }
     final result = PassportExtractionResult.fromResponse(response.data);
@@ -316,6 +378,32 @@ class SupabaseIdentityOcrService implements IdentityDocumentOcrService {
       throw StateError('OCR returned no readable passport data.');
     }
     return result;
+  }
+
+  @override
+  Future<void> validatePassportBack({
+    required KaamUploadResult upload,
+    required String fileName,
+  }) async {
+    final functionName = AppConfig.ocrEdgeFunction.trim();
+    final client = SupabaseService.maybeClient;
+    if (functionName.isEmpty || client == null) {
+      throw StateError('Identity-document validation is unavailable.');
+    }
+    final response = await client.functions.invoke(
+      functionName,
+      body: {
+        'document_type': 'passport-back',
+        'bucket': upload.bucket,
+        'path': upload.path,
+        'file_name': fileName,
+      },
+    );
+    if (response.status >= 400 ||
+        response.data is! Map ||
+        response.data['success'] != true) {
+      throw StateError('Identity-document validation was rejected.');
+    }
   }
 
   String _safePath(String value) {
@@ -343,6 +431,13 @@ class SafeFallbackIdentityOcrService implements IdentityDocumentOcrService {
     await Future<void>.delayed(const Duration(milliseconds: 250));
     return PassportExtractionResult.empty();
   }
+
+  @override
+  Future<void> validatePassportBack({
+    required KaamUploadResult upload,
+    required String fileName,
+  }) =>
+      throw StateError('Identity-document validation is unavailable.');
 }
 
 class IdentityFieldSpec {

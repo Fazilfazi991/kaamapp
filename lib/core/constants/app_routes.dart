@@ -3,15 +3,19 @@ class AppRoutes {
 
   static const home = '/home';
   static const welcome = '/welcome';
+  static const sessionRouting = '/session-routing';
+  static const accountAccess = '/account-access';
   static const roleSelection = '/role-selection';
   static const login = '/login';
   static const otp = '/otp';
   static const accountBlocked = '/account/blocked';
   static const basicDetails = '/onboarding/basic-details';
+  static const editBasicDetails = '/candidate/profile/edit/basic-details';
   static const workPreferences = '/onboarding/work-preferences';
   static const primaryProfession = '/onboarding/primary-profession';
   static const skillDetails = '/onboarding/skill-details';
   static const skillsExperience = '/onboarding/skills-experience';
+  static const profileMedia = '/onboarding/profile-media';
   static const documentsUpload = '/onboarding/documents';
   static const identityDocumentReview = '/candidate/documents/review';
   static const identityDocumentViewer = '/candidate/documents/viewer';
@@ -36,6 +40,7 @@ class AppRoutes {
   static const languageSettings = '/candidate/language';
   static const helpSupport = '/candidate/help';
   static const accountSettings = '/candidate/settings';
+  static const deleteAccount = '/account/delete';
   static const qaTools = '/qa/tools';
 
   static const employerSplash = '/employer';

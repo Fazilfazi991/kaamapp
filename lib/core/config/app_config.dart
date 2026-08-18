@@ -10,6 +10,10 @@ class AppConfig {
   static String get qaEmployerEmail => _read('QA_EMPLOYER_EMAIL');
   static String get qaAdminEmail => _read('QA_ADMIN_EMAIL');
   static String get ocrEdgeFunction => _read('OCR_EDGE_FUNCTION');
+
+  /// OAuth client for the server side Google token audience. This is public
+  /// configuration, but must be supplied per environment (never hard-code it).
+  static String get googleWebClientId => _read('GOOGLE_WEB_CLIENT_ID');
   static int get emailOtpLength {
     final parsed = int.tryParse(_read('EMAIL_OTP_LENGTH'));
     if (parsed == null || parsed < 6 || parsed > 10) return 6;
@@ -60,15 +64,19 @@ class AppConfig {
     final fromDefine = switch (key) {
       'SUPABASE_URL' => const String.fromEnvironment('SUPABASE_URL'),
       'SUPABASE_ANON_KEY' => const String.fromEnvironment('SUPABASE_ANON_KEY'),
-      'KAAM_USE_DEMO_FALLBACK' =>
-        const String.fromEnvironment('KAAM_USE_DEMO_FALLBACK'),
+      'KAAM_USE_DEMO_FALLBACK' => const String.fromEnvironment(
+          'KAAM_USE_DEMO_FALLBACK',
+        ),
       'QA_MODE' => const String.fromEnvironment('QA_MODE'),
-      'QA_CANDIDATE_EMAIL' =>
-        const String.fromEnvironment('QA_CANDIDATE_EMAIL'),
+      'QA_CANDIDATE_EMAIL' => const String.fromEnvironment(
+          'QA_CANDIDATE_EMAIL',
+        ),
       'QA_EMPLOYER_EMAIL' => const String.fromEnvironment('QA_EMPLOYER_EMAIL'),
       'QA_ADMIN_EMAIL' => const String.fromEnvironment('QA_ADMIN_EMAIL'),
       'EMAIL_OTP_LENGTH' => const String.fromEnvironment('EMAIL_OTP_LENGTH'),
       'OCR_EDGE_FUNCTION' => const String.fromEnvironment('OCR_EDGE_FUNCTION'),
+      'GOOGLE_WEB_CLIENT_ID' =>
+        const String.fromEnvironment('GOOGLE_WEB_CLIENT_ID'),
       _ => '',
     };
     if (fromDefine.isNotEmpty) return fromDefine;

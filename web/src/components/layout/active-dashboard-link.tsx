@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 
 function isActivePath(pathname: string, href: string) {
   if (pathname === href) return true;
@@ -14,11 +15,13 @@ export function ActiveDashboardLink({
   label,
   className,
   activeClassName,
+  leading,
 }: {
   href: string;
   label: string;
   className: string;
   activeClassName: string;
+  leading?: ReactNode;
 }) {
   const pathname = usePathname();
   const active = isActivePath(pathname, href);
@@ -29,7 +32,7 @@ export function ActiveDashboardLink({
       aria-current={active ? "page" : undefined}
       className={`${className} ${active ? activeClassName : ""}`}
     >
-      {label}
+      {leading}{label}
     </Link>
   );
 }

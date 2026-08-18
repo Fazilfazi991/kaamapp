@@ -38,8 +38,7 @@ const safeRoutesByRole: Record<UserRole, Set<string>> = {
     routes.employerInterests,
     routes.employerMatches,
     routes.employerMessages,
-    routes.employerDocuments,
-    routes.employerProfile,
+    routes.employerOnboarding,
   ]),
   admin: new Set([
     routes.adminNotifications,
@@ -80,8 +79,8 @@ export function safeNotificationHref({
     if (employerInterestTypes.has(type)) return routes.employerInterests;
     if (type === "match_created") return routes.employerMatches;
     if (type === "new_message") return routes.employerMessages;
-    if (employerDocumentTypes.has(type)) return routes.employerDocuments;
-    if (employerCompanyTypes.has(type)) return routes.employerProfile;
+    if (employerDocumentTypes.has(type)) return routes.employerOnboarding;
+    if (employerCompanyTypes.has(type)) return routes.employerOnboarding;
   }
 
   if (role === "admin") {

@@ -1,133 +1,52 @@
-import { EmptyStateCard } from "@/components/ui/empty-state";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { StatCard } from "@/components/cards/stat-card";
+import Link from "next/link";
 import { routes } from "@/config/routes";
 import { MembershipCheckoutButton } from "@/features/candidate/membership/membership-checkout-button";
 import { membershipPresentation } from "@/features/candidate/membership/membership-status";
-import { candidateCompletion } from "@/features/candidate/profile-completion";
+import { candidateCompletion, type CompletionSection } from "@/features/candidate/profile-completion";
 import type { CandidateMembershipRow, CandidateProfileRow, ProfileRow } from "@/types/domain";
 
-function listSummary(values?: string[] | null) {
-  return values && values.length > 0 ? values.slice(0, 3).join(", ") : "Not added yet";
-}
+type DashboardCounts = { pendingInterests: number; acceptedInterests: number; matches: number; unreadMessages: number };
+type IconName = "bell" | "check" | "document" | "heart" | "interest" | "message" | "profile" | "shield" | "spark" | "calendar" | "membership";
+type Tone = "success" | "warning" | "danger" | "neutral" | "purple" | "green" | "pink" | "blue";
 
-export function CandidateDashboard({
-  profile,
-  candidate,
-  membership,
-  hasPassport,
-  counts,
-}: {
-  profile: ProfileRow | null;
-  candidate: CandidateProfileRow | null;
-  membership: CandidateMembershipRow | null;
-  hasPassport: boolean;
-  counts?: {
-    pendingInterests: number;
-    acceptedInterests: number;
-    matches: number;
-    unreadMessages: number;
-  };
-}) {
+export function CandidateDashboard({ profile, candidate, membership, hasPassport, passportStatus, counts = { pendingInterests: 0, acceptedInterests: 0, matches: 0, unreadMessages: 0 } }: { profile: ProfileRow | null; candidate: CandidateProfileRow | null; membership: CandidateMembershipRow | null; hasPassport: boolean; passportStatus: string; counts?: DashboardCounts }) {
   const completion = candidateCompletion({ profile, candidate, hasPassport });
   const membershipState = membershipPresentation(membership);
+  const firstName = profile?.full_name?.trim().split(/\s+/)[0] || "there";
+  const verification = candidate?.is_verified ? "Verified" : verificationLabel(passportStatus, hasPassport);
+  const tasks = completion.missingSections;
+  const initials = (profile?.full_name ?? profile?.email ?? "K").split(/\s+|@/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("");
 
-  return (
-    <div className="grid gap-5">
-      <section className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold text-[#201925]">{membershipState.heading}</h2>
-            <p className="mt-1 text-sm text-[#66616f]">
-              AED 50 for 2 calendar months. One-time payment. No automatic renewal.
-            </p>
-          </div>
-          <StatusBadge tone={membershipState.tone}>
-            {membershipState.badge}
-          </StatusBadge>
-        </div>
-        <p className="mt-4 text-sm text-[#3b3340]">{membershipState.description}</p>
-        <p className={`mt-2 text-sm font-semibold ${membershipState.isActive ? "text-[#176b3b]" : "text-[#a12a4d]"}`}>
-          {membershipState.isActive ? "Visible to Employers" : "Hidden from Employer Search"}
-        </p>
-        <div className="mt-4"><MembershipCheckoutButton label={membershipState.action} /></div>
-      </section>
+  return <div className="grid gap-4 pb-3 sm:gap-5">
+    <section className="flex flex-wrap items-start justify-between gap-4">
+      <div><p className="text-sm font-medium text-[#746975]">Here&apos;s what&apos;s happening with your profile today.</p><h1 className="mt-1 text-2xl font-bold tracking-tight text-[#1e1a26] sm:text-3xl">Welcome back, {firstName} <span aria-hidden="true">👋</span></h1></div>
+      <div className="flex items-center gap-2"><Link href={routes.candidateNotifications} aria-label="Open notifications" className="focus-ring relative grid h-11 w-11 place-items-center rounded-xl border border-[#f0e1e7] bg-white text-[#413946] shadow-sm hover:bg-[#fff6f9]"><DashboardIcon name="bell" /><span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#e53670]" aria-hidden="true" /></Link><Link href={routes.candidateProfile} aria-label="Open profile" className="focus-ring grid h-11 min-w-11 place-items-center rounded-xl bg-[#342b38] px-2 text-xs font-bold text-white shadow-sm">{initials || "K"}</Link></div>
+    </section>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <StatCard
-          title="Profile completion"
-          value={`${completion.percentage}%`}
-          note="Complete your details, skills, work preferences and required identity document."
-          tone={completion.isComplete ? "success" : "warning"}
-        />
-        <StatCard
-          title="Verification"
-          value={candidate?.is_verified ? "Verified" : "Pending"}
-          note="Document review status comes from the existing candidate profile."
-          tone={candidate?.is_verified ? "success" : "warning"}
-        />
-        <StatCard
-          title="Availability"
-          value={candidate?.availability ?? "Unset"}
-          note="Keep this current so employers can understand when you can join."
-        />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-4">
-        <StatCard
-          title="Pending interests"
-          value={String(counts?.pendingInterests ?? 0)}
-          note="Employer requests waiting for your response."
-          tone={(counts?.pendingInterests ?? 0) > 0 ? "warning" : "neutral"}
-        />
-        <StatCard
-          title="Accepted interests"
-          value={String(counts?.acceptedInterests ?? 0)}
-          note="Accepted requests remain visible in your interest history."
-          tone={(counts?.acceptedInterests ?? 0) > 0 ? "success" : "neutral"}
-        />
-        <StatCard
-          title="Matches"
-          value={String(counts?.matches ?? 0)}
-          note="Matches are created after you accept an interest."
-          tone={(counts?.matches ?? 0) > 0 ? "success" : "neutral"}
-        />
-        <StatCard
-          title="Unread messages"
-          value={String(counts?.unreadMessages ?? 0)}
-          note="Unread matched-chat messages."
-          tone={(counts?.unreadMessages ?? 0) > 0 ? "warning" : "neutral"}
-        />
-      </div>
-
-      <section className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#201925]">Selected skills</h2>
-        <p className="mt-2 text-sm text-[#66616f]">{listSummary(candidate?.skills)}</p>
-      </section>
-
-      {!completion.isComplete ? <section className="rounded-lg border border-[#eadde3] bg-[#fffafc] p-5"><h2 className="text-lg font-semibold text-[#201925]">Still required</h2><div className="mt-3 flex flex-wrap gap-2">{completion.missingSections.map((section) => <a key={section.id} href={section.href} className="focus-ring rounded-lg border border-[#e53670] bg-white px-3 py-2 text-sm font-semibold text-[#bc1f55]">Complete {section.label}</a>)}</div></section> : null}
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <EmptyStateCard
-          title="Employer interests"
-          description="Review incoming employer interest requests and accept or reject pending requests."
-          actionHref={routes.candidateInterests}
-          actionLabel="View interests"
-        />
-        <EmptyStateCard
-          title="Messages"
-          description="Open conversations for accepted matches when the backend chat rule allows messaging."
-          actionHref={routes.candidateMessages}
-          actionLabel="Open messages"
-        />
-      </div>
-
-      <EmptyStateCard
-        title="Documents"
-        description="Upload passport and supporting documents securely, review OCR fields, and track pending verification."
-        actionHref={routes.candidateDocuments}
-        actionLabel="View documents"
-      />
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.9fr)_minmax(270px,.85fr)]">
+      <section className="relative overflow-hidden rounded-2xl border border-[#f0dce5] bg-white p-5 shadow-[0_10px_28px_rgba(71,35,51,.08)] sm:p-6"><div className="relative z-10 max-w-full lg:max-w-[72%] xl:max-w-[68%]"><p className="text-xs font-bold uppercase tracking-wide text-[#d91f64]">Your next step</p><div className="mt-2 flex flex-wrap items-center gap-2"><h2 className="text-xl font-bold tracking-tight text-[#201925] sm:text-2xl">{membershipState.heading}</h2><StatusPill tone={membershipState.tone}>{membershipState.badge}</StatusPill></div><p className="mt-2 text-sm leading-5 text-[#6d6376]">AED 50 for 2 calendar months. One-time payment. No automatic renewal.</p><p className={`mt-3 flex items-center gap-2 text-sm font-semibold ${membershipState.isActive ? "text-[#188150]" : "text-[#d91f64]"}`}><DashboardIcon name={membershipState.isActive ? "check" : "profile"} size={17} />{membershipState.isActive ? "Visible to Employers" : "Hidden from Employer Search"}</p><p className="mt-3 text-sm leading-5 text-[#514856]">{membershipState.description}</p><div className="mt-5 flex flex-wrap items-center gap-3"><MembershipCheckoutButton label={membershipState.action} /><Link href={routes.candidateMembership} className="focus-ring inline-flex min-h-11 items-center justify-center rounded-lg border border-[#e8d8df] bg-white px-4 text-sm font-semibold text-[#514856] hover:bg-[#fff7fa]">Learn more</Link></div></div><MembershipIllustration /></section>
+      <section className="rounded-2xl border border-[#f0dce5] bg-white p-5 shadow-[0_10px_28px_rgba(71,35,51,.08)] sm:p-6"><h2 className="text-base font-bold text-[#201925]">Profile completion</h2><div className="mt-4 flex items-center gap-4"><ProgressRing percentage={completion.percentage} /><div><p className="text-sm font-bold text-[#312a35]">{completion.isComplete ? "Profile ready" : "Almost there!"}</p><p className="mt-1 text-xs leading-5 text-[#716674]">{completion.isComplete ? "Your core profile details are complete." : "Complete your profile to unlock more opportunities."}</p></div></div><Link href={completion.nextHref} className="focus-ring mt-5 inline-flex min-h-10 w-full items-center justify-center rounded-lg border border-[#e53670] px-4 text-sm font-semibold text-[#c51e58] hover:bg-[#fff0f5]">{completion.isComplete ? "View profile" : "Complete profile"}</Link></section>
     </div>
-  );
+
+    <section className="grid overflow-hidden rounded-2xl border border-[#f0dce5] bg-white shadow-[0_8px_22px_rgba(71,35,51,.06)] md:grid-cols-3"><StatusItem icon="shield" title="Verification" detail={verificationDetail(verification)} tone={verification === "Verified" ? "success" : verification === "Rejected" ? "danger" : "warning"} pill={verification} href={routes.candidateDocuments} /><StatusItem icon="calendar" title="Availability" detail={candidate?.availability ? "Employers can see when you can join." : "Set your availability for employers."} tone={candidate?.availability ? "success" : "neutral"} pill={candidate?.availability || "Not set"} href={routes.candidateOnboardingExperience} /><StatusItem icon="membership" title="Membership" detail={membershipState.isActive ? "Your profile can appear in Employer Search." : "Activate to become visible in Employer Search."} tone={membershipState.tone} pill={membershipState.badge} href={routes.candidateMembership} /></section>
+    <section className="grid overflow-hidden rounded-2xl border border-[#f0dce5] bg-white shadow-[0_8px_22px_rgba(71,35,51,.06)] sm:grid-cols-2 xl:grid-cols-4"><Metric icon="interest" label="Pending interests" count={counts.pendingInterests} note="Waiting for your response" href={routes.candidateInterests} tone="purple" /><Metric icon="check" label="Accepted interests" count={counts.acceptedInterests} note="Visible in your history" href={routes.candidateInterests} tone="green" /><Metric icon="heart" label="Matches" count={counts.matches} note="After you accept interest" href={routes.candidateMatches} tone="pink" /><Metric icon="message" label="Unread messages" count={counts.unreadMessages} note="From matched employers" href={routes.candidateMessages} tone="blue" /></section>
+
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,.95fr)]"><section className="rounded-2xl border border-[#f0dce5] bg-white p-5 shadow-[0_8px_22px_rgba(71,35,51,.06)] sm:p-6"><div className="flex items-center justify-between gap-3"><h2 className="text-lg font-bold text-[#201925]">Complete your tasks</h2>{tasks.length > 0 ? <span className="rounded-full bg-[#fff0f5] px-2.5 py-1 text-xs font-bold text-[#d91f64]">{tasks.length} remaining</span> : null}</div>{tasks.length === 0 && membershipState.isActive ? <DashboardSuccess /> : <div className="mt-4 grid gap-2.5">{tasks.map((task) => <TaskRow key={task.id} task={task} />)}{!membershipState.isActive ? <MembershipTask label={membershipState.action} /> : null}</div>}{(tasks.length > 0 || !membershipState.isActive) ? <Link href={completion.nextHref} className="focus-ring mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#cf1f5a] hover:text-[#a61446]">View profile tasks <span aria-hidden="true">→</span></Link> : null}</section><div className="grid gap-3"><ActionCard icon="interest" title="Employer interests" description={counts.pendingInterests > 0 ? `${counts.pendingInterests} request${counts.pendingInterests === 1 ? "" : "s"} waiting for your response.` : "Review incoming employer interest requests."} href={routes.candidateInterests} action="View interests" badge={counts.pendingInterests} tone="purple" /><ActionCard icon="message" title="Messages" description={counts.unreadMessages > 0 ? `${counts.unreadMessages} unread message${counts.unreadMessages === 1 ? "" : "s"} from matched employers.` : "Open conversations with matched employers."} href={routes.candidateMessages} action="Open messages" badge={counts.unreadMessages} tone="blue" /><ActionCard icon="document" title="Documents" description={`${verificationDetail(verification)} Manage and track your secure documents.`} href={routes.candidateDocuments} action="View documents" tone="pink" /></div></div>
+
+    <section className="rounded-2xl border border-[#f0dce5] bg-white p-5 shadow-[0_8px_22px_rgba(71,35,51,.06)] sm:p-6"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[#edf7ff] text-[#1580cf]"><DashboardIcon name="spark" /></span><div><h2 className="text-base font-bold text-[#201925]">Selected skills</h2><p className="text-xs text-[#716674]">Keep these current for more relevant opportunities.</p></div></div><Link href={routes.candidateOnboardingSkills} className="focus-ring text-sm font-bold text-[#d91f64] hover:text-[#a61446]">Edit skills</Link></div><div className="mt-4 flex flex-wrap gap-2">{candidate?.skills?.length ? candidate.skills.map((skill) => <span key={skill} className="rounded-full border border-[#ecdfe5] bg-[#fffafd] px-3 py-1.5 text-xs font-medium text-[#514856]">{skill}</span>) : <p className="text-sm text-[#716674]">No skills added yet.</p>}</div></section>
+  </div>;
 }
+
+function StatusItem({ icon, title, detail, pill, tone, href }: { icon: IconName; title: string; detail: string; pill: string; tone: Tone; href: string }) { return <Link href={href} className="focus-ring flex min-h-[94px] items-center gap-3 border-b border-[#f4e7ec] p-4 hover:bg-[#fffafd] md:border-b-0 md:border-r last:md:border-r-0"><IconTile icon={icon} tone={tone} /><div className="min-w-0 flex-1"><p className="text-sm font-bold text-[#302934]">{title}</p><p className="mt-0.5 truncate text-xs text-[#716674]">{detail}</p></div><StatusPill tone={tone}>{pill}</StatusPill></Link>; }
+function Metric({ icon, label, count, note, href, tone }: { icon: IconName; label: string; count: number; note: string; href: string; tone: "purple" | "green" | "pink" | "blue" }) { return <Link href={href} className="focus-ring flex min-h-[104px] items-center gap-3 border-b border-[#f4e7ec] p-4 hover:bg-[#fffafd] sm:border-b-0 sm:border-r last:xl:border-r-0"><IconTile icon={icon} tone={tone} /><div className="min-w-0 flex-1"><p className="text-xs font-medium text-[#716674]">{label}</p><p className="mt-0.5 text-2xl font-bold leading-none text-[#201925]">{count}</p><p className="mt-1 truncate text-[11px] text-[#857887]">{note}</p></div><span className="text-[#b6aab4]" aria-hidden="true">›</span></Link>; }
+function TaskRow({ task }: { task: CompletionSection }) { const isIdentity = task.id === "identity"; return <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#f3dfe7] bg-[#fffafd] p-3"><IconTile icon={isIdentity ? "document" : "profile"} tone={isIdentity ? "pink" : "purple"} /><div className="min-w-[160px] flex-1"><p className="text-sm font-bold text-[#312a35]">{isIdentity ? "Complete identity document" : `Complete ${task.label.toLowerCase()}`}</p><p className="mt-0.5 text-xs text-[#716674]">{isIdentity ? "Required to verify your identity." : "Add this information to strengthen your profile."}</p></div><Link href={task.href} className="focus-ring inline-flex min-h-10 items-center justify-center rounded-lg border border-[#e53670] px-3 text-xs font-bold text-[#c51e58] hover:bg-white">Continue</Link></div>; }
+function MembershipTask({ label }: { label: string }) { return <div className="flex flex-wrap items-center gap-3 rounded-xl border border-[#f3dfe7] bg-[#fffafd] p-3"><IconTile icon="membership" tone="blue" /><div className="min-w-[160px] flex-1"><p className="text-sm font-bold text-[#312a35]">Activate your profile</p><p className="mt-0.5 text-xs text-[#716674]">Appear in Employer searches and receive opportunities.</p></div><MembershipCheckoutButton label={label} /></div>; }
+function ActionCard({ icon, title, description, href, action, badge, tone }: { icon: IconName; title: string; description: string; href: string; action: string; badge?: number; tone: "purple" | "blue" | "pink" }) { return <section className="rounded-2xl border border-[#f0dce5] bg-white p-4 shadow-[0_6px_18px_rgba(71,35,51,.06)]"><div className="flex items-start gap-3"><IconTile icon={icon} tone={tone} /><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-2"><h2 className="text-sm font-bold text-[#302934]">{title}</h2>{badge && badge > 0 ? <span className="rounded-full bg-[#ffe7f0] px-2 py-0.5 text-xs font-bold text-[#d91f64]">{badge}</span> : null}</div><p className="mt-1 text-xs leading-5 text-[#716674]">{description}</p><Link href={href} className="focus-ring mt-2 inline-flex text-xs font-bold text-[#d91f64] hover:text-[#a61446]">{action}</Link></div></div></section>; }
+function DashboardSuccess() { return <div className="mt-4 flex items-center gap-3 rounded-xl bg-[#effbf5] p-4 text-sm text-[#216542]"><span className="grid h-9 w-9 place-items-center rounded-full bg-white"><DashboardIcon name="check" /></span><div><p className="font-bold">Your core profile is complete.</p><p className="mt-0.5 text-xs">Keep your availability and documents up to date.</p></div></div>; }
+function ProgressRing({ percentage }: { percentage: number }) { return <div className="relative grid h-24 w-24 shrink-0 place-items-center rounded-full" style={{ background: `conic-gradient(#e53670 ${percentage * 3.6}deg, #f8e7ee 0deg)` }} aria-label={`${percentage}% profile complete`}><div className="grid h-[76px] w-[76px] place-items-center rounded-full bg-white text-center"><span className="text-xl font-bold text-[#302934]">{percentage}%</span><span className="text-[10px] text-[#716674]">Complete</span></div></div>; }
+function MembershipIllustration() { return <div className="pointer-events-none absolute bottom-0 right-0 hidden h-full w-[36%] overflow-hidden lg:block" aria-hidden="true"><div className="absolute right-5 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full bg-[#ffe4ee] shadow-[0_0_0_16px_rgba(255,235,243,.82)]" /><div className="absolute right-10 top-[34%] grid h-14 w-14 place-items-center rounded-2xl bg-[#e53670] text-white shadow-lg"><DashboardIcon name="profile" size={29} /></div><div className="absolute bottom-[23%] right-4 grid h-12 w-12 place-items-center rounded-2xl bg-white text-[#e53670] shadow-md"><DashboardIcon name="shield" size={25} /></div><div className="absolute right-5 top-[21%] text-2xl text-[#ff9cc0]">✦</div></div>; }
+function IconTile({ icon, tone }: { icon: IconName; tone: Tone }) { const tones: Record<Tone, string> = { success: "bg-[#eaf9f0] text-[#1b9a58]", warning: "bg-[#fff5df] text-[#d99300]", danger: "bg-[#ffe9ed] text-[#d91f64]", neutral: "bg-[#f4f1f4] text-[#706578]", purple: "bg-[#f1eaff] text-[#7c4bd6]", green: "bg-[#eaf9f0] text-[#1b9a58]", pink: "bg-[#ffe9f1] text-[#e53670]", blue: "bg-[#eaf5ff] text-[#1780ce]" }; return <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${tones[tone]}`} aria-hidden="true"><DashboardIcon name={icon} /></span>; }
+function StatusPill({ children, tone }: { children: React.ReactNode; tone: Tone }) { const tones: Record<Tone, string> = { success: "bg-[#eaf9f0] text-[#187a46]", warning: "bg-[#fff4dc] text-[#9a6600]", danger: "bg-[#ffe9ed] text-[#bc1f55]", neutral: "bg-[#f3f0f3] text-[#665c68]", purple: "bg-[#f1eaff] text-[#7041c8]", green: "bg-[#eaf9f0] text-[#187a46]", pink: "bg-[#ffe9f1] text-[#bc1f55]", blue: "bg-[#eaf5ff] text-[#176faa]" }; return <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold ${tones[tone]}`}>{children}</span>; }
+function DashboardIcon({ name, size = 20 }: { name: IconName; size?: number }) { const paths: Record<IconName, React.ReactNode> = { bell: <><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 22h4" /></>, check: <><circle cx="12" cy="12" r="8" /><path d="m8.5 12 2.3 2.4 4.7-4.8" /></>, document: <><path d="M7 3h7l4 4v14H7z" /><path d="M14 3v5h5M10 13h5M10 17h4" /></>, heart: <path d="M20.8 5.8a5.2 5.2 0 0 0-7.4 0L12 7.2l-1.4-1.4a5.2 5.2 0 0 0-7.4 7.4L12 22l8.8-8.8a5.2 5.2 0 0 0 0-7.4Z" />, interest: <><path d="m4 12 12-8v16z" /><path d="M16 8h4v8h-4M8 12h8" /></>, message: <><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 9 9 0 0 1-3-.5L4 20l1.4-4A7.4 7.4 0 0 1 4 11.5 7.6 7.6 0 0 1 12 4a7.6 7.6 0 0 1 8 7.5Z" /><path d="M8 12h.01M12 12h.01M16 12h.01" /></>, profile: <><circle cx="12" cy="8" r="3.5" /><path d="M4.5 20c.9-3.5 3.3-5.3 7.5-5.3s6.6 1.8 7.5 5.3" /></>, shield: <><path d="M12 3 19 6v5.3c0 4.4-2.8 7.5-7 9.7-4.2-2.2-7-5.3-7-9.7V6l7-3Z" /><path d="m9 12 2 2 4-4" /></>, spark: <path d="m13 2-8 12h6l-1 8 9-13h-6V2Z" />, calendar: <><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M8 3v4M16 3v4M4 10h16" /></>, membership: <><path d="M12 3 19 6v5.3c0 4.4-2.8 7.5-7 9.7-4.2-2.2-7-5.3-7-9.7V6l7-3Z" /><path d="M12 8v7M8.5 11.5h7" /></> }; return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>; }
+function verificationLabel(status: string, hasPassport: boolean) { if (status === "rejected" || status === "expired") return "Rejected"; if (status === "pending_verification") return "Pending"; if (status === "verified") return "Verified"; return hasPassport ? "Pending" : "Not started"; }
+function verificationDetail(verification: string) { if (verification === "Verified") return "Identity verified."; if (verification === "Rejected") return "Document review needs attention."; if (verification === "Pending") return "Document review in progress."; return "Upload an identity document to begin review."; }

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { routes } from "@/config/routes";
+import { requireRole } from "@/lib/auth/session";
 import { requireEmployerCompany } from "./access";
 
 function safeError(message: string): never {
@@ -23,14 +24,14 @@ async function visibleCandidate(candidateId: string) {
 export async function shortlistCandidate(formData: FormData) {
   const candidateId = String(formData.get("candidateId") ?? "");
   if (!candidateId) safeError("Candidate is missing.");
-  const { userId } = await requireEmployerCompany();
+  const { userId } = await requireRole("employer");
   const candidate = await visibleCandidate(candidateId);
   if (!candidate) safeError("This candidate is no longer visible.");
   const supabase = await createServerSupabaseClient();
   const { error } = await supabase
     .from("saved_candidates")
     .upsert({ employer_id: userId, candidate_id: candidateId }, { onConflict: "employer_id,candidate_id" });
-  if (error) safeError("Could not shortlist this candidate.");
+  if (error) safeError("Could not save this candidate.");
   revalidatePath(routes.employerSearch);
   revalidatePath(routes.employerShortlist);
 }
@@ -38,14 +39,14 @@ export async function shortlistCandidate(formData: FormData) {
 export async function removeShortlistCandidate(formData: FormData) {
   const candidateId = String(formData.get("candidateId") ?? "");
   if (!candidateId) safeError("Candidate is missing.");
-  const { userId } = await requireEmployerCompany();
+  const { userId } = await requireRole("employer");
   const supabase = await createServerSupabaseClient();
   const { error } = await supabase
     .from("saved_candidates")
     .delete()
     .eq("employer_id", userId)
     .eq("candidate_id", candidateId);
-  if (error) safeError("Could not remove this candidate.");
+  if (error) safeError("Could not remove this saved candidate.");
   revalidatePath(routes.employerSearch);
   revalidatePath(routes.employerShortlist);
 }
@@ -105,13 +106,13 @@ export async function sendInterest(formData: FormData) {
 export async function withdrawInterest(formData: FormData) {
   const interestId = String(formData.get("interestId") ?? "");
   if (!interestId) safeError("Interest request is missing.");
-  const access = await requireEmployerCompany();
+  const { userId } = await requireRole("employer");
   const supabase = await createServerSupabaseClient();
   const { data: interest } = await supabase
     .from("interest_requests")
     .select("id,status")
     .eq("id", interestId)
-    .eq("employer_id", access.userId)
+    .eq("employer_id", userId)
     .maybeSingle<{ id: string; status: string }>();
   if (!interest) safeError("Interest request was not found.");
   if (interest.status !== "pending") safeError("Only pending interest requests can be withdrawn.");
@@ -119,7 +120,7 @@ export async function withdrawInterest(formData: FormData) {
     .from("interest_requests")
     .update({ status: "withdrawn" })
     .eq("id", interestId)
-    .eq("employer_id", access.userId);
+    .eq("employer_id", userId);
   if (error) safeError("Could not withdraw this interest.");
   revalidatePath(routes.employerInterests);
 }

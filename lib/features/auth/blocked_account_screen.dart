@@ -18,11 +18,7 @@ class BlockedAccountScreen extends StatelessWidget {
     return ScreenScaffold(
       title: 'Account blocked',
       children: [
-        const Icon(
-          Icons.block_rounded,
-          size: 64,
-          color: AppColors.error,
-        ),
+        const Icon(Icons.block_rounded, size: 64, color: AppColors.error),
         const SizedBox(height: 18),
         const Text('Account blocked', style: AppTextStyles.headline),
         const SizedBox(height: 10),
@@ -31,10 +27,9 @@ class BlockedAccountScreen extends StatelessWidget {
         PrimaryButton(
           label: 'Back to login',
           icon: Icons.login_rounded,
-          onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
-            AppRoutes.roleSelection,
-            (_) => false,
-          ),
+          onPressed: () => Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false),
         ),
       ],
     );
@@ -83,14 +78,11 @@ class _ProtectedAccountRouteState extends State<ProtectedAccountRoute> {
         }
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!context.mounted) return;
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            AppRoutes.roleSelection,
-            (_) => false,
-          );
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
         });
-        return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        );
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
       },
     );
   }

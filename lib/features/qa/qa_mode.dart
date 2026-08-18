@@ -32,8 +32,7 @@ class QaLoginShortcuts extends StatelessWidget {
         (label: 'Candidate QA', email: AppConfig.qaCandidateEmail),
       if (showEmployer)
         (label: 'Employer QA', email: AppConfig.qaEmployerEmail),
-      if (showAdmin)
-        (label: 'Admin QA', email: AppConfig.qaAdminEmail),
+      if (showAdmin) (label: 'Admin QA', email: AppConfig.qaAdminEmail),
     ].where((item) => item.email.trim().isNotEmpty).toList();
     if (items.isEmpty) return const SizedBox.shrink();
     return AppCard(

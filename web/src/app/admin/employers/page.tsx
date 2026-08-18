@@ -6,7 +6,7 @@ export default async function AdminEmployersPage({ searchParams }: { searchParam
   const { rows } = await loadEmployers({ q: params.q, status: params.status, page: Number(params.page ?? 1) });
   return (
     <>
-      <AdminPageHeader title="Employers" description="Company verification queue using employer_companies and verification_documents." />
+      <AdminPageHeader title="Employers" description="Employer company directory with optional business-verification records." />
       <FilterBar search={params.q} status={params.status} />
       <AdminTable
         headers={["Company", "Owner", "Location", "Company status", "Documents", "Action"]}
@@ -18,7 +18,7 @@ export default async function AdminEmployersPage({ searchParams }: { searchParam
             <td className="px-4 py-3 text-[#66616f]">{[company.city, company.country].filter(Boolean).join(", ") || "Not set"}</td>
             <td className="px-4 py-3"><AdminStatus status={company.status} /></td>
             <td className="px-4 py-3 text-[#66616f]">{company.verification_documents?.length ?? 0} submitted</td>
-            <td className="px-4 py-3"><RowAction href={`/admin/employers/${company.id}`}>Review</RowAction></td>
+            <td className="px-4 py-3"><RowAction href={`/admin/employers/${company.id}`}>View</RowAction></td>
           </tr>
         ))}
       />

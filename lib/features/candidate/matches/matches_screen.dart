@@ -28,42 +28,48 @@ class _MatchesScreenState extends State<MatchesScreen> {
     return ScreenScaffold(
       title: 'My Matches',
       bottomNavigationBar: const KaamBottomNav(currentIndex: 2),
-      actions: [IconButton(icon: const Icon(Icons.refresh_rounded), onPressed: _refresh)],
-      children: [
-        FutureBuilder<List<MatchItem>>(
-          future: matchesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return EmptyState(
-                icon: Icons.error_outline,
-                title: 'Could not load matches',
-                message: snapshot.error.toString(),
-                action: PrimaryButton(label: 'Retry', onPressed: _refresh),
-              );
-            }
-            final matches = snapshot.data ?? const <MatchItem>[];
-            if (matches.isEmpty) {
-              return const EmptyState(
-                icon: Icons.handshake_outlined,
-                title: 'No accepted matches yet',
-                message: 'Accept an employer interest to unlock chat.',
-              );
-            }
-            return Column(
-              children: [
-                for (final match in matches)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: MatchCard(match: match),
-                  ),
-              ],
-            );
-          },
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh_rounded),
+          onPressed: _refresh,
         ),
       ],
+      body: FutureBuilder<List<MatchItem>>(
+        future: matchesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return EmptyState(
+              icon: Icons.error_outline,
+              title: 'Could not load matches',
+              message: snapshot.error.toString(),
+              action: PrimaryButton(label: 'Retry', onPressed: _refresh),
+            );
+          }
+          final matches = snapshot.data ?? const <MatchItem>[];
+          if (matches.isEmpty) {
+            return const EmptyState(
+              icon: Icons.handshake_outlined,
+              title: 'No accepted matches yet',
+              message: 'Accept an employer interest to unlock chat.',
+            );
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+            itemCount: matches.length,
+            itemBuilder: (context, index) {
+              final match = matches[index];
+              return Padding(
+                key: ValueKey(match.id),
+                padding: const EdgeInsets.only(bottom: 12),
+                child: MatchCard(match: match),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

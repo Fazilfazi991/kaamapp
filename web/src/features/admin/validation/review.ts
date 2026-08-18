@@ -172,7 +172,7 @@ export function validatePublicReason(reason: string) {
   return { ok: true as const, reason: cleaned };
 }
 
-export function canApproveCompany({
+export function canVerifyCompany({
   companyStatus,
   isVerified = false,
   profileComplete = true,
@@ -183,7 +183,7 @@ export function canApproveCompany({
   profileComplete?: boolean;
   requiredDocumentStatuses: Record<string, string | undefined>;
 }) {
-  return getEmployerCompanyApprovalState({
+  return getEmployerCompanyVerificationState({
     companyStatus,
     isVerified,
     profileComplete,
@@ -226,7 +226,7 @@ export function documentStatusesByType(documents: Array<Pick<EmployerDocumentAdm
   return statuses;
 }
 
-export function getEmployerCompanyApprovalState({
+export function getEmployerCompanyVerificationState({
   companyStatus,
   isVerified = false,
   profileComplete,
@@ -237,18 +237,18 @@ export function getEmployerCompanyApprovalState({
   profileComplete: boolean;
   documentStatuses: Record<string, string | undefined>;
 }) {
-  void documentStatuses; // Historical document rows are no longer approval prerequisites.
+  void documentStatuses; // Historical document rows are no longer verification prerequisites.
   if (companyStatus === "blocked") {
     return { canApprove: false, reason: "Company blocked" };
   }
   if (isVerified) {
-    return { canApprove: false, reason: "Company is already approved" };
+    return { canApprove: false, reason: "Business is already verified" };
   }
   if (!profileComplete) {
     return { canApprove: false, reason: "Company profile incomplete" };
   }
 
-  return { canApprove: true, reason: "Ready for approval" };
+  return { canApprove: true, reason: "Ready for optional verification" };
 }
 
 export function canBlockUser({

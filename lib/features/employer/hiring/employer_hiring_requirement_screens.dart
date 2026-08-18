@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/constants/app_routes.dart';
+import '../../../core/supabase/supabase_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_card.dart';
@@ -13,7 +14,10 @@ import '../../../core/widgets/secondary_button.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../supabase_backend/kaam_backend.dart';
+import '../../taxonomy/taxonomy_repository.dart';
 import '../models/employer_models.dart';
+import '../widgets/employer_selector_fields.dart';
+import '../widgets/employer_taxonomy_search_sheets.dart';
 import '../widgets/employer_widgets.dart';
 
 class HiringRequirementsScreen extends StatefulWidget {
@@ -77,7 +81,9 @@ class _HiringRequirementsScreenState extends State<HiringRequirementsScreen> {
                     (item) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: _RequirementCard(
-                          requirement: item, onChanged: _reload),
+                        requirement: item,
+                        onChanged: _reload,
+                      ),
                     ),
                   )
                   .toList(),
@@ -99,22 +105,6 @@ class AddHiringRequirementScreen extends StatefulWidget {
 
 class _AddHiringRequirementScreenState
     extends State<AddHiringRequirementScreen> {
-  static const roles = [
-    'Cleaner',
-    'Driver',
-    'Housekeeping',
-    'Security',
-    'Sales',
-    'Office Staff',
-    'Technician',
-    'Hospitality',
-    'Construction',
-    'Delivery Rider',
-    'Warehouse Helper',
-    'Restaurant Staff',
-    'Domestic Worker',
-    'Other',
-  ];
   static const salaries = [
     'AED 1000 - 1500',
     'AED 1500 - 2000',
@@ -151,7 +141,16 @@ class _AddHiringRequirementScreenState
   final locationController = TextEditingController();
   final hoursController = TextEditingController();
   final descriptionController = TextEditingController();
-  String role = '';
+  TaxonomyRepository? taxonomyRepository;
+  TaxonomyRole? selectedRole;
+  final selectedSkills = <String, CompetencySkill>{};
+  List<CompetencySkill> suggestedSkills = const [];
+  String legacyRole = '';
+  String? roleError;
+  String? suggestedSkillsError;
+  bool loadingSuggestedSkills = false;
+  bool roleExplicitlySelected = false;
+  bool initialized = false;
   bool accommodation = false;
   bool transport = false;
   bool visa = false;
@@ -162,8 +161,13 @@ class _AddHiringRequirementScreenState
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is EmployerHiringRequirement && role.isEmpty) {
-      role = args.role;
+    if (!initialized) {
+      initialized = true;
+      final client = SupabaseService.maybeClient;
+      if (client != null) taxonomyRepository = TaxonomyRepository(client);
+    }
+    if (args is EmployerHiringRequirement && legacyRole.isEmpty) {
+      legacyRole = args.role;
       customRoleController.text = args.customRole;
       openingsController.text = args.openings.toString();
       salaryController.text = args.salaryRange;
@@ -174,8 +178,57 @@ class _AddHiringRequirementScreenState
       transport = args.transportProvided;
       visa = args.visaProvided;
       immediate = args.immediateJoining;
+      _hydrateExistingTaxonomy(args);
     }
   }
+
+  Future<void> _hydrateExistingTaxonomy(
+    EmployerHiringRequirement requirement,
+  ) async {
+    final taxonomy = taxonomyRepository;
+    if (taxonomy == null) return;
+    try {
+      final role = requirement.jobRoleId == null
+          ? await taxonomy.findRoleByExactName(requirement.role)
+          : await taxonomy.role(requirement.jobRoleId!);
+      final skills = await taxonomy.skillsByIds(requirement.competencySkillIds);
+      if (!mounted) return;
+      setState(() {
+        selectedRole = role;
+        selectedSkills
+          ..clear()
+          ..addEntries(skills.map((skill) => MapEntry(skill.id, skill)));
+      });
+      if (role != null) _loadSuggestedSkills(role.id);
+    } catch (_) {
+      // Legacy values remain usable if catalog resolution is temporarily down.
+    }
+  }
+
+  Future<void> _loadSuggestedSkills(String roleId) async {
+    final taxonomy = taxonomyRepository;
+    if (taxonomy == null) return;
+    setState(() {
+      loadingSuggestedSkills = true;
+      suggestedSkillsError = null;
+    });
+    try {
+      final skills = await taxonomy.suggestedSkills(roleId);
+      if (!mounted || selectedRole?.id != roleId) return;
+      setState(() => suggestedSkills = skills);
+    } catch (_) {
+      if (mounted && selectedRole?.id == roleId) {
+        setState(
+            () => suggestedSkillsError = 'Unable to load suggested skills.');
+      }
+    } finally {
+      if (mounted && selectedRole?.id == roleId) {
+        setState(() => loadingSuggestedSkills = false);
+      }
+    }
+  }
+
+  String get _roleDisplay => selectedRole?.name ?? legacyRole;
 
   @override
   void dispose() {
@@ -190,12 +243,10 @@ class _AddHiringRequirementScreenState
 
   Future<void> _save() async {
     final openings = int.tryParse(openingsController.text.trim());
-    if (role.isEmpty) {
+    final args = ModalRoute.of(context)?.settings.arguments;
+    final existing = args is EmployerHiringRequirement ? args : null;
+    if (existing == null && selectedRole == null) {
       _message('Select a job role.');
-      return;
-    }
-    if (role == 'Other' && customRoleController.text.trim().isEmpty) {
-      _message('Enter the custom role.');
       return;
     }
     if (openings == null || openings < 1) {
@@ -209,15 +260,16 @@ class _AddHiringRequirementScreenState
       return;
     }
 
-    final args = ModalRoute.of(context)?.settings.arguments;
-    final existing = args is EmployerHiringRequirement ? args : null;
     setState(() => saving = true);
     try {
       await repository.saveHiringRequirement(
         EmployerHiringRequirement(
           id: existing?.id,
-          role: role,
-          customRole: customRoleController.text.trim(),
+          role: _roleDisplay,
+          jobRoleId:
+              roleExplicitlySelected ? selectedRole?.id : existing?.jobRoleId,
+          competencySkillIds: selectedSkills.keys.toList(),
+          customRole: existing?.customRole ?? '',
           openings: openings,
           salaryRange: salaryController.text.trim(),
           workLocation: locationController.text.trim(),
@@ -236,7 +288,9 @@ class _AddHiringRequirementScreenState
       );
       Navigator.of(context).pop();
     } catch (error) {
-      _message('Could not save hiring requirement: $error');
+      _message(
+        'Could not save hiring requirement. Please retry; skills may need syncing.',
+      );
     } finally {
       if (mounted) setState(() => saving = false);
     }
@@ -255,25 +309,38 @@ class _AddHiringRequirementScreenState
       children: [
         const SectionHeader(title: 'Job role'),
         const SizedBox(height: 10),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: roles
-              .map(
-                (item) => FilterChip(
-                  label: Text(item),
-                  selected: role == item,
-                  onSelected: (_) => setState(() => role = item),
-                ),
-              )
-              .toList(),
+        SelectionField(
+          label: 'Job Role *',
+          value: _roleDisplay,
+          hint: 'Search or select job role',
+          errorText: roleError,
+          onTap: () async {
+            final taxonomy = taxonomyRepository;
+            if (taxonomy == null) {
+              setState(() => roleError = 'Unable to load job roles.');
+              return;
+            }
+            final picked = await showJobRoleSearchSheet(
+              context: context,
+              selected: selectedRole,
+              search: (query) => taxonomy.searchRoles(query, limit: 20),
+            );
+            if (picked != null && mounted) {
+              setState(() {
+                selectedRole = picked;
+                legacyRole = picked.name;
+                roleExplicitlySelected = true;
+                roleError = null;
+              });
+              _loadSuggestedSkills(picked.id);
+            }
+          },
         ),
-        if (role == 'Other') ...[
+        if (selectedRole != null) ...[
           const SizedBox(height: 12),
-          AppTextField(
-            controller: customRoleController,
-            label: 'Custom role',
-            hint: 'Enter role',
+          Text(
+            '${selectedRole!.category} • ${selectedRole!.industry}',
+            style: AppTextStyles.muted,
           ),
         ],
         const SizedBox(height: 18),
@@ -286,42 +353,125 @@ class _AddHiringRequirementScreenState
         ),
         const SizedBox(height: 12),
         _PickerField(
-            controller: salaryController,
-            label: 'Salary range',
-            options: salaries),
+          controller: salaryController,
+          label: 'Salary range',
+          options: salaries,
+        ),
         const SizedBox(height: 12),
         _PickerField(
-            controller: locationController,
-            label: 'Work location',
-            options: locations),
+          controller: locationController,
+          label: 'Work location',
+          options: locations,
+        ),
         const SizedBox(height: 12),
         _PickerField(
-            controller: hoursController,
-            label: 'Working hours',
-            options: hours),
+          controller: hoursController,
+          label: 'Working hours',
+          options: hours,
+        ),
         const SizedBox(height: 14),
         _SwitchLine(
-            label: 'Accommodation provided',
-            value: accommodation,
-            onChanged: (v) => setState(() => accommodation = v)),
+          label: 'Accommodation provided',
+          value: accommodation,
+          onChanged: (v) => setState(() => accommodation = v),
+        ),
         _SwitchLine(
-            label: 'Transport provided',
-            value: transport,
-            onChanged: (v) => setState(() => transport = v)),
+          label: 'Transport provided',
+          value: transport,
+          onChanged: (v) => setState(() => transport = v),
+        ),
         _SwitchLine(
-            label: 'Visa provided',
-            value: visa,
-            onChanged: (v) => setState(() => visa = v)),
+          label: 'Visa provided',
+          value: visa,
+          onChanged: (v) => setState(() => visa = v),
+        ),
         _SwitchLine(
-            label: 'Immediate joining needed',
-            value: immediate,
-            onChanged: (v) => setState(() => immediate = v)),
+          label: 'Immediate joining needed',
+          value: immediate,
+          onChanged: (v) => setState(() => immediate = v),
+        ),
         const SizedBox(height: 12),
         AppTextField(
           controller: descriptionController,
           label: 'Notes / description optional',
           hint: 'Add shift, duties, or interview notes',
           maxLines: 4,
+        ),
+        const SizedBox(height: 20),
+        const SectionHeader(title: 'Skills'),
+        const SizedBox(height: 10),
+        if (selectedSkills.isNotEmpty) ...[
+          const Text('Selected Skills', style: AppTextStyles.label),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: selectedSkills.values
+                .map(
+                  (skill) => InputChip(
+                    label: Text(skill.name),
+                    onDeleted: () =>
+                        setState(() => selectedSkills.remove(skill.id)),
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 14),
+        ],
+        if (selectedRole != null) ...[
+          const Text('Suggested Skills', style: AppTextStyles.label),
+          const SizedBox(height: 8),
+          if (loadingSuggestedSkills) const LinearProgressIndicator(),
+          if (suggestedSkillsError != null)
+            TextButton(
+              onPressed: () => _loadSuggestedSkills(selectedRole!.id),
+              child: Text('$suggestedSkillsError Retry'),
+            ),
+          if (!loadingSuggestedSkills && suggestedSkillsError == null)
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: suggestedSkills
+                  .map(
+                    (skill) => FilterChip(
+                      label: Text(skill.name),
+                      selected: selectedSkills.containsKey(skill.id),
+                      onSelected: (selected) => setState(() {
+                        if (selected) {
+                          selectedSkills[skill.id] = skill;
+                        } else {
+                          selectedSkills.remove(skill.id);
+                        }
+                      }),
+                    ),
+                  )
+                  .toList(),
+            ),
+          const SizedBox(height: 12),
+        ],
+        OutlinedButton.icon(
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Add skills'),
+          onPressed: () async {
+            final taxonomy = taxonomyRepository;
+            if (taxonomy == null) {
+              _message('Unable to load skills.');
+              return;
+            }
+            final picked = await showCompetencySkillSearchSheet(
+              context: context,
+              selected: selectedSkills.values,
+              search: taxonomy.searchSkills,
+            );
+            if (picked != null && mounted) {
+              setState(() {
+                selectedSkills
+                  ..clear()
+                  ..addEntries(
+                      picked.map((skill) => MapEntry(skill.id, skill)));
+              });
+            }
+          },
         ),
         const SizedBox(height: 22),
         PrimaryButton(
@@ -330,7 +480,9 @@ class _AddHiringRequirementScreenState
         ),
         const SizedBox(height: 10),
         SecondaryButton(
-            label: 'Cancel', onPressed: () => Navigator.of(context).pop()),
+          label: 'Cancel',
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ],
     );
   }
@@ -349,9 +501,9 @@ class _RequirementCard extends StatelessWidget {
         status,
       );
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Requirement marked $status.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Requirement marked $status.')));
       onChanged();
     } catch (error) {
       if (!context.mounted) return;
@@ -363,8 +515,9 @@ class _RequirementCard extends StatelessWidget {
 
   Future<void> _delete(BuildContext context) async {
     try {
-      await const EmployerRepository()
-          .deleteHiringRequirement(requirement.id ?? '');
+      await const EmployerRepository().deleteHiringRequirement(
+        requirement.id ?? '',
+      );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Hiring requirement deleted.')),
@@ -387,8 +540,11 @@ class _RequirementCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                  child: Text(requirement.displayRole,
-                      style: AppTextStyles.title)),
+                child: Text(
+                  requirement.displayRole,
+                  style: AppTextStyles.title,
+                ),
+              ),
               StatusBadge(label: requirement.status, color: AppColors.warning),
             ],
           ),
@@ -418,8 +574,10 @@ class _RequirementCard extends StatelessWidget {
               SecondaryButton(
                 label: 'Edit',
                 onPressed: () => Navigator.of(context)
-                    .pushNamed(AppRoutes.employerAddHiringRequirement,
-                        arguments: requirement)
+                    .pushNamed(
+                      AppRoutes.employerAddHiringRequirement,
+                      arguments: requirement,
+                    )
                     .then((_) => onChanged()),
               ),
               SecondaryButton(
@@ -430,10 +588,13 @@ class _RequirementCard extends StatelessWidget {
                 ),
               ),
               SecondaryButton(
-                  label: 'Close',
-                  onPressed: () => _setStatus(context, 'closed')),
+                label: 'Close',
+                onPressed: () => _setStatus(context, 'closed'),
+              ),
               SecondaryButton(
-                  label: 'Delete', onPressed: () => _delete(context)),
+                label: 'Delete',
+                onPressed: () => _delete(context),
+              ),
             ],
           ),
         ],
@@ -469,10 +630,12 @@ class _PickerField extends StatelessWidget {
             child: ListView(
               shrinkWrap: true,
               children: options
-                  .map((option) => ListTile(
-                        title: Text(option),
-                        onTap: () => Navigator.of(context).pop(option),
-                      ))
+                  .map(
+                    (option) => ListTile(
+                      title: Text(option),
+                      onTap: () => Navigator.of(context).pop(option),
+                    ),
+                  )
                   .toList(),
             ),
           ),
@@ -489,8 +652,11 @@ class _PickerField extends StatelessWidget {
 }
 
 class _SwitchLine extends StatelessWidget {
-  const _SwitchLine(
-      {required this.label, required this.value, required this.onChanged});
+  const _SwitchLine({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
 
   final String label;
   final bool value;

@@ -9,7 +9,13 @@ import {
 } from "@/features/employer/server/actions";
 import type { EmployerCandidateCardModel } from "@/features/employer/types";
 
-export function EmployerCandidateCard({ candidate }: { candidate: EmployerCandidateCardModel }) {
+export function EmployerCandidateCard({
+  candidate,
+  canSendInterest = true,
+}: {
+  candidate: EmployerCandidateCardModel;
+  canSendInterest?: boolean;
+}) {
   return (
     <article className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
       <div className="flex gap-4">
@@ -71,19 +77,23 @@ export function EmployerCandidateCard({ candidate }: { candidate: EmployerCandid
         <form action={candidate.isShortlisted ? removeShortlistCandidate : shortlistCandidate}>
           <input type="hidden" name="candidateId" value={candidate.id} />
           <Button type="submit" variant="ghost">
-            {candidate.isShortlisted ? "Remove shortlist" : "Add shortlist"}
+            {candidate.isShortlisted ? "Remove saved candidate" : "Save candidate"}
           </Button>
         </form>
-        {candidate.interestStatus || candidate.isMatched ? (
-          <ButtonLink href="/employer/interests" variant="ghost">
-            View interest status
+        {candidate.isMatched ? (
+          <ButtonLink href="/employer/matches" variant="ghost">
+            View Match
           </ButtonLink>
-        ) : (
+        ) : candidate.interestStatus ? (
+          <ButtonLink href="/employer/interests" variant="ghost">
+            Interest Sent
+          </ButtonLink>
+        ) : canSendInterest ? (
           <form action={sendInterest}>
             <input type="hidden" name="candidateId" value={candidate.id} />
-            <Button type="submit">Send interest</Button>
+            <Button type="submit">Show Interest</Button>
           </form>
-        )}
+        ) : null}
       </div>
     </article>
   );

@@ -32,8 +32,9 @@ class EmployerSplashScreen extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 'Perfect Match',
-                style:
-                    AppTextStyles.title.copyWith(color: AppColors.primaryPink),
+                style: AppTextStyles.title.copyWith(
+                  color: AppColors.primaryPink,
+                ),
               ),
               const SizedBox(height: 14),
               const Text(
@@ -56,7 +57,9 @@ class EmployerSplashScreen extends StatelessWidget {
 }
 
 class EmployerLoginScreen extends StatefulWidget {
-  const EmployerLoginScreen({super.key});
+  const EmployerLoginScreen({super.key, this.googleSignIn});
+
+  final Future<KaamGoogleSignInResult> Function()? googleSignIn;
 
   @override
   State<EmployerLoginScreen> createState() => _EmployerLoginScreenState();
@@ -66,6 +69,8 @@ class _EmployerLoginScreenState extends State<EmployerLoginScreen> {
   final contactController = TextEditingController();
   final auth = const KaamAuthRepository();
   bool loading = false;
+  bool googleSignInInProgress = false;
+  bool navigationCommitted = false;
 
   @override
   void dispose() {
@@ -80,6 +85,7 @@ class _EmployerLoginScreenState extends State<EmployerLoginScreen> {
       await auth.signInWithOtp(
         email: contactController.text,
         role: KaamRole.employer,
+        freshRegistration: _freshRegistration,
       );
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed(
@@ -87,78 +93,172 @@ class _EmployerLoginScreenState extends State<EmployerLoginScreen> {
         arguments: {
           'email': contactController.text.trim().toLowerCase(),
           'role': KaamRole.employer,
+          'freshRegistration': _freshRegistration,
         },
       );
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not send OTP: $error')),
+        const SnackBar(
+          content: Text(
+            'We could not send a verification code. Check your email and connection, then try again.',
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => loading = false);
     }
   }
 
+  void _openAccountLogin() {
+    if (loading) return;
+    KaamAuthSessionCoordinator.clearUserScopedState();
+    Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+  }
+
+  Future<void> _continueWithGoogle() async {
+    if (loading || googleSignInInProgress || navigationCommitted) return;
+    setState(() => googleSignInInProgress = true);
+    try {
+      final result = await (widget.googleSignIn ?? auth.signInWithGoogle)();
+      if (!mounted || result.isCancelled) return;
+      if (!result.isSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.safeMessage)),
+        );
+        return;
+      }
+      if (navigationCommitted) return;
+      navigationCommitted = true;
+      final route = switch (result.route!.destination) {
+        KaamAuthDestination.roleSelection => AppRoutes.roleSelection,
+        KaamAuthDestination.blocked => AppRoutes.accountBlocked,
+        KaamAuthDestination.candidateOnboarding => AppRoutes.documentsUpload,
+        KaamAuthDestination.candidateDashboard => AppRoutes.dashboard,
+        KaamAuthDestination.employerOnboarding =>
+          AppRoutes.employerOnboardingOverview,
+        KaamAuthDestination.employerDashboard => AppRoutes.employerDashboard,
+      };
+      Navigator.of(context).pushReplacementNamed(route);
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text(KaamSafeErrorMessages.googleSignInFailure)),
+      );
+    } finally {
+      if (mounted && !navigationCommitted) {
+        setState(() => googleSignInInProgress = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ScreenScaffold(
-      title: 'Employer Login',
-      showBack: true,
-      children: [
-        const Text('Start hiring with KAAM', style: AppTextStyles.headline),
-        const SizedBox(height: 10),
-        const Text(
-          'Use your email to sign in or create your employer account.',
-          style: AppTextStyles.body,
-        ),
-        const SizedBox(height: 18),
-        const AppCard(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _LoginOption(
+    final registering = _freshRegistration;
+    final authBusy = loading || googleSignInInProgress;
+    return PopScope(
+      canPop: !googleSignInInProgress && !navigationCommitted,
+      child: ScreenScaffold(
+        title: registering ? 'Create employer account' : 'Employer Login',
+        showBack: true,
+        children: [
+          Text(
+            registering ? 'Create employer account' : 'Start hiring with KAAM',
+            style: AppTextStyles.headline,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            registering
+                ? 'Use your company email to create your employer account.'
+                : 'Use your email to sign in or create your employer account.',
+            style: AppTextStyles.body,
+          ),
+          const SizedBox(height: 18),
+          const AppCard(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _LoginOption(
                   icon: Icons.check_circle_outline_rounded,
-                  label: 'Email OTP login is active'),
-              SizedBox(height: 8),
-              _LoginOption(
+                  label: 'Email OTP login is active',
+                ),
+                SizedBox(height: 8),
+                _LoginOption(
                   icon: Icons.phone_iphone_rounded,
-                  label: 'Phone OTP coming soon'),
-              SizedBox(height: 8),
-              _LoginOption(
-                  icon: Icons.g_mobiledata_rounded,
-                  label: 'Google login coming soon'),
-            ],
+                  label: 'Phone OTP coming soon',
+                ),
+                SizedBox(height: 8),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 18),
-        AppTextField(
-          controller: contactController,
-          label: 'Company email',
-          hint: 'hr@company.com',
-          keyboardType: TextInputType.emailAddress,
-        ),
-        const SizedBox(height: 22),
-        PrimaryButton(
-          label: loading ? 'Sending...' : 'Continue with email',
-          onPressed: loading ? null : _continue,
-        ),
-        const SizedBox(height: 12),
-        const Center(
-          child: Text(
-            'New or existing employer? Continue with email.',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.muted,
+          const SizedBox(height: 18),
+          AppTextField(
+            controller: contactController,
+            label: 'Company email',
+            hint: 'hr@company.com',
+            keyboardType: TextInputType.emailAddress,
           ),
-        ),
-        const SizedBox(height: 18),
-        QaLoginShortcuts(
-          showCandidate: false,
-          onPickEmail: (email) =>
-              setState(() => contactController.text = email),
-        ),
-      ],
+          const SizedBox(height: 22),
+          PrimaryButton(
+            label: loading ? 'Sending...' : 'Continue with email',
+            onPressed: authBusy ? null : _continue,
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: authBusy ? null : _continueWithGoogle,
+            icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+            label: Text(
+              googleSignInInProgress ? 'Signing in…' : 'Continue with Google',
+            ),
+          ),
+          if (registering) ...[
+            const SizedBox(height: 20),
+            Center(
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  const Text(
+                    'Already have an account? ',
+                    style: AppTextStyles.muted,
+                  ),
+                  TextButton(
+                    onPressed: authBusy ? null : _openAccountLogin,
+                    child: const Text('Login'),
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 12),
+            const Center(
+              child: Text(
+                'New or existing employer? Continue with email.',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.muted,
+              ),
+            ),
+          ],
+          const SizedBox(height: 18),
+          IgnorePointer(
+            ignoring: authBusy,
+            child: QaLoginShortcuts(
+              showCandidate: false,
+              onPickEmail: (email) =>
+                  setState(() => contactController.text = email),
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  bool get _freshRegistration {
+    final arguments = ModalRoute.of(context)?.settings.arguments;
+    if (arguments is Map) return arguments['freshRegistration'] == true;
+    return false;
   }
 }
 
@@ -177,7 +277,8 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
   final auth = const KaamAuthRepository();
   bool loading = false;
   bool autoSubmitted = false;
-  int resendSeconds = 45;
+  final resendSeconds = ValueNotifier<int>(45);
+  final otpComplete = ValueNotifier<bool>(false);
   Timer? resendTimer;
 
   bool get canVerify =>
@@ -187,6 +288,8 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
   @override
   void dispose() {
     resendTimer?.cancel();
+    resendSeconds.dispose();
+    otpComplete.dispose();
     for (final controller in controllers) {
       controller.dispose();
     }
@@ -231,26 +334,30 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
         );
         if (!mounted) return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.message)),
-      );
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        _routeFor(result.destination),
-        (_) => false,
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.message)));
+      if (_otpContext().freshRegistration) {
+        await _showRegistrationSuccess();
+        if (!mounted) return;
+      }
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(_routeFor(result.destination), (_) => false);
     } on KaamRoleMismatchException catch (error) {
       if (!mounted) return;
       autoSubmitted = false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.safeMessage)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.safeMessage)));
     } catch (_) {
       if (!mounted) return;
       autoSubmitted = false;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content:
-              Text('We could not verify that code. Check it and try again.'),
+          content: Text(
+            'We could not verify that code. Check it and try again.',
+          ),
         ),
       );
     } finally {
@@ -266,17 +373,21 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
       autoSubmitted = false;
     });
     try {
-      await auth.signInWithOtp(email: email, role: KaamRole.employer);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('OTP resent.')),
+      await auth.signInWithOtp(
+        email: email,
+        role: KaamRole.employer,
+        freshRegistration: otpContext.freshRegistration,
       );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('OTP resent.')));
       _startResendCountdown();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not resend OTP: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not resend OTP: $error')));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -295,19 +406,48 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
       role: KaamRole.employer,
       requestedAt: KaamAuthSessionCoordinator.pendingOtp?.requestedAt ??
           DateTime.now().toUtc(),
+      freshRegistration: data['freshRegistration'] == true,
+    );
+  }
+
+  Future<void> _showRegistrationSuccess() async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Registration successful'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.check_circle_outline,
+              color: AppColors.success,
+              size: 48,
+            ),
+            SizedBox(height: 12),
+            Text('Your KAAM account has been created successfully.'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
     );
   }
 
   void _startResendCountdown() {
     resendTimer?.cancel();
-    setState(() => resendSeconds = 45);
+    resendSeconds.value = 45;
     resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
-      if (resendSeconds <= 1) {
+      if (resendSeconds.value <= 1) {
         timer.cancel();
-        setState(() => resendSeconds = 0);
+        resendSeconds.value = 0;
       } else {
-        setState(() => resendSeconds--);
+        resendSeconds.value -= 1;
       }
     });
   }
@@ -326,6 +466,7 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final email = _otpContext().normalizedEmail;
     return ScreenScaffold(
       title: 'Verification',
       showBack: true,
@@ -333,13 +474,14 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
         const Text('Verify your account', style: AppTextStyles.headline),
         const SizedBox(height: 10),
         Text(
-            'Enter the ${AppConfig.emailOtpLength}-digit code sent to your email.',
-            style: AppTextStyles.body),
+          'Enter the ${AppConfig.emailOtpLength}-digit code sent to $email.',
+          style: AppTextStyles.body,
+        ),
         const SizedBox(height: 28),
         OtpCodeFields(
           controllers: controllers,
           focusNodes: focusNodes,
-          onChanged: () => setState(() {}),
+          onChanged: () => otpComplete.value = canVerify,
           onCompleted: () {
             if (!loading && canVerify && !autoSubmitted) {
               autoSubmitted = true;
@@ -348,16 +490,27 @@ class _EmployerOtpScreenState extends State<EmployerOtpScreen> {
           },
         ),
         const SizedBox(height: 28),
-        PrimaryButton(
-          label: loading ? 'Verifying...' : 'Verify',
-          onPressed: loading || !canVerify ? null : _verify,
-        ),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: loading || resendSeconds > 0 ? null : _resend,
-          child: Text(resendSeconds > 0
-              ? 'Resend in ${resendSeconds}s'
-              : 'Resend code'),
+        ValueListenableBuilder<bool>(
+          valueListenable: otpComplete,
+          builder: (context, complete, _) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              PrimaryButton(
+                label: loading ? 'Verifying...' : 'Verify',
+                onPressed: loading || !complete ? null : _verify,
+              ),
+              const SizedBox(height: 12),
+              ValueListenableBuilder<int>(
+                valueListenable: resendSeconds,
+                builder: (context, seconds, _) => TextButton(
+                  onPressed: loading || seconds > 0 ? null : _resend,
+                  child: Text(
+                    seconds > 0 ? 'Resend in ${seconds}s' : 'Resend code',
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

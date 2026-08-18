@@ -5,11 +5,14 @@ import '../../../core/constants/app_routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/private_profile_photo_avatar.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/secondary_button.dart';
 import '../../../core/widgets/skill_chip.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../models/employer_models.dart';
+import '../models/employer_interest_state_store.dart';
+import '../models/employer_saved_state_store.dart';
 import '../../supabase_backend/kaam_backend.dart';
 
 class EmployerBottomNav extends StatelessWidget {
@@ -19,7 +22,8 @@ class EmployerBottomNav extends StatelessWidget {
 
   static const _routes = [
     AppRoutes.employerDashboard,
-    AppRoutes.employerHiringRequirements,
+    AppRoutes.employerCandidateSearch,
+    AppRoutes.employerSavedCandidates,
     AppRoutes.employerMatches,
     AppRoutes.employerSentRequests,
     AppRoutes.employerCompanyProfile,
@@ -31,22 +35,34 @@ class EmployerBottomNav extends StatelessWidget {
       selectedIndex: currentIndex,
       onDestinationSelected: (index) {
         if (index == currentIndex) return;
-        Navigator.of(context)
-            .pushNamedAndRemoveUntil(_routes[index], (route) => route.isFirst);
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(_routes[index], (route) => route.isFirst);
       },
       destinations: const [
         NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
         NavigationDestination(
-            icon: Icon(Icons.work_history_outlined), label: 'Hiring'),
+          icon: Icon(Icons.manage_search_rounded),
+          label: 'Hire',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.bookmark_border_rounded),
+          selectedIcon: Icon(Icons.bookmark_rounded),
+          label: 'Saved',
+        ),
         NavigationDestination(
           icon: Icon(Icons.handshake_outlined, size: 30),
           selectedIcon: Icon(Icons.handshake_rounded, size: 34),
           label: 'Matches',
         ),
         NavigationDestination(
-            icon: Icon(Icons.outbox_rounded), label: 'Interests'),
+          icon: Icon(Icons.outbox_rounded),
+          label: 'Interests',
+        ),
         NavigationDestination(
-            icon: Icon(Icons.business_outlined), label: 'Company'),
+          icon: Icon(Icons.business_outlined),
+          label: 'Company',
+        ),
       ],
     );
   }
@@ -160,10 +176,12 @@ class CandidateMiniProfileCard extends StatefulWidget {
     super.key,
     required this.candidate,
     this.showActions = true,
+    this.onSavedChanged,
   });
 
   final EmployerCandidate candidate;
   final bool showActions;
+  final ValueChanged<bool>? onSavedChanged;
 
   @override
   State<CandidateMiniProfileCard> createState() =>
@@ -172,11 +190,91 @@ class CandidateMiniProfileCard extends StatefulWidget {
 
 class _CandidateMiniProfileCardState extends State<CandidateMiniProfileCard> {
   late bool saved = widget.candidate.isSaved;
+  bool saving = false;
   final repository = const EmployerRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    EmployerInterestStateStore.instance.addListener(_interestChanged);
+    EmployerSavedStateStore.instance.addListener(_interestChanged);
+  }
+
+  @override
+  void dispose() {
+    EmployerInterestStateStore.instance.removeListener(_interestChanged);
+    EmployerSavedStateStore.instance.removeListener(_interestChanged);
+    super.dispose();
+  }
+
+  void _interestChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void didUpdateWidget(CandidateMiniProfileCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.candidate.candidateProfileId !=
+        widget.candidate.candidateProfileId) {
+      saved = widget.candidate.isSaved;
+    }
+  }
+
+  Future<void> _toggleSaved() async {
+    if (saving) return;
+    final candidateId = widget.candidate.candidateProfileId ?? '';
+    if (candidateId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('We could not update this candidate.')),
+      );
+      return;
+    }
+    final previous =
+        EmployerSavedStateStore.instance.isSavedFor(candidateId) ?? saved;
+    setState(() {
+      saving = true;
+      saved = !previous;
+    });
+    try {
+      if (saved) {
+        await repository.saveCandidate(candidateId);
+      } else {
+        await repository.removeSavedCandidate(candidateId);
+      }
+      if (!mounted) return;
+      EmployerSavedStateStore.instance.setSaved(candidateId, saved);
+      widget.onSavedChanged?.call(saved);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            saved ? 'Candidate saved.' : 'Removed from saved candidates.',
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => saved = previous);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'We could not update this candidate. Please try again.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => saving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final candidate = widget.candidate;
+    final isSaved = EmployerSavedStateStore.instance
+            .isSavedFor(candidate.candidateProfileId) ??
+        saved;
+    final interestStatus = EmployerInterestStateStore.instance
+            .statusFor(candidate.candidateProfileId) ??
+        candidate.interestStatus;
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,46 +288,41 @@ class _CandidateMiniProfileCardState extends State<CandidateMiniProfileCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(candidate.displayName, style: AppTextStyles.title),
+                    Row(children: [
+                      Flexible(
+                          child: Text(candidate.displayName,
+                              style: AppTextStyles.title)),
+                      if (candidate.isManuallyVerified) ...[
+                        const SizedBox(width: 6),
+                        const Icon(Icons.verified_rounded,
+                            size: 16, color: AppColors.success),
+                        const SizedBox(width: 3),
+                        const Text('KAAM Verified',
+                            style: TextStyle(
+                                fontSize: 12, color: AppColors.success)),
+                      ],
+                    ]),
                     const SizedBox(height: 4),
-                    Text(candidate.role,
-                        style: AppTextStyles.body
-                            .copyWith(color: AppColors.white)),
+                    Text(
+                      candidate.role,
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.white,
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              IconButton(
-                tooltip: saved ? 'Saved' : 'Save candidate',
-                onPressed: () async {
-                  try {
-                    await repository
-                        .saveCandidate(candidate.candidateProfileId ?? '');
-                    if (!mounted) return;
-                    setState(() => saved = true);
-                    ScaffoldMessenger.of(this.context).showSnackBar(
-                      const SnackBar(content: Text('Candidate saved.')),
-                    );
-                  } catch (error) {
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(this.context).showSnackBar(
-                      SnackBar(
-                          content: Text('Could not save candidate: $error')),
-                    );
-                  }
-                },
-                icon: Icon(saved
-                    ? Icons.bookmark_rounded
-                    : Icons.bookmark_border_rounded),
-                color: saved ? AppColors.primaryPink : AppColors.secondaryText,
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text('${candidate.experience} • ${candidate.location}',
-              style: AppTextStyles.muted),
           Text(
-              'Expected ${candidate.expectedSalary} • ${candidate.availability}',
-              style: AppTextStyles.muted),
+            '${candidate.experience} • ${candidate.location}',
+            style: AppTextStyles.muted,
+          ),
+          Text(
+            'Expected ${candidate.expectedSalary} • ${candidate.availability}',
+            style: AppTextStyles.muted,
+          ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
@@ -240,33 +333,59 @@ class _CandidateMiniProfileCardState extends State<CandidateMiniProfileCard> {
                 .toList(),
           ),
           const SizedBox(height: 12),
-          const Text('Contact details unlock only after mutual approval.',
-              style: AppTextStyles.muted),
+          const Text(
+            'Contact details unlock only after mutual approval.',
+            style: AppTextStyles.muted,
+          ),
           if (widget.showActions) ...[
             const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: SecondaryButton(
+                    label: isSaved ? 'Saved' : 'Save',
+                    icon: isSaved
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
+                    onPressed: saving ? null : _toggleSaved,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: SecondaryButton(
                     label: 'View Profile',
+                    icon: Icons.person_outline_rounded,
                     onPressed: () => Navigator.of(context).pushNamed(
                       AppRoutes.employerCandidateProfile,
                       arguments: candidate,
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: PrimaryButton(
-                    label: 'Send Interest',
-                    onPressed: () => Navigator.of(context).pushNamed(
-                      AppRoutes.employerSendInterest,
-                      arguments: candidate,
-                    ),
-                  ),
-                ),
               ],
             ),
+            const SizedBox(height: 10),
+            if (interestStatus == 'pending')
+              const PrimaryButton(
+                label: 'Interest Sent',
+                icon: Icons.schedule_rounded,
+                onPressed: null,
+              )
+            else if (interestStatus == 'accepted')
+              PrimaryButton(
+                label: 'View Match',
+                icon: Icons.handshake_rounded,
+                onPressed: () =>
+                    Navigator.of(context).pushNamed(AppRoutes.employerMatches),
+              )
+            else
+              PrimaryButton(
+                label: 'Show Interest',
+                icon: Icons.handshake_rounded,
+                onPressed: () => Navigator.of(context).pushNamed(
+                  AppRoutes.employerSendInterest,
+                  arguments: candidate,
+                ),
+              ),
           ],
         ],
       ),
@@ -281,36 +400,10 @@ class _CandidateAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initials = candidate.displayName
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((part) => part.isNotEmpty)
-        .take(2)
-        .map((part) => part[0].toUpperCase())
-        .join();
-    Widget fallback() => Container(
-          width: 48,
-          height: 48,
-          alignment: Alignment.center,
-          decoration: const BoxDecoration(
-            color: AppColors.elevatedCard,
-            shape: BoxShape.circle,
-          ),
-          child: Text(
-            initials.isEmpty ? 'C' : initials,
-            style: AppTextStyles.label.copyWith(color: AppColors.primaryPink),
-          ),
-        );
-    final url = candidate.profilePhotoUrl?.trim() ?? '';
-    if (url.isEmpty) return fallback();
-    return ClipOval(
-      child: Image.network(
-        url,
-        width: 48,
-        height: 48,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => fallback(),
-      ),
+    return PrivateProfilePhotoAvatar(
+      path: candidate.profilePhotoUrl ?? '',
+      initials: profileInitials(candidate.displayName, fallback: 'C'),
+      candidateId: candidate.candidateProfileId,
     );
   }
 }
@@ -359,16 +452,30 @@ class SentInterestRequestCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              PrivateProfilePhotoAvatar(
+                path: request.candidatePhotoUrl,
+                candidateId: request.candidateId,
+                initials: profileInitials(
+                  request.candidateName,
+                  fallback: 'C',
+                ),
+              ),
+              const SizedBox(width: 12),
               Expanded(
-                  child: Text(request.candidateId, style: AppTextStyles.title)),
+                child: Text(request.candidateName, style: AppTextStyles.title),
+              ),
               StatusBadge(label: request.status, color: color),
             ],
           ),
           const SizedBox(height: 8),
-          Text(request.jobTitle,
-              style: AppTextStyles.body.copyWith(color: AppColors.white)),
-          Text('${request.salary} • ${request.location}',
-              style: AppTextStyles.muted),
+          Text(
+            request.jobTitle,
+            style: AppTextStyles.body.copyWith(color: AppColors.white),
+          ),
+          Text(
+            '${request.salary} • ${request.location}',
+            style: AppTextStyles.muted,
+          ),
           const SizedBox(height: 8),
           Text(request.message, style: AppTextStyles.body),
           const SizedBox(height: 14),
@@ -393,14 +500,17 @@ class SentInterestRequestCard extends StatelessWidget {
                       builder: (_) => AlertDialog(
                         title: const Text('Cancel request?'),
                         content: const Text(
-                            'This interest request will be withdrawn.'),
+                          'This interest request will be withdrawn.',
+                        ),
                         actions: [
                           TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Keep')),
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Keep'),
+                          ),
                           TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Cancel Request')),
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Cancel Request'),
+                          ),
                         ],
                       ),
                     ),
@@ -437,6 +547,12 @@ class EmployerMatchCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              PrivateProfilePhotoAvatar(
+                path: match.profilePhotoUrl,
+                candidateId: match.candidateProfileId,
+                initials: profileInitials(match.name, fallback: 'C'),
+              ),
+              const SizedBox(width: 12),
               Expanded(child: Text(match.name, style: AppTextStyles.title)),
               StatusBadge(label: match.status, color: AppColors.success),
             ],
@@ -447,10 +563,14 @@ class EmployerMatchCard extends StatelessWidget {
           Text(match.lastMessage, style: AppTextStyles.muted),
           if (match.contactRevealed) ...[
             const SizedBox(height: 10),
-            Text('Phone: ${match.phone.isEmpty ? 'Not shared' : match.phone}',
-                style: AppTextStyles.body),
-            Text('Email: ${match.email.isEmpty ? 'Not shared' : match.email}',
-                style: AppTextStyles.body),
+            Text(
+              'Phone: ${match.phone.isEmpty ? 'Not shared' : match.phone}',
+              style: AppTextStyles.body,
+            ),
+            Text(
+              'Email: ${match.email.isEmpty ? 'Not shared' : match.email}',
+              style: AppTextStyles.body,
+            ),
             const SizedBox(height: 10),
             Column(
               children: [
@@ -483,10 +603,7 @@ class EmployerMatchCard extends StatelessWidget {
                       ? null
                       : () => _launchContact(
                             context,
-                            Uri(
-                              scheme: 'mailto',
-                              path: match.email.trim(),
-                            ),
+                            Uri(scheme: 'mailto', path: match.email.trim()),
                           ),
                 ),
               ],
@@ -502,10 +619,9 @@ class EmployerMatchCard extends StatelessWidget {
           PrimaryButton(
             label: match.chatEnabled ? 'Open Chat' : 'Chat Unavailable',
             onPressed: match.chatEnabled
-                ? () => Navigator.of(context).pushNamed(
-                      AppRoutes.employerPrivateChat,
-                      arguments: match,
-                    )
+                ? () => Navigator.of(
+                      context,
+                    ).pushNamed(AppRoutes.employerPrivateChat, arguments: match)
                 : null,
           ),
         ],
@@ -523,17 +639,16 @@ class EmployerChatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       onTap: match.chatEnabled
-          ? () => Navigator.of(context).pushNamed(
-                AppRoutes.employerPrivateChat,
-                arguments: match,
-              )
+          ? () => Navigator.of(
+                context,
+              ).pushNamed(AppRoutes.employerPrivateChat, arguments: match)
           : null,
       child: Row(
         children: [
-          const CircleAvatar(
-            backgroundColor: AppColors.elevatedCard,
-            child: Icon(Icons.person_outline_rounded,
-                color: AppColors.primaryPink),
+          PrivateProfilePhotoAvatar(
+            path: match.profilePhotoUrl,
+            candidateId: match.candidateProfileId,
+            initials: profileInitials(match.name, fallback: 'C'),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -549,7 +664,9 @@ class EmployerChatCard extends StatelessWidget {
           ),
           if (match.unreadCount > 0)
             StatusBadge(
-                label: '${match.unreadCount}', color: AppColors.primaryPink),
+              label: '${match.unreadCount}',
+              color: AppColors.primaryPink,
+            ),
         ],
       ),
     );
@@ -557,8 +674,11 @@ class EmployerChatCard extends StatelessWidget {
 }
 
 class EmployerChatBubble extends StatelessWidget {
-  const EmployerChatBubble(
-      {super.key, required this.text, required this.isEmployer});
+  const EmployerChatBubble({
+    super.key,
+    required this.text,
+    required this.isEmployer,
+  });
 
   final String text;
   final bool isEmployer;
@@ -606,10 +726,15 @@ class UploadDocumentCard extends StatelessWidget {
           const Icon(Icons.upload_file_rounded, color: AppColors.primaryPink),
           const SizedBox(width: 12),
           Expanded(
-              child: Text(optional ? '$title optional' : title,
-                  style: AppTextStyles.label)),
-          const Icon(Icons.add_circle_outline_rounded,
-              color: AppColors.secondaryText),
+            child: Text(
+              optional ? '$title optional' : title,
+              style: AppTextStyles.label,
+            ),
+          ),
+          const Icon(
+            Icons.add_circle_outline_rounded,
+            color: AppColors.secondaryText,
+          ),
         ],
       ),
     );
@@ -629,8 +754,10 @@ class TeamMemberCard extends StatelessWidget {
         children: [
           const CircleAvatar(
             backgroundColor: AppColors.elevatedCard,
-            child: Icon(Icons.person_outline_rounded,
-                color: AppColors.primaryPink),
+            child: Icon(
+              Icons.person_outline_rounded,
+              color: AppColors.primaryPink,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(

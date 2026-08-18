@@ -17,7 +17,8 @@ class InterestRequestsScreen extends StatefulWidget {
 
 class _InterestRequestsScreenState extends State<InterestRequestsScreen> {
   final repository = const InterestRepository();
-  late Future<List<InterestRequest>> requestsFuture = repository.candidateRequests();
+  late Future<List<InterestRequest>> requestsFuture =
+      repository.candidateRequests();
 
   void _refresh() {
     setState(() => requestsFuture = repository.candidateRequests());
@@ -28,7 +29,12 @@ class _InterestRequestsScreenState extends State<InterestRequestsScreen> {
     return ScreenScaffold(
       title: 'Interest Requests',
       bottomNavigationBar: const KaamBottomNav(currentIndex: 1),
-      actions: [IconButton(icon: const Icon(Icons.refresh_rounded), onPressed: _refresh)],
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh_rounded),
+          onPressed: _refresh,
+        ),
+      ],
       children: [
         FutureBuilder<List<InterestRequest>>(
           future: requestsFuture,
@@ -40,7 +46,7 @@ class _InterestRequestsScreenState extends State<InterestRequestsScreen> {
               return EmptyState(
                 icon: Icons.error_outline,
                 title: 'Could not load requests',
-                message: snapshot.error.toString(),
+                message: 'Please try again.',
                 action: PrimaryButton(label: 'Retry', onPressed: _refresh),
               );
             }
@@ -52,18 +58,93 @@ class _InterestRequestsScreenState extends State<InterestRequestsScreen> {
                 message: 'Employer requests sent to you will appear here.',
               );
             }
-            return Column(
-              children: [
-                for (final request in requests)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: InterestRequestCard(request: request),
+            final pending = _withStatus(requests, 'pending');
+            final accepted = _withStatus(requests, 'accepted');
+            final declined = _withStatus(requests, 'rejected');
+            return DefaultTabController(
+              length: 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Employers waiting for your response',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
-              ],
+                  const SizedBox(height: 12),
+                  TabBar(
+                    tabs: [
+                      Tab(text: 'Pending (${pending.length})'),
+                      Tab(text: 'Accepted (${accepted.length})'),
+                      Tab(text: 'Declined (${declined.length})'),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 560,
+                    child: TabBarView(
+                      children: [
+                        _RequestList(
+                          requests: pending,
+                          emptyTitle: 'No pending requests',
+                          emptyMessage:
+                              'New employer requests will appear here.',
+                        ),
+                        _RequestList(
+                          requests: accepted,
+                          emptyTitle: 'No accepted requests',
+                          emptyMessage:
+                              'Accepted requests are also available in Matches.',
+                        ),
+                        _RequestList(
+                          requests: declined,
+                          emptyTitle: 'No declined requests',
+                          emptyMessage:
+                              'Declined requests stay here as history.',
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         ),
       ],
+    );
+  }
+}
+
+List<InterestRequest> _withStatus(
+        List<InterestRequest> requests, String status) =>
+    requests
+        .where((request) => request.status.toLowerCase() == status)
+        .toList();
+
+class _RequestList extends StatelessWidget {
+  const _RequestList({
+    required this.requests,
+    required this.emptyTitle,
+    required this.emptyMessage,
+  });
+
+  final List<InterestRequest> requests;
+  final String emptyTitle;
+  final String emptyMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    if (requests.isEmpty) {
+      return EmptyState(
+        icon: Icons.inbox_outlined,
+        title: emptyTitle,
+        message: emptyMessage,
+      );
+    }
+    return ListView.separated(
+      itemCount: requests.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) =>
+          InterestRequestCard(request: requests[index]),
     );
   }
 }

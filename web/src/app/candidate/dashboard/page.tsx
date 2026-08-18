@@ -1,4 +1,3 @@
-import { PageTitle } from "@/components/layout/page-title";
 import { AuthNotice } from "@/components/ui/auth-notice";
 import { CandidateDashboard } from "@/features/candidate/candidate-dashboard";
 import { loadCandidateDashboardCounts } from "@/features/candidate/interests/server/data";
@@ -19,14 +18,19 @@ export default async function CandidateDashboardPage({
   ]);
   const params = await searchParams;
 
+  const passport = documents.cards.find((card) => card.type === "passport");
+
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-4">
       <AuthNotice code={params.authNotice} />
-      <PageTitle
-        title="Candidate dashboard"
-        description="Your profile, verification, matching, and membership status in one place."
+      <CandidateDashboard
+        profile={profile}
+        candidate={candidate}
+        membership={membership}
+        counts={counts}
+        hasPassport={Boolean(passport?.hasFile)}
+        passportStatus={passport?.status ?? "not_uploaded"}
       />
-      <CandidateDashboard profile={profile} candidate={candidate} membership={membership} counts={counts} hasPassport={Boolean(documents.cards.find((card) => card.type === "passport")?.hasFile)} />
     </div>
   );
 }

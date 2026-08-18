@@ -16,6 +16,7 @@ class AppTextField extends StatelessWidget {
     this.onTap,
     this.suffixIcon,
     this.inputFormatters,
+    this.errorText,
   });
 
   final String label;
@@ -30,6 +31,7 @@ class AppTextField extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? suffixIcon;
   final List<TextInputFormatter>? inputFormatters;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +49,7 @@ class AppTextField extends StatelessWidget {
         labelText: label,
         hintText: hint,
         suffixIcon: suffixIcon,
+        errorText: errorText,
       ),
     );
   }

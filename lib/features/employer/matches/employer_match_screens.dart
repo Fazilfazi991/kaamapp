@@ -6,6 +6,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/private_profile_photo_avatar.dart';
 import '../../../core/widgets/screen_scaffold.dart';
 import '../../../core/widgets/secondary_button.dart';
 import '../../../core/widgets/status_badge.dart';
@@ -38,11 +39,22 @@ class EmployerMatchUnlockedScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                PrivateProfilePhotoAvatar(
+                  path: match.profilePhotoUrl,
+                  candidateId: match.candidateProfileId,
+                  initials: profileInitials(match.name, fallback: 'C'),
+                  size: 64,
+                ),
+                const SizedBox(height: 12),
                 Text(match.name, style: AppTextStyles.title),
-                Text('${match.role} - ${match.location}',
-                    style: AppTextStyles.body),
-                Text('Match date: ${match.matchDate}',
-                    style: AppTextStyles.muted),
+                Text(
+                  '${match.role} - ${match.location}',
+                  style: AppTextStyles.body,
+                ),
+                Text(
+                  'Match date: ${match.matchDate}',
+                  style: AppTextStyles.muted,
+                ),
               ],
             ),
           ),
@@ -50,10 +62,9 @@ class EmployerMatchUnlockedScreen extends StatelessWidget {
         PrimaryButton(
           label: match?.chatEnabled == true ? 'Start Chat' : 'Chat Unavailable',
           onPressed: match?.chatEnabled == true
-              ? () => Navigator.of(context).pushNamed(
-                    AppRoutes.employerPrivateChat,
-                    arguments: match,
-                  )
+              ? () => Navigator.of(
+                    context,
+                  ).pushNamed(AppRoutes.employerPrivateChat, arguments: match)
               : null,
         ),
         const SizedBox(height: 10),
@@ -86,10 +97,12 @@ class _EmployerMatchesScreenState extends State<EmployerMatchesScreen> {
   Widget build(BuildContext context) {
     return ScreenScaffold(
       title: 'Active Matches',
-      bottomNavigationBar: const EmployerBottomNav(currentIndex: 2),
+      bottomNavigationBar: const EmployerBottomNav(currentIndex: 3),
       actions: [
         IconButton(
-            icon: const Icon(Icons.refresh_rounded), onPressed: _refresh),
+          icon: const Icon(Icons.refresh_rounded),
+          onPressed: _refresh,
+        ),
         IconButton(
           tooltip: 'Hiring pipeline',
           onPressed: () =>
@@ -97,41 +110,42 @@ class _EmployerMatchesScreenState extends State<EmployerMatchesScreen> {
           icon: const Icon(Icons.view_kanban_outlined),
         ),
       ],
-      children: [
-        FutureBuilder<List<EmployerMatch>>(
-          future: matchesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return EmptyState(
-                icon: Icons.error_outline,
-                title: 'Could not load matches',
-                message: snapshot.error.toString(),
-                action: PrimaryButton(label: 'Retry', onPressed: _refresh),
-              );
-            }
-            final matches = snapshot.data ?? const <EmployerMatch>[];
-            if (matches.isEmpty) {
-              return const EmptyState(
-                icon: Icons.handshake_outlined,
-                title: 'No active matches',
-                message: 'Accepted candidate requests will appear here.',
-              );
-            }
-            return Column(
-              children: [
-                for (final match in matches)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: EmployerMatchCard(match: match),
-                  ),
-              ],
+      body: FutureBuilder<List<EmployerMatch>>(
+        future: matchesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return EmptyState(
+              icon: Icons.error_outline,
+              title: 'Could not load matches',
+              message: snapshot.error.toString(),
+              action: PrimaryButton(label: 'Retry', onPressed: _refresh),
             );
-          },
-        ),
-      ],
+          }
+          final matches = snapshot.data ?? const <EmployerMatch>[];
+          if (matches.isEmpty) {
+            return const EmptyState(
+              icon: Icons.handshake_outlined,
+              title: 'No active matches',
+              message: 'Accepted candidate requests will appear here.',
+            );
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+            itemCount: matches.length,
+            itemBuilder: (context, index) {
+              final match = matches[index];
+              return Padding(
+                key: ValueKey(match.matchId),
+                padding: const EdgeInsets.only(bottom: 12),
+                child: EmployerMatchCard(match: match),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
@@ -150,7 +164,7 @@ class _HiringPipelineScreenState extends State<HiringPipelineScreen> {
     'Interviewing',
     'Offered',
     'Hired',
-    'Closed'
+    'Closed',
   ];
 
   @override
@@ -163,9 +177,10 @@ class _HiringPipelineScreenState extends State<HiringPipelineScreen> {
           scrollDirection: Axis.horizontal,
           child: SegmentedButton<int>(
             segments: List.generate(
-                stages.length,
-                (index) =>
-                    ButtonSegment(value: index, label: Text(stages[index]))),
+              stages.length,
+              (index) =>
+                  ButtonSegment(value: index, label: Text(stages[index])),
+            ),
             selected: {stage},
             onSelectionChanged: (value) => setState(() => stage = value.first),
           ),
@@ -178,20 +193,25 @@ class _HiringPipelineScreenState extends State<HiringPipelineScreen> {
               Row(
                 children: [
                   Expanded(
-                      child: Text(stages[stage], style: AppTextStyles.title)),
+                    child: Text(stages[stage], style: AppTextStyles.title),
+                  ),
                   const StatusBadge(
-                      label: 'Local stage', color: AppColors.accentPurple),
+                    label: 'Local stage',
+                    color: AppColors.accentPurple,
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
               const Text(
-                  'Pipeline stage editing is local until pipeline columns are added to matches.',
-                  style: AppTextStyles.body),
+                'Pipeline stage editing is local until pipeline columns are added to matches.',
+                style: AppTextStyles.body,
+              ),
               const SizedBox(height: 14),
               SecondaryButton(
-                  label: 'Move Stage',
-                  onPressed: () =>
-                      setState(() => stage = (stage + 1) % stages.length)),
+                label: 'Move Stage',
+                onPressed: () =>
+                    setState(() => stage = (stage + 1) % stages.length),
+              ),
             ],
           ),
         ),

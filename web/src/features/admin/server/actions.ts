@@ -8,7 +8,7 @@ import {
   canApproveEmployerDocument,
   canBlockUser,
   canRequestEmployerDocumentResubmission,
-  getEmployerCompanyApprovalState,
+  getEmployerCompanyVerificationState,
   isAllowedCandidateDocumentApproval,
   isEmployerCompanyProfileComplete,
   safeActionResult,
@@ -207,7 +207,7 @@ export async function rejectEmployerDocument(_previousState: AdminActionState, f
   return safeActionResult("Resubmission requested.", true);
 }
 
-export async function approveEmployerCompany(_previousState: AdminActionState, formData: FormData): Promise<AdminActionState> {
+export async function verifyEmployerCompany(_previousState: AdminActionState, formData: FormData): Promise<AdminActionState> {
   await requireAdmin();
   const companyId = String(formData.get("companyId") ?? "");
   if (!companyId) return safeActionResult("Company is missing.");
@@ -218,19 +218,19 @@ export async function approveEmployerCompany(_previousState: AdminActionState, f
     .select("id,owner_id,company_name,trade_license_number,industry,company_size,country,city,office_area,contact_person,contact_role,hiring_needs,website,logo_url,description,is_verified,status,created_at,updated_at")
     .eq("id", companyId)
     .maybeSingle<EmployerCompanyAdminRow>();
-  if (companyError) return safeActionResult("Company review data could not be loaded. Please try again.");
+  if (companyError) return safeActionResult("Business verification data could not be loaded. Please try again.");
   if (!company) return safeActionResult("Company was not found.");
-  if (company.is_verified) return safeActionResult("Company is already approved.", true);
+  if (company.is_verified) return safeActionResult("Business is already verified.", true);
 
   const profileComplete = isEmployerCompanyProfileComplete(company);
-  const approvalState = getEmployerCompanyApprovalState({
+  const verificationState = getEmployerCompanyVerificationState({
     companyStatus: company.status,
     isVerified: company.is_verified,
     profileComplete,
     documentStatuses: {},
   });
-  if (!approvalState.canApprove) {
-    return safeActionResult(approvalState.reason);
+  if (!verificationState.canApprove) {
+    return safeActionResult(verificationState.reason);
   }
 
   const { error } = await supabase
@@ -238,12 +238,12 @@ export async function approveEmployerCompany(_previousState: AdminActionState, f
     .update({ status: "active", is_verified: true })
     .eq("id", companyId)
     .neq("status", "blocked");
-  if (error) return safeActionResult("Could not approve company. Please try again.");
+  if (error) return safeActionResult("Could not verify business. Please try again.");
 
   revalidatePath("/admin");
   revalidatePath("/admin/employers");
   revalidatePath(`/admin/employers/${companyId}`);
-  return safeActionResult("Company approved.", true);
+  return safeActionResult("Business verified. Employer access was already active.", true);
 }
 
 export async function blockUser(formData: FormData) {

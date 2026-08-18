@@ -6,7 +6,7 @@ export default async function EmployerProfileEditPage() {
   const { company } = await loadEmployerCompanyBundle();
   return (
     <div className="grid gap-6">
-      <PageTitle title="Edit company profile" description="Update supported company profile fields without changing admin approval directly." />
+      <PageTitle title="Edit employer details" description="Update the company information used by your employer workspace." />
       <CompanyInformationForm company={company} next="/employer/profile" />
       <CompanyLocationForm company={company} next="/employer/profile" />
       <CompanyContactForm company={company} next="/employer/profile" />

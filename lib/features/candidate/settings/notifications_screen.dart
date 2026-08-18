@@ -10,6 +10,8 @@ import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/screen_scaffold.dart';
 import '../../notifications/notification_models.dart';
 import '../../notifications/notification_repository.dart';
+import '../onboarding/documents_upload_screen.dart';
+import '../documents/identity_document_ocr_service.dart';
 import '../../notifications/push_notification_service.dart';
 import '../../qa/qa_mode.dart';
 import '../../supabase_backend/kaam_backend.dart';
@@ -68,7 +70,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       actionRoute: notification.actionRoute,
     );
     if (!mounted) return;
-    Navigator.of(context).pushNamed(route).then((_) => _reload());
+    final isDocument = notification.type.startsWith('candidate_document_');
+    Navigator.of(context)
+        .pushNamed(
+          route,
+          arguments: isDocument
+              ? CandidateDocumentEntryArgs(
+                  mode: CandidateDocumentEntryMode.notification,
+                  documentType: notification.data['documentType'] == 'visa'
+                      ? IdentityDocumentType.visa
+                      : IdentityDocumentType.passport,
+                  documentId: notification.data['documentId']?.toString(),
+                  documentVersionId:
+                      notification.data['documentVersionId']?.toString(),
+                  reviewEventId: notification.data['reviewEventId']?.toString(),
+                  publicReason: notification.data['publicReason']?.toString(),
+                  entrySource: 'notification',
+                )
+              : null,
+        )
+        .then((_) => _reload());
   }
 
   Future<void> _savePreference(
@@ -121,10 +142,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           content: Text(
             'Notifications are disabled. You can enable them in Android settings.',
           ),
-          action: SnackBarAction(
-            label: 'Settings',
-            onPressed: openAppSettings,
-          ),
+          action: SnackBarAction(label: 'Settings', onPressed: openAppSettings),
         ),
       );
     }
@@ -250,9 +268,9 @@ class _PushDiagnosticsCardState extends State<_PushDiagnosticsCard> {
   Future<void> _copySummary() async {
     await Clipboard.setData(ClipboardData(text: snapshot.toSafeSummary()));
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Safe diagnostics copied.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Safe diagnostics copied.')));
   }
 
   @override
@@ -444,8 +462,10 @@ class _NotificationCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(notification.body, style: AppTextStyles.body),
                 const SizedBox(height: 6),
-                Text(_dateText(notification.createdAt),
-                    style: AppTextStyles.muted),
+                Text(
+                  _dateText(notification.createdAt),
+                  style: AppTextStyles.muted,
+                ),
               ],
             ),
           ),

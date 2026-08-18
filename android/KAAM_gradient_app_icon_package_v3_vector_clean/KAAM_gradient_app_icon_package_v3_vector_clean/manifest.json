@@ -1,0 +1,23 @@
+{
+  "brand": "KAAM",
+  "source": "KAAM_logo_transparent_cropped_2x.png",
+  "symbol": "Exact silhouette extracted from supplied logo; white m and #FF5BA1 dots",
+  "main_icon_padding": "Symbol fitted within 62% of canvas",
+  "android_safe_padding": "Symbol fitted within 56% of canvas",
+  "files": [
+    "Android/KAAM_android_adaptive_preview_1024.png",
+    "Android/KAAM_android_background_1024.png",
+    "Android/KAAM_android_foreground_1024.png",
+    "PDF/KAAM_gradient_icon.pdf",
+    "PNG/KAAM_gradient_icon_1024x1024.png",
+    "PNG/KAAM_gradient_icon_2048x2048.png",
+    "PNG/KAAM_gradient_icon_4096x4096.png",
+    "PNG/KAAM_gradient_icon_512x512.png",
+    "README.txt",
+    "SVG/KAAM_gradient_icon.svg",
+    "Transparent/KAAM_symbol_transparent_4096.png",
+    "WEBP/KAAM_gradient_icon_4096.webp",
+    "iOS/KAAM_iOS_AppStore_1024.png",
+    "manifest.json"
+  ]
+}

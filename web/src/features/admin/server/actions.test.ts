@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { initialAdminActionState } from "@/features/admin/validation/review";
-import { approveCandidateDocument, approveEmployerCompany, approveEmployerDocument, rejectCandidateDocument, verifyCandidate } from "./actions";
+import { approveCandidateDocument, approveEmployerDocument, rejectCandidateDocument, verifyCandidate, verifyEmployerCompany } from "./actions";
 
 const mockSupabase = {
   from: vi.fn(),
@@ -64,7 +64,7 @@ describe("admin employer review actions", () => {
     expect(mockSupabase.from).toHaveBeenCalledTimes(1);
   });
 
-  it("repeated company approval returns a safe no-op", async () => {
+  it("repeated business verification returns a safe no-op", async () => {
     mockSupabase.from
       .mockReturnValueOnce(
         maybeSingleQuery({
@@ -95,9 +95,9 @@ describe("admin employer review actions", () => {
     const formData = new FormData();
     formData.set("companyId", "company-1");
 
-    const result = await approveEmployerCompany(initialAdminActionState, formData);
+    const result = await verifyEmployerCompany(initialAdminActionState, formData);
 
-    expect(result).toEqual({ ok: true, message: "Company is already approved." });
+    expect(result).toEqual({ ok: true, message: "Business is already verified." });
     expect(mockSupabase.from).toHaveBeenCalledTimes(1);
   });
 

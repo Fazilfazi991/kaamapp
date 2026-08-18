@@ -9,10 +9,7 @@ import '../../../core/widgets/screen_scaffold.dart';
 import '../../supabase_backend/kaam_backend.dart';
 
 class IdentityDocumentViewerArgs {
-  const IdentityDocumentViewerArgs({
-    required this.title,
-    required this.path,
-  });
+  const IdentityDocumentViewerArgs({required this.title, required this.path});
 
   final String title;
   final String path;
@@ -22,10 +19,12 @@ class IdentityDocumentViewerScreen extends StatefulWidget {
   const IdentityDocumentViewerScreen({super.key});
 
   @override
-  State<IdentityDocumentViewerScreen> createState() => _IdentityDocumentViewerScreenState();
+  State<IdentityDocumentViewerScreen> createState() =>
+      _IdentityDocumentViewerScreenState();
 }
 
-class _IdentityDocumentViewerScreenState extends State<IdentityDocumentViewerScreen> {
+class _IdentityDocumentViewerScreenState
+    extends State<IdentityDocumentViewerScreen> {
   final storage = const KaamStorageRepository();
   double zoom = 1;
   int turns = 0;

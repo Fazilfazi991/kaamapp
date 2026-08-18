@@ -108,17 +108,34 @@ describe("protectedRouteDecision", () => {
     });
   });
 
-  it("sends employer accounts missing company profile to profile completion", () => {
+  it("allows employer accounts missing a company profile into their workspace", () => {
     expect(
       protectedRouteDecision(
         { ...employer, hasEmployerProfile: false },
         "employer",
         routes.employerDashboard,
       ),
-    ).toMatchObject({
-      allowed: false,
-      redirectTo: routes.employerProfile,
-    });
+    ).toMatchObject({ allowed: true, status: "ready" });
+  });
+
+  it("keeps every Employer workspace route reachable without a company record", () => {
+    for (const path of [
+      routes.employerDashboard,
+      routes.employerSearch,
+      routes.employerShortlist,
+      routes.employerInterests,
+      routes.employerMatches,
+      routes.employerMessages,
+      routes.employerNotifications,
+    ]) {
+      expect(
+        protectedRouteDecision(
+          { ...employer, hasEmployerProfile: false },
+          "employer",
+          path,
+        ),
+      ).toMatchObject({ allowed: true, status: "ready" });
+    }
   });
 
   it("missing profile produces recovery state", () => {

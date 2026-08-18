@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/constants/app_routes.dart';
+import '../../../core/supabase/supabase_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_card.dart';
@@ -14,6 +15,8 @@ import '../../../core/widgets/status_badge.dart';
 import '../data/employer_dummy_data.dart';
 import '../widgets/employer_widgets.dart';
 import '../../supabase_backend/kaam_backend.dart';
+import '../../taxonomy/taxonomy_repository.dart';
+import '../widgets/employer_selector_fields.dart';
 
 class EmployerOnboardingOverviewScreen extends StatelessWidget {
   const EmployerOnboardingOverviewScreen({super.key});
@@ -22,35 +25,40 @@ class EmployerOnboardingOverviewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     const steps = [
       'Company Details',
-      'Verification Documents',
-      'Ready / Pending Review'
+      'Ready to Hire',
     ];
     return ScreenScaffold(
       title: 'Setup',
       showBack: true,
       children: [
-        const Text('Set up your company profile',
-            style: AppTextStyles.headline),
+        const Text(
+          'Set up your company profile',
+          style: AppTextStyles.headline,
+        ),
         const SizedBox(height: 10),
         const Text(
-          'Verified companies get better candidate trust and higher response rates.',
+          'Complete your company details to start hiring. Verification is optional and managed separately.',
           style: AppTextStyles.body,
         ),
         const SizedBox(height: 22),
-        ...steps.map((step) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: AppCard(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    const Icon(Icons.check_circle_outline_rounded,
-                        color: AppColors.primaryPink),
-                    const SizedBox(width: 12),
-                    Expanded(child: Text(step, style: AppTextStyles.label)),
-                  ],
-                ),
+        ...steps.map(
+          (step) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: AppCard(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.check_circle_outline_rounded,
+                    color: AppColors.primaryPink,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(step, style: AppTextStyles.label)),
+                ],
               ),
-            )),
+            ),
+          ),
+        ),
         const SizedBox(height: 14),
         PrimaryButton(
           label: 'Start Setup',
@@ -71,32 +79,78 @@ class CompanyDetailsScreen extends StatefulWidget {
 
 class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
   final companyNameController = TextEditingController();
-  final industryController = TextEditingController();
-  final companySizeController = TextEditingController();
-  final locationController = TextEditingController();
   final branchController = TextEditingController();
   final contactNameController = TextEditingController();
-  final contactRoleController = TextEditingController();
+  final contactRoleOtherController = TextEditingController();
   final descriptionController = TextEditingController();
   final repository = const EmployerRepository();
+  TaxonomyRepository? taxonomyRepository;
+  EmployerCompanyData? existingCompany;
+  List<TaxonomyIndustry> industries = const [];
+  TaxonomyIndustry? selectedIndustry;
+  StructuredOption? selectedCompanySize;
+  StructuredOption? selectedContactRole;
+  String? selectedEmirate;
+  String? selectedArea;
+  String? industryLoadError;
+  String? contactRoleError;
+  bool industriesLoading = false;
+  bool industryExplicitlySelected = false;
+  bool companySizeExplicitlySelected = false;
+  bool contactRoleExplicitlySelected = false;
+  bool emirateExplicitlySelected = false;
+  bool areaExplicitlySelected = false;
+  bool branchExplicitlyEdited = false;
   bool saving = false;
   bool loading = true;
+
+  /*
+  static const companySizeOptions = [
+    StructuredOption(code: '1_10', label: '1–10'),
+    StructuredOption(code: '11_25', label: '11–25'),
+    StructuredOption(code: '26_50', label: '26–50'),
+    StructuredOption(code: '51_100', label: '51–100'),
+    StructuredOption(code: '101_250', label: '101–250'),
+    StructuredOption(code: '251_500', label: '251–500'),
+    StructuredOption(code: '500_plus', label: '500+'),
+  ];
+  static const contactRoleOptions = [
+    StructuredOption(code: 'owner', label: 'Owner'),
+    StructuredOption(code: 'founder', label: 'Founder'),
+    StructuredOption(code: 'co_founder', label: 'Co-Founder'),
+    StructuredOption(code: 'managing_director', label: 'Managing Director'),
+    StructuredOption(code: 'director', label: 'Director'),
+    StructuredOption(code: 'general_manager', label: 'General Manager'),
+    StructuredOption(code: 'hr_manager', label: 'HR Manager'),
+    StructuredOption(code: 'hr_executive', label: 'HR Executive'),
+    StructuredOption(code: 'recruitment_manager', label: 'Recruitment Manager'),
+    StructuredOption(code: 'recruiter', label: 'Recruiter'),
+    StructuredOption(code: 'operations_manager', label: 'Operations Manager'),
+    StructuredOption(
+        code: 'operations_executive', label: 'Operations Executive'),
+    StructuredOption(code: 'admin_manager', label: 'Admin Manager'),
+    StructuredOption(code: 'administrator', label: 'Administrator'),
+    StructuredOption(code: 'supervisor', label: 'Supervisor'),
+    StructuredOption(code: 'pro', label: 'PRO'),
+    StructuredOption(code: 'other', label: 'Other'),
+  ];
+  */
 
   @override
   void initState() {
     super.initState();
+    final client = SupabaseService.maybeClient;
+    if (client != null) taxonomyRepository = TaxonomyRepository(client);
     _load();
+    _loadIndustries();
   }
 
   @override
   void dispose() {
     companyNameController.dispose();
-    industryController.dispose();
-    companySizeController.dispose();
-    locationController.dispose();
     branchController.dispose();
     contactNameController.dispose();
-    contactRoleController.dispose();
+    contactRoleOtherController.dispose();
     descriptionController.dispose();
     super.dispose();
   }
@@ -105,14 +159,52 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
     try {
       final company = await repository.loadMyCompany();
       if (!mounted || company == null) return;
+      existingCompany = company;
+      if (industries.isNotEmpty) {
+        selectedIndustry = _matchIndustry(company, industries);
+      }
       companyNameController.text = company.companyName;
-      industryController.text = company.industry;
-      companySizeController.text = company.companySize;
-      locationController.text = company.location;
-      branchController.text = company.officeArea;
+      branchController.text = company.branchName ?? company.officeArea;
       contactNameController.text = company.contactPerson;
-      contactRoleController.text = company.contactRole;
       descriptionController.text = company.description;
+      selectedCompanySize = _optionForCode(
+        EmployerCompanyOptions.companySizes,
+        company.companySizeCode,
+      );
+      selectedCompanySize ??= _optionForLabel(
+          EmployerCompanyOptions.companySizes, company.companySize);
+      selectedContactRole = _optionForCode(
+        EmployerCompanyOptions.contactRoles,
+        company.contactRoleCode,
+      );
+      selectedContactRole ??= _optionForLabel(
+          EmployerCompanyOptions.contactRoles, company.contactRole);
+      if (selectedContactRole?.code == 'other' ||
+          (selectedContactRole == null &&
+              company.contactRole.trim().isNotEmpty)) {
+        selectedContactRole =
+            _optionForCode(EmployerCompanyOptions.contactRoles, 'other');
+        contactRoleOtherController.text =
+            company.contactRoleOther ?? company.contactRole;
+      } else {
+        contactRoleOtherController.text = company.contactRoleOther ?? '';
+      }
+      selectedEmirate = _validEmirate(company.companyEmirate) ??
+          _validEmirate(company.location);
+      final storedArea = company.companyArea;
+      if (storedArea != null &&
+          selectedEmirate != null &&
+          CandidateLocationOptions.isValidAreaForEmirate(
+            selectedEmirate!,
+            storedArea,
+          )) {
+        selectedArea =
+            CandidateLocationOptions.areasForEmirate(selectedEmirate!)
+                .firstWhere(
+                    (area) => area.toLowerCase() == storedArea.toLowerCase());
+      } else {
+        selectedArea = storedArea;
+      }
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -124,30 +216,144 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
     }
   }
 
+  Future<void> _loadIndustries() async {
+    final taxonomy = taxonomyRepository;
+    if (taxonomy == null) {
+      if (mounted) {
+        setState(() => industryLoadError = 'Industry catalog is unavailable.');
+      }
+      return;
+    }
+    setState(() {
+      industriesLoading = true;
+      industryLoadError = null;
+    });
+    try {
+      final loaded = await taxonomy.getIndustries();
+      if (!mounted) return;
+      setState(() {
+        industries = loaded;
+        selectedIndustry = _matchIndustry(existingCompany, loaded);
+        if (loaded.isEmpty) industryLoadError = 'No industries are available.';
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() => industryLoadError = 'Unable to load industries.');
+      }
+    } finally {
+      if (mounted) setState(() => industriesLoading = false);
+    }
+  }
+
+  TaxonomyIndustry? _matchIndustry(
+    EmployerCompanyData? company,
+    List<TaxonomyIndustry> options,
+  ) {
+    if (company == null) return null;
+    for (final option in options) {
+      if (option.id == company.industryId ||
+          option.name.toLowerCase() == company.industry.trim().toLowerCase()) {
+        return option;
+      }
+    }
+    return null;
+  }
+
+  StructuredOption? _optionForCode(
+    List<StructuredOption> options,
+    String? code,
+  ) =>
+      options.where((option) => option.code == code).firstOrNull;
+
+  StructuredOption? _optionForLabel(
+    List<StructuredOption> options,
+    String value,
+  ) =>
+      options
+          .where((option) =>
+              option.label.toLowerCase() == value.trim().toLowerCase())
+          .firstOrNull;
+
+  String? _validEmirate(String? value) {
+    final normalized = CandidateLocationOptions.normalizeRegionForCountry(
+      'UAE',
+      value ?? '',
+    );
+    return normalized.isEmpty ? null : normalized;
+  }
+
+  String get _industryDisplay =>
+      selectedIndustry?.name ?? existingCompany?.industry ?? '';
+  String get _companySizeDisplay =>
+      selectedCompanySize?.label ?? existingCompany?.companySize ?? '';
+  String get _contactRoleDisplay {
+    if (selectedContactRole?.code == 'other') {
+      return contactRoleOtherController.text.trim().isEmpty
+          ? 'Other'
+          : contactRoleOtherController.text.trim();
+    }
+    return selectedContactRole?.label ?? existingCompany?.contactRole ?? '';
+  }
+
+  String get _emirateDisplay =>
+      selectedEmirate ?? existingCompany?.location ?? '';
+
   Future<void> _continue() async {
+    if (selectedContactRole?.code == 'other' &&
+        contactRoleOtherController.text.trim().isEmpty) {
+      setState(() => contactRoleError = 'Specify the contact person role.');
+      return;
+    }
     setState(() => saving = true);
     try {
+      final company = existingCompany;
+      final selectedRoleIsOther = selectedContactRole?.code == 'other';
       await repository.upsertCompanyProfile(
         companyName: companyNameController.text,
-        industry: industryController.text,
-        companySize: companySizeController.text,
-        location: locationController.text,
+        industry: _industryDisplay,
+        companySize: _companySizeDisplay,
+        location: emirateExplicitlySelected
+            ? (selectedEmirate ?? '')
+            : (company?.location ?? selectedEmirate ?? ''),
         branch: branchController.text,
         contactName: contactNameController.text,
-        contactRole: contactRoleController.text,
+        contactRole: _contactRoleDisplay,
         description: descriptionController.text,
+        industryId: industryExplicitlySelected
+            ? selectedIndustry?.id
+            : company?.industryId,
+        companySizeCode: companySizeExplicitlySelected
+            ? selectedCompanySize?.code
+            : company?.companySizeCode,
+        contactRoleCode: contactRoleExplicitlySelected
+            ? selectedContactRole?.code
+            : company?.contactRoleCode,
+        contactRoleOther: contactRoleExplicitlySelected
+            ? (selectedRoleIsOther
+                ? contactRoleOtherController.text.trim()
+                : '')
+            : company?.contactRoleOther,
+        companyEmirate: emirateExplicitlySelected
+            ? selectedEmirate
+            : company?.companyEmirate,
+        companyArea:
+            areaExplicitlySelected ? selectedArea : company?.companyArea,
+        branchName: branchExplicitlyEdited
+            ? branchController.text
+            : company?.branchName,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Company profile saved.')),
-      );
-      Navigator.of(context).pushNamed(AppRoutes.employerBusinessVerification);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Company profile saved.')));
+      Navigator.of(context).pushNamed(AppRoutes.employerProfileComplete);
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text(KaamSafeErrorMessages.employerCompanySaveMessage(error)),
+          content: Text(
+            KaamSafeErrorMessages.employerCompanySaveMessage(error),
+          ),
         ),
       );
     } finally {
@@ -166,45 +372,179 @@ class _CompanyDetailsScreenState extends State<CompanyDetailsScreen> {
         if (loading) const LinearProgressIndicator(),
         if (loading) const SizedBox(height: 12),
         AppTextField(
-            controller: companyNameController,
-            label: 'Company name',
-            hint: EmployerDummyData.companyName),
+          controller: companyNameController,
+          label: 'Company name',
+          hint: EmployerDummyData.companyName,
+        ),
+        const SizedBox(height: 12),
+        SelectionField(
+          label: 'Industry',
+          value: _industryDisplay,
+          hint: 'Select industry',
+          errorText: industryLoadError,
+          loading: industriesLoading,
+          enabled: !industriesLoading,
+          onTap: industries.isEmpty
+              ? _loadIndustries
+              : () async {
+                  final picked =
+                      await showSearchSelectionSheet<TaxonomyIndustry>(
+                    context: context,
+                    title: 'Select Industry',
+                    options: industries,
+                    label: (industry) => industry.name,
+                    selected: selectedIndustry,
+                  );
+                  if (picked != null && mounted) {
+                    setState(() {
+                      selectedIndustry = picked;
+                      industryExplicitlySelected = true;
+                    });
+                  }
+                },
+        ),
+        if (industryLoadError != null) ...[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+                onPressed: _loadIndustries,
+                child: const Text('Retry industries')),
+          ),
+        ],
+        const SizedBox(height: 12),
+        SelectionField(
+          label: 'Company size',
+          value: _companySizeDisplay,
+          hint: 'Select company size',
+          onTap: () async {
+            final picked = await showSearchSelectionSheet<StructuredOption>(
+              context: context,
+              title: 'Select Company Size',
+              options: EmployerCompanyOptions.companySizes,
+              label: (option) => option.label,
+              selected: selectedCompanySize,
+            );
+            if (picked != null && mounted) {
+              setState(() {
+                selectedCompanySize = picked;
+                companySizeExplicitlySelected = true;
+              });
+            }
+          },
+        ),
+        const SizedBox(height: 12),
+        SelectionField(
+          label: 'Emirate',
+          value: _emirateDisplay,
+          hint: 'Select emirate',
+          onTap: () async {
+            final picked = await showSearchSelectionSheet<String>(
+              context: context,
+              title: 'Select Emirate',
+              options: CandidateLocationOptions.uaeEmirates,
+              label: (value) => value,
+              selected: selectedEmirate,
+            );
+            if (picked != null && mounted) {
+              setState(() {
+                final retainedArea = retainedAreaForEmirateChange(
+                  nextEmirate: picked,
+                  currentArea: selectedArea,
+                );
+                selectedEmirate = picked;
+                if (retainedArea == null) selectedArea = null;
+                emirateExplicitlySelected = true;
+                if (retainedArea == null) areaExplicitlySelected = true;
+              });
+            }
+          },
+        ),
+        const SizedBox(height: 12),
+        SelectionField(
+          label: 'Area',
+          value: selectedArea ?? '',
+          hint: selectedEmirate == null
+              ? 'Select an emirate first'
+              : 'Select area',
+          enabled: selectedEmirate != null,
+          onTap: selectedEmirate == null
+              ? null
+              : () async {
+                  final picked = await showSearchSelectionSheet<String>(
+                    context: context,
+                    title: 'Select Area',
+                    options: CandidateLocationOptions.areasForEmirate(
+                        selectedEmirate!),
+                    label: (value) => value,
+                    selected: selectedArea,
+                  );
+                  if (picked != null && mounted) {
+                    setState(() {
+                      selectedArea = picked;
+                      areaExplicitlySelected = true;
+                    });
+                  }
+                },
+        ),
         const SizedBox(height: 12),
         AppTextField(
-            controller: industryController,
-            label: 'Industry',
-            hint: 'Facilities, Hospitality, Retail'),
+          controller: branchController,
+          label: 'Branch name (optional)',
+          hint: 'Al Quoz Branch',
+          onChanged: (_) => branchExplicitlyEdited = true,
+        ),
         const SizedBox(height: 12),
         AppTextField(
-            controller: companySizeController,
-            label: 'Company size',
-            hint: '51-200 employees'),
+          controller: contactNameController,
+          label: 'Contact person name',
+          hint: 'Nadia Rahman',
+        ),
+        const SizedBox(height: 12),
+        SelectionField(
+          label: 'Contact person role',
+          value: _contactRoleDisplay,
+          hint: 'Select contact role',
+          errorText: contactRoleError,
+          onTap: () async {
+            final picked = await showSearchSelectionSheet<StructuredOption>(
+              context: context,
+              title: 'Select Contact Role',
+              options: EmployerCompanyOptions.contactRoles,
+              label: (option) => option.label,
+              selected: selectedContactRole,
+            );
+            if (picked != null && mounted) {
+              setState(() {
+                selectedContactRole = picked;
+                contactRoleExplicitlySelected = true;
+                contactRoleError = null;
+                if (picked.code != 'other') contactRoleOtherController.clear();
+              });
+            }
+          },
+        ),
+        if (selectedContactRole?.code == 'other') ...[
+          const SizedBox(height: 12),
+          AppTextField(
+            controller: contactRoleOtherController,
+            label: 'Specify role',
+            hint: 'CMO',
+            errorText: contactRoleError,
+            inputFormatters: [LengthLimitingTextInputFormatter(100)],
+            onChanged: (_) {
+              if (contactRoleError != null) {
+                setState(() => contactRoleError = null);
+              }
+            },
+          ),
+        ],
         const SizedBox(height: 12),
         AppTextField(
-            controller: locationController,
-            label: 'Location',
-            hint: 'Dubai, Sharjah, Abu Dhabi, Ajman'),
-        const SizedBox(height: 12),
-        AppTextField(
-            controller: branchController,
-            label: 'Office area / branch',
-            hint: 'Al Quoz, Dubai'),
-        const SizedBox(height: 12),
-        AppTextField(
-            controller: contactNameController,
-            label: 'Contact person name',
-            hint: 'Nadia Rahman'),
-        const SizedBox(height: 12),
-        AppTextField(
-            controller: contactRoleController,
-            label: 'Contact person role',
-            hint: 'HR Manager'),
-        const SizedBox(height: 12),
-        AppTextField(
-            controller: descriptionController,
-            label: 'Company description',
-            hint: 'Tell candidates about your company.',
-            maxLines: 4),
+          controller: descriptionController,
+          label: 'Company description',
+          hint: 'Tell candidates about your company.',
+          maxLines: 4,
+        ),
         const SizedBox(height: 22),
         PrimaryButton(
           label: saving ? 'Saving...' : 'Continue',
@@ -383,13 +723,14 @@ class _LegacyDisabledEmployerHiringSetupScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Requirement details saved.')),
       );
-      Navigator.of(context).pushNamed(AppRoutes.employerBusinessVerification);
+      Navigator.of(context).pushNamed(AppRoutes.employerProfileComplete);
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text(KaamSafeErrorMessages.employerCompanySaveMessage(error)),
+          content: Text(
+            KaamSafeErrorMessages.employerCompanySaveMessage(error),
+          ),
         ),
       );
     } finally {
@@ -441,8 +782,10 @@ class _LegacyDisabledEmployerHiringSetupScreenState
         const SizedBox(height: 18),
         if (loading) const LinearProgressIndicator(),
         if (loading) const SizedBox(height: 12),
-        const Text('What roles are you hiring for?',
-            style: AppTextStyles.headline),
+        const Text(
+          'What roles are you hiring for?',
+          style: AppTextStyles.headline,
+        ),
         const SizedBox(height: 16),
         Wrap(
           spacing: 8,
@@ -476,36 +819,43 @@ class _LegacyDisabledEmployerHiringSetupScreenState
         ),
         const SizedBox(height: 12),
         _GuidedPickerField(
-            controller: salaryController,
-            label: 'Salary range',
-            options: salaryOptions),
+          controller: salaryController,
+          label: 'Salary range',
+          options: salaryOptions,
+        ),
         const SizedBox(height: 12),
         _GuidedPickerField(
-            controller: locationController,
-            label: 'Work location',
-            options: locationOptions),
+          controller: locationController,
+          label: 'Work location',
+          options: locationOptions,
+        ),
         const SizedBox(height: 12),
         _GuidedPickerField(
-            controller: hoursController,
-            label: 'Working hours',
-            options: hoursOptions),
+          controller: hoursController,
+          label: 'Working hours',
+          options: hoursOptions,
+        ),
         const SizedBox(height: 12),
         _SwitchLine(
-            label: 'Accommodation provided?',
-            value: accommodation,
-            onChanged: (v) => setState(() => accommodation = v)),
+          label: 'Accommodation provided?',
+          value: accommodation,
+          onChanged: (v) => setState(() => accommodation = v),
+        ),
         _SwitchLine(
-            label: 'Transport provided?',
-            value: transport,
-            onChanged: (v) => setState(() => transport = v)),
+          label: 'Transport provided?',
+          value: transport,
+          onChanged: (v) => setState(() => transport = v),
+        ),
         _SwitchLine(
-            label: 'Visa provided?',
-            value: visa,
-            onChanged: (v) => setState(() => visa = v)),
+          label: 'Visa provided?',
+          value: visa,
+          onChanged: (v) => setState(() => visa = v),
+        ),
         _SwitchLine(
-            label: 'Immediate hiring?',
-            value: immediate,
-            onChanged: (v) => setState(() => immediate = v)),
+          label: 'Immediate hiring?',
+          value: immediate,
+          onChanged: (v) => setState(() => immediate = v),
+        ),
         const SizedBox(height: 18),
         PrimaryButton(
           label: saving ? 'Saving...' : 'Continue',
@@ -530,8 +880,11 @@ class _BusinessVerificationScreenState
   final employer = const EmployerRepository();
   String? busyKey;
 
-  Future<void> _upload(String key, String title,
-      {bool publicFile = false}) async {
+  Future<void> _upload(
+    String key,
+    String title, {
+    bool publicFile = false,
+  }) async {
     setState(() => busyKey = key);
     try {
       final picked = await FilePicker.platform.pickFiles(withData: true);
@@ -540,9 +893,15 @@ class _BusinessVerificationScreenState
       if (file == null || bytes == null) return;
       final upload = publicFile
           ? await storage.uploadPublicFile(
-              bytes: bytes, fileName: file.name, folder: key)
+              bytes: bytes,
+              fileName: file.name,
+              folder: key,
+            )
           : await storage.uploadPrivateFile(
-              bytes: bytes, fileName: file.name, folder: key);
+              bytes: bytes,
+              fileName: file.name,
+              folder: key,
+            );
       final company = await employer.loadMyCompany();
       if (key == 'company-logo') {
         await employer.updateCompanyLogo(upload.publicUrl ?? upload.path);
@@ -573,12 +932,15 @@ class _BusinessVerificationScreenState
       title: 'Verification',
       showBack: true,
       children: [
-        const ProgressStepper(current: 2, total: 3),
+        const ProgressStepper(current: 2, total: 2),
         const SizedBox(height: 18),
-        const Text('Verify your business', style: AppTextStyles.headline),
+        const Text('Optional business documents',
+            style: AppTextStyles.headline),
         const SizedBox(height: 8),
-        const Text('Verification helps candidates trust your company.',
-            style: AppTextStyles.body),
+        const Text(
+          'You can provide documents for an optional KAAM trust review. This does not affect access to employer tools.',
+          style: AppTextStyles.body,
+        ),
         const SizedBox(height: 18),
         UploadDocumentCard(
           title: busyKey == 'trade-license'
@@ -626,13 +988,16 @@ class _BusinessVerificationScreenState
           ),
         ),
         const SizedBox(height: 12),
-        const Text('Your documents are reviewed securely by Kaam.',
-            style: AppTextStyles.muted),
+        const Text(
+          'Your documents are reviewed securely by Kaam.',
+          style: AppTextStyles.muted,
+        ),
         const SizedBox(height: 18),
         PrimaryButton(
-          label: 'Submit Verification',
-          onPressed: () => Navigator.of(context)
-              .pushNamed(AppRoutes.employerProfileComplete),
+          label: 'Return to profile setup',
+          onPressed: () => Navigator.of(
+            context,
+          ).pushNamed(AppRoutes.employerProfileComplete),
         ),
       ],
     );
@@ -680,8 +1045,9 @@ class _EmployerRulesScreenState extends State<EmployerRulesScreen> {
         const SizedBox(height: 20),
         PrimaryButton(
           label: 'Complete Setup',
-          onPressed: () => Navigator.of(context)
-              .pushNamed(AppRoutes.employerProfileComplete),
+          onPressed: () => Navigator.of(
+            context,
+          ).pushNamed(AppRoutes.employerProfileComplete),
         ),
       ],
     );
@@ -696,26 +1062,32 @@ class EmployerProfileCompleteScreen extends StatelessWidget {
     return ScreenScaffold(
       title: 'Profile Ready',
       children: [
-        const Icon(Icons.check_circle_rounded,
-            color: AppColors.success, size: 72),
+        const Icon(
+          Icons.check_circle_rounded,
+          color: AppColors.success,
+          size: 72,
+        ),
         const SizedBox(height: 18),
         const Text('Company profile ready', style: AppTextStyles.headline),
         const SizedBox(height: 8),
         const Text(
-            'You can now discover candidates and send interest requests.',
-            style: AppTextStyles.body),
+          'You can now discover candidates and send interest requests.',
+          style: AppTextStyles.body,
+        ),
         const SizedBox(height: 20),
         const AppCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               StatusBadge(
-                  label: 'Verification: Pending Review',
-                  color: AppColors.warning),
+                label: 'Verification: Not verified',
+                color: AppColors.warning,
+              ),
               SizedBox(height: 10),
               Text(
-                  'Your company dashboard is ready while documents are reviewed.',
-                  style: AppTextStyles.body),
+                'Your company dashboard is ready. Verification is an optional KAAM trust status.',
+                style: AppTextStyles.body,
+              ),
             ],
           ),
         ),
@@ -723,7 +1095,9 @@ class EmployerProfileCompleteScreen extends StatelessWidget {
         PrimaryButton(
           label: 'Go to Dashboard',
           onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
-              AppRoutes.employerDashboard, (route) => route.isFirst),
+            AppRoutes.employerDashboard,
+            (route) => route.isFirst,
+          ),
         ),
       ],
     );
@@ -778,8 +1152,11 @@ class _GuidedPickerField extends StatelessWidget {
 }
 
 class _SwitchLine extends StatelessWidget {
-  const _SwitchLine(
-      {required this.label, required this.value, required this.onChanged});
+  const _SwitchLine({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
 
   final String label;
   final bool value;
@@ -807,8 +1184,11 @@ class _Benefit extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          const Icon(Icons.check_circle_rounded,
-              color: AppColors.success, size: 18),
+          const Icon(
+            Icons.check_circle_rounded,
+            color: AppColors.success,
+            size: 18,
+          ),
           const SizedBox(width: 8),
           Text(label, style: AppTextStyles.body),
         ],

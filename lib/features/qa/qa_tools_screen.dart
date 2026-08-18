@@ -17,6 +17,7 @@ class QaToolsScreen extends StatefulWidget {
 
 class _QaToolsScreenState extends State<QaToolsScreen> {
   final repository = const QaToolsRepository();
+  late Future<String> roleFuture = repository.currentRole();
   bool busy = false;
 
   @override
@@ -45,12 +46,16 @@ class _QaToolsScreenState extends State<QaToolsScreen> {
             children: [
               const Text('Current Session', style: AppTextStyles.title),
               const SizedBox(height: 8),
-              Text('User ID: ${user?.id ?? 'Not signed in'}',
-                  style: AppTextStyles.muted),
-              Text('Email: ${user?.email ?? 'Not signed in'}',
-                  style: AppTextStyles.muted),
+              Text(
+                'User ID: ${user?.id ?? 'Not signed in'}',
+                style: AppTextStyles.muted,
+              ),
+              Text(
+                'Email: ${user?.email ?? 'Not signed in'}',
+                style: AppTextStyles.muted,
+              ),
               FutureBuilder<String>(
-                future: repository.currentRole(),
+                future: roleFuture,
                 builder: (context, snapshot) => Text(
                   'Role: ${snapshot.data ?? 'loading'}',
                   style: AppTextStyles.muted,
@@ -61,18 +66,20 @@ class _QaToolsScreenState extends State<QaToolsScreen> {
         ),
         const SizedBox(height: 16),
         FutureBuilder<String>(
-          future: repository.currentRole(),
+          future: roleFuture,
           builder: (context, snapshot) {
             final role = snapshot.data ?? '';
             if (role == 'candidate') {
               return Column(
                 children: [
                   _QaAction(
-                      label: 'Reset Candidate Onboarding',
-                      onTap: () => _run('reset_candidate_onboarding')),
+                    label: 'Reset Candidate Onboarding',
+                    onTap: () => _run('reset_candidate_onboarding'),
+                  ),
                   _QaAction(
-                      label: 'Reset Document Status Only',
-                      onTap: () => _run('reset_document_status')),
+                    label: 'Reset Document Status Only',
+                    onTap: () => _run('reset_document_status'),
+                  ),
                   _QaAction(
                     label: 'Delete Documents and Reset',
                     danger: true,
@@ -99,8 +106,9 @@ class _QaToolsScreenState extends State<QaToolsScreen> {
               return Column(
                 children: [
                   _QaAction(
-                      label: 'Reset Employer Onboarding',
-                      onTap: () => _run('reset_employer_onboarding')),
+                    label: 'Reset Employer Onboarding',
+                    onTap: () => _run('reset_employer_onboarding'),
+                  ),
                   _QaAction(
                     label: 'Full Employer QA Reset',
                     danger: true,
@@ -135,27 +143,31 @@ class _QaToolsScreenState extends State<QaToolsScreen> {
       if (signOutAfter) {
         await repository.signOut();
         if (!mounted) return;
-        Navigator.of(context)
-            .pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
         return;
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$action completed.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('$action completed.')));
       if (action.contains('candidate')) {
-        Navigator.of(context)
-            .pushNamedAndRemoveUntil(AppRoutes.documentsUpload, (_) => false);
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil(AppRoutes.documentsUpload, (_) => false);
       }
       if (action.contains('employer')) {
         Navigator.of(context).pushNamedAndRemoveUntil(
-            AppRoutes.employerOnboardingOverview, (_) => false);
+          AppRoutes.employerOnboardingOverview,
+          (_) => false,
+        );
       }
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('QA reset failed: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('QA reset failed: $error')));
     } finally {
       if (mounted) setState(() => busy = false);
     }
@@ -173,11 +185,13 @@ class _QaToolsScreenState extends State<QaToolsScreen> {
         content: Text(message),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
           TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Reset')),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Reset'),
+          ),
         ],
       ),
     );
@@ -187,15 +201,17 @@ class _QaToolsScreenState extends State<QaToolsScreen> {
   Future<void> _clearLocal() async {
     await repository.signOut();
     if (!mounted) return;
-    Navigator.of(context)
-        .pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
   }
 
   Future<void> _signOut() async {
     await repository.signOut();
     if (!mounted) return;
-    Navigator.of(context)
-        .pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
   }
 }
 
@@ -219,9 +235,11 @@ class _QaAction extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(danger
-                ? Icons.delete_forever_rounded
-                : Icons.build_circle_outlined),
+            Icon(
+              danger
+                  ? Icons.delete_forever_rounded
+                  : Icons.build_circle_outlined,
+            ),
             const SizedBox(width: 12),
             Expanded(child: Text(label, style: AppTextStyles.body)),
             const Icon(Icons.chevron_right_rounded),

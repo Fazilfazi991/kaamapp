@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'core/constants/app_routes.dart';
+import 'core/remote_config/app_remote_config.dart';
 import 'core/theme/app_theme.dart';
+import 'features/auth/account_access_screen.dart';
+import 'features/auth/delete_account_screen.dart';
 import 'features/auth/blocked_account_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/otp_verification_screen.dart';
@@ -20,6 +23,7 @@ import 'features/candidate/onboarding/basic_details_screen.dart';
 import 'features/candidate/onboarding/documents_upload_screen.dart';
 import 'features/candidate/onboarding/privacy_settings_setup_screen.dart';
 import 'features/candidate/onboarding/profile_complete_screen.dart';
+import 'features/candidate/onboarding/profile_media_screen.dart';
 import 'features/candidate/onboarding/skills_experience_screen.dart';
 import 'features/candidate/onboarding/skill_selection_screen.dart';
 import 'features/candidate/onboarding/work_preferences_screen.dart';
@@ -44,12 +48,14 @@ import 'features/supabase_backend/kaam_backend.dart';
 class KaamApp extends StatelessWidget {
   const KaamApp({
     super.key,
-    this.initialRoute = AppRoutes.welcome,
+    this.initialRoute = AppRoutes.sessionRouting,
     this.startupConfigurationError,
+    required this.remoteConfig,
   });
 
   final String initialRoute;
   final String? startupConfigurationError;
+  final AppRemoteConfigService remoteConfig;
 
   @override
   Widget build(BuildContext context) {
@@ -63,66 +69,96 @@ class KaamApp extends StatelessWidget {
       );
     }
 
-    return MaterialApp(
-      navigatorKey: KaamPushNotificationService.navigatorKey,
-      title: 'Kaam - Perfect Match',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark(),
-      initialRoute: initialRoute,
-      routes: {
-        AppRoutes.home: (_) => const HomeScreen(),
-        AppRoutes.welcome: (_) => const WelcomeScreen(),
-        AppRoutes.roleSelection: (_) => const RoleSelectionScreen(),
-        AppRoutes.login: (_) => const LoginScreen(),
-        AppRoutes.otp: (_) => const OtpVerificationScreen(),
-        AppRoutes.accountBlocked: (_) => const BlockedAccountScreen(),
-        AppRoutes.basicDetails: (_) => _candidate(const BasicDetailsScreen()),
-        AppRoutes.workPreferences: (_) =>
-            _candidate(const WorkPreferencesScreen()),
-        AppRoutes.skillsExperience: (_) =>
-            _candidate(const SkillsExperienceScreen()),
-        AppRoutes.primaryProfession: (_) =>
-            _candidate(const PrimaryProfessionScreen()),
-        AppRoutes.skillDetails: (_) => _candidate(const SkillDetailsScreen()),
-        AppRoutes.documentsUpload: (_) =>
-            _candidate(const DocumentsUploadScreen()),
-        AppRoutes.identityDocumentReview: (_) =>
-            _candidate(const IdentityDocumentReviewScreen()),
-        AppRoutes.identityDocumentViewer: (_) =>
-            _candidate(const IdentityDocumentViewerScreen()),
-        AppRoutes.privacySetup: (_) =>
-            _candidate(const PrivacySettingsSetupScreen()),
-        AppRoutes.profileComplete: (_) =>
-            _candidate(const ProfileCompleteScreen()),
-        AppRoutes.dashboard: (_) =>
-            _candidate(const CandidateDashboardScreen()),
-        AppRoutes.membershipPlans: (_) =>
-            _candidate(const MembershipPlansScreen()),
-        AppRoutes.profile: (_) => _candidate(const CandidateProfileScreen()),
-        AppRoutes.editProfile: (_) => _candidate(const EditProfileScreen()),
-        AppRoutes.requests: (_) => _candidate(const InterestRequestsScreen()),
-        AppRoutes.requestDetails: (_) =>
-            _candidate(const InterestRequestDetailsScreen()),
-        AppRoutes.matchUnlocked: (_) => _candidate(const MatchUnlockedScreen()),
-        AppRoutes.matches: (_) => _candidate(const MatchesScreen()),
-        AppRoutes.chatList: (_) => _candidate(const ChatListScreen()),
-        AppRoutes.privateChat: (_) => _candidate(const PrivateChatScreen()),
-        AppRoutes.scheduleInterview: (_) =>
-            _candidate(const ScheduleInterviewScreen()),
-        AppRoutes.profileViews: (_) => _candidate(const ProfileViewsScreen()),
-        AppRoutes.notifications: (_) => _candidate(const NotificationsScreen()),
-        AppRoutes.availability: (_) =>
-            _candidate(const AvailabilityStatusScreen()),
-        AppRoutes.privacyVisibility: (_) =>
-            _candidate(const PrivacyVisibilityScreen()),
-        AppRoutes.loginSecurity: (_) => _candidate(const LoginSecurityScreen()),
-        AppRoutes.languageSettings: (_) =>
-            _candidate(const LanguageSettingsScreen()),
-        AppRoutes.helpSupport: (_) => _candidate(const HelpSupportScreen()),
-        AppRoutes.accountSettings: (_) =>
-            _candidate(const AccountSettingsScreen()),
-        AppRoutes.qaTools: (_) => const QaToolsScreen(),
-        ...EmployerRoutes.routes,
+    return AnimatedBuilder(
+      animation: remoteConfig,
+      builder: (context, _) {
+        if (remoteConfig.config.maintenanceMode) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.dark(),
+            home: MaintenanceScreen(
+              config: remoteConfig.config,
+              onRetry: remoteConfig.refresh,
+            ),
+          );
+        }
+        return MaterialApp(
+          navigatorKey: KaamPushNotificationService.navigatorKey,
+          title: 'Kaam - Perfect Match',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.dark(),
+          initialRoute: initialRoute,
+          routes: {
+            AppRoutes.home: (_) => const HomeScreen(),
+            AppRoutes.sessionRouting: (_) => const SessionRoutingScreen(),
+            AppRoutes.welcome: (_) => const WelcomeScreen(),
+            AppRoutes.accountAccess: (_) => const AccountAccessScreen(),
+            AppRoutes.roleSelection: (_) => const RoleSelectionScreen(),
+            AppRoutes.login: (_) => const LoginScreen(),
+            AppRoutes.otp: (_) => const OtpVerificationScreen(),
+            AppRoutes.accountBlocked: (_) => const BlockedAccountScreen(),
+            AppRoutes.basicDetails: (_) =>
+                _candidate(const BasicDetailsScreen()),
+            AppRoutes.editBasicDetails: (_) =>
+                _candidate(const BasicDetailsScreen.forProfileEdit()),
+            AppRoutes.workPreferences: (_) =>
+                _candidate(const WorkPreferencesScreen()),
+            AppRoutes.skillsExperience: (_) =>
+                _candidate(const SkillsExperienceScreen()),
+            AppRoutes.profileMedia: (_) =>
+                _candidate(const ProfileMediaScreen()),
+            AppRoutes.primaryProfession: (_) =>
+                _candidate(const PrimaryProfessionScreen()),
+            AppRoutes.skillDetails: (_) =>
+                _candidate(const SkillDetailsScreen()),
+            AppRoutes.documentsUpload: (_) =>
+                _candidate(const DocumentsUploadScreen()),
+            AppRoutes.identityDocumentReview: (_) =>
+                _candidate(const IdentityDocumentReviewScreen()),
+            AppRoutes.identityDocumentViewer: (_) =>
+                _candidate(const IdentityDocumentViewerScreen()),
+            AppRoutes.privacySetup: (_) =>
+                _candidate(const PrivacySettingsSetupScreen()),
+            AppRoutes.profileComplete: (_) =>
+                _candidate(const ProfileCompleteScreen()),
+            AppRoutes.dashboard: (_) =>
+                _candidate(const CandidateDashboardScreen()),
+            AppRoutes.membershipPlans: (_) =>
+                _candidate(const MembershipPlansScreen()),
+            AppRoutes.profile: (_) =>
+                _candidate(const CandidateProfileScreen()),
+            AppRoutes.editProfile: (_) => _candidate(const EditProfileScreen()),
+            AppRoutes.requests: (_) =>
+                _candidate(const InterestRequestsScreen()),
+            AppRoutes.requestDetails: (_) =>
+                _candidate(const InterestRequestDetailsScreen()),
+            AppRoutes.matchUnlocked: (_) =>
+                _candidate(const MatchUnlockedScreen()),
+            AppRoutes.matches: (_) => _candidate(const MatchesScreen()),
+            AppRoutes.chatList: (_) => _candidate(const ChatListScreen()),
+            AppRoutes.privateChat: (_) => _candidate(const PrivateChatScreen()),
+            AppRoutes.scheduleInterview: (_) =>
+                _candidate(const ScheduleInterviewScreen()),
+            AppRoutes.profileViews: (_) =>
+                _candidate(const ProfileViewsScreen()),
+            AppRoutes.notifications: (_) =>
+                _candidate(const NotificationsScreen()),
+            AppRoutes.availability: (_) =>
+                _candidate(const AvailabilityStatusScreen()),
+            AppRoutes.privacyVisibility: (_) =>
+                _candidate(const PrivacyVisibilityScreen()),
+            AppRoutes.loginSecurity: (_) =>
+                _candidate(const LoginSecurityScreen()),
+            AppRoutes.languageSettings: (_) =>
+                _candidate(const LanguageSettingsScreen()),
+            AppRoutes.helpSupport: (_) => _candidate(const HelpSupportScreen()),
+            AppRoutes.accountSettings: (_) =>
+                _candidate(const AccountSettingsScreen()),
+            AppRoutes.deleteAccount: (_) => const DeleteAccountScreen(),
+            AppRoutes.qaTools: (_) => const QaToolsScreen(),
+            ...EmployerRoutes.routes,
+          },
+        );
       },
     );
   }
@@ -130,6 +166,44 @@ class KaamApp extends StatelessWidget {
   static Widget _candidate(Widget child) {
     return ProtectedAccountRoute(role: KaamRole.candidate, child: child);
   }
+}
+
+class MaintenanceScreen extends StatelessWidget {
+  const MaintenanceScreen(
+      {super.key, required this.config, required this.onRetry});
+  final AppRemoteConfig config;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: const Color(0xFF070A18),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.build_circle_outlined,
+                    color: Color(0xFFED5AA6), size: 56),
+                const SizedBox(height: 20),
+                Text(config.maintenanceTitle,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800)),
+                const SizedBox(height: 12),
+                Text(config.maintenanceMessage,
+                    textAlign: TextAlign.center,
+                    style:
+                        const TextStyle(color: Color(0xFFD7D9E8), height: 1.5)),
+                const SizedBox(height: 24),
+                FilledButton(onPressed: onRetry, child: const Text('Retry')),
+              ],
+            ),
+          ),
+        ),
+      );
 }
 
 class StartupConfigurationErrorScreen extends StatelessWidget {

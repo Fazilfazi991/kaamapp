@@ -22,9 +22,9 @@ void main() {
         profileCompleted: true,
         documentsVerified: false,
         membershipActive: membership(
-                status: 'active',
-                expiresAt: DateTime.now().add(const Duration(days: 30)))
-            .isActive,
+          status: 'active',
+          expiresAt: DateTime.now().add(const Duration(days: 30)),
+        ).isActive,
         profileVisible: true,
       );
 
@@ -35,8 +35,9 @@ void main() {
       final visibility = CandidateEmployerVisibility(
         profileCompleted: true,
         documentsVerified: true,
-        membershipActive:
-            const CandidateMembershipData(status: 'inactive').isActive,
+        membershipActive: const CandidateMembershipData(
+          status: 'inactive',
+        ).isActive,
         profileVisible: true,
       );
 
@@ -48,9 +49,9 @@ void main() {
         profileCompleted: true,
         documentsVerified: true,
         membershipActive: membership(
-                status: 'active',
-                expiresAt: DateTime.now().subtract(const Duration(days: 1)))
-            .isActive,
+          status: 'active',
+          expiresAt: DateTime.now().subtract(const Duration(days: 1)),
+        ).isActive,
         profileVisible: true,
       );
 
@@ -62,9 +63,9 @@ void main() {
         profileCompleted: true,
         documentsVerified: true,
         membershipActive: membership(
-                status: 'active',
-                expiresAt: DateTime.now().add(const Duration(days: 30)))
-            .isActive,
+          status: 'active',
+          expiresAt: DateTime.now().add(const Duration(days: 30)),
+        ).isActive,
         profileVisible: true,
       );
 
@@ -76,9 +77,9 @@ void main() {
         profileCompleted: true,
         documentsVerified: true,
         membershipActive: membership(
-                status: 'active',
-                expiresAt: DateTime.now().add(const Duration(days: 30)))
-            .isActive,
+          status: 'active',
+          expiresAt: DateTime.now().add(const Duration(days: 30)),
+        ).isActive,
         profileVisible: false,
       );
 
@@ -110,41 +111,52 @@ void main() {
     });
 
     test(
-        'employer search view does not return private document or payment data',
-        () {
-      final sql = File('supabase/012_employer_match_contact_rules.sql')
-          .readAsStringSync()
-          .toLowerCase();
-      final viewSql = sql
-          .split('create or replace view public.public_candidate_search')
-          .last
-          .split('create or replace function public.match_chat_enabled')
-          .first;
+      'employer search view does not return private document or payment data',
+      () {
+        final sql = File(
+          'supabase/012_employer_match_contact_rules.sql',
+        ).readAsStringSync().toLowerCase();
+        final viewSql = sql
+            .split('create or replace view public.public_candidate_search')
+            .last
+            .split('create or replace function public.match_chat_enabled')
+            .first;
 
-      expect(viewSql, isNot(contains('payment_reference')));
-      expect(viewSql, isNot(contains('passport_number')));
-      expect(viewSql, isNot(contains('passport_file_url')));
-      expect(viewSql, isNot(contains('dob')));
-      expect(viewSql, isNot(contains('resume_url')));
-    });
+        expect(viewSql, isNot(contains('payment_reference')));
+        expect(viewSql, isNot(contains('passport_number')));
+        expect(viewSql, isNot(contains('passport_file_url')));
+        expect(viewSql, isNot(contains('dob')));
+        expect(viewSql, isNot(contains('resume_url')));
+      },
+    );
 
-    test('match communication SQL gates chat and contact reveal by membership',
-        () {
-      final sql = File('supabase/012_employer_match_contact_rules.sql')
-          .readAsStringSync()
-          .toLowerCase();
+    test(
+      'match communication SQL gates chat and contact reveal by membership',
+      () {
+        final sql = File(
+          'supabase/012_employer_match_contact_rules.sql',
+        ).readAsStringSync().toLowerCase();
 
-      expect(sql,
-          contains('create or replace function public.match_chat_enabled'));
-      expect(
-          sql, contains('public.candidate_membership_active(m.candidate_id)'));
-      expect(
+        expect(
+          sql,
+          contains('create or replace function public.match_chat_enabled'),
+        );
+        expect(
+          sql,
+          contains('public.candidate_membership_active(m.candidate_id)'),
+        );
+        expect(
           sql,
           contains(
-              'create or replace function public.reveal_candidate_contact'));
-      expect(sql, contains('contact_revealed_at'));
-      expect(sql,
-          contains('drop policy if exists "chat_insert_match_participants"'));
-    });
+            'create or replace function public.reveal_candidate_contact',
+          ),
+        );
+        expect(sql, contains('contact_revealed_at'));
+        expect(
+          sql,
+          contains('drop policy if exists "chat_insert_match_participants"'),
+        );
+      },
+    );
   });
 }

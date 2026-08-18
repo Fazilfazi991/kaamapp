@@ -15,10 +15,12 @@ class InterestRequestDetailsScreen extends StatefulWidget {
   const InterestRequestDetailsScreen({super.key});
 
   @override
-  State<InterestRequestDetailsScreen> createState() => _InterestRequestDetailsScreenState();
+  State<InterestRequestDetailsScreen> createState() =>
+      _InterestRequestDetailsScreenState();
 }
 
-class _InterestRequestDetailsScreenState extends State<InterestRequestDetailsScreen> {
+class _InterestRequestDetailsScreenState
+    extends State<InterestRequestDetailsScreen> {
   final repository = const InterestRepository();
   bool saving = false;
 
@@ -31,13 +33,23 @@ class _InterestRequestDetailsScreenState extends State<InterestRequestDetailsScr
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(accepted ? 'Interest accepted. Match created.' : 'Interest declined.')),
+        SnackBar(
+          content: Text(
+            accepted
+                ? 'Interest accepted. Match created.'
+                : 'Interest declined.',
+          ),
+        ),
       );
-      Navigator.of(context).pushNamed(accepted ? AppRoutes.matches : AppRoutes.requests);
+      Navigator.of(
+        context,
+      ).pushNamed(accepted ? AppRoutes.matches : AppRoutes.requests);
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not update request: $error')),
+        const SnackBar(
+          content: Text('We could not update this request. Please try again.'),
+        ),
       );
     } finally {
       if (mounted) setState(() => saving = false);
@@ -46,7 +58,8 @@ class _InterestRequestDetailsScreenState extends State<InterestRequestDetailsScr
 
   @override
   Widget build(BuildContext context) {
-    final request = ModalRoute.of(context)?.settings.arguments as InterestRequest?;
+    final request =
+        ModalRoute.of(context)?.settings.arguments as InterestRequest?;
     if (request == null) {
       return const ScreenScaffold(
         title: 'Request Details',
@@ -64,7 +77,9 @@ class _InterestRequestDetailsScreenState extends State<InterestRequestDetailsScr
             children: [
               Row(
                 children: [
-                  Expanded(child: Text(request.company, style: AppTextStyles.title)),
+                  Expanded(
+                    child: Text(request.company, style: AppTextStyles.title),
+                  ),
                   StatusBadge(label: request.status),
                 ],
               ),
@@ -74,16 +89,22 @@ class _InterestRequestDetailsScreenState extends State<InterestRequestDetailsScr
               _Line('Salary', request.salary),
               _Line('Location', request.location),
               _Line('Working hours', request.hours),
-              _Line('Accommodation / transport', request.support),
-              const SizedBox(height: 12),
-              const Text('Message from employer', style: AppTextStyles.label),
-              const SizedBox(height: 6),
-              Text(request.message, style: AppTextStyles.body),
+              _Line('Accommodation', request.accommodation, optional: true),
+              _Line('Transport', request.transport, optional: true),
+              _Line('Visa Support', request.visaSupport, optional: true),
+              if (request.message.trim().isNotEmpty) ...[
+                const SizedBox(height: 12),
+                const Text('Message from employer', style: AppTextStyles.label),
+                const SizedBox(height: 6),
+                Text(request.message, style: AppTextStyles.body),
+              ],
             ],
           ),
         ),
         const SizedBox(height: 12),
-        const PrivacyBadge(label: 'Your phone number is hidden until you accept.'),
+        const PrivacyBadge(
+          label: 'Your phone number is hidden until you accept.',
+        ),
         const SizedBox(height: 24),
         if (request.status.toLowerCase() == 'pending') ...[
           PrimaryButton(
@@ -106,15 +127,28 @@ class _InterestRequestDetailsScreenState extends State<InterestRequestDetailsScr
 }
 
 class _Line extends StatelessWidget {
-  const _Line(this.label, this.value);
+  const _Line(this.label, this.value, {this.optional = false});
   final String label;
   final String value;
+  final bool optional;
 
   @override
   Widget build(BuildContext context) {
+    final cleaned = value.trim();
+    if (optional && cleaned.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Text('$label: $value', style: AppTextStyles.body),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: AppTextStyles.label),
+          const SizedBox(height: 3),
+          Text(
+            cleaned.isEmpty ? 'Not specified' : cleaned,
+            style: AppTextStyles.body,
+          ),
+        ],
+      ),
     );
   }
 }

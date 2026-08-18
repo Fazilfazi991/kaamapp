@@ -15,7 +15,8 @@ class KaamNotificationRepository {
     var query = _client
         .from('notifications')
         .select(
-            'id,type,title,body,status,read_at,created_at,action_route,data')
+          'id,type,title,body,status,read_at,created_at,action_route,data',
+        )
         .eq('recipient_id', user.id);
     if (unreadOnly) query = query.eq('status', 'unread');
     final rows = await query.order('created_at', ascending: false).limit(100);
@@ -84,15 +85,16 @@ class KaamNotificationRepository {
     final token = fcmToken.trim();
     if (token.isEmpty) return;
     final user = _requireUser();
-    await _client.from('user_push_devices').upsert({
-      'user_id': user.id,
-      'platform': platform,
-      'fcm_token': token,
-      'device_id': deviceId,
-      'app_version': appVersion,
-      'is_active': true,
-      'last_seen_at': DateTime.now().toUtc().toIso8601String(),
-    }, onConflict: 'fcm_token');
+    if (user.id.isEmpty) return;
+    // `register_current_push_device` performs the former client upsert
+    // (`onConflict: 'fcm_token'`, `'user_id': user.id`, `'is_active': true`)
+    // under SECURITY DEFINER so a token cannot remain active for two users.
+    await _client.rpc('register_current_push_device', params: {
+      'p_fcm_token': token,
+      'p_platform': platform,
+      'p_device_id': deviceId,
+      'p_app_version': appVersion,
+    });
   }
 
   Future<void> deactivateDeviceToken(String? fcmToken) async {

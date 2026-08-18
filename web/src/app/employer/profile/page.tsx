@@ -10,14 +10,14 @@ export default async function EmployerProfilePage() {
   const completion = employerCompanyCompletion(company, documents);
   return (
     <div className="grid gap-6">
-      <PageTitle title="Company Profile" description="Private company profile summary for the authenticated employer owner." />
+      <PageTitle title="Employer setup" description="Manage company information and contextual business verification." />
       <section className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-[#201925]">{company?.company_name ?? "Company profile not created"}</h2>
-            <p className="mt-1 text-sm text-[#66616f]">{[company?.industry, company?.city, company?.country].filter(Boolean).join(" - ") || "Complete onboarding to enable employer workflows."}</p>
+            <h2 className="text-lg font-semibold text-[#201925]">{company?.company_name ?? "Employer details not created"}</h2>
+            <p className="mt-1 text-sm text-[#66616f]">{[company?.industry, company?.city, company?.country].filter(Boolean).join(" - ") || "Use setup to add your employer details."}</p>
           </div>
-          <StatusBadge tone={company?.is_verified ? "success" : "neutral"}>{company?.is_verified ? "Verified" : "Not verified"}</StatusBadge>
+          <StatusBadge tone={company?.is_verified ? "success" : "neutral"}>{company?.is_verified ? "Business verified" : "Optional verification"}</StatusBadge>
         </div>
         <dl className="mt-5 grid gap-4 text-sm md:grid-cols-2">
           <div><dt className="font-semibold text-[#3b3340]">Trade licence</dt><dd className="mt-1 text-[#66616f]">{company?.trade_license_number ? "Saved" : "Not provided"}</dd></div>
@@ -26,8 +26,8 @@ export default async function EmployerProfilePage() {
           <div><dt className="font-semibold text-[#3b3340]">Completion</dt><dd className="mt-1 text-[#66616f]">{completion.percentage}%</dd></div>
         </dl>
         <div className="mt-5 flex flex-wrap gap-3">
-          <ButtonLink href="/employer/profile/edit">Edit Company Profile</ButtonLink>
-          <ButtonLink href="/employer/documents" variant="secondary">View Document History</ButtonLink>
+          <ButtonLink href="/employer/profile/edit">Edit employer details</ButtonLink>
+          <ButtonLink href="/employer/onboarding/documents" variant="secondary">Business verification</ButtonLink>
           <ButtonLink href="/employer/dashboard" variant="ghost">Return to Dashboard</ButtonLink>
         </div>
       </section>

@@ -7,11 +7,13 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/private_profile_photo_avatar.dart';
 import '../../../core/widgets/screen_scaffold.dart';
 import '../../../core/widgets/secondary_button.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../supabase_backend/kaam_backend.dart';
 import '../models/employer_models.dart';
+import '../models/employer_interest_state_store.dart';
 import '../widgets/employer_widgets.dart';
 
 class SendInterestScreen extends StatefulWidget {
@@ -44,6 +46,7 @@ class _SendInterestScreenState extends State<SendInterestScreen> {
   }
 
   Future<void> _send(EmployerCandidate candidate) async {
+    if (sending) return;
     setState(() => sending = true);
     try {
       await repository.sendInterest(
@@ -57,15 +60,26 @@ class _SendInterestScreenState extends State<SendInterestScreen> {
         transportProvided: transport,
         visaSupport: visa,
       );
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Interest request sent.')),
+      EmployerInterestStateStore.instance.setStatus(
+        candidate.candidateProfileId ?? '',
+        'pending',
       );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Interest sent.')));
       Navigator.of(context).pushNamed(AppRoutes.employerSentRequests);
-    } catch (error) {
+    } on InterestAlreadySentException {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not send interest: $error')),
+        const SnackBar(content: Text('Interest already sent.')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('We could not send this interest. Please try again.'),
+        ),
       );
     } finally {
       if (mounted) setState(() => sending = false);
@@ -78,29 +92,53 @@ class _SendInterestScreenState extends State<SendInterestScreen> {
     final candidate = args is EmployerCandidate ? args : null;
     if (candidate == null) {
       return const ScreenScaffold(
-        title: 'Send Interest Request',
+        title: 'Show Interest',
         showBack: true,
-        children: [Text('Open this screen from candidate search.', style: AppTextStyles.body)],
+        children: [
+          Text(
+            'Open this screen from candidate search.',
+            style: AppTextStyles.body,
+          ),
+        ],
       );
     }
     return ScreenScaffold(
-      title: 'Send Interest Request',
+      title: 'Show Interest',
       showBack: true,
       children: [
         CandidateMiniProfileCard(candidate: candidate, showActions: false),
         const SizedBox(height: 16),
-        AppTextField(controller: jobTitleController, label: 'Job title', hint: 'Cleaning Team Lead'),
+        AppTextField(
+          controller: jobTitleController,
+          label: 'Job title',
+          hint: 'Cleaning Team Lead',
+        ),
         const SizedBox(height: 12),
-        AppTextField(controller: salaryController, label: 'Salary range', hint: 'AED 2,200 - AED 2,800'),
+        AppTextField(
+          controller: salaryController,
+          label: 'Salary range',
+          hint: 'AED 2,200 - AED 2,800',
+        ),
         const SizedBox(height: 12),
-        AppTextField(controller: locationController, label: 'Work location', hint: 'Dubai'),
+        AppTextField(
+          controller: locationController,
+          label: 'Work location',
+          hint: 'Dubai',
+        ),
         const SizedBox(height: 12),
-        AppTextField(controller: hoursController, label: 'Working hours', hint: '9 hours with weekly off'),
+        AppTextField(
+          controller: hoursController,
+          label: 'Working hours',
+          hint: '9 hours with weekly off',
+        ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: accommodation,
           onChanged: (value) => setState(() => accommodation = value),
-          title: const Text('Accommodation provided', style: AppTextStyles.body),
+          title: const Text(
+            'Accommodation provided',
+            style: AppTextStyles.body,
+          ),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
@@ -117,14 +155,19 @@ class _SendInterestScreenState extends State<SendInterestScreen> {
         AppTextField(
           controller: messageController,
           label: 'Message to candidate',
-          hint: 'Write a short intro about the role and why you want to connect.',
+          hint:
+              'Write a short intro about the role and why you want to connect.',
           maxLines: 4,
         ),
         const SizedBox(height: 12),
-        const Text('The candidate will review your request. Chat opens only if they accept.', style: AppTextStyles.muted),
+        const Text(
+          'The candidate will review your request. Chat opens only if they accept.',
+          style: AppTextStyles.muted,
+        ),
         const SizedBox(height: 20),
         PrimaryButton(
-          label: sending ? 'Sending...' : 'Send Interest',
+          label: sending ? 'Sending...' : 'Show Interest',
+          icon: Icons.handshake_rounded,
           onPressed: sending ? null : () => _send(candidate),
         ),
       ],
@@ -140,20 +183,33 @@ class InterestSentConfirmationScreen extends StatelessWidget {
     return ScreenScaffold(
       title: 'Interest Sent',
       children: [
-        const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 72),
+        const Icon(
+          Icons.check_circle_rounded,
+          color: AppColors.success,
+          size: 72,
+        ),
         const SizedBox(height: 18),
-        Text('Interest Sent', style: AppTextStyles.headline.copyWith(color: AppColors.white)),
+        Text(
+          'Interest Sent',
+          style: AppTextStyles.headline.copyWith(color: AppColors.white),
+        ),
         const SizedBox(height: 8),
-        const Text('The candidate has been notified.', style: AppTextStyles.body),
+        const Text(
+          'The candidate has been notified.',
+          style: AppTextStyles.body,
+        ),
         const SizedBox(height: 22),
         PrimaryButton(
           label: 'View Sent Interests',
-          onPressed: () => Navigator.of(context).pushNamed(AppRoutes.employerSentRequests),
+          onPressed: () =>
+              Navigator.of(context).pushNamed(AppRoutes.employerSentRequests),
         ),
         const SizedBox(height: 10),
         SecondaryButton(
           label: 'Search More Candidates',
-          onPressed: () => Navigator.of(context).pushNamed(AppRoutes.employerCandidateSearch),
+          onPressed: () => Navigator.of(
+            context,
+          ).pushNamed(AppRoutes.employerCandidateSearch),
         ),
       ],
     );
@@ -164,12 +220,15 @@ class SentInterestRequestsScreen extends StatefulWidget {
   const SentInterestRequestsScreen({super.key});
 
   @override
-  State<SentInterestRequestsScreen> createState() => _SentInterestRequestsScreenState();
+  State<SentInterestRequestsScreen> createState() =>
+      _SentInterestRequestsScreenState();
 }
 
-class _SentInterestRequestsScreenState extends State<SentInterestRequestsScreen> {
+class _SentInterestRequestsScreenState
+    extends State<SentInterestRequestsScreen> {
   final repository = const InterestRepository();
-  late Future<List<EmployerInterestRequest>> requestsFuture = repository.employerRequests();
+  late Future<List<EmployerInterestRequest>> requestsFuture =
+      repository.employerRequests();
 
   void _refresh() {
     setState(() => requestsFuture = repository.employerRequests());
@@ -179,8 +238,13 @@ class _SentInterestRequestsScreenState extends State<SentInterestRequestsScreen>
   Widget build(BuildContext context) {
     return ScreenScaffold(
       title: 'Interest Requests',
-      bottomNavigationBar: const EmployerBottomNav(currentIndex: 3),
-      actions: [IconButton(icon: const Icon(Icons.refresh_rounded), onPressed: _refresh)],
+      bottomNavigationBar: const EmployerBottomNav(currentIndex: 4),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh_rounded),
+          onPressed: _refresh,
+        ),
+      ],
       children: [
         FutureBuilder<List<EmployerInterestRequest>>(
           future: requestsFuture,
@@ -192,7 +256,7 @@ class _SentInterestRequestsScreenState extends State<SentInterestRequestsScreen>
               return EmptyState(
                 icon: Icons.error_outline,
                 title: 'Could not load interests',
-                message: snapshot.error.toString(),
+                message: 'Please try again.',
                 action: PrimaryButton(label: 'Retry', onPressed: _refresh),
               );
             }
@@ -204,7 +268,9 @@ class _SentInterestRequestsScreenState extends State<SentInterestRequestsScreen>
                 message: 'Send interest from candidate search.',
                 action: PrimaryButton(
                   label: 'Search Candidates',
-                  onPressed: () => Navigator.of(context).pushNamed(AppRoutes.employerCandidateSearch),
+                  onPressed: () => Navigator.of(
+                    context,
+                  ).pushNamed(AppRoutes.employerCandidateSearch),
                 ),
               );
             }
@@ -229,12 +295,18 @@ class EmployerInterestRequestDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final request = ModalRoute.of(context)?.settings.arguments as EmployerInterestRequest?;
+    final request =
+        ModalRoute.of(context)?.settings.arguments as EmployerInterestRequest?;
     if (request == null) {
       return const ScreenScaffold(
         title: 'Request Details',
         showBack: true,
-        children: [Text('Open this screen from sent interests.', style: AppTextStyles.body)],
+        children: [
+          Text(
+            'Open this screen from sent interests.',
+            style: AppTextStyles.body,
+          ),
+        ],
       );
     }
     return ScreenScaffold(
@@ -245,20 +317,74 @@ class EmployerInterestRequestDetailsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(request.candidateId, style: AppTextStyles.headline),
-              const SizedBox(height: 8),
-              Text('${request.role} - ${request.location}', style: AppTextStyles.body),
-              Text('Job sent: ${request.jobTitle}', style: AppTextStyles.body),
-              Text('Salary: ${request.salary}', style: AppTextStyles.body),
-              Text('Working hours: ${request.workingHours}', style: AppTextStyles.body),
+              PrivateProfilePhotoAvatar(
+                path: request.candidatePhotoUrl,
+                candidateId: request.candidateId,
+                initials: profileInitials(
+                  request.candidateName,
+                  fallback: 'C',
+                ),
+                size: 64,
+              ),
               const SizedBox(height: 12),
-              Text(request.message, style: AppTextStyles.body),
+              Text(request.candidateName, style: AppTextStyles.headline),
+              const SizedBox(height: 8),
+              Text(
+                '${request.role} - ${request.location}',
+                style: AppTextStyles.body,
+              ),
+              const SizedBox(height: 12),
+              _DetailLine('Job Role', request.jobTitle),
+              _DetailLine('Salary', request.salary),
+              _DetailLine('Location', request.location),
+              _DetailLine('Working Hours', request.workingHours),
+              _DetailLine(
+                'Accommodation',
+                request.accommodation,
+                optional: true,
+              ),
+              _DetailLine('Transport', request.transport, optional: true),
+              _DetailLine('Visa Support', request.visaSupport, optional: true),
+              if (request.message.trim().isNotEmpty) ...[
+                const SizedBox(height: 12),
+                const Text('Message', style: AppTextStyles.label),
+                const SizedBox(height: 4),
+                Text(request.message, style: AppTextStyles.body),
+              ],
             ],
           ),
         ),
         const SizedBox(height: 18),
         StatusBadge(label: request.status, color: AppColors.warning),
       ],
+    );
+  }
+}
+
+class _DetailLine extends StatelessWidget {
+  const _DetailLine(this.label, this.value, {this.optional = false});
+
+  final String label;
+  final String value;
+  final bool optional;
+
+  @override
+  Widget build(BuildContext context) {
+    final cleaned = value.trim();
+    if (optional && cleaned.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: AppTextStyles.label),
+          const SizedBox(height: 3),
+          Text(
+            cleaned.isEmpty ? 'Not specified' : cleaned,
+            style: AppTextStyles.body,
+          ),
+        ],
+      ),
     );
   }
 }

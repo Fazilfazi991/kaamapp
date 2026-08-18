@@ -18,15 +18,20 @@ class ScheduleInterviewScreen extends StatelessWidget {
         const AppTextField(label: 'Preferred time', hint: '10:00 AM'),
         const SizedBox(height: 12),
         const AppTextField(
-            label: 'Interview mode: Call / WhatsApp / In-person',
-            hint: 'WhatsApp'),
+          label: 'Interview mode: Call / WhatsApp / In-person',
+          hint: 'WhatsApp',
+        ),
         const SizedBox(height: 12),
         const AppTextField(
-            label: 'Notes', hint: 'I am available after 10 AM.', maxLines: 4),
+          label: 'Notes',
+          hint: 'I am available after 10 AM.',
+          maxLines: 4,
+        ),
         const SizedBox(height: 24),
         PrimaryButton(
-            label: 'Send Availability',
-            onPressed: () => Navigator.of(context).pop()),
+          label: 'Send Availability',
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ],
     );
   }

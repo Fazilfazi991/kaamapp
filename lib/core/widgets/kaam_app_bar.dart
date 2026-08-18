@@ -22,8 +22,10 @@ class KaamAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: showBack,
-      title: Text(title,
-          style: AppTextStyles.title.copyWith(color: AppColors.primaryPink)),
+      title: Text(
+        title,
+        style: AppTextStyles.title.copyWith(color: AppColors.primaryPink),
+      ),
       actions: actions,
       flexibleSpace: Container(
         decoration: const BoxDecoration(

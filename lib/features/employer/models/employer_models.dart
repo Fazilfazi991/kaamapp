@@ -14,12 +14,14 @@ class EmployerCandidate {
     this.currentLocation = '',
     this.preferredLocation = '',
     this.visaStatus = '',
-    this.isVerified = false,
+    this.verificationStatus = '',
     this.isSaved = false,
     this.isMatched = false,
+    this.interestStatus,
     this.allowedName,
     this.candidateProfileId,
     this.profilePhotoUrl,
+    this.about = '',
   });
 
   final String id;
@@ -36,21 +38,58 @@ class EmployerCandidate {
   final String currentLocation;
   final String preferredLocation;
   final String visaStatus;
-  final bool isVerified;
+  final String verificationStatus;
+  bool get isManuallyVerified =>
+      verificationStatus.trim().toLowerCase() == 'verified';
+  bool get isVerified => isManuallyVerified;
   final bool isSaved;
   final bool isMatched;
+  final String? interestStatus;
+  bool get hasActiveInterest =>
+      interestStatus == 'pending' || interestStatus == 'accepted';
   final String? allowedName;
   final String? candidateProfileId;
   final String? profilePhotoUrl;
+  final String about;
 
   String get displayName =>
       allowedName == null || allowedName!.trim().isEmpty ? id : allowedName!;
+
+  EmployerCandidate copyWith(
+      {bool? isSaved, String? savedDate, String? interestStatus}) {
+    return EmployerCandidate(
+      id: id,
+      role: role,
+      location: location,
+      expectedSalary: expectedSalary,
+      availability: availability,
+      experience: experience,
+      previousRole: previousRole,
+      skills: skills,
+      languages: languages,
+      savedDate: savedDate ?? this.savedDate,
+      mainCategory: mainCategory,
+      currentLocation: currentLocation,
+      preferredLocation: preferredLocation,
+      visaStatus: visaStatus,
+      verificationStatus: verificationStatus,
+      isSaved: isSaved ?? this.isSaved,
+      isMatched: isMatched,
+      interestStatus: interestStatus ?? this.interestStatus,
+      allowedName: allowedName,
+      candidateProfileId: candidateProfileId,
+      profilePhotoUrl: profilePhotoUrl,
+      about: about,
+    );
+  }
 }
 
 class EmployerHiringRequirement {
   const EmployerHiringRequirement({
     this.id,
     required this.role,
+    this.jobRoleId,
+    this.competencySkillIds = const [],
     this.customRole = '',
     required this.openings,
     required this.salaryRange,
@@ -66,6 +105,8 @@ class EmployerHiringRequirement {
 
   final String? id;
   final String role;
+  final String? jobRoleId;
+  final List<String> competencySkillIds;
   final String customRole;
   final int openings;
   final String salaryRange;
@@ -80,10 +121,48 @@ class EmployerHiringRequirement {
 
   String get displayRole => customRole.trim().isNotEmpty ? customRole : role;
 
+  EmployerHiringRequirement copyWith({
+    String? id,
+    String? role,
+    String? jobRoleId,
+    List<String>? competencySkillIds,
+    String? customRole,
+    int? openings,
+    String? salaryRange,
+    String? workLocation,
+    String? workingHours,
+    bool? accommodationProvided,
+    bool? transportProvided,
+    bool? visaProvided,
+    bool? immediateJoining,
+    String? description,
+    String? status,
+  }) {
+    return EmployerHiringRequirement(
+      id: id ?? this.id,
+      role: role ?? this.role,
+      jobRoleId: jobRoleId ?? this.jobRoleId,
+      competencySkillIds: competencySkillIds ?? this.competencySkillIds,
+      customRole: customRole ?? this.customRole,
+      openings: openings ?? this.openings,
+      salaryRange: salaryRange ?? this.salaryRange,
+      workLocation: workLocation ?? this.workLocation,
+      workingHours: workingHours ?? this.workingHours,
+      accommodationProvided:
+          accommodationProvided ?? this.accommodationProvided,
+      transportProvided: transportProvided ?? this.transportProvided,
+      visaProvided: visaProvided ?? this.visaProvided,
+      immediateJoining: immediateJoining ?? this.immediateJoining,
+      description: description ?? this.description,
+      status: status ?? this.status,
+    );
+  }
+
   factory EmployerHiringRequirement.fromRow(Map<String, dynamic> row) {
     return EmployerHiringRequirement(
       id: row['id'] as String?,
       role: row['role'] as String? ?? '',
+      jobRoleId: row['job_role_id'] as String?,
       customRole: row['custom_role'] as String? ?? '',
       openings: row['openings'] as int? ?? 1,
       salaryRange: row['salary_range'] as String? ?? '',
@@ -111,6 +190,13 @@ class EmployerInterestRequest {
     required this.message,
     required this.status,
     required this.sentDate,
+    this.candidateName = 'Candidate',
+    this.candidatePhotoUrl = '',
+    this.experience = '',
+    this.availability = '',
+    this.accommodation = '',
+    this.transport = '',
+    this.visaSupport = '',
   });
 
   final String? id;
@@ -123,6 +209,13 @@ class EmployerInterestRequest {
   final String message;
   final String status;
   final String sentDate;
+  final String candidateName;
+  final String candidatePhotoUrl;
+  final String experience;
+  final String availability;
+  final String accommodation;
+  final String transport;
+  final String visaSupport;
 }
 
 class EmployerMatch {
@@ -140,6 +233,8 @@ class EmployerMatch {
     this.contactRevealed = false,
     this.phone = '',
     this.email = '',
+    this.candidateProfileId = '',
+    this.profilePhotoUrl = '',
   });
 
   final String? matchId;
@@ -155,6 +250,8 @@ class EmployerMatch {
   final bool contactRevealed;
   final String phone;
   final String email;
+  final String candidateProfileId;
+  final String profilePhotoUrl;
 }
 
 class EmployerNotificationItem {

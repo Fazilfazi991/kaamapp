@@ -26,16 +26,19 @@ class SupabaseService {
   static Future<void> initialize() async {
     await _loadEnv();
     final host = Uri.tryParse(AppConfig.supabaseUrl)?.host ?? 'invalid';
-    debugPrint('[Supabase] Connected project host: $host');
-    debugPrint('[Build] mode=${_buildModeLabel()}');
-    debugPrint('Kaam demo fallback: ${AppConfig.useDemoFallback}');
+    if (kDebugMode) {
+      debugPrint('[Supabase] Connected project host: $host');
+      debugPrint('[Build] mode=${_buildModeLabel()}');
+      debugPrint('Kaam demo fallback: ${AppConfig.useDemoFallback}');
+    }
 
     final configurationIssues = AppConfig.supabaseConfigurationIssues();
     if (configurationIssues.isNotEmpty) {
       _startupConfigurationError = configurationIssues.join('\n');
       if (kDebugMode) {
         debugPrint(
-            'Kaam running without Supabase credentials: ${AppConfig.debugModeLabel()}');
+          'Kaam running without Supabase credentials: ${AppConfig.debugModeLabel()}',
+        );
       }
       return;
     }
@@ -48,9 +51,7 @@ class SupabaseService {
         authFlowType: AuthFlowType.pkce,
         autoRefreshToken: true,
       ),
-      realtimeClientOptions: const RealtimeClientOptions(
-        eventsPerSecond: 10,
-      ),
+      realtimeClientOptions: const RealtimeClientOptions(eventsPerSecond: 10),
     );
     _initialized = true;
     _sessionRecovery = _observeInitialSession();
@@ -68,7 +69,8 @@ class SupabaseService {
           .timeout(const Duration(seconds: 3));
       if (kDebugMode) {
         debugPrint(
-            '[Auth] event=${event.event.name} initialSession=${event.session != null} userIdPresent=${event.session?.user.id.isNotEmpty == true}');
+          '[Auth] event=${event.event.name} initialSession=${event.session != null} userIdPresent=${event.session?.user.id.isNotEmpty == true}',
+        );
       }
     } on TimeoutException {
       if (kDebugMode) debugPrint('[Auth] initial session recovery timed out');
@@ -81,7 +83,8 @@ class SupabaseService {
     } on Object {
       if (kDebugMode) {
         debugPrint(
-            '.env not loaded. Use --dart-define or add a safe .env with public Supabase config.');
+          '.env not loaded. Use --dart-define or add a safe .env with public Supabase config.',
+        );
       }
     }
   }

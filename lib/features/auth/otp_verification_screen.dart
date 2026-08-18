@@ -26,7 +26,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final auth = const KaamAuthRepository();
   bool loading = false;
   bool resent = false;
-  int resendSeconds = 45;
+  final resendSeconds = ValueNotifier<int>(45);
+  final otpComplete = ValueNotifier<bool>(false);
   Timer? resendTimer;
 
   bool get canVerify =>
@@ -36,6 +37,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   void dispose() {
     resendTimer?.cancel();
+    resendSeconds.dispose();
+    otpComplete.dispose();
     for (final controller in controllers) {
       controller.dispose();
     }
@@ -59,8 +62,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
     setState(() => loading = true);
     try {
-      final result =
-          await auth.verifyOtp(email: email, token: token, role: role);
+      final result = await auth.verifyOtp(
+        email: email,
+        token: token,
+        role: role,
+      );
       if (!mounted) return;
       if (result.message.startsWith('This email is already registered')) {
         await showDialog<void>(
@@ -78,26 +84,42 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         );
         if (!mounted) return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.message)));
+      if (otpContext.freshRegistration) {
+        await _showRegistrationSuccess();
+        if (!mounted) return;
+      }
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(_routeFor(result.destination), (_) => false);
+    } on KaamAccountNotFoundException catch (error) {
+      if (!mounted) return;
+      resent = false;
       Navigator.of(context).pushNamedAndRemoveUntil(
-        _routeFor(result.destination),
+        AppRoutes.login,
         (_) => false,
+        arguments: {'accountNotFound': true},
       );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.safeMessage)));
     } on KaamRoleMismatchException catch (error) {
       if (!mounted) return;
       resent = false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.safeMessage)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.safeMessage)));
     } catch (_) {
       if (!mounted) return;
       resent = false;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content:
-                Text('We could not verify that code. Check it and try again.')),
+          content: Text(
+            'We could not verify that code. Check it and try again.',
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => loading = false);
@@ -113,17 +135,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       resent = false;
     });
     try {
-      await auth.signInWithOtp(email: email, role: role);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('OTP resent.')),
+      await auth.signInWithOtp(
+        email: email,
+        role: role,
+        freshRegistration: otpContext.freshRegistration,
       );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('OTP resent.')));
       _startResendCountdown();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not resend OTP: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not resend OTP: $error')));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -144,19 +170,48 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       role: role,
       requestedAt: KaamAuthSessionCoordinator.pendingOtp?.requestedAt ??
           DateTime.now().toUtc(),
+      freshRegistration: data['freshRegistration'] == true,
+    );
+  }
+
+  Future<void> _showRegistrationSuccess() async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Registration successful'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.check_circle_outline,
+              color: AppColors.success,
+              size: 48,
+            ),
+            SizedBox(height: 12),
+            Text('Your KAAM account has been created successfully.'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
     );
   }
 
   void _startResendCountdown() {
     resendTimer?.cancel();
-    setState(() => resendSeconds = 45);
+    resendSeconds.value = 45;
     resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
-      if (resendSeconds <= 1) {
+      if (resendSeconds.value <= 1) {
         timer.cancel();
-        setState(() => resendSeconds = 0);
+        resendSeconds.value = 0;
       } else {
-        setState(() => resendSeconds--);
+        resendSeconds.value -= 1;
       }
     });
   }
@@ -175,6 +230,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final email = _otpContext().normalizedEmail;
     return ScreenScaffold(
       title: 'Verify',
       showBack: true,
@@ -182,13 +238,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         const Text('Verify your email', style: AppTextStyles.headline),
         const SizedBox(height: 8),
         Text(
-            'Enter the ${AppConfig.emailOtpLength}-digit code sent to your email',
-            style: AppTextStyles.body),
+          'Enter the ${AppConfig.emailOtpLength}-digit code sent to $email',
+          style: AppTextStyles.body,
+        ),
         const SizedBox(height: 28),
         OtpCodeFields(
           controllers: controllers,
           focusNodes: focusNodes,
-          onChanged: () => setState(() {}),
+          onChanged: () => otpComplete.value = canVerify,
           onCompleted: () {
             if (!loading && canVerify && !resent) {
               resent = true;
@@ -197,16 +254,27 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           },
         ),
         const SizedBox(height: 28),
-        PrimaryButton(
-          label: loading ? 'Verifying...' : 'Verify',
-          onPressed: loading || !canVerify ? null : _verify,
-        ),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: loading || resendSeconds > 0 ? null : _resend,
-          child: Text(resendSeconds > 0
-              ? 'Resend in ${resendSeconds}s'
-              : 'Resend code'),
+        ValueListenableBuilder<bool>(
+          valueListenable: otpComplete,
+          builder: (context, complete, _) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              PrimaryButton(
+                label: loading ? 'Verifying...' : 'Verify',
+                onPressed: loading || !complete ? null : _verify,
+              ),
+              const SizedBox(height: 12),
+              ValueListenableBuilder<int>(
+                valueListenable: resendSeconds,
+                builder: (context, seconds, _) => TextButton(
+                  onPressed: loading || seconds > 0 ? null : _resend,
+                  child: Text(
+                    seconds > 0 ? 'Resend in ${seconds}s' : 'Resend code',
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -236,8 +304,9 @@ class OtpCodeFields extends StatelessWidget {
 
     if (digits != value) {
       controllers[index].text = digits;
-      controllers[index].selection =
-          TextSelection.collapsed(offset: digits.length);
+      controllers[index].selection = TextSelection.collapsed(
+        offset: digits.length,
+      );
     }
 
     if (digits.isEmpty && value.isEmpty && index > 0) {
@@ -261,16 +330,17 @@ class OtpCodeFields extends StatelessWidget {
       controllers[target].selection = const TextSelection.collapsed(offset: 1);
       target++;
     }
-    FocusScope.of(context).requestFocus(
-      focusNodes[(target - 1).clamp(0, focusNodes.length - 1)],
-    );
+    FocusScope.of(
+      context,
+    ).requestFocus(focusNodes[(target - 1).clamp(0, focusNodes.length - 1)]);
     onChanged();
     _notifyComplete();
   }
 
   void _notifyComplete() {
-    final complete =
-        controllers.every((controller) => controller.text.length == 1);
+    final complete = controllers.every(
+      (controller) => controller.text.length == 1,
+    );
     if (complete) onCompleted?.call();
   }
 
@@ -294,8 +364,9 @@ class OtpCodeFields extends StatelessWidget {
         controllers.length,
         (index) => Expanded(
           child: Padding(
-            padding:
-                EdgeInsets.only(right: index == controllers.length - 1 ? 0 : 8),
+            padding: EdgeInsets.only(
+              right: index == controllers.length - 1 ? 0 : 8,
+            ),
             child: Focus(
               onKeyEvent: (_, event) => _handleKey(context, index, event),
               child: TextField(
@@ -307,9 +378,7 @@ class OtpCodeFields extends StatelessWidget {
                     ? TextInputAction.done
                     : TextInputAction.next,
                 showCursor: false,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (value) => _handleChanged(context, index, value),
                 decoration: InputDecoration(
                   counterText: '',

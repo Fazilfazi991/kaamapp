@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-  canApproveCompany,
+  canVerifyCompany,
   canApproveEmployerDocument,
   canBlockUser,
   canRequestEmployerDocumentResubmission,
   documentStatusesByType,
-  getEmployerCompanyApprovalState,
+  getEmployerCompanyVerificationState,
   getEmployerDocumentReviewState,
   isAllowedCandidateDocumentApproval,
   isAllowedEmployerDocumentApproval,
@@ -99,29 +99,29 @@ describe("admin review validation", () => {
     expect(statusTone("approved")).toBe("success");
   });
 
-  it("does not require employer documents before company approval", () => {
+  it("does not require employer documents before optional business verification", () => {
     expect(
-      canApproveCompany({
+      canVerifyCompany({
         companyStatus: "draft",
         requiredDocumentStatuses: {},
       }),
     ).toBe(true);
     expect(
-      canApproveCompany({
+      canVerifyCompany({
         companyStatus: "draft",
         requiredDocumentStatuses: { "authorization-letter": "pending" },
       }),
     ).toBe(true);
     expect(
-      canApproveCompany({
+      canVerifyCompany({
         companyStatus: "blocked",
         requiredDocumentStatuses: {},
       }),
     ).toBe(false);
   });
 
-  it("company can be approved with no verification documents", () => {
-    const state = getEmployerCompanyApprovalState({
+  it("company can be verified with no verification documents", () => {
+    const state = getEmployerCompanyVerificationState({
       companyStatus: "draft",
       profileComplete: true,
       documentStatuses: {},
@@ -129,8 +129,8 @@ describe("admin review validation", () => {
     expect(state.canApprove).toBe(true);
   });
 
-  it("historical pending documents do not block approval", () => {
-    const state = getEmployerCompanyApprovalState({
+  it("historical pending documents do not block optional verification", () => {
+    const state = getEmployerCompanyVerificationState({
       companyStatus: "draft",
       profileComplete: true,
       documentStatuses: {
@@ -140,26 +140,26 @@ describe("admin review validation", () => {
     expect(state.canApprove).toBe(true);
   });
 
-  it("missing, pending, or rejected trade licences do not block company approval", () => {
-    expect(getEmployerCompanyApprovalState({ companyStatus: "draft", profileComplete: true, documentStatuses: {} }).canApprove).toBe(true);
-    expect(getEmployerCompanyApprovalState({ companyStatus: "draft", profileComplete: true, documentStatuses: { "trade-license": "pending" } }).canApprove).toBe(true);
-    expect(getEmployerCompanyApprovalState({ companyStatus: "draft", profileComplete: true, documentStatuses: { "trade-license": "rejected" } }).canApprove).toBe(true);
+  it("missing, pending, or rejected trade licences do not block optional verification", () => {
+    expect(getEmployerCompanyVerificationState({ companyStatus: "draft", profileComplete: true, documentStatuses: {} }).canApprove).toBe(true);
+    expect(getEmployerCompanyVerificationState({ companyStatus: "draft", profileComplete: true, documentStatuses: { "trade-license": "pending" } }).canApprove).toBe(true);
+    expect(getEmployerCompanyVerificationState({ companyStatus: "draft", profileComplete: true, documentStatuses: { "trade-license": "rejected" } }).canApprove).toBe(true);
   });
 
-  it("company profile completeness is checked before approval", () => {
+  it("company profile completeness is checked before optional verification", () => {
     expect(isEmployerCompanyProfileComplete(company)).toBe(true);
     expect(isEmployerCompanyProfileComplete({ ...company, contact_person: null })).toBe(false);
   });
 
-  it("already approved company hides approval button", () => {
-    const state = getEmployerCompanyApprovalState({
+  it("already verified company hides the verification button", () => {
+    const state = getEmployerCompanyVerificationState({
       companyStatus: "active",
       isVerified: true,
       profileComplete: true,
       documentStatuses: {},
     });
     expect(state.canApprove).toBe(false);
-    expect(state.reason).toBe("Company is already approved");
+    expect(state.reason).toBe("Business is already verified");
   });
 
   it("document status mapping keeps authorization letter optional", () => {

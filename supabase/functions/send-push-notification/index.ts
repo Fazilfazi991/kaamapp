@@ -23,7 +23,7 @@ type PreferenceRow = {
 type DeviceRow = {
   id: string;
   fcm_token: string;
-  platform: "android" | "web";
+  platform: "android" | "ios";
 };
 
 type AdminAuthorizationStatus =
@@ -72,6 +72,9 @@ const categoryByType: Record<string, keyof PreferenceRow> = {
   candidate_document_rejected: "document_updates_enabled",
   candidate_document_resubmission_requested: "document_updates_enabled",
   candidate_document_submitted: "document_updates_enabled",
+  candidate_verification_approved: "document_updates_enabled",
+  candidate_verification_rejected: "document_updates_enabled",
+  candidate_reverification_required: "document_updates_enabled",
   employer_document_submitted: "document_updates_enabled",
   employer_document_approved: "document_updates_enabled",
   employer_document_rejected: "document_updates_enabled",
@@ -177,7 +180,6 @@ Deno.serve(async (request) => {
         .select("id, fcm_token, platform")
         .eq("user_id", notification.recipient_id)
         .eq("is_active", true)
-        .eq("platform", "android")
         .returns<DeviceRow[]>(),
     ]);
 
@@ -196,7 +198,7 @@ Deno.serve(async (request) => {
   const activeDevices = devices ?? [];
   if (activeDevices.length === 0) {
     await markSkipped(supabase, notification.id, "no active android devices");
-    return json({ status: "skipped", reason: "no active android devices" });
+    return json({ status: "skipped", reason: "no active devices" });
   }
 
   const serviceAccount = JSON.parse(firebaseServiceAccountJson);
@@ -229,13 +231,17 @@ Deno.serve(async (request) => {
             body: notification.body,
           },
           data: payloadData,
-          android: {
+          android: device.platform === "android" ? {
             priority: "HIGH",
             notification: {
-              channel_id: "kaam_notifications",
+              channel_id: channelFor(notification.type),
               click_action: "FLUTTER_NOTIFICATION_CLICK",
             },
-          },
+          } : undefined,
+          apns: device.platform === "ios" ? {
+            payload: { aps: { sound: "default", badge: 1 } },
+            headers: { "apns-priority": "10" },
+          } : undefined,
         },
       }),
     });
@@ -246,12 +252,23 @@ Deno.serve(async (request) => {
       if (["UNREGISTERED", "NOT_FOUND", "INVALID_ARGUMENT"].includes(errorCode)) {
         await supabase.from("user_push_devices").update({ is_active: false }).eq("id", device.id);
       }
+      await supabase.from("notification_delivery_attempts").insert({
+        notification_id: notification.id,
+        device_id: device.id,
+        status: ["UNREGISTERED", "NOT_FOUND", "INVALID_ARGUMENT"].includes(errorCode) ? "invalid" : "failed",
+        provider_code: errorCode.slice(0, 100) || null,
+      });
       failedCount += 1;
       lastSafeError = errorCode || "FCM send failed";
       continue;
     }
 
     acceptedCount += 1;
+    await supabase.from("notification_delivery_attempts").insert({
+      notification_id: notification.id,
+      device_id: device.id,
+      status: "accepted",
+    });
   }
 
   const anySuccess = acceptedCount > 0;
@@ -273,6 +290,13 @@ Deno.serve(async (request) => {
     error: anySuccess ? undefined : lastSafeError || "FCM send failed",
   });
 });
+
+function channelFor(type: string) {
+  if (type === "new_message") return "kaam_messages";
+  if (type.includes("match") || type.includes("interest")) return "kaam_matches";
+  if (type.includes("document") || type.includes("company")) return "kaam_account";
+  return "kaam_announcements";
+}
 
 async function healthCheck(
   supabase: ReturnType<typeof createClient>,

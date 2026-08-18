@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 class ProgressStepper extends StatelessWidget {
-  const ProgressStepper(
-      {super.key, required this.current, required this.total});
+  const ProgressStepper({
+    super.key,
+    required this.current,
+    required this.total,
+  });
 
   final int current;
   final int total;

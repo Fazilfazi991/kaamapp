@@ -20,7 +20,7 @@ class _AvailabilityStatusScreenState extends State<AvailabilityStatusScreen> {
     'Available immediately',
     'Available after 1 week',
     'Available after 1 month',
-    'Not currently looking'
+    'Not currently looking',
   ];
 
   @override
@@ -54,7 +54,9 @@ class _AvailabilityStatusScreenState extends State<AvailabilityStatusScreen> {
         ],
         const SizedBox(height: 24),
         PrimaryButton(
-            label: 'Save Status', onPressed: () => Navigator.of(context).pop()),
+          label: 'Save Status',
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ],
     );
   }

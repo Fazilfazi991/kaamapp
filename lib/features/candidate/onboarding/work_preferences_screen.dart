@@ -15,10 +15,12 @@ class SkillSelectionDraft {
     required this.categories,
     required this.skills,
     this.primarySkillId,
+    this.savedBySkillId = const {},
   });
   final List<SkillCategoryData> categories;
   final List<SkillData> skills;
   String? primarySkillId;
+  final Map<String, CandidateSkillData> savedBySkillId;
 }
 
 class WorkPreferencesScreen extends StatefulWidget {
@@ -32,7 +34,9 @@ class _WorkPreferencesScreenState extends State<WorkPreferencesScreen> {
   final categoryController = TextEditingController();
   final skillController = TextEditingController();
   SkillCategoryData? category;
+  String? primarySkillId;
   final selectedSkills = <SkillData>[];
+  final savedBySkillId = <String, CandidateSkillData>{};
   List<SkillCategoryData> categories = const [];
   List<SkillData> skills = const [];
   bool loading = true;
@@ -59,16 +63,29 @@ class _WorkPreferencesScreenState extends State<WorkPreferencesScreen> {
     try {
       final loadedCategories = await repository.loadSkillCategories();
       final loadedSkills = await repository.loadSkills(
-          categoryIds: loadedCategories.map((item) => item.id));
+        categoryIds: loadedCategories.map((item) => item.id),
+      );
       final saved = await repository.loadMySkills();
+      final profile = await repository.loadCurrentProfile();
       if (!mounted) return;
-      final savedCategoryId = saved.isEmpty ? null : saved.first.category.id;
-      category = loadedCategories
-          .where((item) => item.id == savedCategoryId)
-          .firstOrNull;
-      selectedSkills.addAll(loadedSkills.where((item) =>
-          saved.any((selection) => selection.skill.id == item.id) &&
-          item.categoryId == category?.id));
+      savedBySkillId
+        ..clear()
+        ..addEntries(
+          saved.map((selection) => MapEntry(selection.skill.id, selection)),
+        );
+      final restored = CandidateJobHierarchyRestore.resolve(
+        categories: loadedCategories,
+        skills: loadedSkills,
+        savedSelections: saved,
+        legacyCategoryLabels: profile.jobCategories,
+        legacySkillLabels: profile.skills,
+        legacyPrimaryLabel: profile.headline,
+      );
+      category = restored.category;
+      selectedSkills
+        ..clear()
+        ..addAll(restored.skills);
+      primarySkillId = restored.subcategoryId;
       categoryController.text = category?.name ?? '';
       skillController.text =
           selectedSkills.isEmpty ? '' : '${selectedSkills.length} selected';
@@ -79,7 +96,8 @@ class _WorkPreferencesScreenState extends State<WorkPreferencesScreen> {
     } catch (_) {
       if (mounted) {
         setState(
-            () => error = 'We couldn\'t load the skills. Please try again.');
+          () => error = 'We couldn\'t load the skills. Please try again.',
+        );
       }
     } finally {
       if (mounted) setState(() => loading = false);
@@ -101,11 +119,20 @@ class _WorkPreferencesScreenState extends State<WorkPreferencesScreen> {
       final proceed = await _confirmCategoryChange();
       if (!proceed) return;
     }
+    final hierarchyChange = CandidateJobHierarchyChange.forCategory(
+      categoryId: next.id,
+      currentSkills: selectedSkills,
+      currentSubcategoryId: primarySkillId,
+    );
     setState(() {
       category = next;
-      selectedSkills.clear();
+      selectedSkills
+        ..clear()
+        ..addAll(hierarchyChange.skills);
+      primarySkillId = hierarchyChange.subcategoryId;
       categoryController.text = next.name;
-      skillController.clear();
+      skillController.text =
+          selectedSkills.isEmpty ? '' : '${selectedSkills.length} selected';
     });
   }
 
@@ -115,67 +142,83 @@ class _WorkPreferencesScreenState extends State<WorkPreferencesScreen> {
         builder: (context) => AlertDialog(
           title: const Text('Change category?'),
           content: const Text(
-              'Changing the category will clear your selected skills.'),
+            'Changing the category will clear your selected skills.',
+          ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel')),
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
             TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Continue'))
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Continue'),
+            ),
           ],
         ),
       ) ??
       false;
 
-  Future<T?> _pickOne<T>(
-      {required String title,
-      required List<T> items,
-      required String Function(T) label,
-      T? selected}) async {
+  Future<T?> _pickOne<T>({
+    required String title,
+    required List<T> items,
+    required String Function(T) label,
+    T? selected,
+  }) async {
     final search = TextEditingController();
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (context) => SafeArea(
-        child: StatefulBuilder(builder: (context, setSheetState) {
-          final query = search.text.toLowerCase();
-          final filtered = items
-              .where((item) => label(item).toLowerCase().contains(query))
-              .toList();
-          return Padding(
-            padding: EdgeInsets.only(
+        child: StatefulBuilder(
+          builder: (context, setSheetState) {
+            final query = search.text.toLowerCase();
+            final filtered = items
+                .where((item) => label(item).toLowerCase().contains(query))
+                .toList();
+            return Padding(
+              padding: EdgeInsets.only(
                 left: 20,
                 right: 20,
-                bottom: MediaQuery.viewInsetsOf(context).bottom + 20),
-            child: SizedBox(
+                bottom: MediaQuery.viewInsetsOf(context).bottom + 20,
+              ),
+              child: SizedBox(
                 height: MediaQuery.sizeOf(context).height * .7,
                 child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: AppTextStyles.title),
-                      const SizedBox(height: 12),
-                      AppTextField(
-                          controller: search,
-                          label: 'Search',
-                          hint: 'Search',
-                          onChanged: (_) => setSheetState(() {})),
-                      const SizedBox(height: 8),
-                      Expanded(
-                          child: ListView(children: [
-                        for (final item in filtered)
-                          ListTile(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: AppTextStyles.title),
+                    const SizedBox(height: 12),
+                    AppTextField(
+                      controller: search,
+                      label: 'Search',
+                      hint: 'Search',
+                      onChanged: (_) => setSheetState(() {}),
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          for (final item in filtered)
+                            ListTile(
                               title: Text(label(item)),
                               trailing: identical(item, selected)
-                                  ? const Icon(Icons.check,
-                                      color: AppColors.primaryPink)
+                                  ? const Icon(
+                                      Icons.check,
+                                      color: AppColors.primaryPink,
+                                    )
                                   : null,
-                              onTap: () => Navigator.pop(context, item))
-                      ])),
-                    ])),
-          );
-        }),
+                              onTap: () => Navigator.pop(context, item),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -183,66 +226,131 @@ class _WorkPreferencesScreenState extends State<WorkPreferencesScreen> {
   Future<void> _pickSkills() async {
     final search = TextEditingController();
     final temporary = List<SkillData>.of(selectedSkills);
+    String? limitError;
     final picked = await showModalBottomSheet<List<SkillData>>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (context) => SafeArea(
-        child: StatefulBuilder(builder: (context, setSheetState) {
-          final query = search.text.toLowerCase();
-          final filtered = _categorySkills
-              .where((item) => item.name.toLowerCase().contains(query))
-              .toList();
-          return Padding(
-            padding: EdgeInsets.only(
+        child: StatefulBuilder(
+          builder: (context, setSheetState) {
+            final query = search.text.toLowerCase();
+            final filtered = _categorySkills
+                .where((item) => item.name.toLowerCase().contains(query))
+                .toList();
+            return Padding(
+              padding: EdgeInsets.only(
                 left: 20,
                 right: 20,
-                bottom: MediaQuery.viewInsetsOf(context).bottom + 20),
-            child: SizedBox(
+                bottom: MediaQuery.viewInsetsOf(context).bottom + 20,
+              ),
+              child: SizedBox(
                 height: MediaQuery.sizeOf(context).height * .75,
                 child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                          'Select your skills (${temporary.length}/${CandidateSkillLimits.maxSkills})',
-                          style: AppTextStyles.title),
-                      const SizedBox(height: 12),
-                      AppTextField(
-                          controller: search,
-                          label: 'Search skills',
-                          hint: 'Search skills',
-                          onChanged: (_) => setSheetState(() {})),
-                      Expanded(
-                          child: ListView(children: [
-                        for (final skill in filtered)
-                          _SkillChoiceTile(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Select your skills (${temporary.length}/${CandidateSkillLimits.maxSkills})',
+                      style: AppTextStyles.title,
+                    ),
+                    const SizedBox(height: 12),
+                    AppTextField(
+                      controller: search,
+                      label: 'Search skills',
+                      hint: 'Search skills',
+                      onChanged: (_) => setSheetState(() {}),
+                    ),
+                    if (limitError != null) ...[
+                      const SizedBox(height: 10),
+                      Semantics(
+                        container: true,
+                        liveRegion: true,
+                        label: limitError,
+                        child: ExcludeSemantics(
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.error.withValues(alpha: .12),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: AppColors.error.withValues(alpha: .45),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.info_outline_rounded,
+                                  color: AppColors.error,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    limitError!,
+                                    style: AppTextStyles.body.copyWith(
+                                      color: AppColors.error,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          for (final skill in filtered)
+                            _SkillChoiceTile(
                               skill: skill,
-                              selected:
-                                  temporary.any((item) => item.id == skill.id),
+                              selected: temporary.any(
+                                (item) => item.id == skill.id,
+                              ),
                               onChanged: (checked) {
-                                if (checked == true &&
-                                    temporary.length >=
-                                        CandidateSkillLimits.maxSkills) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(CandidateSkillLimits
-                                              .maxMessage)));
+                                final alreadySelected = temporary.any(
+                                  (item) => item.id == skill.id,
+                                );
+                                if (!CandidateSkillLimits.allowsToggle(
+                                  selectedCount: temporary.length,
+                                  alreadySelected: alreadySelected,
+                                  selecting: checked,
+                                )) {
+                                  if (limitError == null) {
+                                    setSheetState(
+                                      () => limitError =
+                                          CandidateSkillLimits.maxMessage,
+                                    );
+                                  }
                                   return;
                                 }
                                 setSheetState(() {
                                   checked == true
                                       ? temporary.add(skill)
                                       : temporary.removeWhere(
-                                          (item) => item.id == skill.id);
+                                          (item) => item.id == skill.id,
+                                        );
+                                  limitError = null;
                                 });
-                              })
-                      ])),
-                      PrimaryButton(
-                          label: 'Done',
-                          onPressed: () => Navigator.pop(context, temporary)),
-                    ])),
-          );
-        }),
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
+                    PrimaryButton(
+                      label: 'Done',
+                      onPressed: () => Navigator.pop(context, temporary),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
     if (picked != null && mounted) {
@@ -250,6 +358,9 @@ class _WorkPreferencesScreenState extends State<WorkPreferencesScreen> {
         selectedSkills
           ..clear()
           ..addAll(picked);
+        if (!selectedSkills.any((skill) => skill.id == primarySkillId)) {
+          primarySkillId = null;
+        }
         skillController.text =
             picked.isEmpty ? '' : '${picked.length} selected';
       });
@@ -264,72 +375,98 @@ class _WorkPreferencesScreenState extends State<WorkPreferencesScreen> {
     if (selectedSkills.length > CandidateSkillLimits.maxSkills) {
       return _message(CandidateSkillLimits.maxMessage);
     }
-    Navigator.of(context).pushNamed(AppRoutes.primaryProfession,
-        arguments: SkillSelectionDraft(
-            categories: [category!], skills: List.of(selectedSkills)));
+    Navigator.of(context).pushNamed(
+      AppRoutes.primaryProfession,
+      arguments: SkillSelectionDraft(
+        categories: [category!],
+        skills: List.of(selectedSkills),
+        primarySkillId: primarySkillId,
+        savedBySkillId: {
+          for (final skill in selectedSkills)
+            if (savedBySkillId[skill.id] != null)
+              skill.id: savedBySkillId[skill.id]!,
+        },
+      ),
+    );
   }
 
   void _message(String text) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
 
   @override
-  Widget build(BuildContext context) =>
-      ScreenScaffold(title: 'Work Category', showBack: true, children: [
-        const ProgressStepper(current: 3, total: 5),
-        const SizedBox(height: 22),
-        const Text('What type of work do you do?',
-            style: AppTextStyles.headline),
-        const SizedBox(height: 8),
-        const Text('Choose your main category, then add the jobs you can do.',
-            style: AppTextStyles.body),
-        const SizedBox(height: 16),
-        if (loading) const LinearProgressIndicator(),
-        if (error != null)
-          AppCard(child: Text(error!, style: AppTextStyles.body)),
-        AppTextField(
+  Widget build(BuildContext context) => ScreenScaffold(
+        title: 'Work Category',
+        showBack: true,
+        children: [
+          const ProgressStepper(current: 3, total: 5),
+          const SizedBox(height: 22),
+          const Text('What type of work do you do?',
+              style: AppTextStyles.headline),
+          const SizedBox(height: 8),
+          const Text(
+            'Choose your main category, then add the jobs you can do.',
+            style: AppTextStyles.body,
+          ),
+          const SizedBox(height: 16),
+          if (loading) const LinearProgressIndicator(),
+          if (error != null)
+            AppCard(child: Text(error!, style: AppTextStyles.body)),
+          AppTextField(
             controller: categoryController,
             label: 'Main Category',
             hint: 'Select a work category',
             readOnly: true,
             suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded),
-            onTap: loading ? null : _pickCategory),
-        if (category != null) ...[
-          const SizedBox(height: 14),
-          AppTextField(
+            onTap: loading ? null : _pickCategory,
+          ),
+          if (category != null) ...[
+            const SizedBox(height: 14),
+            AppTextField(
               controller: skillController,
               label: 'Job Role / Skill',
               hint: 'Select your skill',
               readOnly: true,
               suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded),
-              onTap: _pickSkills),
-          const SizedBox(height: 10),
-          Text(
+              onTap: _pickSkills,
+            ),
+            const SizedBox(height: 10),
+            Text(
               'Selected skills: ${selectedSkills.length}/${CandidateSkillLimits.maxSkills}',
               style: selectedSkills.length > CandidateSkillLimits.maxSkills
                   ? const TextStyle(color: AppColors.error)
-                  : AppTextStyles.muted),
-          if (selectedSkills.isNotEmpty)
-            Padding(
+                  : AppTextStyles.muted,
+            ),
+            if (selectedSkills.isNotEmpty)
+              Padding(
                 padding: const EdgeInsets.only(top: 10),
-                child: Wrap(spacing: 8, runSpacing: 8, children: [
-                  for (final skill in selectedSkills)
-                    InputChip(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final skill in selectedSkills)
+                      InputChip(
                         label: Text(skill.name),
                         onDeleted: () => setState(() {
-                              selectedSkills
-                                  .removeWhere((item) => item.id == skill.id);
-                              skillController.text = selectedSkills.isEmpty
-                                  ? ''
-                                  : '${selectedSkills.length} selected';
-                            }))
-                ]))
-        ],
-        const SizedBox(height: 24),
-        PrimaryButton(
+                          selectedSkills
+                              .removeWhere((item) => item.id == skill.id);
+                          if (primarySkillId == skill.id) primarySkillId = null;
+                          skillController.text = selectedSkills.isEmpty
+                              ? ''
+                              : '${selectedSkills.length} selected';
+                        }),
+                      ),
+                  ],
+                ),
+              ),
+          ],
+          const SizedBox(height: 24),
+          PrimaryButton(
             label: 'Continue',
             onPressed:
-                category == null || selectedSkills.isEmpty ? null : _continue),
-      ]);
+                category == null || selectedSkills.isEmpty ? null : _continue,
+          ),
+        ],
+      );
 }
 
 class _SkillChoiceTile extends StatelessWidget {
@@ -345,21 +482,30 @@ class _SkillChoiceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: selected ? AppColors.elevatedCard : Colors.transparent,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: selected ? AppColors.primaryPink : AppColors.border,
+    return Semantics(
+      selected: selected,
+      child: Card(
+        color: selected ? AppColors.elevatedCard : Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: selected ? AppColors.primaryPink : AppColors.border,
+          ),
         ),
-      ),
-      child: CheckboxListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-        value: selected,
-        activeColor: AppColors.primaryPink,
-        title: Text(skill.name, style: AppTextStyles.body),
-        onChanged: (value) => onChanged(value ?? false),
+        child: CheckboxListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+          value: selected,
+          activeColor: AppColors.primaryPink,
+          secondary: selected
+              ? const Icon(
+                  Icons.check_circle_rounded,
+                  color: AppColors.primaryPink,
+                )
+              : const Icon(Icons.circle_outlined, color: AppColors.mutedText),
+          title: Text(skill.name, style: AppTextStyles.body),
+          onChanged: (value) => onChanged(value ?? false),
+        ),
       ),
     );
   }

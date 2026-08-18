@@ -50,11 +50,13 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
         title: const Text('Are you sure you want to log out?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
           TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Logout')),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Logout'),
+          ),
         ],
       ),
     );
@@ -63,8 +65,9 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
     try {
       await auth.signOut();
       if (!mounted) return;
-      Navigator.of(context)
-          .pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -79,10 +82,12 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
   Widget build(BuildContext context) {
     return ScreenScaffold(
       title: 'Company Profile',
-      bottomNavigationBar: const EmployerBottomNav(currentIndex: 4),
+      bottomNavigationBar: const EmployerBottomNav(currentIndex: 5),
       actions: [
         IconButton(
-            icon: const Icon(Icons.refresh_rounded), onPressed: _refresh),
+          icon: const Icon(Icons.refresh_rounded),
+          onPressed: _refresh,
+        ),
         Padding(
           padding: const EdgeInsets.only(right: 12),
           child: Image.asset(AppAssets.logo, width: 72, fit: BoxFit.contain),
@@ -111,8 +116,9 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                 message: 'Save company details before browsing candidates.',
                 action: PrimaryButton(
                   label: 'Create Company Profile',
-                  onPressed: () => Navigator.of(context)
-                      .pushNamed(AppRoutes.employerCompanyDetails),
+                  onPressed: () => Navigator.of(
+                    context,
+                  ).pushNamed(AppRoutes.employerCompanyDetails),
                 ),
               );
             }
@@ -136,8 +142,10 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(_titleCase(company.companyName),
-                                    style: AppTextStyles.title),
+                                Text(
+                                  _titleCase(company.companyName),
+                                  style: AppTextStyles.title,
+                                ),
                                 const SizedBox(height: 8),
                                 VerifiedBadge(pending: !company.isVerified),
                               ],
@@ -147,17 +155,21 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                       ),
                       const SizedBox(height: 18),
                       _InfoLine(
-                          label: 'Industry',
-                          value: _titleCase(_dash(company.industry))),
+                        label: 'Industry',
+                        value: _titleCase(_dash(company.industry)),
+                      ),
                       _InfoLine(
-                          label: 'Location',
-                          value: _titleCase(_dash(company.location))),
+                        label: 'Location',
+                        value: _titleCase(_dash(company.location)),
+                      ),
                       _InfoLine(
-                          label: 'Company size',
-                          value: _dash(company.companySize)),
+                        label: 'Company size',
+                        value: _dash(company.companySize),
+                      ),
                       _InfoLine(
-                          label: 'Contact person',
-                          value: _contactLine(company)),
+                        label: 'Contact person',
+                        value: _contactLine(company),
+                      ),
                     ],
                   ),
                 ),
@@ -165,42 +177,45 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                 const SectionHeader(title: 'About company'),
                 const SizedBox(height: 10),
                 AppCard(
-                    child: Text(
-                        company.description.trim().isEmpty
-                            ? 'Not set'
-                            : company.description.trim(),
-                        style: AppTextStyles.body)),
-                const SizedBox(height: 18),
-                const SectionHeader(title: 'Hiring Requirements'),
-                const SizedBox(height: 10),
-                _HiringRequirementsPreview(
-                  requirementsFuture: requirementsFuture,
-                  onRefresh: _refresh,
+                  child: Text(
+                    company.description.trim().isEmpty
+                        ? 'Not set'
+                        : company.description.trim(),
+                    style: AppTextStyles.body,
+                  ),
                 ),
                 const SizedBox(height: 18),
-                const SectionHeader(title: 'Documents status'),
+                const SectionHeader(title: 'Company status'),
                 const SizedBox(height: 10),
-                const AppCard(
-                    child: StatusBadge(
-                        label: 'Documents under review',
-                        color: AppColors.warning)),
+                AppCard(
+                  child: StatusBadge(
+                    label:
+                        company.isVerified ? 'KAAM Verified' : 'Not verified',
+                    color: company.isVerified
+                        ? AppColors.success
+                        : AppColors.warning,
+                  ),
+                ),
                 const SizedBox(height: 22),
                 PrimaryButton(
                   label: 'Edit Company Profile',
-                  onPressed: () => Navigator.of(context)
-                      .pushNamed(AppRoutes.employerEditCompanyProfile),
+                  onPressed: () => Navigator.of(
+                    context,
+                  ).pushNamed(AppRoutes.employerEditCompanyProfile),
                 ),
                 const SizedBox(height: 10),
                 SecondaryButton(
-                  label: 'View Verification',
-                  onPressed: () => Navigator.of(context)
-                      .pushNamed(AppRoutes.employerVerificationStatus),
+                  label: 'View Verification Status',
+                  onPressed: () => Navigator.of(
+                    context,
+                  ).pushNamed(AppRoutes.employerVerificationStatus),
                 ),
                 const SizedBox(height: 10),
                 SecondaryButton(
                   label: 'Settings',
-                  onPressed: () => Navigator.of(context)
-                      .pushNamed(AppRoutes.employerSettings),
+                  onPressed: () => Navigator.of(
+                    context,
+                  ).pushNamed(AppRoutes.employerSettings),
                 ),
                 const SizedBox(height: 10),
                 SecondaryButton(
@@ -240,9 +255,11 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
     if (value.isEmpty || value == 'Not set') return value;
     return value
         .split(RegExp(r'\s+'))
-        .map((word) => word.isEmpty
-            ? word
-            : '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}')
+        .map(
+          (word) => word.isEmpty
+              ? word
+              : '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}',
+        )
         .join(' ');
   }
 }
@@ -295,6 +312,8 @@ class _CompanyLogo extends StatelessWidget {
   }
 }
 
+// Legacy presentation retained temporarily for historical requirement records.
+// ignore: unused_element
 class _HiringRequirementsPreview extends StatelessWidget {
   const _HiringRequirementsPreview({
     required this.requirementsFuture,
@@ -318,8 +337,10 @@ class _HiringRequirementsPreview extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.waiting)
                 const LinearProgressIndicator()
               else if (requirements.isEmpty)
-                const Text('No hiring requirements added yet.',
-                    style: AppTextStyles.body)
+                const Text(
+                  'No hiring requirements added yet.',
+                  style: AppTextStyles.body,
+                )
               else
                 ...requirements.take(3).map(
                       (item) => Padding(
@@ -436,16 +457,17 @@ class _EditCompanyProfileScreenState extends State<EditCompanyProfileScreen> {
         description: descriptionController.text,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Company profile saved.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Company profile saved.')));
       Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text(KaamSafeErrorMessages.employerCompanySaveMessage(error)),
+          content: Text(
+            KaamSafeErrorMessages.employerCompanySaveMessage(error),
+          ),
         ),
       );
     } finally {
@@ -456,24 +478,30 @@ class _EditCompanyProfileScreenState extends State<EditCompanyProfileScreen> {
   Future<void> _uploadLogo() async {
     setState(() => uploading = true);
     try {
-      final picked = await FilePicker.platform
-          .pickFiles(withData: true, type: FileType.image);
+      final picked = await FilePicker.platform.pickFiles(
+        withData: true,
+        type: FileType.image,
+      );
       final file = picked?.files.single;
       final bytes = file?.bytes;
       if (file == null || bytes == null) return;
       final upload = await storage.uploadPublicFile(
-          bytes: bytes, fileName: file.name, folder: 'company-logo');
-      current =
-          await repository.updateCompanyLogo(upload.publicUrl ?? upload.path);
+        bytes: bytes,
+        fileName: file.name,
+        folder: 'company-logo',
+      );
+      current = await repository.updateCompanyLogo(
+        upload.publicUrl ?? upload.path,
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Company logo uploaded: ${file.name}')),
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not upload logo: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not upload logo: $error')));
     } finally {
       if (mounted) setState(() => uploading = false);
     }
@@ -490,48 +518,56 @@ class _EditCompanyProfileScreenState extends State<EditCompanyProfileScreen> {
         const SectionHeader(title: 'Company details'),
         const SizedBox(height: 10),
         AppTextField(
-            controller: companyController,
-            label: 'Company name',
-            hint: EmployerDummyData.companyName),
+          controller: companyController,
+          label: 'Company name',
+          hint: EmployerDummyData.companyName,
+        ),
         const SizedBox(height: 12),
         AppTextField(
-            controller: industryController,
-            label: 'Industry',
-            hint: EmployerDummyData.industry),
+          controller: industryController,
+          label: 'Industry',
+          hint: EmployerDummyData.industry,
+        ),
         const SizedBox(height: 12),
         AppTextField(
-            controller: locationController,
-            label: 'Location',
-            hint: EmployerDummyData.location),
+          controller: locationController,
+          label: 'Location',
+          hint: EmployerDummyData.location,
+        ),
         const SizedBox(height: 18),
         const SectionHeader(title: 'Contact person'),
         const SizedBox(height: 10),
         AppTextField(
-            controller: contactController,
-            label: 'Name',
-            hint: EmployerDummyData.contactPerson),
+          controller: contactController,
+          label: 'Name',
+          hint: EmployerDummyData.contactPerson,
+        ),
         const SizedBox(height: 12),
         AppTextField(
-            controller: contactRoleController,
-            label: 'Role',
-            hint: EmployerDummyData.contactRole),
+          controller: contactRoleController,
+          label: 'Role',
+          hint: EmployerDummyData.contactRole,
+        ),
         const SizedBox(height: 18),
         _UploadLine(
-            title: 'Company logo',
-            subtitle:
-                current?.logoUrl.isEmpty ?? true ? 'Not uploaded' : 'Uploaded',
-            loading: uploading,
-            onTap: _uploadLogo),
+          title: 'Company logo',
+          subtitle:
+              current?.logoUrl.isEmpty ?? true ? 'Not uploaded' : 'Uploaded',
+          loading: uploading,
+          onTap: _uploadLogo,
+        ),
         const SizedBox(height: 12),
         AppTextField(
-            controller: descriptionController,
-            label: 'About company',
-            hint: 'Tell candidates about your company.',
-            maxLines: 4),
+          controller: descriptionController,
+          label: 'About company',
+          hint: 'Tell candidates about your company.',
+          maxLines: 4,
+        ),
         const SizedBox(height: 22),
         PrimaryButton(
-            label: saving ? 'Saving...' : 'Save Changes',
-            onPressed: saving ? null : _save),
+          label: saving ? 'Saving...' : 'Save Changes',
+          onPressed: saving ? null : _save,
+        ),
       ],
     );
   }
@@ -573,7 +609,7 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
         FutureBuilder<
             ({
               EmployerCompanyData? company,
-              List<VerificationDocumentData> documents
+              List<VerificationDocumentData> documents,
             })>(
           future: statusFuture,
           builder: (context, snapshot) {
@@ -605,14 +641,14 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
                       const Text('Current status', style: AppTextStyles.muted),
                       const SizedBox(height: 8),
                       StatusBadge(
-                        label: approved ? 'Approved' : 'Pending Review',
+                        label: approved ? 'KAAM Verified' : 'Not verified',
                         color: approved ? AppColors.success : AppColors.warning,
                       ),
                       const SizedBox(height: 10),
                       Text(
                         approved
                             ? 'Your employer profile has been approved.'
-                            : 'Your dashboard and candidate search remain available while KAAM reviews your documents.',
+                            : 'Your dashboard and candidate search remain available. Verification is an optional KAAM trust status.',
                         style: AppTextStyles.body,
                       ),
                     ],
@@ -623,8 +659,11 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
                 const SizedBox(height: 10),
                 if (documents.isEmpty)
                   const AppCard(
-                      child: Text('No verification documents uploaded yet.',
-                          style: AppTextStyles.body))
+                    child: Text(
+                      'No verification documents uploaded yet.',
+                      style: AppTextStyles.body,
+                    ),
+                  )
                 else
                   ...documents.map(
                     (document) => Padding(
@@ -633,25 +672,30 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
                         padding: const EdgeInsets.all(16),
                         child: Row(
                           children: [
-                            const Icon(Icons.description_outlined,
-                                color: AppColors.primaryPink),
+                            const Icon(
+                              Icons.description_outlined,
+                              color: AppColors.primaryPink,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                      document.documentType
-                                          .replaceAll('-', ' '),
-                                      style: AppTextStyles.label),
-                                  Text(document.displayName,
-                                      style: AppTextStyles.muted),
+                                    document.documentType.replaceAll('-', ' '),
+                                    style: AppTextStyles.label,
+                                  ),
+                                  Text(
+                                    document.displayName,
+                                    style: AppTextStyles.muted,
+                                  ),
                                 ],
                               ),
                             ),
                             StatusBadge(
-                                label: document.status,
-                                color: AppColors.warning),
+                              label: document.status,
+                              color: AppColors.warning,
+                            ),
                           ],
                         ),
                       ),
@@ -664,14 +708,17 @@ class _VerificationStatusScreenState extends State<VerificationStatusScreen> {
         const SizedBox(height: 18),
         const AppCard(
           child: Text(
-              'Verification documents are stored privately in kaam-private.',
-              style: AppTextStyles.body),
+            'Verification documents are stored privately in kaam-private.',
+            style: AppTextStyles.body,
+          ),
         ),
         const SizedBox(height: 22),
         PrimaryButton(
-            label: 'Re-upload Documents',
-            onPressed: () => Navigator.of(context)
-                .pushNamed(AppRoutes.employerBusinessVerification)),
+          label: 'Manage optional documents',
+          onPressed: () => Navigator.of(
+            context,
+          ).pushNamed(AppRoutes.employerBusinessVerification),
+        ),
       ],
     );
   }
@@ -686,17 +733,22 @@ class TeamMembersScreen extends StatelessWidget {
       title: 'Team Members',
       showBack: true,
       children: [
-        ...EmployerDummyData.teamMembers.map((member) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: TeamMemberCard(member: member),
-            )),
+        ...EmployerDummyData.teamMembers.map(
+          (member) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: TeamMemberCard(member: member),
+          ),
+        ),
         const SizedBox(height: 14),
         const AppTextField(
-            label: 'Invite team member by email', hint: 'name@company.com'),
+          label: 'Invite team member by email',
+          hint: 'name@company.com',
+        ),
         const SizedBox(height: 12),
         const Text(
-            'Team invitations are disabled until team-member backend policies are enabled.',
-            style: AppTextStyles.muted),
+          'Team invitations are disabled until team-member backend policies are enabled.',
+          style: AppTextStyles.muted,
+        ),
       ],
     );
   }
@@ -736,12 +788,15 @@ class _UploadLine extends StatelessWidget {
           ),
           if (loading)
             const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(strokeWidth: 2))
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
           else
-            const Icon(Icons.add_circle_outline_rounded,
-                color: AppColors.secondaryText),
+            const Icon(
+              Icons.add_circle_outline_rounded,
+              color: AppColors.secondaryText,
+            ),
         ],
       ),
     );

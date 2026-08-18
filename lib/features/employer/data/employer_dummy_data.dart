@@ -62,7 +62,8 @@ class EmployerDummyData {
       salary: 'AED 2,200 - AED 2,800',
       location: 'Dubai',
       workingHours: '9 hours with weekly off',
-      message: 'We like your hotel housekeeping experience and team lead background.',
+      message:
+          'We like your hotel housekeeping experience and team lead background.',
       status: 'Accepted',
       sentDate: 'Today',
     ),
@@ -84,7 +85,8 @@ class EmployerDummyData {
       salary: 'AED 2,000 - AED 2,300',
       location: 'Abu Dhabi',
       workingHours: 'Shift duty',
-      message: 'Your room service experience looks relevant for our hotel client.',
+      message:
+          'Your room service experience looks relevant for our hotel client.',
       status: 'Declined',
       sentDate: 'Jun 25',
     ),
@@ -141,8 +143,20 @@ class EmployerDummyData {
   ];
 
   static const teamMembers = [
-    TeamMember(name: 'Nadia Rahman', email: 'nadia@brightstar.example', role: 'Admin'),
-    TeamMember(name: 'Omar Khalid', email: 'omar@brightstar.example', role: 'Recruiter'),
-    TeamMember(name: 'Sara Mathew', email: 'sara@brightstar.example', role: 'Viewer'),
+    TeamMember(
+      name: 'Nadia Rahman',
+      email: 'nadia@brightstar.example',
+      role: 'Admin',
+    ),
+    TeamMember(
+      name: 'Omar Khalid',
+      email: 'omar@brightstar.example',
+      role: 'Recruiter',
+    ),
+    TeamMember(
+      name: 'Sara Mathew',
+      email: 'sara@brightstar.example',
+      role: 'Viewer',
+    ),
   ];
 }

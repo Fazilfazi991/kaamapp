@@ -106,6 +106,7 @@ create table if not exists public.candidate_profiles (
   currency text default 'AED',
   availability text,
   visa_status text,
+  visa_expiry_date date,
   profile_photo_url text,
   resume_url text,
   bio text,

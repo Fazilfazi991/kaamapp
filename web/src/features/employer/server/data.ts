@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { requireEmployerCompany, resolveEmployerAccess } from "./access";
+import { requireRole } from "@/lib/auth/session";
+import { resolveEmployerAccess } from "./access";
 import {
   candidateMatchesFilters,
   employerSearchPageSize,
@@ -56,10 +57,23 @@ async function employerState(userId: string) {
 }
 
 export async function loadEmployerSearch(rawParams: Record<string, string | string[] | undefined>) {
-  const access = await requireEmployerCompany();
+  const access = await resolveEmployerAccess();
   const lookups = await loadLookups();
   const parsed = parseEmployerSearchParams(rawParams);
   const filters = validateFiltersAgainstSkills(parsed, lookups.categories, lookups.skills);
+
+  if (!access.ok) {
+    return {
+      access,
+      lookups,
+      filters,
+      results: [],
+      total: 0,
+      totalPages: 1,
+      searchError: null,
+    };
+  }
+
   const supabase = await createServerSupabaseClient();
 
   let rows: PublicCandidateSearchRow[] = [];
@@ -107,25 +121,29 @@ export async function loadEmployerSearch(rawParams: Record<string, string | stri
 }
 
 export async function loadEmployerCandidate(candidateId: string) {
-  const access = await requireEmployerCompany();
+  const access = await resolveEmployerAccess();
+  if (!access.ok) return { access, candidate: null };
   const supabase = await createServerSupabaseClient();
   const [{ data: row }, state] = await Promise.all([
     supabase.from("public_candidate_search").select("*").eq("id", candidateId).maybeSingle<PublicCandidateSearchRow>(),
     employerState(access.userId),
   ]);
-  if (!row) return null;
-  return mapCandidateCard({
-    row,
-    shortlistedIds: state.shortlistedIds,
-    interestByCandidate: state.interestByCandidate,
-    matchedCandidateIds: state.matchedCandidateIds,
-  });
+  if (!row) return { access, candidate: null };
+  return {
+    access,
+    candidate: mapCandidateCard({
+      row,
+      shortlistedIds: state.shortlistedIds,
+      interestByCandidate: state.interestByCandidate,
+      matchedCandidateIds: state.matchedCandidateIds,
+    }),
+  };
 }
 
 export async function loadShortlist() {
-  const access = await requireEmployerCompany();
+  const account = await requireRole("employer");
   const supabase = await createServerSupabaseClient();
-  const state = await employerState(access.userId);
+  const state = await employerState(account.userId);
   if (state.savedRows.length === 0) return { candidates: [], savedRows: [] };
   const ids = state.savedRows.map((row) => row.candidate_id);
   const { data } = await supabase
@@ -145,12 +163,12 @@ export async function loadShortlist() {
 }
 
 export async function loadEmployerInterests() {
-  const access = await requireEmployerCompany();
+  const account = await requireRole("employer");
   const supabase = await createServerSupabaseClient();
   const { data: rows } = await supabase
     .from("interest_requests")
     .select("id,employer_id,company_id,candidate_id,message,status,created_at,updated_at")
-    .eq("employer_id", access.userId)
+    .eq("employer_id", account.userId)
     .order("created_at", { ascending: false })
     .returns<InterestRow[]>();
   const ids = [...new Set((rows ?? []).map((row) => row.candidate_id))];
@@ -162,7 +180,7 @@ export async function loadEmployerInterests() {
 }
 
 export async function loadEmployerMatches() {
-  await requireEmployerCompany();
+  await requireRole("employer");
   const supabase = await createServerSupabaseClient();
   const { data, error } = await supabase.rpc("employer_matches_with_contact");
   return { matches: (data ?? []) as MatchContactRow[], error: error ? "Could not load matches." : null };
@@ -182,11 +200,10 @@ export async function loadEmployerDashboard() {
     return { access, counts: null, documents: documents ?? [] };
   }
 
-  const [{ count: shortlisted }, { count: pending }, { count: accepted }, { count: matches }, { data: documents }] =
+  const [{ count: shortlisted }, { count: interestsSent }, { count: matches }, { data: documents }] =
     await Promise.all([
       supabase.from("saved_candidates").select("*", { count: "exact", head: true }).eq("employer_id", access.userId),
-      supabase.from("interest_requests").select("*", { count: "exact", head: true }).eq("employer_id", access.userId).eq("status", "pending"),
-      supabase.from("interest_requests").select("*", { count: "exact", head: true }).eq("employer_id", access.userId).eq("status", "accepted"),
+      supabase.from("interest_requests").select("*", { count: "exact", head: true }).eq("employer_id", access.userId),
       supabase.from("matches").select("*", { count: "exact", head: true }).eq("employer_id", access.userId),
       documentsQuery,
     ]);
@@ -195,8 +212,7 @@ export async function loadEmployerDashboard() {
     access,
     counts: {
       shortlisted: shortlisted ?? 0,
-      pendingInterests: pending ?? 0,
-      acceptedInterests: accepted ?? 0,
+      interestsSent: interestsSent ?? 0,
       matches: matches ?? 0,
     },
     documents: documents ?? [],

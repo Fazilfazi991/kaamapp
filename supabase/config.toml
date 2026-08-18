@@ -1,0 +1,4 @@
+[functions.delete-account]
+# This endpoint deletes an authenticated user's own account. Keep the
+# platform-level JWT verification enabled in addition to the handler check.
+verify_jwt = true

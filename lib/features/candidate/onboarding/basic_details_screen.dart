@@ -11,11 +11,19 @@ import '../../supabase_backend/kaam_backend.dart';
 import '../profile/candidate_display_formatters.dart';
 
 class BasicDetailsScreen extends StatefulWidget {
-  const BasicDetailsScreen({super.key});
+  const BasicDetailsScreen({super.key})
+      : entryMode = BasicDetailsEntryMode.onboarding;
+
+  const BasicDetailsScreen.forProfileEdit({super.key})
+      : entryMode = BasicDetailsEntryMode.profileEdit;
+
+  final BasicDetailsEntryMode entryMode;
 
   @override
   State<BasicDetailsScreen> createState() => _BasicDetailsScreenState();
 }
+
+enum BasicDetailsEntryMode { onboarding, profileEdit }
 
 class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
   final fullNameController = TextEditingController();
@@ -29,8 +37,10 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
   final passportNumberController = TextEditingController();
   final passportExpiryController = TextEditingController();
   final repository = const CandidateProfileRepository();
+  final errors = <String, String>{};
   bool saving = false;
   bool loading = true;
+  bool loadFailed = false;
 
   static const nationalities = [
     'Indian',
@@ -65,6 +75,10 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
   }
 
   Future<void> _load() async {
+    setState(() {
+      loading = true;
+      loadFailed = false;
+    });
     try {
       final profile = await repository.loadCurrentProfile();
       final identity = await repository.loadIdentityDocuments();
@@ -90,8 +104,13 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
       passportExpiryController.text = identity.passportExpiryDate;
     } catch (error) {
       if (mounted) {
+        setState(() => loadFailed = true);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not load profile: $error')),
+          const SnackBar(
+            content: Text(
+              'We could not load your saved details. Please try again.',
+            ),
+          ),
         );
       }
     } finally {
@@ -100,20 +119,35 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
   }
 
   Future<void> _continue() async {
-    final missing = <String>[];
-    if (fullNameController.text.trim().isEmpty) missing.add('full name');
-    if (phoneController.text.trim().isEmpty) missing.add('mobile number');
-    if (nationalityController.text.trim().isEmpty) missing.add('nationality');
-    if (preferredLocationController.text.trim().isEmpty) {
-      missing.add('country');
+    if (loading || loadFailed || saving) return;
+    final nextErrors = <String, String>{};
+    if (fullNameController.text.trim().isEmpty) {
+      nextErrors['full_name'] = 'Enter your full name.';
     }
-    if (currentLocationController.text.trim().isEmpty) {
-      missing.add(
-          preferredLocationController.text == 'India' ? 'state' : 'emirate');
+    if (phoneController.text.trim().isEmpty) {
+      nextErrors['phone'] = 'Enter your mobile number.';
     }
-    if (missing.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please add ${missing.join(', ')}.')),
+    if (nationalityController.text.trim().isEmpty) {
+      nextErrors['nationality'] = 'Select your nationality.';
+    }
+    final locationError = CandidateLocationOptions.validationError(
+      preferredLocationController.text,
+      currentLocationController.text,
+    );
+    if (locationError != null) {
+      if (CandidateLocationOptions.normalizeCountry(
+        preferredLocationController.text,
+      ).isEmpty) {
+        nextErrors['country'] = locationError;
+      } else {
+        nextErrors['location'] = locationError;
+      }
+    }
+    if (nextErrors.isNotEmpty) {
+      setState(
+        () => errors
+          ..clear()
+          ..addAll(nextErrors),
       );
       return;
     }
@@ -130,14 +164,20 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
         preferredLocation: titleCase(currentLocationController.text),
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile saved.')),
-      );
-      Navigator.of(context).pushNamed(AppRoutes.workPreferences);
+      if (widget.entryMode == BasicDetailsEntryMode.profileEdit) {
+        Navigator.of(context).pop(true);
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Profile saved.')));
+        Navigator.of(context).pushNamed(AppRoutes.workPreferences);
+      }
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save profile: $error')),
+        const SnackBar(
+          content: Text('We could not save your location. Please try again.'),
+        ),
       );
     } finally {
       if (mounted) setState(() => saving = false);
@@ -154,42 +194,54 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (context) =>
-          SafeArea(child: StatefulBuilder(builder: (context, setSheetState) {
-        final query = search.text.toLowerCase();
-        final visible = options
-            .where((item) => item.toLowerCase().contains(query))
-            .toList();
-        return Padding(
-            padding: EdgeInsets.only(
+      builder: (context) => SafeArea(
+        child: StatefulBuilder(
+          builder: (context, setSheetState) {
+            final query = search.text.toLowerCase();
+            final visible = options
+                .where((item) => item.toLowerCase().contains(query))
+                .toList();
+            return Padding(
+              padding: EdgeInsets.only(
                 left: 16,
                 right: 16,
-                bottom: MediaQuery.viewInsetsOf(context).bottom + 24),
-            child: SizedBox(
+                bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
+              ),
+              child: SizedBox(
                 height: MediaQuery.sizeOf(context).height * .7,
                 child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: AppTextStyles.title),
-                      const SizedBox(height: 12),
-                      if (options.length > 10)
-                        AppTextField(
-                            controller: search,
-                            label: 'Search',
-                            hint: 'Search',
-                            onChanged: (_) => setSheetState(() {})),
-                      Expanded(
-                          child: ListView(children: [
-                        for (final option in visible)
-                          ListTile(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: AppTextStyles.title),
+                    const SizedBox(height: 12),
+                    if (options.length > 10)
+                      AppTextField(
+                        controller: search,
+                        label: 'Search',
+                        hint: 'Search',
+                        onChanged: (_) => setSheetState(() {}),
+                      ),
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          for (final option in visible)
+                            ListTile(
                               title: Text(option),
                               trailing: controller.text == option
                                   ? const Icon(Icons.check)
                                   : null,
-                              onTap: () => Navigator.of(context).pop(option))
-                      ]))
-                    ])));
-      })),
+                              onTap: () => Navigator.of(context).pop(option),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
     if (value == null) return;
     controller.text = value;
@@ -198,37 +250,56 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isProfileEdit = widget.entryMode == BasicDetailsEntryMode.profileEdit;
     return ScreenScaffold(
       title: 'Basic Details',
       showBack: true,
       children: [
-        const ProgressStepper(current: 2, total: 5),
-        const SizedBox(height: 22),
-        const Text('Check Your Details', style: AppTextStyles.headline),
+        if (!isProfileEdit) const ProgressStepper(current: 2, total: 5),
+        SizedBox(height: isProfileEdit ? 4 : 22),
+        Text(
+          isProfileEdit ? 'Update Basic Details' : 'Check Your Details',
+          style: AppTextStyles.headline,
+        ),
         const SizedBox(height: 8),
         const Text(
-            'We filled what we could from your passport. You can edit anything.',
-            style: AppTextStyles.body),
+          'Contact and location fields can be updated here. Passport-derived '
+          'identity fields are read-only and managed in Identity Documents.',
+          style: AppTextStyles.body,
+        ),
         const SizedBox(height: 18),
         if (loading) const LinearProgressIndicator(),
         if (loading) const SizedBox(height: 12),
+        if (loadFailed) ...[
+          const Text(
+            'Saved details could not be loaded. Check your connection and retry.',
+            style: AppTextStyles.body,
+          ),
+          const SizedBox(height: 12),
+          PrimaryButton(label: 'Retry', onPressed: _load),
+          const SizedBox(height: 18),
+        ],
         AppTextField(
-            controller: fullNameController,
-            label: 'Full name',
-            hint: 'Your full name'),
+          controller: fullNameController,
+          label: 'Full name *',
+          hint: 'Your full name',
+          errorText: errors['full_name'],
+          onChanged: (_) => setState(() => errors.remove('full_name')),
+        ),
         const SizedBox(height: 12),
         AppTextField(
           controller: dobController,
           label: 'Date of birth',
-          hint: 'YYYY-MM-DD',
+          hint: 'Complete passport verification to add this',
           readOnly: true,
           suffixIcon: const Icon(Icons.lock_outline_rounded),
         ),
         const SizedBox(height: 12),
         AppTextField(
           controller: nationalityController,
-          label: 'Nationality',
+          label: 'Nationality *',
           hint: 'Select nationality',
+          errorText: errors['nationality'],
           readOnly: true,
           suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded),
           onTap: () => _pickOption(
@@ -241,7 +312,7 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
         AppTextField(
           controller: genderController,
           label: 'Gender',
-          hint: 'From passport',
+          hint: 'Complete passport verification to add this',
           readOnly: true,
           suffixIcon: const Icon(Icons.lock_outline_rounded),
         ),
@@ -249,7 +320,7 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
         AppTextField(
           controller: passportNumberController,
           label: 'Passport number',
-          hint: 'From passport',
+          hint: 'Complete passport verification to add this',
           readOnly: true,
           suffixIcon: const Icon(Icons.lock_outline_rounded),
         ),
@@ -257,7 +328,7 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
         AppTextField(
           controller: passportExpiryController,
           label: 'Passport expiry',
-          hint: 'YYYY-MM-DD',
+          hint: 'Complete passport verification to add this',
           readOnly: true,
           suffixIcon: const Icon(Icons.lock_outline_rounded),
         ),
@@ -269,6 +340,8 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
           label: 'Mobile number *',
           hint: '+971 50 000 0000',
           keyboardType: TextInputType.phone,
+          errorText: errors['phone'],
+          onChanged: (_) => setState(() => errors.remove('phone')),
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ]')),
           ],
@@ -286,13 +359,16 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
         const SizedBox(height: 20),
         const Text('Location', style: AppTextStyles.title),
         const SizedBox(height: 8),
-        const Text('Select your country, then your emirate or state.',
-            style: AppTextStyles.body),
+        const Text(
+          'Select your country, then your emirate or state.',
+          style: AppTextStyles.body,
+        ),
         const SizedBox(height: 12),
         AppTextField(
           controller: preferredLocationController,
           label: 'Country *',
           hint: 'Select country',
+          errorText: errors['country'],
           readOnly: true,
           suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded),
           onTap: () async {
@@ -303,7 +379,12 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
               controller: preferredLocationController,
             );
             if (preferredLocationController.text != previous) {
-              setState(() => currentLocationController.clear());
+              setState(() {
+                currentLocationController.clear();
+                errors
+                  ..remove('country')
+                  ..remove('location');
+              });
             }
           },
         ),
@@ -317,6 +398,7 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
             hint: preferredLocationController.text == 'India'
                 ? 'Select state'
                 : 'Select emirate',
+            errorText: errors['location'],
             readOnly: true,
             suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded),
             onTap: () => _pickOption(
@@ -327,13 +409,17 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                 preferredLocationController.text,
               ),
               controller: currentLocationController,
-            ),
+            ).then((_) => setState(() => errors.remove('location'))),
           ),
         ],
         const SizedBox(height: 24),
         PrimaryButton(
-          label: saving ? 'Saving...' : 'Continue',
-          onPressed: saving ? null : _continue,
+          label: saving
+              ? 'Saving...'
+              : isProfileEdit
+                  ? 'Save Changes'
+                  : 'Continue',
+          onPressed: saving || loading || loadFailed ? null : _continue,
         ),
       ],
     );

@@ -7,6 +7,12 @@ type OcrRequest = {
   file_name?: string;
 };
 
+type ValidationDocumentType = "passport_front" | "passport_back" | "visa";
+
+// Azure can report one required field below its otherwise reliable extraction score
+// on a clear scan. Keep the gate conservative while avoiding false rejections.
+const PASSPORT_MIN_FIELD_CONFIDENCE = 0.55;
+
 type NormalizedPassport = {
   full_name?: string;
   first_name?: string;
@@ -70,10 +76,12 @@ Deno.serve(async (req) => {
   if (bucket !== "kaam-private") {
     return json({ success: false, error: "Invalid storage bucket" }, 400);
   }
-  if (documentType !== "passport") {
-    return json({ success: false, error: "Only passport OCR is supported" }, 400);
+  const validationType = validationTypeFor(documentType);
+  if (!validationType) {
+    return json({ success: false, error: "Unsupported identity document type" }, 400);
   }
-  if (!path.startsWith(`${user.id}/candidate-documents/passport/`)) {
+  const expectedFolder = validationType === "passport_back" ? "passport-back" : validationType === "passport_front" ? "passport" : "visa";
+  if (!path.startsWith(`${user.id}/candidate-documents/${expectedFolder}/`)) {
     return json({ success: false, error: "Document path is not owned by this user" }, 403);
   }
 
@@ -88,9 +96,10 @@ Deno.serve(async (req) => {
   }
 
   const bytes = await fileData.arrayBuffer();
-  if (bytes.byteLength === 0) {
-    return json({ success: false, error: "Uploaded passport file is empty" }, 400);
-  }
+  const basicRejection = basicFileRejection(bytes, path, fileData.type);
+  if (basicRejection) return await persistAndRespond(adminClient, user.id, validationType, bucket, path, bytes, {
+    status: "rejected", reasons: [basicRejection], quality: {}, data: {}, confidence: 0,
+  });
 
   const analyzeUrl =
     `${azureEndpoint}/documentintelligence/documentModels/prebuilt-idDocument:analyze?api-version=2024-11-30`;
@@ -117,18 +126,98 @@ Deno.serve(async (req) => {
   const result = await pollAzure(operationLocation, azureKey);
   const fields = extractDocumentFields(result);
   const normalized = normalizePassport(fields, result);
-  const warnings = warningsFor(normalized);
+  const confidence = confidenceFor(fields);
+  const reasons = validationReasons(validationType, normalized, confidence, result);
+  const quality = qualityFor(result);
+  const status = reasons.length === 0 ? "accepted" : "rejected";
 
-  console.log(`passport-ocr: success user=${user.id} keys=${Object.keys(normalized).join(",")} warnings=${warnings.length}`);
+  console.log(`passport-ocr: validation user=${user.id} type=${validationType} status=${status} reasons=${reasons.length}`);
 
-  return json({
-    success: true,
-    document_type: "passport",
-    data: normalized,
-    confidence: confidenceFor(fields),
-    warnings,
+  return await persistAndRespond(adminClient, user.id, validationType, bucket, path, bytes, {
+    status, reasons, quality, data: normalized, confidence: overallConfidence(confidence),
   });
 });
+
+function validationTypeFor(value: string): ValidationDocumentType | undefined {
+  if (value === "passport" || value === "passport-front") return "passport_front";
+  if (value === "passport-back") return "passport_back";
+  if (value === "visa") return "visa";
+  return undefined;
+}
+
+function basicFileRejection(bytes: ArrayBuffer, path: string, contentType: string): string | undefined {
+  const data = new Uint8Array(bytes);
+  if (data.byteLength === 0) return "empty_file";
+  if (data.byteLength > 10 * 1024 * 1024) return "file_too_large";
+  const image = startsWith(data, [0xff, 0xd8, 0xff]) || startsWith(data, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  const pdf = startsWith(data, [0x25, 0x50, 0x44, 0x46, 0x2d]);
+  const allowedName = /\.(jpe?g|png|pdf)$/i.test(path);
+  if (!allowedName || (!image && !pdf)) return "unsupported_or_mismatched_file";
+  if (contentType && !(contentType.startsWith("image/") || contentType === "application/pdf")) return "mismatched_content_type";
+  return undefined;
+}
+
+function startsWith(bytes: Uint8Array, signature: number[]): boolean {
+  return bytes.length >= signature.length && signature.every((value, index) => bytes[index] === value);
+}
+
+function validationReasons(type: ValidationDocumentType, data: NormalizedPassport, confidence: Record<string, number>, result: Record<string, unknown>): string[] {
+  const reasons: string[] = [];
+  const content = String(asRecord(result.analyzeResult).content ?? "").replace(/\s/g, "");
+  const document = firstDocument(result);
+  const detected = String(document.docType ?? document.documentType ?? "").toLowerCase();
+  if (!detected.includes("passport") && type !== "visa") {
+    reasons.push("not_a_passport_page");
+  }
+  if (type === "passport_front") {
+    if (!data.full_name || !data.passport_number || !data.nationality || !data.date_of_birth || !data.expiry_date) reasons.push("required_passport_fields_missing");
+    if (!data.mrz_text || !/^P</m.test(data.mrz_text.replace(/\s/g, ""))) reasons.push("mrz_not_detected");
+    if (overallConfidence(confidence) < PASSPORT_MIN_FIELD_CONFIDENCE) reasons.push("document_confidence_too_low");
+  } else if (type === "passport_back") {
+    if (content.length < 20) reasons.push("passport_back_not_readable");
+  } else if (content.length < 20) {
+    reasons.push("visa_not_readable");
+  }
+  return [...new Set(reasons)];
+}
+
+function firstDocument(result: Record<string, unknown>): Record<string, unknown> {
+  const documents = asRecord(result.analyzeResult).documents;
+  return Array.isArray(documents) ? asRecord(documents[0]) : {};
+}
+
+function qualityFor(result: Record<string, unknown>): Record<string, unknown> {
+  const pages = asRecord(result.analyzeResult).pages;
+  const page = Array.isArray(pages) ? asRecord(pages[0]) : {};
+  return compact({ page_width: Number(page.width) || undefined, page_height: Number(page.height) || undefined, unit: typeof page.unit === "string" ? page.unit : undefined });
+}
+
+function overallConfidence(confidence: Record<string, number>): number {
+  const scores = Object.values(confidence).filter((value) => Number.isFinite(value));
+  return scores.length ? Math.min(...scores) : 0;
+}
+
+async function persistAndRespond(
+  client: ReturnType<typeof createClient>, candidateId: string, documentType: ValidationDocumentType,
+  bucket: string, path: string, bytes: ArrayBuffer,
+  result: { status: "accepted" | "rejected"; reasons: string[]; quality: Record<string, unknown>; data: NormalizedPassport; confidence: number },
+): Promise<Response> {
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  const fileHash = [...new Uint8Array(digest)].map((value) => value.toString(16).padStart(2, "0")).join("");
+  const { data, error } = await client.from("candidate_document_validations").upsert({
+    candidate_id: candidateId, document_type: documentType, storage_bucket: bucket, file_path: path, file_hash: fileHash,
+    status: result.status, detected_document_type: documentType, confidence: result.confidence, quality: result.quality,
+    extracted_data: result.data, rejection_reasons: result.reasons, provider: "azure_document_intelligence",
+    provider_version: "prebuilt-idDocument:2024-11-30", validated_at: new Date().toISOString(),
+    expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(), consumed_at: null,
+  }, { onConflict: "candidate_id,file_hash,document_type" }).select("id,status,expires_at").single();
+  if (error || !data) {
+    console.error(`passport-ocr: validation persistence failed ${error?.message ?? "unknown"}`);
+    return json({ success: false, error: "Validation service is temporarily unavailable" }, 503);
+  }
+  return json({ success: result.status === "accepted", document_type: documentType, data: result.data,
+    confidence: { overall: result.confidence }, validation: { id: data.id, status: data.status, expires_at: data.expires_at, reasons: result.reasons, quality: result.quality } }, result.status === "accepted" ? 200 : 422);
+}
 
 async function pollAzure(operationLocation: string, key: string): Promise<Record<string, unknown>> {
   const started = Date.now();

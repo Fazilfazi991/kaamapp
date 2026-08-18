@@ -5,6 +5,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/candidate_widgets.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/widgets/private_profile_photo_avatar.dart';
 import '../../../core/widgets/screen_scaffold.dart';
 import '../../supabase_backend/kaam_backend.dart';
 import '../profile/candidate_profile_completion.dart';
@@ -24,16 +25,14 @@ class _ProfileCompleteScreenState extends State<ProfileCompleteScreen> {
         CandidateProfileData profile,
         List<VerificationDocumentData> documents,
         CandidateIdentityDocumentData identity,
-      })>
-      dataFuture = _load();
+      })> dataFuture = _load();
 
   Future<
       ({
         CandidateProfileData profile,
         List<VerificationDocumentData> documents,
         CandidateIdentityDocumentData identity,
-      })>
-      _load() async {
+      })> _load() async {
     final profile = await profiles.loadCurrentProfile();
     final documents = await storage.listMyDocuments();
     final identity = await profiles.loadIdentityDocuments();
@@ -49,8 +48,12 @@ class _ProfileCompleteScreenState extends State<ProfileCompleteScreen> {
         const Center(child: Icon(Icons.celebration_rounded, size: 72)),
         const SizedBox(height: 18),
         const Center(
-            child: Text('Your profile is ready!',
-                style: AppTextStyles.headline, textAlign: TextAlign.center)),
+          child: Text(
+            'Your profile is ready!',
+            style: AppTextStyles.headline,
+            textAlign: TextAlign.center,
+          ),
+        ),
         const SizedBox(height: 10),
         const Text(
           'Employers can now discover your profile while your contact details stay private.',
@@ -82,17 +85,29 @@ class _ProfileCompleteScreenState extends State<ProfileCompleteScreen> {
               documents: data?.documents ?? const [],
               identity: data?.identity ?? const CandidateIdentityDocumentData(),
             );
-            return ProfileStrengthCard(
-              value: completion.percentage,
-              helperText: completion.helperText,
+            final profile = data?.profile ?? const CandidateProfileData();
+            return Column(
+              children: [
+                PrivateProfilePhotoAvatar(
+                  path: profile.profilePhotoUrl,
+                  initials: profileInitials(profile.fullName),
+                  size: 82,
+                ),
+                const SizedBox(height: 16),
+                ProfileStrengthCard(
+                  value: completion.percentage,
+                  helperText: completion.helperText,
+                ),
+              ],
             );
           },
         ),
         const SizedBox(height: 24),
         PrimaryButton(
           label: 'Go to Jobs',
-          onPressed: () => Navigator.of(context)
-              .pushNamedAndRemoveUntil(AppRoutes.dashboard, (_) => false),
+          onPressed: () => Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil(AppRoutes.dashboard, (_) => false),
         ),
       ],
     );

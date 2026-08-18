@@ -14,7 +14,7 @@ export default async function EmployerDashboardPage({
   return (
     <div className="grid gap-6">
       <AuthNotice code={params.authNotice} />
-      <PageTitle title="Employer dashboard" description="Company status, candidate search, shortlist, matches, and job posts." />
+      <PageTitle title="Employer dashboard" description="Search candidates, send interest, match, and connect." />
       <EmployerDashboard access={access} counts={counts} documents={documents} />
     </div>
   );

@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import { AdminPageHeader, AdminStatus, DetailSection, Field, SafeLink } from "@/features/admin/components/admin-ui";
-import { EmployerCompanyApprovalForm } from "@/features/admin/components/employer-review-actions";
+import { EmployerCompanyVerificationForm } from "@/features/admin/components/employer-review-actions";
 import { loadEmployer } from "@/features/admin/server/data";
 import {
   documentStatusesByType,
-  getEmployerCompanyApprovalState,
+  getEmployerCompanyVerificationState,
   isEmployerCompanyProfileComplete,
 } from "@/features/admin/validation/review";
 
@@ -13,7 +13,7 @@ export default async function AdminEmployerDetailPage({ params }: { params: Prom
   const company = await loadEmployer(companyId);
   if (!company) notFound();
   const profileComplete = isEmployerCompanyProfileComplete(company);
-  const approvalState = getEmployerCompanyApprovalState({
+  const verificationState = getEmployerCompanyVerificationState({
     companyStatus: company.status,
     isVerified: company.is_verified,
     profileComplete,
@@ -21,7 +21,7 @@ export default async function AdminEmployerDetailPage({ params }: { params: Prom
   });
   return (
     <>
-      <AdminPageHeader title={company.company_name} description="Employer company profile, owner account summary, submitted documents, and explicit approval action." />
+      <AdminPageHeader title={company.company_name} description="Employer company profile, owner account summary, and optional business-verification records." />
       <DetailSection title="Company details">
         <div className="grid gap-4 md:grid-cols-3">
           <Field label="Industry" value={company.industry} />
@@ -43,13 +43,13 @@ export default async function AdminEmployerDetailPage({ params }: { params: Prom
           </p>
         )) : <p>No employer documents submitted.</p>}
       </DetailSection>
-      <DetailSection title="Company approval">
-        <p>Company approval requires a complete company profile. Verification documents, if present, are historical review evidence and are optional.</p>
-        <p className="text-sm text-[#66616f]">{approvalState.reason}</p>
+      <DetailSection title="Optional business verification">
+        <p>Employer accounts are already active. A complete company profile may be optionally verified; documents are supporting evidence only.</p>
+        <p className="text-sm text-[#66616f]">{verificationState.reason}</p>
         {company.is_verified ? (
-          <p><AdminStatus status="approved" /> Company is already approved.</p>
+          <p><AdminStatus status="approved" /> Business is verified.</p>
         ) : (
-          <EmployerCompanyApprovalForm companyId={company.id} canApprove={approvalState.canApprove} />
+          <EmployerCompanyVerificationForm companyId={company.id} canApprove={verificationState.canApprove} />
         )}
       </DetailSection>
     </>

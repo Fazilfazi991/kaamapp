@@ -5,7 +5,8 @@ import 'kaam_app_bar.dart';
 class ScreenScaffold extends StatelessWidget {
   const ScreenScaffold({
     super.key,
-    required this.children,
+    this.children = const [],
+    this.body,
     this.title = 'Kaam',
     this.showBack = false,
     this.bottomNavigationBar,
@@ -16,6 +17,7 @@ class ScreenScaffold extends StatelessWidget {
   final String title;
   final bool showBack;
   final List<Widget> children;
+  final Widget? body;
   final Widget? bottomNavigationBar;
   final EdgeInsetsGeometry padding;
   final List<Widget>? actions;
@@ -27,22 +29,24 @@ class ScreenScaffold extends StatelessWidget {
       appBar: KaamAppBar(title: title, showBack: showBack, actions: actions),
       bottomNavigationBar: bottomNavigationBar,
       body: SafeArea(
-        child: ListView(
-          padding: bottomNavigationBar == null
-              ? padding
-              : resolvedPadding.copyWith(bottom: resolvedPadding.bottom + 72),
-          children: [
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 560),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: children,
+        child: body ??
+            ListView(
+              padding: bottomNavigationBar == null
+                  ? padding
+                  : resolvedPadding.copyWith(
+                      bottom: resolvedPadding.bottom + 72),
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 560),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: children,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
       ),
     );
   }

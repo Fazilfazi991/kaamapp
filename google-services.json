@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "125086209741",
+    "project_id": "kaam-8dad7",
+    "storage_bucket": "kaam-8dad7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:125086209741:android:68f84703ce3134b4197b84",
+        "android_client_info": {
+          "package_name": "com.kaamperfectmatch.kaam_perfect_match"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrQ5qhFY3ZsBOcx5cf3zip03vnQIuley0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:125086209741:android:c41221fcc01c9a5a197b84",
+        "android_client_info": {
+          "package_name": "com.kaamperfectmatch.kaam_perfect_match.qa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrQ5qhFY3ZsBOcx5cf3zip03vnQIuley0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

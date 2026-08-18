@@ -62,6 +62,20 @@ void main() {
       expect(
         KaamNotificationDeepLinks.routeFor(
           role: KaamRole.candidate,
+          type: 'candidate_verification_approved',
+        ),
+        AppRoutes.profile,
+      );
+      expect(
+        KaamNotificationDeepLinks.routeFor(
+          role: KaamRole.candidate,
+          type: 'candidate_reverification_required',
+        ),
+        AppRoutes.profile,
+      );
+      expect(
+        KaamNotificationDeepLinks.routeFor(
+          role: KaamRole.candidate,
           type: 'admin_broadcast',
         ),
         AppRoutes.notifications,
@@ -104,15 +118,17 @@ void main() {
       final sql = migration.readAsStringSync();
       expect(sql, contains('create table if not exists public.notifications'));
       expect(
-          sql, contains('create table if not exists public.user_push_devices'));
+        sql,
+        contains('create table if not exists public.user_push_devices'),
+      );
       expect(
-          sql,
-          contains(
-              'create table if not exists public.notification_preferences'));
+        sql,
+        contains('create table if not exists public.notification_preferences'),
+      );
       expect(
-          sql,
-          contains(
-              'alter table public.notifications enable row level security'));
+        sql,
+        contains('alter table public.notifications enable row level security'),
+      );
       expect(sql, contains('user_push_devices_insert_own'));
       expect(sql, contains('notification_preferences_update_own_or_admin'));
     });
@@ -131,19 +147,26 @@ void main() {
       expect(sql, contains('employer_document_approved'));
       expect(
         sql,
-        isNot(contains(
-            'grant execute on function public.create_notification(uuid, text, text, text, text, jsonb, text, text, uuid) to authenticated')),
+        isNot(
+          contains(
+            'grant execute on function public.create_notification(uuid, text, text, text, text, jsonb, text, text, uuid) to authenticated',
+          ),
+        ),
       );
     });
 
     test('employer company triggers use live profile status enum values', () {
       final sql = migration.readAsStringSync();
       final submittedStart = sql.indexOf(
-          'create or replace function public.notify_company_review_submitted()');
+        'create or replace function public.notify_company_review_submitted()',
+      );
       final reviewedStart = sql.indexOf(
-          'create or replace function public.notify_company_reviewed()');
+        'create or replace function public.notify_company_reviewed()',
+      );
       final submitted = sql.substring(
-          submittedStart, reviewedStart == -1 ? sql.length : reviewedStart);
+        submittedStart,
+        reviewedStart == -1 ? sql.length : reviewedStart,
+      );
       final reviewed = sql.substring(reviewedStart);
 
       expect(submitted, isNot(contains("'pending'")));
@@ -154,42 +177,69 @@ void main() {
     });
   });
 
-  test('Dart notification registry only exposes supported foundation types',
-      () {
-    expect(
+  test(
+    'Dart notification registry only exposes supported foundation types',
+    () {
+      expect(
         KaamNotificationTypes.supported,
-        containsPair('candidate_document_approved',
-            KaamNotificationType.candidateDocumentApproved));
-    expect(
+        containsPair(
+          'candidate_document_approved',
+          KaamNotificationType.candidateDocumentApproved,
+        ),
+      );
+      expect(
         KaamNotificationTypes.supported,
-        containsPair('employer_document_approved',
-            KaamNotificationType.employerDocumentApproved));
-    expect(
-        KaamNotificationTypes.supported, isNot(contains('profile_incomplete')));
-    expect(KaamNotificationTypes.supported, isNot(contains('report_received')));
-    expect(KaamNotificationTypes.supported,
-        isNot(contains('membership_expiring')));
-    expect(
-      KaamNotificationTypes.supported,
-      containsPair(
-          'general_announcement', KaamNotificationType.generalAnnouncement),
-    );
-    expect(
-      KaamNotificationTypes.supported,
-      containsPair('urgent_alert', KaamNotificationType.urgentAlert),
-    );
-    expect(
-      KaamNotificationTypes.supported,
-      containsPair('admin_broadcast', KaamNotificationType.adminBroadcast),
-    );
-  });
+        containsPair(
+          'candidate_verification_approved',
+          KaamNotificationType.candidateVerificationApproved,
+        ),
+      );
+      expect(
+        KaamNotificationTypes.supported,
+        containsPair(
+          'employer_document_approved',
+          KaamNotificationType.employerDocumentApproved,
+        ),
+      );
+      expect(
+        KaamNotificationTypes.supported,
+        isNot(contains('profile_incomplete')),
+      );
+      expect(
+        KaamNotificationTypes.supported,
+        isNot(contains('report_received')),
+      );
+      expect(
+        KaamNotificationTypes.supported,
+        isNot(contains('membership_expiring')),
+      );
+      expect(
+        KaamNotificationTypes.supported,
+        containsPair(
+          'general_announcement',
+          KaamNotificationType.generalAnnouncement,
+        ),
+      );
+      expect(
+        KaamNotificationTypes.supported,
+        containsPair('urgent_alert', KaamNotificationType.urgentAlert),
+      );
+      expect(
+        KaamNotificationTypes.supported,
+        containsPair('admin_broadcast', KaamNotificationType.adminBroadcast),
+      );
+    },
+  );
 
   test('edge function does not expose server secrets in client code', () {
-    final source = File('supabase/functions/send-push-notification/index.ts')
-        .readAsStringSync();
+    final source = File(
+      'supabase/functions/send-push-notification/index.ts',
+    ).readAsStringSync();
     expect(source, contains('FIREBASE_SERVICE_ACCOUNT_JSON'));
     expect(
-        source, contains('https://www.googleapis.com/auth/firebase.messaging'));
+      source,
+      contains('https://www.googleapis.com/auth/firebase.messaging'),
+    );
     expect(source, isNot(contains('private_key_id:')));
     expect(source, contains('candidate_document_approved'));
     expect(source, contains('employer_document_approved'));

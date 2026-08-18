@@ -1,6 +1,6 @@
 # KAAM OCR Setup
 
-The Flutter app now calls a Supabase Edge Function for passport OCR when `OCR_EDGE_FUNCTION` is configured.
+The Flutter app calls a Supabase Edge Function for server-side identity-document validation and OCR when `OCR_EDGE_FUNCTION` is configured.
 
 Expected flow:
 
@@ -9,9 +9,9 @@ Flutter uploads passport to kaam-private
 Flutter sends bucket/path/document_type/file_name to Edge Function
 Edge Function reads the private file securely
 Edge Function calls the OCR provider using server-side secrets
-Edge Function returns normalized JSON
-Flutter parses and pre-fills Review Extracted Details
-Candidate confirms and saves to profiles + candidate_documents
+Edge Function validates file ownership/type, performs document recognition, and stores a hash-bound validation record
+Flutter only opens Review Extracted Details after an accepted validation
+Candidate submits through a server RPC that consumes the validation record and creates the document version
 ```
 
 Required Flutter env:
@@ -27,7 +27,7 @@ Expected Edge Function response:
 ```json
 {
   "success": true,
-  "document_type": "passport",
+  "document_type": "passport_front",
   "data": {
     "full_name": "Example Name",
     "passport_number": "N1234567",
@@ -39,12 +39,25 @@ Expected Edge Function response:
     "place_of_birth": "KERALA",
     "country_of_issue": "IND"
   },
-  "confidence": {
-    "passport_number": 0.98
+  "confidence": { "overall": 0.98 },
+  "validation": {
+    "id": "validation UUID",
+    "status": "accepted",
+    "expires_at": "2026-08-01T12:30:00Z",
+    "reasons": [],
+    "quality": { "page_width": 8.2, "page_height": 5.8 }
   }
 }
 ```
 
 The Flutter parser also accepts common alternate keys and MRZ text (`mrz`, `mrz_text`, `raw_text`).
 
-If `OCR_EDGE_FUNCTION` is empty or the OCR request fails, the app opens the same review screen in manual-entry mode and marks `ocr_completed=false`.
+If the function or document-recognition provider is unavailable, Flutter fails closed: it does not open review and asks the candidate to retry.
+
+Deployment order:
+
+1. Run `supabase/027_identity_document_validation.sql` in the linked project after the already-applied 019/020/023 and `20260731000400` changes.
+2. Deploy `supabase/functions/passport-ocr` with `AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT`, `AZURE_DOCUMENT_INTELLIGENCE_KEY`, `SUPABASE_URL`, and `SUPABASE_SERVICE_ROLE_KEY` configured as Edge Function secrets.
+3. Keep `OCR_EDGE_FUNCTION=passport-ocr` in the Flutter environment. Never expose the Edge Function secrets in Flutter.
+
+Do not run or deploy `supabase/migrations/025_remote_app_config.sql` as part of this change.

@@ -14,7 +14,8 @@ import 'notification_repository.dart';
 
 @pragma('vm:entry-point')
 Future<void> kaamFirebaseMessagingBackgroundHandler(
-    RemoteMessage message) async {
+  RemoteMessage message,
+) async {
   try {
     await Firebase.initializeApp();
   } on Object {
@@ -36,10 +37,17 @@ class KaamPushNotificationService {
   Future<void>? _initialization;
   bool _firebaseAvailable = false;
   String? _lastToken;
+  String? _pendingRoute;
+  String? _activeConversationId;
   KaamPushDiagnosticsSnapshot _diagnostics =
       const KaamPushDiagnosticsSnapshot();
 
   KaamPushDiagnosticsSnapshot get diagnostics => _diagnostics;
+
+  /// Chat screens set this while visible to prevent a second system alert for
+  /// a message the recipient is already reading.
+  void setActiveConversation(String? conversationId) =>
+      _activeConversationId = conversationId;
 
   Future<void> initialize() async {
     final existingInitialization = _initialization;
@@ -72,7 +80,8 @@ class KaamPushNotificationService {
     }
 
     FirebaseMessaging.onBackgroundMessage(
-        kaamFirebaseMessagingBackgroundHandler);
+      kaamFirebaseMessagingBackgroundHandler,
+    );
     await _runOptionalStep(
       _configureLocalNotifications,
       category: 'local_notifications_initialization_failed',
@@ -107,8 +116,10 @@ class KaamPushNotificationService {
         !SupabaseService.isEnabled) {
       return false;
     }
-    _setDiagnostics(_diagnostics.copyWith(lastSafeErrorCategory: 'none'),
-        log: 'Notification permission requested');
+    _setDiagnostics(
+      _diagnostics.copyWith(lastSafeErrorCategory: 'none'),
+      log: 'Notification permission requested',
+    );
     late final NotificationSettings settings;
     try {
       settings = await messaging.requestPermission(
@@ -163,9 +174,15 @@ class KaamPushNotificationService {
         return;
       }
       _lastToken = token;
-      _setDiagnostics(_diagnostics.copyWith(fcmRegistration: 'Registered'),
-          log: 'FCM registration succeeded');
-      await _repository.registerDeviceToken(fcmToken: token);
+      _setDiagnostics(
+        _diagnostics.copyWith(fcmRegistration: 'Registered'),
+        log: 'FCM registration succeeded',
+      );
+      await _repository.registerDeviceToken(
+        fcmToken: token,
+        platform:
+            defaultTargetPlatform == TargetPlatform.iOS ? 'ios' : 'android',
+      );
       _setDiagnostics(
         _diagnostics.copyWith(
           supabaseDeviceRegistration: 'Active',
@@ -202,7 +219,8 @@ class KaamPushNotificationService {
     } on Object {
       _setDiagnostics(
         _diagnostics.copyWith(
-            lastSafeErrorCategory: 'device_deactivation_failed'),
+          lastSafeErrorCategory: 'device_deactivation_failed',
+        ),
         log: 'Device deactivation failed',
       );
     }
@@ -215,8 +233,9 @@ class KaamPushNotificationService {
         final settings = await messaging.getNotificationSettings();
         _diagnostics = _diagnostics.copyWith(
           firebaseInitialized: true,
-          notificationPermission:
-              _permissionLabel(settings.authorizationStatus),
+          notificationPermission: _permissionLabel(
+            settings.authorizationStatus,
+          ),
         );
       } on Object {
         _diagnostics = _diagnostics.copyWith(
@@ -257,19 +276,27 @@ class KaamPushNotificationService {
     if (messaging == null) return;
     _authSubscription?.cancel();
     _authSubscription = client.auth.onAuthStateChange.listen((state) async {
+      _debugAuthEvent(state);
       if (KaamAuthSessionCoordinator.blocksSessionRestore) return;
       if (state.event == AuthChangeEvent.signedIn ||
           state.event == AuthChangeEvent.tokenRefreshed ||
           state.event == AuthChangeEvent.initialSession) {
         await registerCurrentDevice();
+        final pending = _pendingRoute;
+        if (pending != null) {
+          _pendingRoute = null;
+          _navigateToSafeRoute(pending);
+        }
       }
     });
 
     _tokenRefreshSubscription?.cancel();
     _tokenRefreshSubscription = messaging.onTokenRefresh.listen((token) async {
       _lastToken = token;
-      _setDiagnostics(_diagnostics.copyWith(fcmRegistration: 'Registered'),
-          log: 'FCM token refresh received');
+      _setDiagnostics(
+        _diagnostics.copyWith(fcmRegistration: 'Registered'),
+        log: 'FCM token refresh received',
+      );
       if (!KaamAuthSessionCoordinator.blocksSessionRestore &&
           SupabaseService.maybeClient?.auth.currentUser != null) {
         try {
@@ -291,6 +318,26 @@ class KaamPushNotificationService {
     });
   }
 
+  void _debugAuthEvent(AuthState state) {
+    if (!kDebugMode) return;
+    final user = state.session?.user;
+    debugPrint(
+      '[AuthState] event=${state.event.name} '
+      'userIdPresent=${user?.id.isNotEmpty == true} '
+      'email=${_maskedEmail(user?.email)}',
+    );
+  }
+
+  String _maskedEmail(String? email) {
+    final value = (email ?? '').trim();
+    final at = value.indexOf('@');
+    if (value.isEmpty || at <= 0) return 'none';
+    final name = value.substring(0, at);
+    final domain = value.substring(at + 1);
+    final visible = name.length <= 2 ? name[0] : name.substring(0, 2);
+    return '$visible***@$domain';
+  }
+
   void _listenForMessages() {
     final messaging = _messaging;
     if (messaging == null) return;
@@ -301,15 +348,19 @@ class KaamPushNotificationService {
       );
       final notification = message.notification;
       if (notification == null) return;
+      final conversationId = message.data['conversation_id'] as String?;
+      if (conversationId != null && conversationId == _activeConversationId) {
+        return;
+      }
       try {
         await _localNotifications.show(
           notification.hashCode,
           notification.title,
           notification.body,
-          const NotificationDetails(
+          NotificationDetails(
             android: AndroidNotificationDetails(
-              'kaam_notifications',
-              'Kaam notifications',
+              _channelFor(message.data['type'] as String?),
+              'KAAM notifications',
               channelDescription: 'Account, message, and verification updates.',
               importance: Importance.high,
               priority: Priority.high,
@@ -357,15 +408,22 @@ class KaamPushNotificationService {
   }
 
   Future<void> _createAndroidChannel() async {
-    const channel = AndroidNotificationChannel(
-      'kaam_notifications',
-      'Kaam notifications',
-      description: 'Account, message, and verification updates.',
-      importance: Importance.high,
-    );
     final android = _localNotifications.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
-    await android?.createNotificationChannel(channel);
+    for (final channel in const [
+      AndroidNotificationChannel('kaam_messages', 'Messages',
+          description: 'Chat messages', importance: Importance.high),
+      AndroidNotificationChannel('kaam_matches', 'Matches and interests',
+          description: 'Matches and interests', importance: Importance.high),
+      AndroidNotificationChannel('kaam_account', 'Account and documents',
+          description: 'Account and document updates',
+          importance: Importance.defaultImportance),
+      AndroidNotificationChannel('kaam_announcements', 'Announcements',
+          description: 'KAAM announcements',
+          importance: Importance.defaultImportance),
+    ]) {
+      await android?.createNotificationChannel(channel);
+    }
   }
 
   Future<void> _runOptionalStep(
@@ -403,6 +461,10 @@ class KaamPushNotificationService {
       _diagnostics.copyWith(lastPushReceived: 'Background/opened'),
       log: 'Notification tap received',
     );
+    if (SupabaseService.maybeClient?.auth.currentUser == null) {
+      _pendingRoute = message.data['route'] as String?;
+      return;
+    }
     final role = _roleFromCurrentRoute();
     final type = message.data['type'] as String? ?? '';
     final route = KaamNotificationDeepLinks.routeFor(
@@ -457,6 +519,18 @@ class KaamPushNotificationService {
       AuthorizationStatus.denied => 'Denied',
       AuthorizationStatus.notDetermined => 'Not requested',
     };
+  }
+
+  String _channelFor(String? type) {
+    if (type == 'new_message') return 'kaam_messages';
+    if (type?.contains('match') == true || type?.contains('interest') == true) {
+      return 'kaam_matches';
+    }
+    if (type?.contains('document') == true ||
+        type?.contains('company') == true) {
+      return 'kaam_account';
+    }
+    return 'kaam_announcements';
   }
 
   void _setDiagnostics(KaamPushDiagnosticsSnapshot snapshot, {String? log}) {

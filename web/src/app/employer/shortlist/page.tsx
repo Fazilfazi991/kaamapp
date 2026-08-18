@@ -7,7 +7,7 @@ export default async function EmployerShortlistPage() {
   const { candidates } = await loadShortlist();
   return (
     <div className="grid gap-6">
-      <PageTitle title="Shortlist" description="Candidates saved from the existing saved-candidates backend table." />
+      <PageTitle title="Saved Candidates" description="Candidates saved from the existing saved-candidates backend table." />
       {candidates.length ? (
         <div className="grid gap-4">
           {candidates.map((candidate) => (
@@ -16,8 +16,8 @@ export default async function EmployerShortlistPage() {
         </div>
       ) : (
         <EmptyStateCard
-          title="No shortlisted candidates"
-          description="Shortlisting keeps candidates private and does not create a match."
+          title="No saved candidates"
+          description="Saving a candidate keeps their profile handy and does not create a match."
           actionHref="/employer/search"
           actionLabel="Search candidates"
         />

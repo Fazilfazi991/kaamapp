@@ -31,8 +31,10 @@ void main() {
       final group = MultiSelectFilterGroup();
       group.toggle('Available Immediately');
       group.toggle('Within 15 days');
-      expect(group.selected,
-          containsAll(['Available Immediately', 'Within 15 days']));
+      expect(
+        group.selected,
+        containsAll(['Available Immediately', 'Within 15 days']),
+      );
     });
 
     test('selecting three nationalities keeps all three selected', () {
@@ -41,7 +43,9 @@ void main() {
       group.toggle('Pakistani');
       group.toggle('Bangladeshi');
       expect(
-          group.selected, containsAll(['Indian', 'Pakistani', 'Bangladeshi']));
+        group.selected,
+        containsAll(['Indian', 'Pakistani', 'Bangladeshi']),
+      );
     });
 
     test('selecting multiple languages keeps all selected', () {
@@ -77,8 +81,10 @@ void main() {
       const filters = EmployerCandidateSearchFilters(
         nationalities: ['Indian', 'Pakistani'],
       );
-      expect(EmployerCandidateSearchMatcher.matches(candidateRow(), filters),
-          isTrue);
+      expect(
+        EmployerCandidateSearchMatcher.matches(candidateRow(), filters),
+        isTrue,
+      );
     });
 
     test('backend query uses AND between separate filter categories', () {
@@ -86,8 +92,10 @@ void main() {
         nationalities: ['Indian'],
         languages: ['Arabic'],
       );
-      expect(EmployerCandidateSearchMatcher.matches(candidateRow(), filters),
-          isFalse);
+      expect(
+        EmployerCandidateSearchMatcher.matches(candidateRow(), filters),
+        isFalse,
+      );
     });
 
     test('array fields such as skills and languages use overlap logic', () {
@@ -95,21 +103,27 @@ void main() {
         skills: ['Carpenter', 'Mason'],
         languages: ['Hindi', 'English'],
       );
-      expect(EmployerCandidateSearchMatcher.matches(candidateRow(), filters),
-          isTrue);
+      expect(
+        EmployerCandidateSearchMatcher.matches(candidateRow(), filters),
+        isTrue,
+      );
     });
 
     test('no-filter search returns candidates normally', () {
       const filters = EmployerCandidateSearchFilters();
       expect(filters.isEmpty, isTrue);
-      expect(EmployerCandidateSearchMatcher.matches(candidateRow(), filters),
-          isTrue);
+      expect(
+        EmployerCandidateSearchMatcher.matches(candidateRow(), filters),
+        isTrue,
+      );
     });
   });
 
   test('candidate skill limit is three', () {
     expect(CandidateSkillLimits.maxSkills, 3);
-    expect(CandidateSkillLimits.maxMessage,
-        'You can select a maximum of 3 skills.');
+    expect(
+      CandidateSkillLimits.maxMessage,
+      'You can select a maximum of 3 skills.',
+    );
   });
 }

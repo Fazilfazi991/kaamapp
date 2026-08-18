@@ -26,6 +26,8 @@ class _IdentityDocumentReviewScreenState
   CandidateProfileData profile = const CandidateProfileData();
   bool loading = true;
   bool saving = false;
+  bool correctionMode = false;
+  late final TextEditingController correctionReasonController;
 
   IdentityDocumentReviewArgs? get args {
     final value = ModalRoute.of(context)?.settings.arguments;
@@ -35,7 +37,10 @@ class _IdentityDocumentReviewScreenState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (controllers.isEmpty) _setup();
+    if (controllers.isEmpty) {
+      correctionReasonController = TextEditingController();
+      _setup();
+    }
   }
 
   @override
@@ -43,6 +48,7 @@ class _IdentityDocumentReviewScreenState
     for (final controller in controllers.values) {
       controller.dispose();
     }
+    correctionReasonController.dispose();
     super.dispose();
   }
 
@@ -79,6 +85,14 @@ class _IdentityDocumentReviewScreenState
       for (final entry in controllers.entries)
         entry.key: entry.value.text.trim(),
     };
+    if (correctionMode) {
+      final reason = correctionReasonController.text.trim();
+      if (reason.length < 8) {
+        _message('Tell us why the extracted value needs correction.');
+        return;
+      }
+      values['identity_correction_reason'] = reason;
+    }
 
     if (currentArgs.type == IdentityDocumentType.passport) {
       if ((values['full_name'] ?? '').isEmpty) {
@@ -115,6 +129,8 @@ class _IdentityDocumentReviewScreenState
         ...values,
         if (currentArgs.type == IdentityDocumentType.passport) ...{
           'passport_file_url': currentArgs.upload.path,
+          if (currentArgs.backUpload != null)
+            'passport_back_file_url': currentArgs.backUpload!.path,
           'passport_status': DocumentStatusService.pendingVerification,
           'passport_verified': false,
         } else ...{
@@ -142,9 +158,22 @@ class _IdentityDocumentReviewScreenState
         candidateValues: candidateValues,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Identity details saved.')),
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Passport submitted'),
+          content: const Text(
+            'Passport submitted successfully. Your document is now under review.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Continue'),
+            ),
+          ],
+        ),
       );
+      if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (error) {
       debugPrint('Identity review save failed: type=${error.runtimeType}');
@@ -173,11 +202,13 @@ class _IdentityDocumentReviewScreenState
 
   void _message(String text) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(text),
-      behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(text),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 96),
+      ),
+    );
   }
 
   @override
@@ -204,29 +235,29 @@ class _IdentityDocumentReviewScreenState
         if (loading) const SizedBox(height: 12),
         const AppCard(
           child: Text(
-            'If automatic reading misses anything, enter it manually. KAAM never guesses document values.',
+            'These values come from the validated document. They are locked by default to protect against accidental or arbitrary changes.',
             style: AppTextStyles.body,
           ),
         ),
-        if (currentArgs.ocrError != null) ...[
+        const SizedBox(height: 10),
+        SecondaryButton(
+          label: correctionMode
+              ? 'Cancel correction'
+              : 'Correct an extracted value',
+          onPressed: saving
+              ? null
+              : () => setState(() => correctionMode = !correctionMode),
+        ),
+        if (correctionMode) ...[
           const SizedBox(height: 12),
-          AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'We could not automatically read your passport.',
-                  style: AppTextStyles.label,
-                ),
-                const SizedBox(height: 6),
-                const Text('Please enter your details manually.',
-                    style: AppTextStyles.body),
-                const SizedBox(height: 6),
-                Text(currentArgs.ocrError!, style: AppTextStyles.muted),
-              ],
-            ),
+          AppTextField(
+            controller: correctionReasonController,
+            label: 'Reason for correction',
+            hint: 'For example: my middle name was omitted',
           ),
         ],
+        const SizedBox(height: 16),
+        _UploadedFilesCard(args: currentArgs),
         const SizedBox(height: 16),
         for (final field in fields) ...[
           AppTextField(
@@ -235,6 +266,7 @@ class _IdentityDocumentReviewScreenState
             hint: field.key.contains('date') || field.key == 'dob'
                 ? 'YYYY-MM-DD'
                 : null,
+            readOnly: !correctionMode,
           ),
           if (_hasProfileConflict(field.key))
             _ConflictChoice(
@@ -249,9 +281,11 @@ class _IdentityDocumentReviewScreenState
         Row(
           children: [
             Expanded(
-                child: SecondaryButton(
-                    label: 'Back',
-                    onPressed: () => Navigator.of(context).pop())),
+              child: SecondaryButton(
+                label: 'Back',
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: PrimaryButton(
@@ -282,6 +316,58 @@ class _IdentityDocumentReviewScreenState
   }
 }
 
+class _UploadedFilesCard extends StatelessWidget {
+  const _UploadedFilesCard({required this.args});
+
+  final IdentityDocumentReviewArgs args;
+
+  @override
+  Widget build(BuildContext context) {
+    final isPassport = args.type == IdentityDocumentType.passport;
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Uploaded files', style: AppTextStyles.label),
+          const SizedBox(height: 8),
+          _FileLine(
+            label: isPassport ? 'Front' : 'Document',
+            path: args.upload.path,
+          ),
+          if (args.backUpload != null) ...[
+            const SizedBox(height: 6),
+            _FileLine(label: 'Back', path: args.backUpload!.path),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _FileLine extends StatelessWidget {
+  const _FileLine({required this.label, required this.path});
+
+  final String label;
+  final String path;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text('$label: ', style: AppTextStyles.muted),
+        Expanded(
+          child: Text(
+            path.split('/').last,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.body,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ConflictChoice extends StatelessWidget {
   const _ConflictChoice({
     required this.existingValue,
@@ -299,8 +385,10 @@ class _ConflictChoice extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('This field already contains information.',
-              style: AppTextStyles.label),
+          const Text(
+            'This field already contains information.',
+            style: AppTextStyles.label,
+          ),
           const SizedBox(height: 6),
           Text('Existing: $existingValue', style: AppTextStyles.muted),
           _ChoiceRow(

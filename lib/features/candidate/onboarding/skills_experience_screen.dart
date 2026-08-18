@@ -10,6 +10,7 @@ import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/progress_stepper.dart';
 import '../../../core/widgets/screen_scaffold.dart';
 import '../../supabase_backend/kaam_backend.dart';
+import '../profile/candidate_display_formatters.dart';
 
 class SkillsExperienceScreen extends StatefulWidget {
   const SkillsExperienceScreen({super.key});
@@ -25,22 +26,23 @@ class _SkillsExperienceScreenState extends State<SkillsExperienceScreen> {
   final currentCountryController = TextEditingController();
   final emirateController = TextEditingController();
   final visaStatusController = TextEditingController();
+  final visaExpiryController = TextEditingController();
+  final otherLanguageController = TextEditingController();
+  final employmentStatusController = TextEditingController();
+  final otherEmploymentStatusController = TextEditingController();
   final skillExperience = <String, String>{};
   final computerSkills = <String>{};
   final languages = <String>{};
+  final drivingLicenses = <String>{};
+  final errors = <String, String>{};
   String drivingSkill = 'No';
-  String drivingLicense = 'None';
-  List<String> selectedSkills = const [];
+  List<CandidateSkillData> selectedSkills = const [];
   bool loading = true;
+  bool loadFailed = false;
   bool saving = false;
+  String visaExpiryValue = '';
 
-  static const experienceOptions = [
-    'Fresher',
-    'Less than 1 year',
-    '1-3 years',
-    '3-5 years',
-    '5+ years',
-  ];
+  static final experienceOptions = CandidateSkillExperience.labels;
 
   static const availabilityOptions = [
     'Available Immediately',
@@ -49,18 +51,36 @@ class _SkillsExperienceScreenState extends State<SkillsExperienceScreen> {
     'Currently Working',
   ];
 
-  static const countryOptions = ['UAE', 'India', 'Other'];
-  static const emirateOptions = ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain'];
-  static const visaOptions = [
-    'Employment Visa',
-    'Visit Visa',
-    'Cancelled Visa',
-    'Own Visa',
-    'No Visa',
-    'Outside UAE',
+  static final visaOptions = CandidateVisaStatus.labels;
+  static const computerOptions = [
+    'MS Office',
+    'Email',
+    'Internet',
+    'Data Entry',
   ];
-  static const computerOptions = ['MS Office', 'Email', 'Internet', 'Data Entry'];
-  static const languageOptions = ['English', 'Arabic', 'Hindi', 'Urdu', 'Malayalam', 'Tamil', 'Other'];
+  static const languageOptions = [
+    'English',
+    'Arabic',
+    'Hindi',
+    'Urdu',
+    'Malayalam',
+    'Tamil',
+    'Other',
+  ];
+  static const drivingLicenseOptions = [
+    'UAE Driving Licence',
+    'India Driving Licence',
+    'Other Country Driving Licence',
+    'No Driving Licence',
+  ];
+  static const employmentStatusOptions = [
+    'Currently Employed',
+    'Unemployed',
+    'Serving Notice Period',
+    'Freelance / Self-employed',
+    'Student',
+    'Other',
+  ];
 
   @override
   void initState() {
@@ -75,29 +95,80 @@ class _SkillsExperienceScreenState extends State<SkillsExperienceScreen> {
     currentCountryController.dispose();
     emirateController.dispose();
     visaStatusController.dispose();
+    visaExpiryController.dispose();
+    otherLanguageController.dispose();
+    employmentStatusController.dispose();
+    otherEmploymentStatusController.dispose();
     super.dispose();
   }
 
   Future<void> _load() async {
+    if (mounted) {
+      setState(() {
+        loading = true;
+        loadFailed = false;
+      });
+    }
     try {
       final profile = await repository.loadCurrentProfile();
+      final savedSkills = await repository.loadMySkills();
       if (!mounted) return;
-      selectedSkills = profile.skills.take(3).toList();
-      for (final skill in selectedSkills) {
-        skillExperience[skill] = _experienceLabel(profile.experienceYears);
+      selectedSkills =
+          savedSkills.take(CandidateSkillLimits.maxSkills).toList();
+      skillExperience.clear();
+      for (final selection in selectedSkills) {
+        final label = CandidateSkillExperience.labelFor(
+          selection.experienceRange,
+        );
+        if (label.isNotEmpty) skillExperience[selection.skill.id] = label;
       }
       salaryController.text = profile.expectedSalaryMin?.toString() ?? '';
       availabilityController.text = profile.availability;
-      currentCountryController.text = profile.currentCity == 'India' ? 'India' : 'UAE';
-      emirateController.text = profile.currentCity;
-      visaStatusController.text = '';
+      currentCountryController.text = CandidateLocationOptions.normalizeCountry(
+        profile.currentCountry,
+      );
+      emirateController.text =
+          CandidateLocationOptions.normalizeRegionForCountry(
+        currentCountryController.text,
+        profile.currentCity,
+      );
+      visaStatusController.text = CandidateVisaStatus.labelFor(
+        profile.visaStatus,
+      );
+      visaExpiryValue = profile.visaExpiryDate;
+      visaExpiryController.text = CandidateVisaExpiry.displayDate(
+        visaExpiryValue,
+      );
+      drivingLicenses
+        ..clear()
+        ..addAll(
+          _normalizeDrivingLicenses(profile.drivingLicenses, profile.bio),
+        );
+      if (drivingLicenses.any((value) => value != 'No Driving Licence')) {
+        drivingSkill = 'Yes';
+      }
+      employmentStatusController.text = profile.currentEmploymentStatus;
+      otherEmploymentStatusController.text =
+          profile.currentEmploymentStatusOther;
       languages
         ..clear()
         ..addAll(profile.languages.where(languageOptions.contains));
+      final customLanguages = profile.languages
+          .where((language) => !languageOptions.contains(language))
+          .toList();
+      if (customLanguages.isNotEmpty) {
+        languages.add('Other');
+        otherLanguageController.text = customLanguages.first;
+      }
     } catch (error) {
       if (!mounted) return;
+      loadFailed = true;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not load experience details: $error')),
+        const SnackBar(
+          content: Text(
+            'We could not load your saved details. Please try again.',
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => loading = false);
@@ -105,97 +176,171 @@ class _SkillsExperienceScreenState extends State<SkillsExperienceScreen> {
   }
 
   Future<void> _continue() async {
-    if (selectedSkills.isEmpty) {
-      _message('Go back and select your work skills first.');
-      return;
-    }
-    if (skillExperience.length < selectedSkills.length) {
-      _message('Select experience for each skill.');
-      return;
-    }
-    if (salaryController.text.trim().isEmpty) {
-      _message('Add your expected monthly salary.');
-      return;
-    }
-    if (availabilityController.text.trim().isEmpty) {
-      _message('Select your availability.');
-      return;
-    }
-    if (currentCountryController.text.trim().isEmpty) {
-      _message('Select your current country.');
-      return;
-    }
-    if (visaStatusController.text.trim().isEmpty) {
-      _message('Select your visa status.');
-      return;
-    }
+    if (loading || loadFailed || saving) return;
+    if (!_validate()) return;
     setState(() => saving = true);
     try {
-      final allSkills = {
-        ...selectedSkills,
-        if (drivingSkill == 'Yes') 'Driving',
-        ...computerSkills,
-      }.toList()
-        ..sort();
+      final savedLanguages = _savedLanguages();
+      await repository.updateCurrentLocation(
+        country: currentCountryController.text,
+        region: emirateController.text,
+      );
+      await repository.updateSkillExperiences({
+        for (final selection in selectedSkills)
+          selection.skill.id: skillExperience[selection.skill.id] ?? '',
+      });
       await repository.updateWorkProfile({
-        'skills': allSkills,
-        'languages': languages.toList()..sort(),
+        'skills': CandidateSkillLimits.normalizeNames(
+          selectedSkills.map((selection) => selection.skill.name),
+        ),
+        'languages': savedLanguages,
         'experience_years': _maxExperienceYears(),
         'expected_salary_min': parseFirstInt(salaryController.text),
         'expected_salary_max': parseFirstInt(salaryController.text),
         'availability': availabilityController.text.trim(),
-        'current_country': currentCountryController.text.trim(),
-        'current_city': currentCountryController.text == 'UAE'
-            ? emirateController.text.trim()
-            : currentCountryController.text.trim(),
-        'visa_status': visaStatusController.text.trim(),
+        'driving_licenses': drivingLicenses.toList()..sort(),
+        'current_employment_status': employmentStatusController.text.trim(),
+        'current_employment_status_other':
+            otherEmploymentStatusController.text.trim().isEmpty
+                ? null
+                : otherEmploymentStatusController.text.trim(),
         'bio': _summaryText(),
       });
+      await repository.updateVisaDetails(
+        selectedStatus: visaStatusController.text,
+        expiryDate: visaExpiryValue,
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Experience and preferences saved.')),
       );
-      Navigator.of(context).pushNamed(AppRoutes.profileComplete);
+      Navigator.of(context).pushNamed(AppRoutes.profileMedia);
     } catch (error) {
       if (!mounted) return;
-      _message('Could not save experience: $error');
+      _message('We could not save your skill experience. Please try again.');
     } finally {
       if (mounted) setState(() => saving = false);
     }
   }
 
+  bool _validate() {
+    final next = <String, String>{};
+    if (selectedSkills.isEmpty) {
+      next['skills'] = 'Select at least one skill.';
+    }
+    for (final selection in selectedSkills) {
+      if (!CandidateSkillExperience.isValid(
+        skillExperience[selection.skill.id],
+      )) {
+        next['experience_${selection.skill.id}'] =
+            'Enter your years of experience.';
+      }
+    }
+    if (salaryController.text.trim().isEmpty) {
+      next['salary'] = 'Select your expected salary.';
+    }
+    if (availabilityController.text.trim().isEmpty) {
+      next['availability'] = 'Select your availability.';
+    }
+    if (languages.isEmpty) {
+      next['languages'] = 'Select at least one language.';
+    }
+    if (languages.contains('Other') &&
+        otherLanguageController.text.trim().isEmpty) {
+      next['other_language'] = 'Enter language.';
+    }
+    if (drivingSkill == 'Yes' && drivingLicenses.isEmpty) {
+      next['driving'] = 'Choose your driving licence status.';
+    }
+    if (employmentStatusController.text.trim().isEmpty) {
+      next['employment'] = 'Select your current employment status.';
+    }
+    if (employmentStatusController.text == 'Other' &&
+        otherEmploymentStatusController.text.trim().isEmpty) {
+      next['employment_other'] = 'Enter your current employment status.';
+    }
+    final locationError = CandidateLocationOptions.validationError(
+      currentCountryController.text,
+      emirateController.text,
+    );
+    if (locationError != null) {
+      if (CandidateLocationOptions.normalizeCountry(
+        currentCountryController.text,
+      ).isEmpty) {
+        next['current_country'] = locationError;
+      } else {
+        next['region'] = locationError;
+      }
+    }
+    if (visaStatusController.text.trim().isEmpty) {
+      next['visa'] = 'Select your visa status.';
+    }
+    final visaExpiryError = CandidateVisaExpiry.validationError(
+      visaStatusController.text,
+      visaExpiryValue,
+    );
+    if (visaExpiryError != null) {
+      next['visa_expiry'] = visaExpiryError;
+    }
+    setState(
+      () => errors
+        ..clear()
+        ..addAll(next),
+    );
+    return next.isEmpty;
+  }
+
+  List<String> _savedLanguages() {
+    final values = <String>{
+      ...languages.where((value) => value != 'Other'),
+      if (languages.contains('Other') &&
+          otherLanguageController.text.trim().isNotEmpty)
+        titleCase(otherLanguageController.text),
+    }.toList()
+      ..sort();
+    return values;
+  }
+
+  List<String> _normalizeDrivingLicenses(List<String> current, String bio) {
+    final values = current.where(drivingLicenseOptions.contains).toList();
+    if (values.isNotEmpty) return values;
+    final match = RegExp(
+      r'Driving license:\s*(.+)',
+      caseSensitive: false,
+    ).firstMatch(bio);
+    final legacy = match?.group(1)?.trim();
+    if (legacy == null || legacy.isEmpty) return const [];
+    return switch (legacy) {
+      'UAE' => const ['UAE Driving Licence'],
+      'India' => const ['India Driving Licence'],
+      'None' => const ['No Driving Licence'],
+      _ => [legacy],
+    };
+  }
+
   String _summaryText() {
-    final exp = skillExperience.entries.map((entry) => '${entry.key}: ${entry.value}').join(', ');
+    final exp = selectedSkills
+        .map(
+          (selection) =>
+              '${selection.skill.name}: ${skillExperience[selection.skill.id] ?? ''}',
+        )
+        .where((value) => !value.endsWith(': '))
+        .join(', ');
     final parts = [
       if (exp.isNotEmpty) 'Skill experience: $exp',
       'Driving skill: $drivingSkill',
-      if (drivingLicense != 'None') 'Driving license: $drivingLicense',
-      if (computerSkills.isNotEmpty) 'Computer skills: ${computerSkills.join(', ')}',
+      if (drivingLicenses.isNotEmpty)
+        'Driving license: ${drivingLicenses.join(', ')}',
+      if (employmentStatusController.text.trim().isNotEmpty)
+        'Current employment status: ${employmentStatusController.text.trim()}',
+      if (computerSkills.isNotEmpty)
+        'Computer skills: ${computerSkills.join(', ')}',
     ];
     return parts.join('\n');
   }
 
-  num _maxExperienceYears() {
-    var max = 0;
-    for (final value in skillExperience.values) {
-      max = switch (value) {
-        'Less than 1 year' => max < 1 ? 1 : max,
-        '1-3 years' => max < 3 ? 3 : max,
-        '3-5 years' => max < 5 ? 5 : max,
-        '5+ years' => max < 6 ? 6 : max,
-        _ => max,
-      };
-    }
-    return max;
-  }
-
-  String _experienceLabel(num? years) {
-    if (years == null || years == 0) return 'Fresher';
-    if (years < 1) return 'Less than 1 year';
-    if (years <= 3) return '1-3 years';
-    if (years <= 5) return '3-5 years';
-    return '5+ years';
-  }
+  num _maxExperienceYears() =>
+      CandidateSkillExperience.aggregateYears(skillExperience.values);
 
   Future<void> _pickOption({
     required String title,
@@ -226,6 +371,39 @@ class _SkillsExperienceScreenState extends State<SkillsExperienceScreen> {
     if (value != null) onPick(value);
   }
 
+  Future<void> _pickVisaExpiryDate() async {
+    final now = DateTime.now();
+    final firstDate = DateTime(now.year, now.month, now.day).add(
+      const Duration(days: 1),
+    );
+    final lastDate = DateTime(now.year + 20, 12, 31);
+    final savedDate = CandidateVisaExpiry.parse(visaExpiryValue);
+    final initialDate = savedDate != null &&
+            !savedDate.isBefore(
+              DateTime.utc(firstDate.year, firstDate.month, firstDate.day),
+            ) &&
+            !savedDate.isAfter(
+              DateTime.utc(lastDate.year, lastDate.month, lastDate.day),
+            )
+        ? DateTime(savedDate.year, savedDate.month, savedDate.day)
+        : firstDate;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      helpText: 'Select visa expiry date',
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      visaExpiryValue = CandidateVisaExpiry.normalizeDate(picked);
+      visaExpiryController.text = CandidateVisaExpiry.displayDate(
+        visaExpiryValue,
+      );
+      errors.remove('visa_expiry');
+    });
+  }
+
   void _message(String text) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
@@ -242,7 +420,9 @@ class _SkillsExperienceScreenState extends State<SkillsExperienceScreen> {
       checkmarkColor: AppColors.white,
       selectedColor: AppColors.primaryPink,
       backgroundColor: AppColors.elevatedCard,
-      side: BorderSide(color: selected ? AppColors.primaryPink : AppColors.border),
+      side: BorderSide(
+        color: selected ? AppColors.primaryPink : AppColors.border,
+      ),
       labelStyle: TextStyle(
         color: selected ? AppColors.white : AppColors.secondaryText,
         fontWeight: FontWeight.w700,
@@ -253,26 +433,56 @@ class _SkillsExperienceScreenState extends State<SkillsExperienceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (loading) {
+      return const ScreenScaffold(
+        title: 'Experience',
+        showBack: true,
+        children: [
+          ProgressStepper(current: 4, total: 5),
+          SizedBox(height: 22),
+          LinearProgressIndicator(),
+        ],
+      );
+    }
+    if (loadFailed) {
+      return ScreenScaffold(
+        title: 'Experience',
+        showBack: true,
+        children: [
+          const ProgressStepper(current: 4, total: 5),
+          const SizedBox(height: 22),
+          const Text(
+            'We could not load your saved experience details.',
+            style: AppTextStyles.body,
+          ),
+          const SizedBox(height: 16),
+          PrimaryButton(label: 'Try Again', onPressed: _load),
+        ],
+      );
+    }
     return ScreenScaffold(
       title: 'Experience',
       showBack: true,
       children: [
         const ProgressStepper(current: 4, total: 5),
         const SizedBox(height: 22),
-        const Text('Tell employers what you need', style: AppTextStyles.headline),
+        const Text(
+          'Tell employers what you need',
+          style: AppTextStyles.headline,
+        ),
         const SizedBox(height: 8),
-        const Text('Add your experience, availability, visa, and salary expectation.',
-            style: AppTextStyles.body),
+        const Text(
+          'Add your experience, availability, visa, and salary expectation.',
+          style: AppTextStyles.body,
+        ),
         const SizedBox(height: 16),
-        if (loading) const LinearProgressIndicator(),
-        if (loading) const SizedBox(height: 12),
-        for (final skill in selectedSkills) ...[
+        for (final selection in selectedSkills) ...[
           AppCard(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(skill, style: AppTextStyles.title),
+                Text(selection.skill.name, style: AppTextStyles.title),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
@@ -281,11 +491,19 @@ class _SkillsExperienceScreenState extends State<SkillsExperienceScreen> {
                     for (final option in experienceOptions)
                       _chip(
                         label: option,
-                        selected: skillExperience[skill] == option,
-                        onTap: () => setState(() => skillExperience[skill] = option),
+                        selected: skillExperience[selection.skill.id] == option,
+                        onTap: () => setState(
+                          () => skillExperience[selection.skill.id] = option,
+                        ),
                       ),
                   ],
                 ),
+                if (errors['experience_${selection.skill.id}'] != null) ...[
+                  const SizedBox(height: 8),
+                  _FieldError(
+                    errors['experience_${selection.skill.id}']!,
+                  ),
+                ],
               ],
             ),
           ),
@@ -299,21 +517,59 @@ class _SkillsExperienceScreenState extends State<SkillsExperienceScreen> {
         Wrap(
           spacing: 8,
           children: [
-            _chip(label: 'Yes', selected: drivingSkill == 'Yes', onTap: () => setState(() => drivingSkill = 'Yes')),
-            _chip(label: 'No', selected: drivingSkill == 'No', onTap: () => setState(() => drivingSkill = 'No')),
+            _chip(
+              label: 'Yes',
+              selected: drivingSkill == 'Yes',
+              onTap: () => setState(() {
+                drivingSkill = 'Yes';
+                drivingLicenses.remove('No Driving Licence');
+              }),
+            ),
+            _chip(
+              label: 'No',
+              selected: drivingSkill == 'No',
+              onTap: () => setState(() {
+                drivingSkill = 'No';
+                drivingLicenses
+                  ..clear()
+                  ..add('No Driving Licence');
+                errors.remove('driving');
+              }),
+            ),
           ],
         ),
         if (drivingSkill == 'Yes') ...[
           const SizedBox(height: 10),
-          const Text('License', style: AppTextStyles.label),
+          const Text('Licence *', style: AppTextStyles.label),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
+            runSpacing: 8,
             children: [
-              for (final value in ['UAE', 'India', 'None'])
-                _chip(label: value, selected: drivingLicense == value, onTap: () => setState(() => drivingLicense = value)),
+              for (final value in drivingLicenseOptions)
+                _chip(
+                  label: value,
+                  selected: drivingLicenses.contains(value),
+                  onTap: () => setState(() {
+                    errors.remove('driving');
+                    if (value == 'No Driving Licence') {
+                      drivingLicenses
+                        ..clear()
+                        ..add(value);
+                    } else {
+                      drivingLicenses.remove('No Driving Licence');
+                      drivingLicenses.contains(value)
+                          ? drivingLicenses.remove(value)
+                          : drivingLicenses.add(value);
+                    }
+                  }),
+                ),
             ],
           ),
+          if (errors['driving'] != null) ...[
+            const SizedBox(height: 8),
+            _FieldError(errors['driving']!),
+          ],
         ],
         const SizedBox(height: 14),
         const Text('Computer Skills', style: AppTextStyles.label),
@@ -327,13 +583,15 @@ class _SkillsExperienceScreenState extends State<SkillsExperienceScreen> {
                 label: value,
                 selected: computerSkills.contains(value),
                 onTap: () => setState(() {
-                  computerSkills.contains(value) ? computerSkills.remove(value) : computerSkills.add(value);
+                  computerSkills.contains(value)
+                      ? computerSkills.remove(value)
+                      : computerSkills.add(value);
                 }),
               ),
           ],
         ),
         const SizedBox(height: 14),
-        const Text('Languages', style: AppTextStyles.label),
+        const Text('Languages *', style: AppTextStyles.label),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -344,72 +602,168 @@ class _SkillsExperienceScreenState extends State<SkillsExperienceScreen> {
                 label: value,
                 selected: languages.contains(value),
                 onTap: () => setState(() {
-                  languages.contains(value) ? languages.remove(value) : languages.add(value);
+                  errors
+                    ..remove('languages')
+                    ..remove('other_language');
+                  if (languages.contains(value)) {
+                    languages.remove(value);
+                    if (value == 'Other') otherLanguageController.clear();
+                  } else {
+                    languages.add(value);
+                  }
                 }),
               ),
           ],
         ),
+        if (errors['languages'] != null) ...[
+          const SizedBox(height: 8),
+          _FieldError(errors['languages']!),
+        ],
+        if (languages.contains('Other')) ...[
+          const SizedBox(height: 12),
+          AppTextField(
+            controller: otherLanguageController,
+            label: 'Enter language *',
+            hint: 'Language',
+            errorText: errors['other_language'],
+            onChanged: (_) => setState(() => errors.remove('other_language')),
+          ),
+        ],
         const SizedBox(height: 20),
         AppTextField(
           controller: salaryController,
-          label: 'Salary expectation',
+          label: 'Salary expectation *',
           hint: 'AED per month',
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          errorText: errors['salary'],
+          onChanged: (_) => setState(() => errors.remove('salary')),
         ),
         const SizedBox(height: 12),
         _PickerField(
           controller: availabilityController,
-          label: 'Availability',
+          label: 'Availability *',
           hint: 'Select availability',
+          errorText: errors['availability'],
           onTap: () => _pickOption(
             title: 'Availability',
             options: availabilityOptions,
             current: availabilityController.text,
-            onPick: (value) => setState(() => availabilityController.text = value),
+            onPick: (value) => setState(() {
+              availabilityController.text = value;
+              errors.remove('availability');
+            }),
           ),
         ),
         const SizedBox(height: 12),
         _PickerField(
-          controller: currentCountryController,
-          label: 'Current country',
-          hint: 'UAE, India, or Other',
+          controller: employmentStatusController,
+          label: 'Current Employment Status *',
+          hint: 'Select employment status',
+          errorText: errors['employment'],
           onTap: () => _pickOption(
-            title: 'Current country',
-            options: countryOptions,
-            current: currentCountryController.text,
+            title: 'Current Employment Status',
+            options: employmentStatusOptions,
+            current: employmentStatusController.text,
             onPick: (value) => setState(() {
-              currentCountryController.text = value;
-              if (value != 'UAE') emirateController.clear();
+              employmentStatusController.text = value;
+              if (value != 'Other') otherEmploymentStatusController.clear();
+              errors
+                ..remove('employment')
+                ..remove('employment_other');
             }),
           ),
         ),
-        if (currentCountryController.text == 'UAE') ...[
+        if (employmentStatusController.text == 'Other') ...[
+          const SizedBox(height: 12),
+          AppTextField(
+            controller: otherEmploymentStatusController,
+            label: 'Enter employment status *',
+            hint: 'Current employment status',
+            errorText: errors['employment_other'],
+            onChanged: (_) => setState(() => errors.remove('employment_other')),
+          ),
+        ],
+        const SizedBox(height: 12),
+        _PickerField(
+          controller: currentCountryController,
+          label: 'Current country *',
+          hint: 'UAE or India',
+          errorText: errors['current_country'],
+          onTap: () => _pickOption(
+            title: 'Current country',
+            options: CandidateLocationOptions.countries,
+            current: currentCountryController.text,
+            onPick: (value) => setState(() {
+              if (currentCountryController.text != value) {
+                emirateController.clear();
+              }
+              currentCountryController.text = value;
+              errors
+                ..remove('current_country')
+                ..remove('region');
+            }),
+          ),
+        ),
+        if (CandidateLocationOptions.normalizeCountry(
+          currentCountryController.text,
+        ).isNotEmpty) ...[
           const SizedBox(height: 12),
           _PickerField(
             controller: emirateController,
-            label: 'Emirate',
-            hint: 'Select emirate',
+            label: currentCountryController.text == 'India'
+                ? 'State *'
+                : 'Emirate *',
+            hint: currentCountryController.text == 'India'
+                ? 'Select state'
+                : 'Select emirate',
+            errorText: errors['region'],
             onTap: () => _pickOption(
-              title: 'Emirate',
-              options: emirateOptions,
+              title: currentCountryController.text == 'India'
+                  ? 'State'
+                  : 'Emirate',
+              options: CandidateLocationOptions.regionsForCountry(
+                currentCountryController.text,
+              ),
               current: emirateController.text,
-              onPick: (value) => setState(() => emirateController.text = value),
+              onPick: (value) => setState(() {
+                emirateController.text = value;
+                errors.remove('region');
+              }),
             ),
           ),
         ],
         const SizedBox(height: 12),
         _PickerField(
           controller: visaStatusController,
-          label: 'Visa status',
+          label: 'Visa status *',
           hint: 'Select visa status',
+          errorText: errors['visa'],
           onTap: () => _pickOption(
             title: 'Visa status',
             options: visaOptions,
             current: visaStatusController.text,
-            onPick: (value) => setState(() => visaStatusController.text = value),
+            onPick: (value) => setState(() {
+              visaStatusController.text = value;
+              errors.remove('visa');
+              errors.remove('visa_expiry');
+            }),
           ),
         ),
+        if (CandidateVisaExpiry.requiresExpiry(
+          visaStatusController.text,
+        )) ...[
+          const SizedBox(height: 12),
+          AppTextField(
+            controller: visaExpiryController,
+            label: 'Visa Expiry Date *',
+            hint: 'Select date',
+            errorText: errors['visa_expiry'],
+            readOnly: true,
+            suffixIcon: const Icon(Icons.calendar_month_outlined),
+            onTap: _pickVisaExpiryDate,
+          ),
+        ],
         const SizedBox(height: 24),
         PrimaryButton(
           label: saving ? 'Saving...' : 'Finish Profile',
@@ -426,12 +780,14 @@ class _PickerField extends StatelessWidget {
     required this.label,
     required this.hint,
     required this.onTap,
+    this.errorText,
   });
 
   final TextEditingController controller;
   final String label;
   final String hint;
   final VoidCallback onTap;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -441,7 +797,22 @@ class _PickerField extends StatelessWidget {
       hint: hint,
       readOnly: true,
       suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded),
+      errorText: errorText,
       onTap: onTap,
+    );
+  }
+}
+
+class _FieldError extends StatelessWidget {
+  const _FieldError(this.message);
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      message,
+      style: AppTextStyles.muted.copyWith(color: AppColors.error),
     );
   }
 }

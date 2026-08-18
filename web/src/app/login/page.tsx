@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Header } from "@/components/layout/header";
 import { PageTitle } from "@/components/layout/page-title";
 import { AuthForm } from "@/features/auth/auth-form";
+import { AuthBrandPanel } from "@/features/auth/auth-brand-panel";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { redirectAuthenticatedAuthPage } from "@/lib/auth/session";
 import { supabaseConfigError } from "@/lib/supabase/env";
@@ -13,14 +14,21 @@ export default async function LoginPage() {
   return (
     <>
       <Header />
-      <main className="mx-auto grid min-h-[calc(100vh-82px)] max-w-5xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[0.8fr_1fr] lg:px-8">
-        <PageTitle
-          title="Login to Kaam"
-          description="Use email OTP to continue as a candidate or employer. Your account role is verified against Supabase after login."
-        />
-        <Suspense fallback={<LoadingIndicator label="Preparing login" />}>
-          <AuthForm mode="login" configError={configError} />
-        </Suspense>
+      <main className="min-h-[calc(100dvh-82px)] bg-gradient-to-b from-[#fffafd] via-white to-[#fff7fa]">
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:min-h-[calc(100dvh-82px)] lg:grid-cols-[minmax(0,.95fr)_minmax(410px,.85fr)] lg:gap-10 lg:px-8 lg:py-10">
+          <AuthBrandPanel mode="login" />
+          <section className="mx-auto w-full max-w-[500px]">
+            <PageTitle
+              title="Login to KAAM"
+              description="Continue securely with email OTP or Google. We’ll open the workspace linked to your account."
+            />
+            <div className="mt-6">
+              <Suspense fallback={<LoadingIndicator label="Preparing login" />}>
+                <AuthForm mode="login" configError={configError} />
+              </Suspense>
+            </div>
+          </section>
+        </div>
       </main>
     </>
   );

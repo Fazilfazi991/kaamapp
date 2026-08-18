@@ -41,10 +41,9 @@ class _LoginSecurityScreenState extends State<LoginSecurityScreen> {
     try {
       await auth.signOut();
       if (!mounted) return;
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        AppRoutes.roleSelection,
-        (_) => false,
-      );
+      Navigator.of(
+        context,
+      ).pushNamedAndRemoveUntil(AppRoutes.roleSelection, (_) => false);
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -77,8 +76,9 @@ class _LoginSecurityScreenState extends State<LoginSecurityScreen> {
           child: Text('Change email: Coming soon', style: AppTextStyles.body),
         ),
         const SizedBox(height: 12),
-        const AppCard(
-          child: Text('Delete account: Coming soon', style: AppTextStyles.body),
+        AppCard(
+          onTap: () => Navigator.of(context).pushNamed(AppRoutes.deleteAccount),
+          child: const Text('Delete account', style: AppTextStyles.body),
         ),
         const SizedBox(height: 24),
         PrimaryButton(

@@ -71,9 +71,9 @@ class _PrivacyVisibilityScreenState extends State<PrivacyVisibilityScreen> {
         requireApproval = saved.requireApprovalBeforeChat;
         allowDocumentsAfterMatch = saved.allowDocumentSharingAfterMatch;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Privacy settings saved.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Privacy settings saved.')));
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -128,7 +128,8 @@ class _PrivacyVisibilityScreenState extends State<PrivacyVisibilityScreen> {
           label: 'Hide phone number before match',
           value: hidePhone,
           onChanged: (value) => setState(() => hidePhone = value),
-          note: 'Private contact fields stay protected before accepted matches.',
+          note:
+              'Private contact fields stay protected before accepted matches.',
         ),
         _switchRow(
           label: 'Hide email before match',
@@ -145,7 +146,8 @@ class _PrivacyVisibilityScreenState extends State<PrivacyVisibilityScreen> {
         _switchRow(
           label: 'Allow document sharing after match',
           value: allowDocumentsAfterMatch,
-          onChanged: (value) => setState(() => allowDocumentsAfterMatch = value),
+          onChanged: (value) =>
+              setState(() => allowDocumentsAfterMatch = value),
         ),
         _switchRow(
           label: 'Hide profile from selected companies',

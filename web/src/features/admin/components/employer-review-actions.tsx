@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { approveEmployerCompany, approveEmployerDocument, rejectEmployerDocument } from "@/features/admin/server/actions";
+import { approveEmployerDocument, rejectEmployerDocument, verifyEmployerCompany } from "@/features/admin/server/actions";
 import { initialAdminActionState, type AdminActionState } from "@/features/admin/validation/review";
 
 function ActionMessage({ state }: { state: AdminActionState }) {
@@ -58,14 +58,14 @@ export function EmployerDocumentReviewActions({
   );
 }
 
-export function EmployerCompanyApprovalForm({
+export function EmployerCompanyVerificationForm({
   companyId,
   canApprove,
 }: {
   companyId: string;
   canApprove: boolean;
 }) {
-  const [state, action, pending] = useActionState(approveEmployerCompany, initialAdminActionState);
+  const [state, action, pending] = useActionState(verifyEmployerCompany, initialAdminActionState);
 
   if (!canApprove) {
     return <ActionMessage state={state} />;
@@ -74,7 +74,7 @@ export function EmployerCompanyApprovalForm({
   return (
     <form action={action} className="grid gap-3">
       <input type="hidden" name="companyId" value={companyId} />
-      <Button type="submit" disabled={pending}>{pending ? "Approving..." : "Approve company"}</Button>
+      <Button type="submit" disabled={pending}>{pending ? "Verifying..." : "Mark business verified"}</Button>
       <ActionMessage state={state} />
     </form>
   );

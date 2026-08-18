@@ -143,19 +143,6 @@ export function protectedRouteDecision(
     };
   }
 
-  if (
-    account.role === "employer" &&
-    !account.hasEmployerProfile &&
-    currentPath !== routes.employerProfile
-  ) {
-    return {
-      allowed: false,
-      redirectTo: routes.employerProfile,
-      status: "ready",
-      message: "Complete your company profile to continue.",
-    };
-  }
-
   return { allowed: true, status: "ready" };
 }
 

@@ -1,0 +1,17 @@
+# The Vercel project is configured with web/ as its Root Directory.
+# Exclude local-only mobile builds and workspace materials from its upload.
+/build/
+/.dart_tool/
+/android/
+/.idea/
+/.agents/
+/UI/
+/employer ui/
+/stitch_kaam_premium_ui_redesign/
+/qa-artifacts/
+/demo_frames/
+/demo_video_frames/
+/final_video_frames/
+/New folder/
+/KAAM-Production-Debug-Tester.apk
+*.log

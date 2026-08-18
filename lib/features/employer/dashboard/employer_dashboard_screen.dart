@@ -23,6 +23,14 @@ class _EmployerDashboardScreenState extends State<EmployerDashboardScreen> {
   final repository = const EmployerRepository();
   final notifications = const KaamNotificationRepository();
   late Future<EmployerCompanyData?> companyFuture = repository.loadMyCompany();
+  late Future<int> unreadCountFuture = notifications.unreadCount();
+
+  void _refresh() {
+    setState(() {
+      companyFuture = repository.loadMyCompany();
+      unreadCountFuture = notifications.unreadCount();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,16 +40,18 @@ class _EmployerDashboardScreenState extends State<EmployerDashboardScreen> {
       actions: [
         IconButton(
           tooltip: 'Search candidates',
-          onPressed: () => Navigator.of(context)
-              .pushNamed(AppRoutes.employerCandidateSearch),
+          onPressed: () => Navigator.of(
+            context,
+          ).pushNamed(AppRoutes.employerCandidateSearch),
           icon: const Icon(Icons.search_rounded),
         ),
         IconButton(
           tooltip: 'Notifications',
-          onPressed: () =>
-              Navigator.of(context).pushNamed(AppRoutes.employerNotifications),
+          onPressed: () => Navigator.of(context)
+              .pushNamed(AppRoutes.employerNotifications)
+              .then((_) => _refresh()),
           icon: FutureBuilder<int>(
-            future: notifications.unreadCount(),
+            future: unreadCountFuture,
             builder: (context, snapshot) => Badge(
               isLabelVisible: (snapshot.data ?? 0) > 0,
               label: Text('${snapshot.data ?? 0}'),
@@ -64,18 +74,20 @@ class _EmployerDashboardScreenState extends State<EmployerDashboardScreen> {
                   style: AppTextStyles.headline,
                 ),
                 const SizedBox(height: 10),
-                StatusBadge(
-                  label: verified ? 'Approved' : 'Pending Review',
-                  color: verified ? AppColors.success : AppColors.warning,
-                ),
+                if (verified)
+                  const StatusBadge(
+                    label: 'KAAM Verified',
+                    color: AppColors.success,
+                  ),
               ],
             );
           },
         ),
         const SizedBox(height: 8),
         AppCard(
-          onTap: () => Navigator.of(context)
-              .pushNamed(AppRoutes.employerCandidateSearch),
+          onTap: () => Navigator.of(
+            context,
+          ).pushNamed(AppRoutes.employerCandidateSearch),
           padding: const EdgeInsets.all(14),
           child: const Row(
             children: [
@@ -94,11 +106,12 @@ class _EmployerDashboardScreenState extends State<EmployerDashboardScreen> {
         const SectionHeader(title: 'Home Menu'),
         const SizedBox(height: 10),
         EmployerQuickActionCard(
-          title: 'Hiring Requirements',
-          subtitle: 'Add or manage your hiring needs.',
-          icon: Icons.work_history_outlined,
-          onTap: () => Navigator.of(context)
-              .pushNamed(AppRoutes.employerHiringRequirements),
+          title: 'Find Candidates',
+          subtitle: 'Search and connect with suitable candidates.',
+          icon: Icons.person_search_rounded,
+          onTap: () => Navigator.of(
+            context,
+          ).pushNamed(AppRoutes.employerCandidateSearch),
         ),
         const SizedBox(height: 10),
         EmployerQuickActionCard(
@@ -121,7 +134,7 @@ class _EmployerDashboardScreenState extends State<EmployerDashboardScreen> {
         const SizedBox(height: 10),
         EmployerQuickActionCard(
           title: 'Company Profile',
-          subtitle: 'Save company details and verification documents.',
+          subtitle: 'Manage your company details and profile.',
           icon: Icons.business_outlined,
           onTap: () =>
               Navigator.of(context).pushNamed(AppRoutes.employerCompanyProfile),

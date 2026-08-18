@@ -25,16 +25,31 @@ class WelcomeScreen extends StatelessWidget {
                   const SizedBox(height: 30),
                   const Text('Kaam', style: AppTextStyles.display),
                   const SizedBox(height: 8),
-                  Text('Perfect Match', style: AppTextStyles.title.copyWith(color: AppColors.primaryPink)),
+                  Text(
+                    'Perfect Match',
+                    style: AppTextStyles.title.copyWith(
+                      color: AppColors.primaryPink,
+                    ),
+                  ),
                   const SizedBox(height: 14),
-                  const Text('Privacy-first hiring starts here', style: AppTextStyles.body, textAlign: TextAlign.center),
+                  const Text(
+                    'Privacy-first hiring starts here',
+                    style: AppTextStyles.body,
+                    textAlign: TextAlign.center,
+                  ),
                   const Spacer(flex: 3),
                   PrimaryButton(
                     label: 'Get Started',
-                    onPressed: () => Navigator.of(context).pushNamed(AppRoutes.roleSelection),
+                    onPressed: () => Navigator.of(
+                      context,
+                    ).pushNamed(AppRoutes.accountAccess),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Your details stay private until you choose to connect.', style: AppTextStyles.muted, textAlign: TextAlign.center),
+                  const Text(
+                    'Your details stay private until you choose to connect.',
+                    style: AppTextStyles.muted,
+                    textAlign: TextAlign.center,
+                  ),
                 ],
               ),
             ),

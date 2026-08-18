@@ -1,14 +1,12 @@
-import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/session";
-import { routes } from "@/config/routes";
 import type { EmployerCompany } from "@/features/employer/types";
 
 export type EmployerAccess =
   | { ok: true; userId: string; company: EmployerCompany; warning: string | null }
   | { ok: false; userId: string; reason: "missing_company" | "blocked" | "rejected"; message: string };
 
-export async function resolveEmployerAccess({ redirectIncomplete = false } = {}): Promise<EmployerAccess> {
+export async function resolveEmployerAccess(): Promise<EmployerAccess> {
   const account = await requireRole("employer");
   const supabase = await createServerSupabaseClient();
   const { data: company } = await supabase
@@ -20,7 +18,6 @@ export async function resolveEmployerAccess({ redirectIncomplete = false } = {})
     .maybeSingle<EmployerCompany>();
 
   if (!company) {
-    if (redirectIncomplete) redirect(routes.employerOnboarding);
     return {
       ok: false,
       userId: account.userId,
@@ -50,13 +47,13 @@ export async function resolveEmployerAccess({ redirectIncomplete = false } = {})
     ? "Complete your company profile to improve candidate trust."
     : company.is_verified
       ? null
-      : "Company review is pending. Candidate contact details still follow match and reveal rules.";
+      : "Optional business verification has not been completed. This does not affect your employer account or workspace access.";
 
   return { ok: true, userId: account.userId, company, warning };
 }
 
 export async function requireEmployerCompany() {
-  const access = await resolveEmployerAccess({ redirectIncomplete: true });
+  const access = await resolveEmployerAccess();
   if (!access.ok) throw new Error(access.message);
   return access;
 }

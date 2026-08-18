@@ -15,22 +15,28 @@ void showShareCvModal(BuildContext context) {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Share your CV?',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+          const Text(
+            'Share your CV?',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 8),
           const Text('Your CV will be shared only with this matched employer.'),
           const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
-                  child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'))),
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
-                  child: FilledButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Share CV'))),
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Share CV'),
+                ),
+              ),
             ],
           ),
         ],

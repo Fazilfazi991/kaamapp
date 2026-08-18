@@ -25,9 +25,12 @@ class CandidateStatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(stat.value,
-              style: AppTextStyles.headline
-                  .copyWith(color: AppColors.primaryPink)),
+          Text(
+            stat.value,
+            style: AppTextStyles.headline.copyWith(
+              color: AppColors.primaryPink,
+            ),
+          ),
           const SizedBox(height: 6),
           Text(stat.label, style: AppTextStyles.label),
           const SizedBox(height: 4),
@@ -43,24 +46,31 @@ class ProfileStrengthCard extends StatelessWidget {
     super.key,
     required this.value,
     required this.helperText,
+    this.onImprove,
   });
 
   final int value;
   final String helperText;
+  final VoidCallback? onImprove;
 
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      onTap: onImprove,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               const Expanded(
-                  child: Text('Profile Strength', style: AppTextStyles.title)),
-              Text('$value%',
-                  style: AppTextStyles.title
-                      .copyWith(color: AppColors.primaryPink)),
+                child: Text('Profile Strength', style: AppTextStyles.title),
+              ),
+              Text(
+                '$value%',
+                style: AppTextStyles.title.copyWith(
+                  color: AppColors.primaryPink,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -73,7 +83,105 @@ class ProfileStrengthCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(helperText, style: AppTextStyles.muted),
+          if (onImprove != null) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Text('Improve Profile',
+                    style: AppTextStyles.label
+                        .copyWith(color: AppColors.primaryPink)),
+                const SizedBox(width: 6),
+                const Icon(Icons.arrow_forward_rounded,
+                    size: 18, color: AppColors.primaryPink),
+              ],
+            ),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+/// Compact, non-sensitive membership state sourced from candidate_memberships.
+class CandidateMembershipBadge extends StatelessWidget {
+  const CandidateMembershipBadge({
+    super.key,
+    required this.membership,
+    this.visibleToEmployers,
+    this.eligibilityMessage,
+  });
+
+  final CandidateMembershipData membership;
+  final bool? visibleToEmployers;
+  final String? eligibilityMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    final presentation = CandidateMembershipPresentation.resolve(
+      membership,
+      visibleToEmployers: visibleToEmployers,
+      eligibilityMessage: eligibilityMessage,
+    );
+    final (color, icon) = switch (presentation.state) {
+      CandidateMembershipState.activePaid ||
+      CandidateMembershipState.activeTest =>
+        (AppColors.success, Icons.verified_rounded),
+      CandidateMembershipState.expired => (
+          AppColors.warning,
+          Icons.event_busy_rounded
+        ),
+      CandidateMembershipState.pending => (
+          AppColors.warning,
+          Icons.schedule_rounded
+        ),
+      CandidateMembershipState.inactive => (
+          AppColors.secondaryText,
+          Icons.workspace_premium_outlined
+        ),
+      CandidateMembershipState.unknown => (
+          AppColors.secondaryText,
+          Icons.help_outline_rounded
+        ),
+    };
+    final semanticLabel = [
+      presentation.primaryLabel,
+      presentation.secondaryLabel,
+      presentation.detailLabel,
+    ].where((label) => label.isNotEmpty).join(', ');
+    return Semantics(
+      container: true,
+      label: 'Membership status: $semanticLabel',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: .12),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: .45)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 17, color: color),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    presentation.primaryLabel,
+                    style: AppTextStyles.label.copyWith(color: color),
+                  ),
+                  if (presentation.secondaryLabel.isNotEmpty)
+                    Text(presentation.secondaryLabel,
+                        style: AppTextStyles.muted),
+                  if (presentation.detailLabel.isNotEmpty)
+                    Text(presentation.detailLabel, style: AppTextStyles.muted),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -117,8 +225,9 @@ class InterestRequestCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final status = request.status.toLowerCase();
     return AppCard(
-      onTap: () => Navigator.of(context)
-          .pushNamed(AppRoutes.requestDetails, arguments: request),
+      onTap: () => Navigator.of(
+        context,
+      ).pushNamed(AppRoutes.requestDetails, arguments: request),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -126,18 +235,25 @@ class InterestRequestCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                  child: Text(request.company, style: AppTextStyles.title)),
+                child: Text(request.company, style: AppTextStyles.title),
+              ),
               const StatusBadge(
-                  label: 'Verified', icon: Icons.verified_rounded),
+                label: 'Verified',
+                icon: Icons.verified_rounded,
+              ),
             ],
           ),
           const SizedBox(height: 12),
           Text(request.role, style: AppTextStyles.label),
           const SizedBox(height: 6),
-          Text('${request.salary} - ${request.location}',
-              style: AppTextStyles.body),
-          const SizedBox(height: 10),
-          Text(request.message, style: AppTextStyles.muted),
+          Text(
+            '${request.salary} - ${request.location}',
+            style: AppTextStyles.body,
+          ),
+          if (request.message.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(request.message, style: AppTextStyles.muted),
+          ],
           const SizedBox(height: 16),
           if (status == 'pending')
             Row(
@@ -145,24 +261,27 @@ class InterestRequestCard extends StatelessWidget {
                 Expanded(
                   child: SecondaryButton(
                     label: 'Decline',
-                    onPressed: () => Navigator.of(context).pushNamed(
-                        AppRoutes.requestDetails,
-                        arguments: request),
+                    onPressed: () => Navigator.of(
+                      context,
+                    ).pushNamed(AppRoutes.requestDetails, arguments: request),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: PrimaryButton(
                     label: 'Review',
-                    onPressed: () => Navigator.of(context).pushNamed(
-                        AppRoutes.requestDetails,
-                        arguments: request),
+                    onPressed: () => Navigator.of(
+                      context,
+                    ).pushNamed(AppRoutes.requestDetails, arguments: request),
                   ),
                 ),
               ],
             )
           else
-            StatusBadge(label: status, color: AppColors.accentPurple),
+            StatusBadge(
+              label: status[0].toUpperCase() + status.substring(1),
+              color: AppColors.accentPurple,
+            ),
         ],
       ),
     );
@@ -193,11 +312,13 @@ class _MatchCardState extends State<MatchCard> {
             ),
             actions: [
               TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Cancel')),
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
               TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Reveal')),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Reveal'),
+              ),
             ],
           ),
         ) ??
@@ -209,7 +330,8 @@ class _MatchCardState extends State<MatchCard> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Contact details revealed for this match.')),
+          content: Text('Contact details revealed for this match.'),
+        ),
       );
     } catch (error) {
       if (!mounted) return;
@@ -240,10 +362,19 @@ class _MatchCardState extends State<MatchCard> {
           Text(match.preview, style: AppTextStyles.muted),
           const SizedBox(height: 16),
           PrimaryButton(
-            label: match.chatEnabled ? 'Open Chat' : 'Chat Locked',
+            label: 'View Match',
+            onPressed: () => Navigator.of(
+              context,
+            ).pushNamed(AppRoutes.matchUnlocked, arguments: match),
+          ),
+          const SizedBox(height: 10),
+          SecondaryButton(
+            label: match.chatEnabled ? 'Chat' : 'Chat Locked',
+            icon: Icons.chat_bubble_outline_rounded,
             onPressed: match.chatEnabled
-                ? () => Navigator.of(context)
-                    .pushNamed(AppRoutes.privateChat, arguments: match)
+                ? () => Navigator.of(
+                      context,
+                    ).pushNamed(AppRoutes.privateChat, arguments: match)
                 : null,
           ),
           if (match.canRevealContact && !match.contactRevealed) ...[
@@ -314,8 +445,11 @@ class CandidateProfileHeader extends StatelessWidget {
 }
 
 class UploadDocumentCard extends StatelessWidget {
-  const UploadDocumentCard(
-      {super.key, required this.title, required this.subtitle});
+  const UploadDocumentCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+  });
 
   final String title;
   final String subtitle;
@@ -362,12 +496,14 @@ class ChatBubble extends StatelessWidget {
           color: isMe ? AppColors.primaryPink : AppColors.card,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-              color: isMe ? AppColors.primaryPink : AppColors.border),
+            color: isMe ? AppColors.primaryPink : AppColors.border,
+          ),
         ),
         child: Text(
           text,
           style: TextStyle(
-              color: isMe ? AppColors.white : AppColors.secondaryText),
+            color: isMe ? AppColors.white : AppColors.secondaryText,
+          ),
         ),
       ),
     );
@@ -375,11 +511,21 @@ class ChatBubble extends StatelessWidget {
 }
 
 class SettingsTile extends StatelessWidget {
-  const SettingsTile(
-      {super.key, required this.icon, required this.title, this.onTap});
+  const SettingsTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.statusIcon,
+    this.statusColor,
+    this.onTap,
+  });
 
   final IconData icon;
   final String title;
+  final String? subtitle;
+  final IconData? statusIcon;
+  final Color? statusColor;
   final VoidCallback? onTap;
 
   @override
@@ -391,7 +537,27 @@ class SettingsTile extends StatelessWidget {
         children: [
           Icon(icon, color: AppColors.primaryPink),
           const SizedBox(width: 14),
-          Expanded(child: Text(title, style: AppTextStyles.label)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AppTextStyles.label),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle!,
+                    style: AppTextStyles.muted.copyWith(
+                      color: statusColor ?? AppColors.mutedText,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (statusIcon != null) ...[
+            Icon(statusIcon, color: statusColor ?? AppColors.mutedText),
+            const SizedBox(width: 8),
+          ],
           const Icon(Icons.chevron_right, color: AppColors.mutedText),
         ],
       ),

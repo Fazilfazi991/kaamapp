@@ -28,17 +28,24 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       if (!mounted) return;
       if (epoch != KaamAuthSessionCoordinator.sessionEpoch) return;
       const auth = KaamAuthRepository();
-      if (auth.currentUser == null ||
+      if (_freshRegistration ||
+          auth.currentUser == null ||
           KaamAuthSessionCoordinator.blocksSessionRestore) {
         final route = selectedRole == KaamRole.candidate
             ? AppRoutes.login
             : AppRoutes.employerLogin;
-        await Navigator.of(context)
-            .pushNamed(route, arguments: {'role': selectedRole});
+        await Navigator.of(context).pushReplacementNamed(
+          route,
+          arguments: {
+            'role': selectedRole,
+            'freshRegistration': _freshRegistration,
+          },
+        );
         return;
       }
-      final result =
-          await auth.resolvePostOtpDestination(fallbackRole: selectedRole!);
+      final result = await auth.resolvePostOtpDestination(
+        fallbackRole: selectedRole!,
+      );
       if (!mounted) return;
       if (epoch != KaamAuthSessionCoordinator.sessionEpoch) return;
       final route = switch (result.destination) {
@@ -53,8 +60,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       Navigator.of(context).pushNamed(route);
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Could not continue: $error')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not continue: $error')));
       }
     } finally {
       if (mounted) setState(() => navigating = false);
@@ -64,9 +72,18 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
   void _openLogin() {
     if (navigating) return;
     setState(() => navigating = true);
-    Navigator.of(context).pushNamed(AppRoutes.login).whenComplete(() {
-      if (mounted) setState(() => navigating = false);
-    });
+    KaamAuthSessionCoordinator.clearUserScopedState();
+    Navigator.of(context).pushReplacementNamed(AppRoutes.login).whenComplete(
+      () {
+        if (mounted) setState(() => navigating = false);
+      },
+    );
+  }
+
+  bool get _freshRegistration {
+    final arguments = ModalRoute.of(context)?.settings.arguments;
+    if (arguments is Map) return arguments['freshRegistration'] == true;
+    return false;
   }
 
   @override
@@ -81,11 +98,11 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
             const Center(
               child: Text.rich(
                 TextSpan(
-                  text: "Let's start ",
+                  text: 'How will you use ',
                   style: AppTextStyles.headline,
                   children: [
                     TextSpan(
-                      text: 'your journey',
+                      text: 'KAAM?',
                       style: TextStyle(color: AppColors.primaryPink),
                     ),
                   ],
@@ -96,7 +113,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
             const SizedBox(height: 10),
             const Center(
               child: Text(
-                'Choose how you want to use KAAM. Your privacy is protected from the first step.',
+                'Choose one role for this account. You cannot change it during onboarding.',
                 style: AppTextStyles.body,
                 textAlign: TextAlign.center,
               ),
@@ -109,8 +126,8 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                 children: [
                   Expanded(
                     child: _JourneyCard(
-                      title: 'Find Work',
-                      subtitle: 'Create a private profile',
+                      title: 'Employee',
+                      subtitle: "I'm looking for a job",
                       icon: Icons.work_outline_rounded,
                       color: AppColors.primaryPink,
                       selected: isCandidate,
@@ -121,8 +138,8 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _JourneyCard(
-                      title: 'Hire Talent',
-                      subtitle: 'Discover skilled professionals',
+                      title: 'Employer',
+                      subtitle: "I'm hiring workers",
                       icon: Icons.business_center_outlined,
                       color: AppColors.accentPurple,
                       selected: isEmployer,
@@ -149,8 +166,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
               children: [
                 Expanded(child: Divider(color: AppColors.border)),
                 Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('or', style: AppTextStyles.muted)),
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: Text('or', style: AppTextStyles.muted),
+                ),
                 Expanded(child: Divider(color: AppColors.border)),
               ],
             ),
@@ -164,16 +182,25 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
               ),
               child: Column(
                 children: [
-                  const Icon(Icons.account_circle_outlined,
-                      color: AppColors.softPink, size: 30),
+                  const Icon(
+                    Icons.account_circle_outlined,
+                    color: AppColors.softPink,
+                    size: 30,
+                  ),
                   const SizedBox(height: 10),
-                  const Text('Already registered?', style: AppTextStyles.title),
+                  const Text(
+                    'Already have an account?',
+                    style: AppTextStyles.title,
+                  ),
                   const SizedBox(height: 5),
-                  const Text('Sign in to continue your journey.',
-                      style: AppTextStyles.body, textAlign: TextAlign.center),
+                  const Text(
+                    'Sign in to continue your journey.',
+                    style: AppTextStyles.body,
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16),
                   SecondaryButton(
-                    label: 'Log In',
+                    label: 'Login',
                     icon: Icons.login_rounded,
                     onPressed: navigating ? null : _openLogin,
                   ),
@@ -187,9 +214,11 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                 Icon(Icons.lock_outline, color: AppColors.softPink, size: 18),
                 SizedBox(width: 8),
                 Flexible(
-                    child: Text(
-                        'Your privacy is important. We keep it protected.',
-                        style: AppTextStyles.muted)),
+                  child: Text(
+                    'Your privacy is important. We keep it protected.',
+                    style: AppTextStyles.muted,
+                  ),
+                ),
               ],
             ),
           ],
@@ -232,8 +261,9 @@ class _JourneyCard extends StatelessWidget {
             color: selected ? color.withValues(alpha: .11) : AppColors.card,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-                color: selected ? color : AppColors.border,
-                width: selected ? 1.6 : 1),
+              color: selected ? color : AppColors.border,
+              width: selected ? 1.6 : 1,
+            ),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -242,14 +272,16 @@ class _JourneyCard extends StatelessWidget {
               Align(
                 alignment: Alignment.topRight,
                 child: Icon(
-                    selected ? Icons.check_circle : Icons.circle_outlined,
-                    color: selected ? color : AppColors.mutedText),
+                  selected ? Icons.check_circle : Icons.circle_outlined,
+                  color: selected ? color : AppColors.mutedText,
+                ),
               ),
               Container(
                 padding: const EdgeInsets.all(11),
                 decoration: BoxDecoration(
-                    color: color.withValues(alpha: .18),
-                    shape: BoxShape.circle),
+                  color: color.withValues(alpha: .18),
+                  shape: BoxShape.circle,
+                ),
                 child: Icon(icon, color: color),
               ),
               const SizedBox(height: 22),
@@ -262,8 +294,11 @@ class _JourneyCard extends StatelessWidget {
                   Icon(Icons.shield_outlined, color: color, size: 16),
                   const SizedBox(width: 6),
                   Expanded(
-                      child: Text('Details stay private until a match',
-                          style: AppTextStyles.muted.copyWith(fontSize: 11))),
+                    child: Text(
+                      'Details stay private until a match',
+                      style: AppTextStyles.muted.copyWith(fontSize: 11),
+                    ),
+                  ),
                 ],
               ),
             ],

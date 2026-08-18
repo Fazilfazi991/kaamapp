@@ -63,6 +63,9 @@ supabase/**/*service_role*
 # API keys and private signing material
 android/app/google-services.json
 key.properties
+android/key.properties
+android/app/key.properties
+shorebird-release-*.json
 *.jks
 *.keystore
 *.p12
@@ -84,3 +87,5 @@ key.properties
 
 # Codex/local agent workspace metadata
 .agents/
+.vercel
+.env*

@@ -309,9 +309,9 @@ export function AuthForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm"
+      className="rounded-2xl border border-[#eadde3] bg-white p-5 shadow-[0_18px_42px_rgba(74,35,54,.10)] sm:p-6"
     >
-      <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Account type">
+      <div className="grid grid-cols-2 gap-1 rounded-xl bg-[#f8f2f5] p-1" role="tablist" aria-label="Account type">
         {(["candidate", "employer"] as const).map((item) => (
           <button
             key={item}
@@ -320,8 +320,8 @@ export function AuthForm({
             aria-pressed={role === item}
             className={`focus-ring rounded-lg px-4 py-3 text-sm font-semibold ${
               role === item
-                ? "bg-[#e53670] text-white"
-                : "bg-[#f7f2f5] text-[#3b3340]"
+                ? "bg-[#e53670] text-white shadow-sm"
+                : "text-[#5d5364] hover:bg-white"
             }`}
           >
             {item === "candidate" ? "Candidate" : "Employer"}
@@ -329,7 +329,7 @@ export function AuthForm({
         ))}
       </div>
 
-      <div className="mt-5 grid gap-3">
+      <div className="mt-5 grid gap-3.5">
         <Label htmlFor="email">Email address</Label>
         <TextInput
           id="email"
@@ -416,7 +416,7 @@ export function AuthForm({
       </div>
 
       {step === "email" ? (
-        <div className="mt-6">
+        <div className="mt-5">
           <div className="flex items-center gap-3" aria-hidden="true">
             <span className="h-px flex-1 bg-[#eadde3]" />
             <span className="text-xs font-medium uppercase tracking-wide text-[#766b74]">or</span>
@@ -435,7 +435,7 @@ export function AuthForm({
         </div>
       ) : null}
 
-      <p className="mt-4 text-xs leading-5 text-[#66616f]">
+      <p className="mt-4 text-xs leading-5 text-[#766b74]">
         Your selected tab is only the entry path. Kaam redirects using the backend role on your account.
       </p>
     </form>
