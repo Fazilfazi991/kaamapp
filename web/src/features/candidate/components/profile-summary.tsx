@@ -43,10 +43,14 @@ export function ProfileSummary({
           <StatusBadge tone={candidate?.is_verified ? "success" : "warning"}>
             {candidate?.is_verified ? "Verified" : "Verification pending"}
           </StatusBadge>
-          <StatusBadge tone={membership?.status === "active" ? "success" : "neutral"}>
-            Membership {membership?.status ?? "inactive"}
+          <StatusBadge tone={membership?.status === "active" && membership.membership_type === "lifetime" ? "success" : "neutral"}>
+            {membership?.status === "active" && membership.membership_type === "lifetime" ? "Lifetime Membership" : "Membership not active"}
           </StatusBadge>
         </div>
+      </section>
+      <section className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
+        <div><h2 className="text-lg font-semibold text-[#201925]">Profile Visibility</h2><p className="mt-1 text-sm text-[#66616f]">{membership?.status === "active" && membership.membership_type === "lifetime" ? candidate?.is_visible ? "Visible to Employers" : "Hidden from Employers" : "Activate lifetime membership to become visible to employers."}</p></div>
+        <ButtonLink href={routes.candidateMembership}>{membership?.status === "active" && membership.membership_type === "lifetime" ? "Manage" : "Activate membership"}</ButtonLink>
       </section>
       <Section title="Personal details" rows={[
         ["Phone", value(profile?.phone)],

@@ -25,10 +25,13 @@ export async function POST(request: Request) {
     const supabase = await createServerSupabaseClient();
     const { data: membership, error: membershipError } = await supabase
       .from("candidate_memberships")
-      .select("stripe_customer_id")
+      .select("stripe_customer_id,status,membership_type")
       .eq("candidate_id", user.id)
-      .maybeSingle<{ stripe_customer_id: string | null }>();
+      .maybeSingle<{ stripe_customer_id: string | null; status: string | null; membership_type: string | null }>();
     if (membershipError) throw membershipError;
+    if (membership?.status === "active" && membership.membership_type === "lifetime") {
+      return NextResponse.json({ url: `${appOrigin(request)}${routes.candidateMembership}` });
+    }
 
     const stripe = getStripeClient();
     const customerId = membership?.stripe_customer_id ?? (await stripe.customers.create({
@@ -57,8 +60,8 @@ export async function POST(request: Request) {
           currency: CANDIDATE_MEMBERSHIP_CURRENCY,
           unit_amount: CANDIDATE_MEMBERSHIP_AMOUNT_AED_FILS,
           product_data: {
-            name: "KAAM Candidate Membership",
-            description: "Candidate visibility to Employers for 2 calendar months.",
+            name: "KAAM Lifetime Membership",
+            description: "One-time payment for lifetime candidate membership.",
           },
         },
       }],
