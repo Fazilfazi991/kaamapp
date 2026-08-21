@@ -33,7 +33,7 @@ export function membershipPresentation(
     badge: "Not active",
     heading: "KAAM Lifetime Membership",
     description: "Get discovered by employers and receive job opportunities with one lifetime membership.",
-    action: "Activate Lifetime Membership — AED 50",
+    action: "Activate Membership — AED 50",
     tone: "warning",
     isActive: false,
     isVisible: false,

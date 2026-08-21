@@ -22,7 +22,7 @@ export function MembershipCheckoutButton({ label }: { label: string }) {
 
   return (
     <div className="grid gap-2">
-      <button type="button" onClick={startCheckout} disabled={loading} className="w-fit rounded-md bg-[#e72f70] px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
+      <button type="button" onClick={startCheckout} disabled={loading} className="w-fit min-h-10 whitespace-nowrap rounded-lg bg-[#160847] px-4 py-2 text-sm font-semibold text-white hover:bg-[#261069] disabled:cursor-not-allowed disabled:opacity-60">
         {loading ? "Opening secure checkout…" : label}
       </button>
       {message ? <p className="text-sm text-[#a12a4d]" role="alert">{message}</p> : null}

@@ -5,7 +5,7 @@ describe("membershipPresentation", () => {
   it("keeps an unpaid Candidate hidden with an activation CTA", () => {
     const state = membershipPresentation(null);
     expect(state.isActive).toBe(false);
-    expect(state.action).toBe("Activate Lifetime Membership — AED 50");
+    expect(state.action).toBe("Activate Membership — AED 50");
     expect(state.description).toContain("lifetime membership");
   });
 
