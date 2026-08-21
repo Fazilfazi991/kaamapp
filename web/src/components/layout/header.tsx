@@ -28,13 +28,33 @@ export async function Header() {
         </div>
         <details className="relative md:hidden">
           <summary className="focus-ring cursor-pointer list-none rounded-lg border border-white/60 px-4 py-3 text-sm font-semibold text-white">Menu</summary>
-          <nav className="absolute right-0 top-[calc(100%+8px)] z-20 grid w-64 gap-1 rounded-xl border border-[#eadde3] bg-white p-3 shadow-lg" aria-label="Mobile primary">
-            <Link href={routes.home} className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[#f7f4ff]">Home</Link>
-            <Link href={routes.candidates} className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[#f7f4ff]">For Candidates</Link>
-            <Link href={routes.employers} className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[#f7f4ff]">For Employers</Link>
-            <Link href={routes.howItWorks} className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[#f7f4ff]">How it works</Link>
-            {account.authenticated && account.dashboardHref ? <><div className="border-t border-[#eee9ff] px-3 pb-2 pt-3"><p className="font-semibold text-[#160847]">{account.displayName ?? "KAAM account"}</p><p className="mt-0.5 text-xs text-[#746975]">{roleLabel}</p></div><ButtonLink href={account.dashboardHref} className="justify-start">{dashboardLabel}</ButtonLink><form action={signOutToHomeAction} className="px-3 pt-2"><button type="submit" className="focus-ring text-sm font-semibold text-[#160847]">Logout</button></form></> : <><ButtonLink href={routes.login} variant="secondary" className="justify-start">Login</ButtonLink><ButtonLink href={routes.register}>Get started</ButtonLink></>}
-          </nav>
+          <div className="absolute right-0 top-[calc(100%+8px)] z-20 w-[min(20rem,calc(100vw-2rem))] rounded-xl border border-[#eadde3] bg-white p-3 text-[#201925] shadow-lg">
+            {account.authenticated && account.dashboardHref ? (
+              <div className="grid gap-3">
+                <div className="border-b border-[#eee9ff] px-3 pb-3 pt-2">
+                  <p className="font-semibold text-[#160847]">{account.displayName ?? "KAAM account"}</p>
+                  <p className="mt-0.5 text-xs text-[#746975]">{roleLabel}</p>
+                </div>
+                <ButtonLink href={account.dashboardHref} className="min-h-12 w-full">
+                  {dashboardLabel}
+                </ButtonLink>
+                <form action={signOutToHomeAction} className="px-3">
+                  <button type="submit" className="focus-ring text-sm font-semibold text-[#160847]">
+                    Logout
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <nav className="grid gap-1" aria-label="Mobile primary">
+                <Link href={routes.home} className="rounded-lg px-3 py-3 text-sm font-medium text-[#201925] hover:bg-[#f7f4ff]">Home</Link>
+                <Link href={routes.candidates} className="rounded-lg px-3 py-3 text-sm font-medium text-[#201925] hover:bg-[#f7f4ff]">For Candidates</Link>
+                <Link href={routes.employers} className="rounded-lg px-3 py-3 text-sm font-medium text-[#201925] hover:bg-[#f7f4ff]">For Employers</Link>
+                <Link href={routes.howItWorks} className="rounded-lg px-3 py-3 text-sm font-medium text-[#201925] hover:bg-[#f7f4ff]">How it works</Link>
+                <ButtonLink href={routes.login} variant="secondary" className="mt-2 justify-start">Login</ButtonLink>
+                <ButtonLink href={routes.register}>Get started</ButtonLink>
+              </nav>
+            )}
+          </div>
         </details>
       </div>
     </header>
