@@ -8,7 +8,7 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://kaam.ae"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.kaamcareer.com"),
   title: { default: "KAAM | Mutual-interest recruitment", template: "%s | KAAM" },
   description:
     "KAAM connects workers and employers through skills, requirements and mutual interest.",

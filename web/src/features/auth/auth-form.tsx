@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label, TextInput } from "@/components/ui/form";
 import { routes } from "@/config/routes";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+import { oauthCallbackUrl } from "@/lib/auth/oauth-redirect";
 import {
   blockedAccountMessage,
   dashboardForRole,
@@ -278,7 +279,10 @@ export function AuthForm({
     resetAlerts();
     setLoading(true);
 
-    const callback = new URL(routes.authCallback, window.location.origin);
+    const callback = new URL(oauthCallbackUrl({
+      currentOrigin: window.location.origin,
+      configuredSiteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+    }));
     const returnPath = safeReturnPath(searchParams.get("redirectTo"));
     if (returnPath) callback.searchParams.set("next", returnPath);
 
