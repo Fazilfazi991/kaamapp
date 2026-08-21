@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="4096" height="4096" viewBox="0 0 4096 4096">
+  <title>KAAM gradient app icon</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#11073D"/><stop offset="0.55" stop-color="#270C5E"/><stop offset="1" stop-color="#3D1374"/>
+    </linearGradient>
+  </defs>
+  <rect width="4096" height="4096" rx="901" fill="url(#bg)"/>
+  <g transform="translate(778 793) scale(2.539)">
+    <path fill="#fff" d="M0 900V520 C0 295 155 230 280 230 C385 230 455 285 500 350 C545 285 615 230 720 230 C845 230 1000 295 1000 520 V900 H850 V520 C850 415 800 370 720 370 C640 370 575 420 575 520 V900 H425 V520 C425 420 360 370 280 370 C200 370 150 415 150 520 V900 Z"/>
+    <circle cx="280" cy="105" r="105" fill="#FF5BA1"/>
+    <circle cx="720" cy="105" r="105" fill="#FF5BA1"/>
+  </g>
+</svg>
