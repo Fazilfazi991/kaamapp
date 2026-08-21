@@ -53,28 +53,17 @@ export function ExperienceForm({
           defaultValue={candidate?.experience_years ?? ""}
         />
       </label>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-2">
-          <Label htmlFor="expectedSalaryMin">Expected salary min</Label>
+      <label className="grid gap-2">
+          <Label htmlFor="expectedSalary">Expected salary</Label>
           <TextInput
-            id="expectedSalaryMin"
-            name="expectedSalaryMin"
+            id="expectedSalary"
+            name="expectedSalary"
             type="number"
-            min="0"
-            defaultValue={candidate?.expected_salary_min ?? ""}
+            min="1"
+            inputMode="numeric"
+            defaultValue={candidate?.expected_salary_min ?? candidate?.expected_salary_max ?? ""}
           />
-        </label>
-        <label className="grid gap-2">
-          <Label htmlFor="expectedSalaryMax">Expected salary max</Label>
-          <TextInput
-            id="expectedSalaryMax"
-            name="expectedSalaryMax"
-            type="number"
-            min="0"
-            defaultValue={candidate?.expected_salary_max ?? ""}
-          />
-        </label>
-      </div>
+      </label>
       <label className="grid gap-2">
         <Label htmlFor="visaStatus">Visa status</Label>
         <SelectField id="visaStatus" name="visaStatus" defaultValue={candidate?.visa_status ?? ""}>

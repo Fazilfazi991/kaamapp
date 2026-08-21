@@ -149,8 +149,7 @@ export async function saveExperienceDetails(
 ): Promise<ExperienceActionState> {
   const availability = text(formData, "availability");
   const experienceYears = numberOrNull(text(formData, "experienceYears"));
-  const expectedSalaryMin = intOrNull(text(formData, "expectedSalaryMin"));
-  const expectedSalaryMax = intOrNull(text(formData, "expectedSalaryMax"));
+  const expectedSalary = intOrNull(text(formData, "expectedSalary"));
   const visaStatus = text(formData, "visaStatus");
   const languages = formData.getAll("languages").map(String).filter(Boolean);
   const hidePhoneBeforeMatch = formData.get("hidePhoneBeforeMatch") === "on";
@@ -161,13 +160,7 @@ export async function saveExperienceDetails(
   if (experienceYears !== null && (experienceYears < 0 || experienceYears > 60)) {
     return { error: "Enter a valid experience value." };
   }
-  if (
-    expectedSalaryMin !== null &&
-    expectedSalaryMax !== null &&
-    expectedSalaryMin > expectedSalaryMax
-  ) {
-    return { error: "Minimum salary cannot be higher than maximum salary." };
-  }
+  if (expectedSalary !== null && expectedSalary <= 0) return { error: "Expected salary must be a positive amount." };
 
   const { account, supabase } = await ensureCandidateRow();
   const { error } = await supabase
@@ -175,8 +168,7 @@ export async function saveExperienceDetails(
     .update({
       availability,
       experience_years: experienceYears,
-      expected_salary_min: expectedSalaryMin,
-      expected_salary_max: expectedSalaryMax,
+      expected_salary_min: expectedSalary,
       currency: "AED",
       visa_status: visaStatus || null,
       languages: [...new Set(languages)],

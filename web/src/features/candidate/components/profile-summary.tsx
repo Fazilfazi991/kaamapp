@@ -68,7 +68,7 @@ export function ProfileSummary({
       <Section title="Experience and privacy" rows={[
         ["Availability", value(candidate?.availability)],
         ["Experience", candidate?.experience_years == null ? "Not added" : `${candidate.experience_years} years`],
-        ["Expected salary", candidate?.expected_salary_min || candidate?.expected_salary_max ? `${value(candidate?.expected_salary_min)}-${value(candidate?.expected_salary_max)} ${candidate?.currency ?? "AED"}` : "Not added"],
+        ["Expected salary", candidate?.expected_salary_min || candidate?.expected_salary_max ? `${value(candidate?.expected_salary_min ?? candidate?.expected_salary_max)} ${candidate?.currency ?? "AED"}` : "Not added"],
         ["Languages", list(candidate?.languages)],
         ["Phone privacy", candidate?.hide_phone_before_match === false ? "Visible after match rules allow" : "Hidden before match"],
       ]} />
