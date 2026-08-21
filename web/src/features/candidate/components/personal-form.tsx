@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Label, SelectField, TextInput } from "@/components/ui/form";
 import { routes } from "@/config/routes";
@@ -100,7 +104,3 @@ function SaveButton() {
   const { pending } = useFormStatus();
   return <Button type="submit" disabled={pending}>{pending ? "Saving profile..." : "Save and continue"}</Button>;
 }
-"use client";
-
-import { useState } from "react";
-import { useFormStatus } from "react-dom";
