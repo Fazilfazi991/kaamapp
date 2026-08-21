@@ -14,6 +14,7 @@ export function PersonalForm({
   candidate: CandidateProfileRow | null;
   next?: string;
 }) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(candidate?.profile_photo_url ?? null);
   return (
     <form action={savePersonalDetails} className="grid gap-4">
       <input type="hidden" name="next" value={next} />
@@ -66,12 +67,12 @@ export function PersonalForm({
       </label>
       <label className="grid gap-2">
         <Label htmlFor="profilePhoto">Profile photo</Label>
-        {candidate?.profile_photo_url ? (
+        {previewUrl ? (
           <div
             role="img"
             aria-label="Current profile photo"
             className="h-24 w-24 rounded-lg bg-cover bg-center"
-            style={{ backgroundImage: `url(${candidate.profile_photo_url})` }}
+            style={{ backgroundImage: `url(${previewUrl})` }}
           />
         ) : null}
         <TextInput
@@ -79,14 +80,27 @@ export function PersonalForm({
           name="profilePhoto"
           type="file"
           accept="image/jpeg,image/png,image/webp"
+          onChange={(event) => {
+            const file = event.currentTarget.files?.[0];
+            if (file) setPreviewUrl(URL.createObjectURL(file));
+          }}
         />
         <p className="text-xs text-[#66616f]">
           JPG, PNG, or WebP. Maximum 4 MB.
         </p>
       </label>
       <div className="sticky bottom-16 flex gap-3 bg-white/95 py-3 sm:static">
-        <Button type="submit">Save and continue</Button>
+        <SaveButton />
       </div>
     </form>
   );
 }
+
+function SaveButton() {
+  const { pending } = useFormStatus();
+  return <Button type="submit" disabled={pending}>{pending ? "Saving profile..." : "Save and continue"}</Button>;
+}
+"use client";
+
+import { useState } from "react";
+import { useFormStatus } from "react-dom";
