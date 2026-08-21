@@ -14,6 +14,7 @@ export type AccountStatus =
 export type AccountSnapshot = {
   userId: string | null;
   email: string | null;
+  displayName?: string | null;
   role: UserRole | null;
   profileStatus?: string | null;
   hasCandidateProfile: boolean;

@@ -6,6 +6,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { routes } from "@/config/routes";
 import {
   authPageDecision,
+  dashboardForRole,
+  profileRecoveryDecision,
   protectedRouteDecision,
   type AccountSnapshot,
   type AppAccountRole,
@@ -18,6 +20,14 @@ import type {
   ProfileRow,
   UserRole,
 } from "@/types/domain";
+import { supabaseConfigError } from "@/lib/supabase/env";
+
+export type PublicAccountNavigation = {
+  authenticated: boolean;
+  role: UserRole | null;
+  displayName: string | null;
+  dashboardHref: string | null;
+};
 
 function currentPathFromHeaders() {
   return headers()
@@ -60,12 +70,32 @@ export async function getAuthenticatedAccountSnapshot(): Promise<AccountSnapshot
   return {
     userId: user.id,
     email: user.email ?? profile?.email ?? null,
+    displayName: profile?.full_name ?? null,
     role: profile?.role ?? null,
     profileStatus: profile?.status ?? null,
     hasCandidateProfile: Boolean(candidate),
     hasEmployerProfile: Boolean(company),
   };
 }
+
+export const getPublicAccountNavigation = cache(async function getPublicAccountNavigation(): Promise<PublicAccountNavigation> {
+  if (supabaseConfigError()) {
+    return { authenticated: false, role: null, displayName: null, dashboardHref: null };
+  }
+
+  const snapshot = await getAuthenticatedAccountSnapshot();
+  if (!snapshot.userId) {
+    return { authenticated: false, role: null, displayName: null, dashboardHref: null };
+  }
+
+  const recovery = profileRecoveryDecision(snapshot);
+  return {
+    authenticated: true,
+    role: snapshot.role,
+    displayName: snapshot.displayName ?? snapshot.email,
+    dashboardHref: recovery?.redirectTo ?? (snapshot.role ? dashboardForRole(snapshot.role) : routes.accountRecovery),
+  };
+});
 
 export async function getAuthenticatedProfile() {
   const supabase = await createServerSupabaseClient();
@@ -112,6 +142,7 @@ export const requireRole = cache(async function requireRole(role: AppAccountRole
   const snapshot: AccountSnapshot = {
     userId: user.id,
     email: user.email ?? profile?.email ?? null,
+    displayName: profile?.full_name ?? null,
     role: profile?.role ?? null,
     profileStatus: profile?.status ?? null,
     hasCandidateProfile: Boolean(candidate),
@@ -150,21 +181,30 @@ export async function signOutAction() {
   redirect(routes.login);
 }
 
+export async function signOutToHomeAction() {
+  "use server";
+
+  const supabase = await createServerSupabaseClient();
+  await supabase.auth.signOut({ scope: "global" });
+  revalidatePath("/", "layout");
+  redirect(routes.home);
+}
+
 export async function loadCandidateDashboardData(userId: string) {
   const supabase = await createServerSupabaseClient();
   const [{ data: candidate }, { data: membership }] = await Promise.all([
     supabase
       .from("candidate_profiles")
       .select(
-        "id, headline, nationality, current_country, current_city, preferred_country, preferred_city, job_categories, skills, languages, availability, is_verified",
+        "id, headline, nationality, current_country, current_city, preferred_country, preferred_city, job_categories, skills, languages, availability, is_visible, is_verified",
       )
       .eq("id", userId)
       .maybeSingle<CandidateProfileRow>(),
     supabase
       .from("candidate_memberships")
-      .select("status, plan_code, started_at, expires_at")
+      .select("status, plan_code, membership_type, started_at, expires_at")
       .eq("candidate_id", userId)
-      .order("expires_at", { ascending: false })
+      .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle<CandidateMembershipRow>(),
   ]);
