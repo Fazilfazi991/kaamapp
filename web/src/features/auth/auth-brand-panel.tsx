@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 type AuthBrandPanelProps = {
   mode: "login" | "register";
 };
@@ -14,15 +12,11 @@ export function AuthBrandPanel({ mode }: AuthBrandPanelProps) {
   const isRegister = mode === "register";
 
   return (
-    <aside className="relative overflow-hidden rounded-3xl border border-[#f2dce6] bg-white/80 p-4 shadow-[0_18px_48px_rgba(92,39,62,.08)] sm:p-7 lg:min-h-[540px] lg:p-9">
-      <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[#fff0f6]" />
-      <div className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-48 rounded-full border-[22px] border-[#fff4f8]" />
+    <aside className="relative overflow-hidden rounded-3xl border border-[#e5dff4] bg-white/80 p-4 shadow-[0_18px_48px_rgba(22,8,71,.08)] sm:p-7 lg:min-h-[540px] lg:p-9">
+      <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[#f4f1ff]" />
+      <div className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-48 rounded-full border-[22px] border-[#f7f5ff]" />
       <div className="relative flex h-full flex-col">
-        <div className="inline-flex w-fit items-center justify-start">
-          <Image src="/kaam-original-logo.png" alt="KAAM Perfect Match" width={112} height={50} priority className="h-auto w-[112px]" />
-        </div>
-
-        <div className="mt-4 max-w-md sm:mt-6 lg:mt-9">
+        <div className="max-w-md pt-2 sm:pt-3 lg:pt-5">
           <p className="text-xs font-bold uppercase tracking-[.18em] text-[#f56ba1]">Recruitment, made mutual</p>
           <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#160847] sm:text-4xl">
             {isRegister ? "Start your KAAM journey." : "Find the right opportunity. Faster."}
@@ -32,10 +26,10 @@ export function AuthBrandPanel({ mode }: AuthBrandPanelProps) {
           </p>
         </div>
 
-        <ul className="mt-4 grid gap-2 sm:mt-6 sm:gap-3" aria-label="KAAM benefits">
+        <ul className="mt-5 grid gap-3 sm:mt-6" aria-label="KAAM benefits">
           {benefits.map((benefit, index) => (
-            <li key={benefit} className="flex items-center gap-3 text-sm font-medium text-[#3c3441]">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#fce1ec] text-[#160847]" aria-hidden="true">
+            <li key={benefit} className="flex items-center gap-3 text-sm font-medium leading-5 text-[#3c3441]">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#f0edfb] text-[#160847]" aria-hidden="true">
                 <BenefitIcon index={index} />
               </span>
               {benefit}
@@ -43,19 +37,19 @@ export function AuthBrandPanel({ mode }: AuthBrandPanelProps) {
           ))}
         </ul>
 
-        <div className="mt-7 hidden rounded-2xl border border-[#f2dce6] bg-[#fffafd] p-4 shadow-sm lg:block">
+        <div className="mt-7 hidden rounded-2xl border border-[#e5dff4] bg-[#fcfbff] p-4 shadow-sm lg:block">
           <div className="flex items-center justify-between gap-3">
             <MiniProfile label="Profile" tone="pink" />
-            <span className="h-px flex-1 bg-[#efb5ca]" />
+            <span className="h-px flex-1 bg-[#cfc4f1]" />
             <MiniProfile label="Match" tone="dark" />
-            <span className="h-px flex-1 bg-[#efb5ca]" />
+            <span className="h-px flex-1 bg-[#cfc4f1]" />
             <MiniProfile label="Connect" tone="pink" />
           </div>
           <p className="mt-4 text-center text-xs font-semibold text-[#6b6071]">Built for faster hiring across the UAE</p>
         </div>
 
-        <p className="mt-4 border-t border-[#f4e4eb] pt-3 text-xs font-semibold text-[#6b6071] lg:mt-auto lg:pt-4">
-          Profile <span className="px-1 text-[#e53670]">→</span> Match <span className="px-1 text-[#e53670]">→</span> Connect
+        <p className="mt-4 border-t border-[#eee9ff] pt-3 text-xs font-semibold text-[#6b6071] lg:mt-auto lg:pt-4">
+          Profile <span className="px-1 text-[#f56ba1]">→</span> Match <span className="px-1 text-[#f56ba1]">→</span> Connect
         </p>
       </div>
     </aside>
@@ -65,7 +59,7 @@ export function AuthBrandPanel({ mode }: AuthBrandPanelProps) {
 function MiniProfile({ label, tone }: { label: string; tone: "pink" | "dark" }) {
   return (
     <div className="grid justify-items-center gap-1.5 text-center">
-      <span className={`grid h-10 w-10 place-items-center rounded-xl ${tone === "pink" ? "bg-[#ffe7f0] text-[#e53670]" : "bg-[#342b38] text-white"}`} aria-hidden="true">
+      <span className={`grid h-10 w-10 place-items-center rounded-xl ${tone === "pink" ? "bg-[#f0edfb] text-[#160847]" : "bg-[#160847] text-white"}`} aria-hidden="true">
         <span className="h-3 w-3 rounded-full border-2 border-current" />
       </span>
       <span className="text-[11px] font-bold text-[#423946]">{label}</span>
