@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/header";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { ButtonLink } from "@/components/ui/button";
 import { routes } from "@/config/routes";
+import { getPublicAccountNavigation } from "@/lib/auth/session";
 
 const trustBenefits = [
   ["◈", "Verified Employers", "Trusted opportunities"],
@@ -11,7 +12,10 @@ const trustBenefits = [
   ["▣", "Secure & Private", "Your data is protected"],
 ] as const;
 
-export default function HomePage() {
+export default async function HomePage() {
+  const account = await getPublicAccountNavigation();
+  const dashboardLabel = account.role === "candidate" ? "Go to Candidate Dashboard" : account.role === "employer" ? "Go to Employer Dashboard" : account.role === "admin" ? "Go to Admin Dashboard" : "Complete account setup";
+  const secondaryAction = account.role === "candidate" ? { href: routes.candidateMatches, label: "View matches" } : account.role === "employer" ? { href: routes.employerSearch, label: "Search candidates" } : null;
   return (
     <>
       <Header />
@@ -29,13 +33,7 @@ export default function HomePage() {
                 KAAM connects workers and employers based on skills, requirements and mutual interest.
               </p>
               <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row">
-                <ButtonLink href={routes.candidates} className="w-full sm:w-auto">Find jobs</ButtonLink>
-                <ButtonLink href={routes.employers} variant="secondary" className="w-full sm:w-auto">
-                  Hire workers
-                </ButtonLink>
-                <ButtonLink href={routes.login} variant="secondary" className="w-full sm:w-auto">
-                  Login
-                </ButtonLink>
+                {account.authenticated && account.dashboardHref ? <><ButtonLink href={account.dashboardHref} className="w-full sm:w-auto">{dashboardLabel}</ButtonLink>{secondaryAction ? <ButtonLink href={secondaryAction.href} variant="secondary" className="w-full sm:w-auto">{secondaryAction.label}</ButtonLink> : null}</> : <><ButtonLink href={routes.candidates} className="w-full sm:w-auto">Find jobs</ButtonLink><ButtonLink href={routes.employers} variant="secondary" className="w-full sm:w-auto">Hire workers</ButtonLink><ButtonLink href={routes.login} variant="secondary" className="w-full sm:w-auto">Login</ButtonLink></>}
               </div>
               <div className="kaam-trust-marquee mt-7 min-w-0 overflow-hidden border-t border-[#f1dce5] pt-5 sm:mt-8 sm:pt-6" aria-label="KAAM trust benefits">
                 <div className="kaam-trust-track flex w-max">
