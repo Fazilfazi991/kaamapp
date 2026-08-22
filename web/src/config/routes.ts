@@ -44,6 +44,7 @@ export const routes = {
   employerJobPosts: "/employer/job-posts",
   employerNotifications: "/employer/notifications",
   admin: "/admin",
+  adminAnalytics: "/admin/analytics",
   adminNotifications: "/admin/notifications",
   accountBlocked: "/account/blocked",
   accountRecovery: "/account/recovery",

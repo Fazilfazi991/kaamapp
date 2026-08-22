@@ -18,6 +18,7 @@ import {
   type AppAccountRole,
 } from "@/lib/auth/routing";
 import type { UserRole } from "@/types/domain";
+import { linkAnalyticsIdentity, track } from "@/features/analytics/tracker";
 
 type Step = "email" | "otp";
 type AuthMode = "login" | "register";
@@ -110,6 +111,7 @@ export function AuthForm({
       return;
     }
 
+    if (mode === "register") track("registration_started", { role });
     setLoading(true);
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: trimmedEmail,
@@ -194,6 +196,8 @@ export function AuthForm({
       return;
     }
 
+    if (backendRole !== "admin") linkAnalyticsIdentity(backendRole);
+    track(mode === "register" ? "registration_completed" : "login", { role: backendRole });
     const account = {
       userId: data.user.id,
       email: data.user.email ?? null,
@@ -278,6 +282,7 @@ export function AuthForm({
     if (!supabase || loading) return;
     resetAlerts();
     setLoading(true);
+    if (mode === "register") track("registration_started", { role });
 
     const callback = new URL(oauthCallbackUrl({
       currentOrigin: window.location.origin,

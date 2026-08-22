@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
+import { AnalyticsTracker } from "@/features/analytics/analytics-tracker";
 
 const geist = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geist.variable} antialiased`}>
-      <body>{children}</body>
+      <body><AnalyticsTracker />{children}</body>
     </html>
   );
 }

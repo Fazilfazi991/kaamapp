@@ -3,6 +3,7 @@ import type { AdminAccount } from "@/features/admin/types";
 
 export const adminNavItems = [
   { href: "/admin", label: "Overview" },
+  { href: "/admin/analytics", label: "Analytics" },
   { href: "/admin/candidates", label: "Candidates" },
   { href: "/admin/candidate-documents", label: "Candidate docs" },
   { href: "/admin/employers", label: "Employers" },

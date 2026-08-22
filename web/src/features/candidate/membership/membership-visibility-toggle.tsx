@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { setEmployerVisibility } from "./actions";
+import { track } from "@/features/analytics/tracker";
 
 export function MembershipVisibilityToggle({ initialVisible }: { initialVisible: boolean }) {
   const router = useRouter();
@@ -17,6 +18,7 @@ export function MembershipVisibilityToggle({ initialVisible }: { initialVisible:
     startTransition(async () => {
       try {
         await setEmployerVisibility(next);
+        if (next) track("candidate_visibility_enabled");
         setMessage(next ? "Your profile is now visible to employers." : "Your profile is now hidden from employer searches.");
         router.refresh();
       } catch (error) {

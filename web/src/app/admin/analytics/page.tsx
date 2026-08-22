@@ -1,0 +1,5 @@
+import { AdminPageHeader } from "@/features/admin/components/admin-ui";
+import { AnalyticsDashboard } from "@/features/admin/analytics/analytics-dashboard";
+import { loadAnalytics, type AnalyticsRange } from "@/features/admin/analytics/server";
+const valid = new Set<AnalyticsRange>(["today","yesterday","7d","30d","month","previous-month","custom"]);
+export default async function AdminAnalyticsPage({ searchParams }: { searchParams: Promise<{ range?: string; start?: string; end?: string }> }) { const params = await searchParams; const requested = params.range as AnalyticsRange; const range = valid.has(requested) ? requested : "30d"; const data = await loadAnalytics(range, params.start, params.end); return <><AdminPageHeader title="Analytics" description="First-party traffic, acquisition and registration attribution. Location is shown only when reliably supplied; raw IP addresses are never stored."/><AnalyticsDashboard data={data} range={range} customStart={params.start} customEnd={params.end}/></>; }

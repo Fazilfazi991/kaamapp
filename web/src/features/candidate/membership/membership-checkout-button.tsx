@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { track } from "@/features/analytics/tracker";
 
 export function MembershipCheckoutButton({ label }: { label: string }) {
   const [message, setMessage] = useState<string | null>(null);
@@ -8,6 +9,7 @@ export function MembershipCheckoutButton({ label }: { label: string }) {
 
   async function startCheckout() {
     setLoading(true);
+    track("membership_checkout_started");
     setMessage(null);
     try {
       const response = await fetch("/api/stripe/candidate-membership/checkout", { method: "POST" });
