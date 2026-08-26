@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { AnalyticsTracker } from "@/features/analytics/analytics-tracker";
@@ -25,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geist.variable} antialiased`}>
-      <body><GoogleAnalytics /><AnalyticsTracker />{children}</body>
+      <body><GoogleAnalytics /><Suspense fallback={null}><AnalyticsTracker /></Suspense>{children}</body>
     </html>
   );
 }
