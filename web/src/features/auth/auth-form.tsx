@@ -54,6 +54,7 @@ export function AuthForm({
   const [now, setNow] = useState(0);
   const otpRequestInFlight = useRef(false);
   const otpVerificationInFlight = useRef(false);
+  const registrationStarted = useRef(false);
   const [suggestRegistration, setSuggestRegistration] = useState(false);
 
   const cooldownRemaining = cooldownUntil
@@ -85,6 +86,12 @@ export function AuthForm({
     setSuggestRegistration(false);
   }
 
+  function trackRegistrationStarted(authMethod: "otp" | "google") {
+    if (mode !== "register" || registrationStarted.current) return;
+    registrationStarted.current = true;
+    track("registration_started", { account_type: role, auth_method: authMethod });
+  }
+
   async function sendOtp() {
     if (!supabase || loading || otpRequestInFlight.current) return;
     resetAlerts();
@@ -93,7 +100,7 @@ export function AuthForm({
       return;
     }
 
-    if (mode === "register") track("registration_started", { account_type: role });
+    trackRegistrationStarted("otp");
     otpRequestInFlight.current = true;
     setLoading(true);
     const { error: otpError } = await supabase.auth.signInWithOtp({
@@ -113,7 +120,7 @@ export function AuthForm({
       return;
     }
 
-    track("otp_requested", { auth_method: "otp" });
+    track("otp_requested", { flow: mode === "login" ? "login" : "registration", account_type: role });
 
     const sentAt = Date.now();
     setNow(sentAt);
@@ -131,6 +138,7 @@ export function AuthForm({
       return;
     }
 
+    otpVerificationInFlight.current = true;
     setLoading(true);
     const { data, error: verifyError } = await supabase.auth.verifyOtp({
       email: trimmedEmail,
@@ -147,7 +155,7 @@ export function AuthForm({
     }
 
     otpVerificationInFlight.current = false;
-    track("otp_verified", { auth_method: "otp" });
+    track("otp_verified", { flow: mode === "login" ? "login" : "registration" });
 
     const roleResult = await supabase
       .from("profiles")
@@ -193,7 +201,7 @@ export function AuthForm({
     if (backendRole !== "admin") linkAnalyticsIdentity(backendRole);
     if (isNewRoleSelection) track("account_type_selected", { account_type: backendRole as "candidate" | "employer" });
     track(mode === "register" ? "registration_completed" : "login", { role: backendRole });
-    if (mode === "login") track("login_success", { auth_method: "otp" });
+    if (mode === "login") track("login_success", { auth_method: "otp", account_type: backendRole });
     const account = {
       userId: data.user.id,
       email: data.user.email ?? null,
@@ -277,9 +285,8 @@ export function AuthForm({
   async function continueWithGoogle() {
     if (!supabase || loading) return;
     resetAlerts();
-    otpVerificationInFlight.current = true;
     setLoading(true);
-    if (mode === "register") track("registration_started", { account_type: role });
+    trackRegistrationStarted("google");
 
     const callback = new URL(oauthCallbackUrl({
       currentOrigin: window.location.origin,
@@ -298,7 +305,7 @@ export function AuthForm({
       setError(otpErrorPresentation("request", oauthError).message);
       return;
     }
-    track("google_auth_started", { auth_method: "google" });
+    track("google_auth_started", { flow: mode === "login" ? "login" : "registration", account_type: role });
   }
 
   function changeEmail() {

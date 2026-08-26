@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { track } from "@/features/analytics/tracker";
+import { trackGoogleAnalyticsEventOnce } from "@/features/analytics/ga4";
 
 export function MembershipConfirmation({ confirmed }: { confirmed: boolean }) {
   const router = useRouter();
   useEffect(() => {
     if (confirmed) {
-      track("membership_payment_success");
+      trackGoogleAnalyticsEventOnce("membership-payment-success", "membership_payment_success", { membership_type: "lifetime", currency: "AED" });
       return;
     }
     const refreshes = [3500, 9000].map((delay) => window.setTimeout(() => router.refresh(), delay));

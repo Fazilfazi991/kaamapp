@@ -59,7 +59,7 @@ export function GoogleOAuthComplete() {
         setState("choose-role");
         return;
       }
-      track("login_success", { auth_method: "google" });
+      track("login_success", { auth_method: "google", account_type: profile.role });
       if (isBlockedStatus(profile.status)) {
         router.replace(routes.accountBlocked);
       } else {
@@ -84,7 +84,7 @@ export function GoogleOAuthComplete() {
       return;
     }
     track("account_type_selected", { account_type: data.role as "candidate" | "employer" });
-    track("login_success", { auth_method: "google" });
+    track("login_success", { auth_method: "google", account_type: data.role });
     if (isBlockedStatus(data.status)) {
       router.replace(routes.accountBlocked);
     } else {

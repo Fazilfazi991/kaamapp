@@ -3,14 +3,20 @@ export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim
 export type GoogleAnalyticsEvent =
   | "registration_started" | "otp_requested" | "otp_verified" | "google_auth_started"
   | "login_success" | "logout" | "account_type_selected"
+  | "account_setup_viewed"
   | "candidate_onboarding_started" | "candidate_onboarding_completed"
   | "employer_onboarding_started" | "employer_onboarding_completed"
   | "membership_page_viewed" | "membership_checkout_started" | "membership_payment_success"
-  | "candidate_profile_viewed" | "employer_profile_viewed" | "interest_sent" | "interest_accepted";
+  | "candidate_search_viewed" | "candidate_profile_viewed" | "employer_profile_viewed" | "interest_sent" | "interest_accepted";
 
 export type SafeAnalyticsParameters = {
-  account_type?: "candidate" | "employer";
+  account_type?: "candidate" | "employer" | "admin" | "none";
   auth_method?: "otp" | "google";
+  flow?: "login" | "registration";
+  membership_type?: "lifetime";
+  currency?: "AED";
+  viewer_type?: "candidate" | "employer";
+  value?: number;
 };
 
 type Gtag = (...args: unknown[]) => void;
@@ -39,6 +45,18 @@ function gtag(...args: unknown[]) {
 
 export function trackGoogleAnalyticsEvent(eventName: GoogleAnalyticsEvent, parameters: SafeAnalyticsParameters = {}) {
   gtag("event", eventName, { send_to: GA_MEASUREMENT_ID, ...parameters });
+}
+
+export function trackGoogleAnalyticsEventOnce(key: string, eventName: GoogleAnalyticsEvent, parameters: SafeAnalyticsParameters = {}) {
+  if (typeof window === "undefined" || !ga4Enabled()) return;
+  try {
+    const storageKey = `kaam.ga4.once.${key}`;
+    if (window.sessionStorage.getItem(storageKey)) return;
+    window.sessionStorage.setItem(storageKey, "1");
+    trackGoogleAnalyticsEvent(eventName, parameters);
+  } catch {
+    // Analytics storage must never block a KAAM flow.
+  }
 }
 
 export function trackGoogleAnalyticsPageView(pathname: string) {
