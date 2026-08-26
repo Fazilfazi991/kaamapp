@@ -116,7 +116,7 @@ export function AuthForm({
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: trimmedEmail,
       options: {
-        shouldCreateUser: true,
+        shouldCreateUser: mode === "register",
         data: { role },
       },
     });

@@ -87,7 +87,7 @@ export function profileRecoveryDecision(account: AccountSnapshot): RouteDecision
   if (!account.role) {
     return {
       allowed: false,
-      redirectTo: routes.accountRecovery,
+      redirectTo: routes.accountSetup,
       status: "missing_profile",
       message: "Your account setup is incomplete. Please choose how you want to use Kaam.",
     };
@@ -151,6 +151,21 @@ export function authPageDecision(account: AccountSnapshot): RouteDecision {
   const recovery = profileRecoveryDecision(account);
   if (recovery?.status === "unauthenticated") {
     return { allowed: true, status: "unauthenticated" };
+  }
+  if (recovery) return recovery;
+
+  return {
+    allowed: false,
+    redirectTo: dashboardForRole(account.role as UserRole),
+    status: "ready",
+  };
+}
+
+/** Routing decision for the authenticated role-selection page. */
+export function accountSetupDecision(account: AccountSnapshot): RouteDecision {
+  const recovery = profileRecoveryDecision(account);
+  if (recovery?.status === "missing_profile") {
+    return { allowed: true, status: "missing_profile" };
   }
   if (recovery) return recovery;
 

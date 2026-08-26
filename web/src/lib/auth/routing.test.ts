@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   authPageDecision,
+  accountSetupDecision,
   blockedAccountMessage,
   canCreateProfile,
   isBlockedStatus,
@@ -147,7 +148,7 @@ describe("protectedRouteDecision", () => {
       ),
     ).toMatchObject({
       allowed: false,
-      redirectTo: routes.accountRecovery,
+      redirectTo: routes.accountSetup,
       status: "missing_profile",
     });
   });
@@ -244,6 +245,20 @@ describe("auth routing helpers", () => {
 
   it("authenticated user visiting login is redirected correctly", () => {
     expect(authPageDecision(candidate)).toMatchObject({
+      allowed: false,
+      redirectTo: routes.candidateDashboard,
+    });
+  });
+
+  it("allows an authenticated user without a KAAM role into account setup", () => {
+    expect(accountSetupDecision({ ...unauthenticated, userId: "new-auth-user", email: "new@example.com" })).toMatchObject({
+      allowed: true,
+      status: "missing_profile",
+    });
+  });
+
+  it("sends role-holding users away from account setup to their dashboard", () => {
+    expect(accountSetupDecision(candidate)).toMatchObject({
       allowed: false,
       redirectTo: routes.candidateDashboard,
     });

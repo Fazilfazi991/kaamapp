@@ -47,6 +47,7 @@ export const routes = {
   adminAnalytics: "/admin/analytics",
   adminNotifications: "/admin/notifications",
   accountBlocked: "/account/blocked",
+  accountSetup: "/account/setup",
   accountRecovery: "/account/recovery",
   accountConflict: "/account/conflict",
 } as const;

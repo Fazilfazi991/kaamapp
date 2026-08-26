@@ -10,9 +10,7 @@ import type { AppAccountRole } from "@/lib/auth/routing";
 
 export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ role?: string }> }) {
   const configError = supabaseConfigError();
-  if (!configError) {
-    await redirectAuthenticatedAuthPage({ allowMissingProfile: true });
-  }
+  if (!configError) await redirectAuthenticatedAuthPage();
   const requestedRole = (await searchParams).role;
   const initialRole: AppAccountRole = requestedRole === "employer" ? "employer" : "candidate";
 

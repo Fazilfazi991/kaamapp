@@ -6,6 +6,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { routes } from "@/config/routes";
 import {
   authPageDecision,
+  accountSetupDecision,
   dashboardForRole,
   profileRecoveryDecision,
   protectedRouteDecision,
@@ -93,7 +94,7 @@ export const getPublicAccountNavigation = cache(async function getPublicAccountN
     authenticated: true,
     role: snapshot.role,
     displayName: snapshot.displayName ?? snapshot.email,
-    dashboardHref: recovery?.redirectTo ?? (snapshot.role ? dashboardForRole(snapshot.role) : routes.accountRecovery),
+    dashboardHref: recovery?.redirectTo ?? (snapshot.role ? dashboardForRole(snapshot.role) : routes.accountSetup),
   };
 });
 
@@ -161,15 +162,17 @@ export const requireRole = cache(async function requireRole(role: AppAccountRole
   };
 });
 
-export async function redirectAuthenticatedAuthPage({
-  allowMissingProfile = false,
-}: {
-  allowMissingProfile?: boolean;
-} = {}) {
+export async function redirectAuthenticatedAuthPage() {
   const snapshot = await getAuthenticatedAccountSnapshot();
-  if (allowMissingProfile && snapshot.userId && !snapshot.role) return;
   const decision = authPageDecision(snapshot);
   if (!decision.allowed && decision.redirectTo) redirect(decision.redirectTo);
+}
+
+export async function requireAccountSetup() {
+  const snapshot = await getAuthenticatedAccountSnapshot();
+  const decision = accountSetupDecision(snapshot);
+  if (!decision.allowed && decision.redirectTo) redirect(decision.redirectTo);
+  return snapshot;
 }
 
 export async function signOutAction() {
