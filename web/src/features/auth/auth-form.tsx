@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Label, TextInput } from "@/components/ui/form";
 import { routes } from "@/config/routes";
@@ -19,6 +20,7 @@ import {
 } from "@/lib/auth/routing";
 import type { UserRole } from "@/types/domain";
 import { linkAnalyticsIdentity, track } from "@/features/analytics/tracker";
+import { otpErrorPresentation } from "@/features/auth/otp-errors";
 
 type Step = "email" | "otp";
 type AuthMode = "login" | "register";
@@ -50,6 +52,9 @@ export function AuthForm({
   const [loading, setLoading] = useState(false);
   const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
   const [now, setNow] = useState(0);
+  const otpRequestInFlight = useRef(false);
+  const otpVerificationInFlight = useRef(false);
+  const [suggestRegistration, setSuggestRegistration] = useState(false);
 
   const cooldownRemaining = cooldownUntil
     ? Math.max(0, Math.ceil((cooldownUntil - now) / 1000))
@@ -77,34 +82,11 @@ export function AuthForm({
   function resetAlerts() {
     setError("");
     setMessage("");
-  }
-
-  function friendlyError(operation: string, cause: unknown) {
-    const rawMessage =
-      cause && typeof cause === "object" && "message" in cause
-        ? String(cause.message)
-        : "";
-    const lower = rawMessage.toLowerCase();
-
-    if (lower.includes("rate") || lower.includes("too many")) {
-      return "Too many OTP requests. Please wait a little and try again.";
-    }
-    if (lower.includes("expired")) return "This OTP has expired. Request a new code.";
-    if (lower.includes("invalid") || lower.includes("token")) {
-      return "The OTP code is incorrect. Check the email and try again.";
-    }
-    if (lower.includes("network") || lower.includes("fetch")) {
-      return "Network error. Check your connection and try again.";
-    }
-
-    if (process.env.NODE_ENV !== "production") {
-      console.debug("[auth]", { operation, category: "supabase_error" });
-    }
-    return "We could not complete that authentication step. Please try again.";
+    setSuggestRegistration(false);
   }
 
   async function sendOtp() {
-    if (!supabase) return;
+    if (!supabase || loading || otpRequestInFlight.current) return;
     resetAlerts();
     if (!isValidEmail(trimmedEmail)) {
       setError("Enter a valid email address.");
@@ -112,6 +94,7 @@ export function AuthForm({
     }
 
     if (mode === "register") track("registration_started", { account_type: role });
+    otpRequestInFlight.current = true;
     setLoading(true);
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: trimmedEmail,
@@ -120,10 +103,13 @@ export function AuthForm({
         data: { role },
       },
     });
+    otpRequestInFlight.current = false;
     setLoading(false);
 
     if (otpError) {
-      setError(friendlyError("request_otp", otpError));
+      const presentation = otpErrorPresentation("request", otpError);
+      setError(presentation.message);
+      setSuggestRegistration(mode === "login" && presentation.suggestRegistration);
       return;
     }
 
@@ -132,12 +118,13 @@ export function AuthForm({
     const sentAt = Date.now();
     setNow(sentAt);
     setCooldownUntil(sentAt + resendCooldownSeconds * 1000);
+    setOtp("");
     setStep("otp");
     setMessage("OTP sent. Enter the code from your email.");
   }
 
   async function verifyOtp() {
-    if (!supabase) return;
+    if (!supabase || loading || otpVerificationInFlight.current) return;
     resetAlerts();
     if (otp.length !== otpLength) {
       setError(`Enter the ${otpLength}-digit OTP code.`);
@@ -154,10 +141,12 @@ export function AuthForm({
     if (verifyError || !data.user) {
       setLoading(false);
       setOtp("");
-      setError(friendlyError("verify_otp", verifyError));
+      otpVerificationInFlight.current = false;
+      setError(otpErrorPresentation("verify", verifyError).message);
       return;
     }
 
+    otpVerificationInFlight.current = false;
     track("otp_verified", { auth_method: "otp" });
 
     const roleResult = await supabase
@@ -288,6 +277,7 @@ export function AuthForm({
   async function continueWithGoogle() {
     if (!supabase || loading) return;
     resetAlerts();
+    otpVerificationInFlight.current = true;
     setLoading(true);
     if (mode === "register") track("registration_started", { account_type: role });
 
@@ -305,7 +295,7 @@ export function AuthForm({
 
     if (oauthError) {
       setLoading(false);
-      setError(friendlyError("google_oauth", oauthError));
+      setError(otpErrorPresentation("request", oauthError).message);
       return;
     }
     track("google_auth_started", { auth_method: "google" });
@@ -395,9 +385,10 @@ export function AuthForm({
         </p>
       ) : null}
       {error ? (
-        <p className="mt-4 rounded-lg bg-[#ffe4eb] px-3 py-2 text-sm text-[#9a1744]">
-          {error}
-        </p>
+        <div className="mt-4 rounded-lg bg-[#ffe4eb] px-3 py-2 text-sm text-[#9a1744]">
+          <p>{error}</p>
+          {suggestRegistration ? <Link href={routes.register} className="mt-2 inline-block font-semibold underline">Register for KAAM</Link> : null}
+        </div>
       ) : null}
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
