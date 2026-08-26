@@ -111,7 +111,7 @@ export function AuthForm({
       return;
     }
 
-    if (mode === "register") track("registration_started", { role });
+    if (mode === "register") track("registration_started", { account_type: role });
     setLoading(true);
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: trimmedEmail,
@@ -126,6 +126,8 @@ export function AuthForm({
       setError(friendlyError("request_otp", otpError));
       return;
     }
+
+    track("otp_requested", { auth_method: "otp" });
 
     const sentAt = Date.now();
     setNow(sentAt);
@@ -156,6 +158,8 @@ export function AuthForm({
       return;
     }
 
+    track("otp_verified", { auth_method: "otp" });
+
     const roleResult = await supabase
       .from("profiles")
       .select("role,status")
@@ -170,7 +174,8 @@ export function AuthForm({
 
     let backendRole = roleResult.data?.role ?? null;
     let backendStatus = roleResult.data?.status ?? null;
-    if (!backendRole && mode === "register") {
+    const isNewRoleSelection = !backendRole && mode === "register";
+    if (isNewRoleSelection) {
       // This is the shared mobile/web account bootstrap contract. It obtains
       // the authenticated user from auth.uid(), creates exactly one profile,
       // and creates the candidate shell when appropriate. Do not duplicate
@@ -197,7 +202,9 @@ export function AuthForm({
     }
 
     if (backendRole !== "admin") linkAnalyticsIdentity(backendRole);
+    if (isNewRoleSelection) track("account_type_selected", { account_type: backendRole as "candidate" | "employer" });
     track(mode === "register" ? "registration_completed" : "login", { role: backendRole });
+    if (mode === "login") track("login_success", { auth_method: "otp" });
     const account = {
       userId: data.user.id,
       email: data.user.email ?? null,
@@ -282,7 +289,7 @@ export function AuthForm({
     if (!supabase || loading) return;
     resetAlerts();
     setLoading(true);
-    if (mode === "register") track("registration_started", { role });
+    if (mode === "register") track("registration_started", { account_type: role });
 
     const callback = new URL(oauthCallbackUrl({
       currentOrigin: window.location.origin,
@@ -299,7 +306,9 @@ export function AuthForm({
     if (oauthError) {
       setLoading(false);
       setError(friendlyError("google_oauth", oauthError));
+      return;
     }
+    track("google_auth_started", { auth_method: "google" });
   }
 
   function changeEmail() {

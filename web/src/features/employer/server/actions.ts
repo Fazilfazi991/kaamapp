@@ -100,7 +100,7 @@ export async function sendInterest(formData: FormData) {
   revalidatePath(routes.employerSearch);
   revalidatePath(routes.employerShortlist);
   revalidatePath(routes.employerInterests);
-  redirect(routes.employerInterests);
+  redirect(`${routes.employerInterests}?analytics=interest_sent`);
 }
 
 export async function withdrawInterest(formData: FormData) {

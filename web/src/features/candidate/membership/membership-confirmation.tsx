@@ -2,11 +2,15 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { track } from "@/features/analytics/tracker";
 
 export function MembershipConfirmation({ confirmed }: { confirmed: boolean }) {
   const router = useRouter();
   useEffect(() => {
-    if (confirmed) return;
+    if (confirmed) {
+      track("membership_payment_success");
+      return;
+    }
     const refreshes = [3500, 9000].map((delay) => window.setTimeout(() => router.refresh(), delay));
     return () => refreshes.forEach(window.clearTimeout);
   }, [confirmed, router]);

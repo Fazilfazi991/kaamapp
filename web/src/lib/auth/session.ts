@@ -181,7 +181,7 @@ export async function signOutAction() {
   const supabase = await createServerSupabaseClient();
   await supabase.auth.signOut({ scope: "global" });
   revalidatePath("/", "layout");
-  redirect(routes.login);
+  redirect(`${routes.login}?analytics=logout`);
 }
 
 export async function signOutToHomeAction() {
@@ -190,7 +190,7 @@ export async function signOutToHomeAction() {
   const supabase = await createServerSupabaseClient();
   await supabase.auth.signOut({ scope: "global" });
   revalidatePath("/", "layout");
-  redirect(routes.home);
+  redirect(`${routes.home}?analytics=logout`);
 }
 
 export async function loadCandidateDashboardData(userId: string) {

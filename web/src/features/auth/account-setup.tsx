@@ -7,6 +7,7 @@ import { routes } from "@/config/routes";
 import { dashboardForRole, isBlockedStatus, type AppAccountRole } from "@/lib/auth/routing";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import type { UserRole } from "@/types/domain";
+import { track } from "@/features/analytics/tracker";
 
 export function AccountSetup({ email }: { email: string | null }) {
   const router = useRouter();
@@ -28,6 +29,7 @@ export function AccountSetup({ email }: { email: string | null }) {
       setError("We could not finish setting up your KAAM account. Please try again.");
       return;
     }
+    track("account_type_selected", { account_type: data.role as "candidate" | "employer" });
 
     router.replace(isBlockedStatus(data.status) ? routes.accountBlocked : dashboardForRole(data.role));
     router.refresh();

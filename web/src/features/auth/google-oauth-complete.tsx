@@ -7,6 +7,7 @@ import { routes } from "@/config/routes";
 import { dashboardForRole, isBlockedStatus, safeReturnPath, type AppAccountRole } from "@/lib/auth/routing";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import type { UserRole } from "@/types/domain";
+import { track } from "@/features/analytics/tracker";
 
 type State = "checking" | "choose-role" | "error";
 
@@ -58,6 +59,7 @@ export function GoogleOAuthComplete() {
         setState("choose-role");
         return;
       }
+      track("login_success", { auth_method: "google" });
       if (isBlockedStatus(profile.status)) {
         router.replace(routes.accountBlocked);
       } else {
@@ -81,6 +83,8 @@ export function GoogleOAuthComplete() {
       setError("We could not finish setting up your KAAM profile. Please try again.");
       return;
     }
+    track("account_type_selected", { account_type: data.role as "candidate" | "employer" });
+    track("login_success", { auth_method: "google" });
     if (isBlockedStatus(data.status)) {
       router.replace(routes.accountBlocked);
     } else {

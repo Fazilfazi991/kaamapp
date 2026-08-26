@@ -68,7 +68,7 @@ async function respondToInterest(formData: FormData, next: "accepted" | "rejecte
   revalidatePath(routes.employerInterests);
   revalidatePath(routes.employerMatches);
   revalidatePath(routes.employerMessages);
-  redirect(next === "accepted" ? routes.candidateMatches : routes.candidateInterests);
+  redirect(next === "accepted" ? `${routes.candidateMatches}?analytics=interest_accepted` : routes.candidateInterests);
 }
 
 export async function acceptInterest(formData: FormData) {

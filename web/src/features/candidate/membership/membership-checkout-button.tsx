@@ -9,12 +9,12 @@ export function MembershipCheckoutButton({ label }: { label: string }) {
 
   async function startCheckout() {
     setLoading(true);
-    track("membership_checkout_started");
     setMessage(null);
     try {
       const response = await fetch("/api/stripe/candidate-membership/checkout", { method: "POST" });
       const payload = (await response.json()) as { url?: string; error?: string };
       if (!response.ok || !payload.url) throw new Error(payload.error ?? "Unable to start secure checkout.");
+      track("membership_checkout_started");
       window.location.assign(payload.url);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to start secure checkout.");
