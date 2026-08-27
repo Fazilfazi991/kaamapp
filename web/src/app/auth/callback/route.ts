@@ -30,14 +30,17 @@ export async function GET(request: NextRequest) {
 
   const target = completeUrl(request);
   let response = NextResponse.redirect(target);
+  response.headers.set("Cache-Control", "private, no-store");
   const supabase = createServerClient(config.url, config.anonKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet, responseHeaders) {
         response = NextResponse.redirect(target);
         cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        Object.entries(responseHeaders).forEach(([key, value]) => response.headers.set(key, value));
+        response.headers.set("Cache-Control", "private, no-store");
       },
     },
   });

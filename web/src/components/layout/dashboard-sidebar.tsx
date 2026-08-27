@@ -1,7 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { signOutAction } from "@/lib/auth/session";
-import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/features/auth/logout-button";
 import { ActiveDashboardLink } from "./active-dashboard-link";
 
 export function DashboardSidebar({
@@ -34,11 +33,7 @@ export function DashboardSidebar({
         ))}
       </nav>
       {account ? <div className="mt-auto border-t border-[#eee9ff] pt-4"><div className="flex items-center gap-3 rounded-xl bg-[#faf9ff] p-3"><span className="grid h-9 w-9 place-items-center rounded-full bg-[#160847] text-xs font-bold text-white">{initials(account.name ?? account.email)}</span><div className="min-w-0"><p className="truncate text-sm font-bold text-[#160847]">{account.name || "KAAM account"}</p><p className="truncate text-xs text-[#746975]">{title}</p></div></div></div> : null}
-      <form action={signOutAction} className="pt-4">
-        <Button type="submit" variant="secondary" className="w-full">
-          Logout
-        </Button>
-      </form>
+      <LogoutButton variant="secondary" className="pt-4" />
     </aside>
   );
 }

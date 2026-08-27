@@ -297,7 +297,10 @@ export function AuthForm({
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: callback.toString() },
+      options: {
+        redirectTo: callback.toString(),
+        queryParams: { prompt: "select_account" },
+      },
     });
 
     if (oauthError) {

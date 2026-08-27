@@ -2,7 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { routes } from "@/config/routes";
 import { ButtonLink } from "@/components/ui/button";
-import { getPublicAccountNavigation, signOutToHomeAction } from "@/lib/auth/session";
+import { getPublicAccountNavigation } from "@/lib/auth/session";
+import { LogoutButton } from "@/features/auth/logout-button";
 
 export async function Header() {
   const account = await getPublicAccountNavigation();
@@ -24,7 +25,7 @@ export async function Header() {
           <Link href={routes.howItWorks} className="focus-ring rounded-md px-3 py-2 text-sm font-medium text-white/90 hover:text-[#f56ba1]">How it works</Link>
         </nav>
         <div className="hidden items-center gap-2 border-l border-white/25 pl-4 md:flex">
-          {account.authenticated && account.dashboardHref ? <><Link href={account.dashboardHref} className="focus-ring flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/10"><span aria-hidden="true" className="grid h-9 w-9 place-items-center rounded-full border border-white/40 bg-white/10 text-xs font-bold text-white">{initials}</span><span className="flex flex-col leading-tight"><span className="text-sm font-semibold text-white">{firstName}</span><span className="text-[11px] text-white/70">{roleLabel}</span></span></Link><ButtonLink href={account.dashboardHref} className="min-h-10 bg-[#f56ba1] px-4 py-2 text-[#160847] hover:bg-[#f889b6]">Dashboard</ButtonLink><form action={signOutToHomeAction}><button type="submit" className="focus-ring rounded-md px-2 py-2 text-sm font-medium text-white/80 hover:text-[#f56ba1]">Logout</button></form></> : <><ButtonLink href={routes.login} className="min-h-10 border border-white/60 bg-transparent px-4 py-2 text-white hover:bg-white/10">Login</ButtonLink><ButtonLink href={routes.register} className="min-h-10 bg-[#f56ba1] px-4 py-2 text-[#160847] hover:bg-[#f889b6]">Get started</ButtonLink></>}
+          {account.authenticated && account.dashboardHref ? <><Link href={account.dashboardHref} className="focus-ring flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/10"><span aria-hidden="true" className="grid h-9 w-9 place-items-center rounded-full border border-white/40 bg-white/10 text-xs font-bold text-white">{initials}</span><span className="flex flex-col leading-tight"><span className="text-sm font-semibold text-white">{firstName}</span><span className="text-[11px] text-white/70">{roleLabel}</span></span></Link><ButtonLink href={account.dashboardHref} className="min-h-10 bg-[#f56ba1] px-4 py-2 text-[#160847] hover:bg-[#f889b6]">Dashboard</ButtonLink><LogoutButton destination={routes.home} variant="ghost" buttonClassName="min-h-0 px-2 py-2 text-white/80 hover:bg-transparent hover:text-[#f56ba1]" /></> : <><ButtonLink href={routes.login} className="min-h-10 border border-white/60 bg-transparent px-4 py-2 text-white hover:bg-white/10">Login</ButtonLink><ButtonLink href={routes.register} className="min-h-10 bg-[#f56ba1] px-4 py-2 text-[#160847] hover:bg-[#f889b6]">Get started</ButtonLink></>}
         </div>
         <details className="relative md:hidden">
           <summary className="focus-ring cursor-pointer list-none rounded-lg border border-white/60 px-4 py-3 text-sm font-semibold text-white">Menu</summary>
@@ -38,11 +39,7 @@ export async function Header() {
                 <ButtonLink href={account.dashboardHref} className="min-h-12 w-full">
                   {dashboardLabel}
                 </ButtonLink>
-                <form action={signOutToHomeAction} className="px-3">
-                  <button type="submit" className="focus-ring text-sm font-semibold text-[#160847]">
-                    Logout
-                  </button>
-                </form>
+                <LogoutButton destination={routes.home} variant="ghost" className="px-3" buttonClassName="min-h-0 justify-start px-0 py-0" />
               </div>
             ) : (
               <nav className="grid gap-1" aria-label="Mobile primary">

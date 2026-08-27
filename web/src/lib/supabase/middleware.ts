@@ -33,13 +33,16 @@ export async function updateSession(request: NextRequest) {
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet, responseHeaders) {
         cookiesToSet.forEach(({ name, value }) =>
           request.cookies.set(name, value),
         );
         response = NextResponse.next({ request: { headers: requestHeaders } });
         cookiesToSet.forEach(({ name, value, options }) =>
           response.cookies.set(name, value, options),
+        );
+        Object.entries(responseHeaders).forEach(([key, value]) =>
+          response.headers.set(key, value),
         );
       },
     },

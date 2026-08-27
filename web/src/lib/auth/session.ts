@@ -179,7 +179,7 @@ export async function signOutAction() {
   "use server";
 
   const supabase = await createServerSupabaseClient();
-  await supabase.auth.signOut({ scope: "global" });
+  await supabase.auth.signOut({ scope: "local" });
   revalidatePath("/", "layout");
   redirect(`${routes.login}?analytics=logout`);
 }
@@ -188,7 +188,7 @@ export async function signOutToHomeAction() {
   "use server";
 
   const supabase = await createServerSupabaseClient();
-  await supabase.auth.signOut({ scope: "global" });
+  await supabase.auth.signOut({ scope: "local" });
   revalidatePath("/", "layout");
   redirect(`${routes.home}?analytics=logout`);
 }

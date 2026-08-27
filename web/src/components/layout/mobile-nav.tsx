@@ -1,6 +1,5 @@
 import { ActiveDashboardLink } from "./active-dashboard-link";
-import { signOutAction } from "@/lib/auth/session";
-import { Button } from "@/components/ui/button";
+import { LogoutButton } from "@/features/auth/logout-button";
 
 export const mobileMenuLabel = "Menu";
 export const mobileMenuNavigationLabel = "Menu navigation";
@@ -23,7 +22,7 @@ export function MobileNavigation({
         </nav>
         <details className="fixed bottom-[4.8rem] right-3 z-30 lg:hidden">
           <summary className="focus-ring cursor-pointer list-none rounded-full border border-[#eadde3] bg-white px-4 py-2 text-xs font-bold text-[#413946] shadow-lg">More</summary>
-          <div className="absolute bottom-[calc(100%+.5rem)] right-0 grid w-56 gap-1 rounded-2xl border border-[#eadde3] bg-white p-2 shadow-xl"><nav aria-label={mobileMenuNavigationLabel}>{secondary.map((item) => <ActiveDashboardLink key={item.href} href={item.href} label={item.label} className="focus-ring flex min-h-11 items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-[#514856]" activeClassName="bg-[#f3f0ff] text-[#160847]" />)}</nav><form action={signOutAction} className="border-t border-[#eadde3] pt-2"><Button type="submit" variant="secondary" className="w-full">Logout</Button></form></div>
+          <div className="absolute bottom-[calc(100%+.5rem)] right-0 grid w-56 gap-1 rounded-2xl border border-[#eadde3] bg-white p-2 shadow-xl"><nav aria-label={mobileMenuNavigationLabel}>{secondary.map((item) => <ActiveDashboardLink key={item.href} href={item.href} label={item.label} className="focus-ring flex min-h-11 items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-[#514856]" activeClassName="bg-[#f3f0ff] text-[#160847]" />)}</nav><LogoutButton variant="secondary" className="border-t border-[#eadde3] pt-2" /></div>
         </details>
       </>
     );
@@ -36,7 +35,7 @@ export function MobileNavigation({
         <nav className="grid grid-cols-2 gap-1 overflow-y-auto p-2" aria-label={mobileMenuNavigationLabel}>
           {items.map((item) => <ActiveDashboardLink key={item.href} href={item.href} label={item.label} className="focus-ring min-h-11 rounded-lg px-3 py-2.5 text-center text-sm font-semibold text-[#514856]" activeClassName="bg-[#f3f0ff] text-[#160847]" />)}
         </nav>
-        <form action={signOutAction} className="shrink-0 border-t border-[#eadde3] p-3"><Button type="submit" variant="secondary" className="w-full">Logout</Button></form>
+        <LogoutButton variant="secondary" className="shrink-0 border-t border-[#eadde3] p-3" />
       </div>
     </details>
   );
