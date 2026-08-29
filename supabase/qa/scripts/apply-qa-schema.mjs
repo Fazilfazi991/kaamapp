@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { appendFileSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { assertQaSupabaseTarget } from "../../../scripts/assert-qa-supabase-target.mjs";
@@ -31,8 +32,16 @@ if (!connection || !connection.includes(qaRef)) throw new Error("QA_DATABASE_URL
 const logPath = resolve(qaDir, "qa-schema-apply.log.jsonl");
 for (const entry of manifest.entries) {
   const file = resolve(supabaseDir, entry.source.replace(/^supabase\//, ""));
+  const actualSha256 = createHash("sha256").update(readFileSync(file)).digest("hex");
+  if (actualSha256 !== entry.sha256) throw new Error(`Checksum mismatch before execution: ${entry.source}`);
   const startedAt = new Date().toISOString();
-  const result = spawnSync("psql", [connection, "-v", "ON_ERROR_STOP=1", "-f", file], { stdio: "inherit" });
-  appendFileSync(logPath, `${JSON.stringify({ order: entry.order, source: entry.source, sha256: entry.sha256, startedAt, finishedAt: new Date().toISOString(), success: result.status === 0 })}\n`);
+  const startedMs = Date.now();
+  const npxCli = resolve(dirname(process.execPath), "node_modules", "npm", "bin", "npx-cli.js");
+  const result = spawnSync(process.execPath, [npxCli, "supabase", "db", "query", "--db-url", connection, "--file", file], { encoding: "utf8" });
+  if (result.stdout) process.stdout.write(result.stdout);
+  if (result.stderr) process.stderr.write(result.stderr.replaceAll(connection, "[REDACTED_QA_DATABASE_URL]"));
+  const errorText = result.status === 0 ? null : `${result.stderr || result.stdout || result.error || "unknown error"}`.replaceAll(connection, "[REDACTED_QA_DATABASE_URL]");
+  const sqlstate = errorText?.match(/(?:SQLSTATE|code)[^0-9A-Z]*([0-9A-Z]{5})/i)?.[1] ?? null;
+  appendFileSync(logPath, `${JSON.stringify({ order: entry.order, source: entry.source, expectedSha256: entry.sha256, actualSha256, startedAt, finishedAt: new Date().toISOString(), durationMs: Date.now() - startedMs, success: result.status === 0, sqlstate, error: errorText })}\n`);
   if (result.status !== 0) throw new Error(`Stopped after failure in ${entry.source}`);
 }
