@@ -7,7 +7,7 @@ import { routes } from "@/config/routes";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export function LogoutButton({
-  destination = routes.login,
+  destination = routes.candidateLogin,
   children = "Logout",
   className,
   buttonClassName,

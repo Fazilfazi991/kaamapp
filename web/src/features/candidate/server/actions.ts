@@ -261,8 +261,3 @@ export async function saveCandidateSkills(formData: FormData) {
   revalidateCandidatePages();
   redirect(String(formData.get("next") ?? routes.candidateOnboardingLocation));
 }
-
-export async function finishCandidateOnboarding() {
-  revalidateCandidatePages();
-  redirect(routes.candidateDashboard);
-}

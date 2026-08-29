@@ -1,18 +1,16 @@
 import { AuthNotice } from "@/components/ui/auth-notice";
 import { CandidateDashboard } from "@/features/candidate/candidate-dashboard";
 import { loadCandidateDashboardCounts } from "@/features/candidate/interests/server/data";
-import { loadCandidateBundle } from "@/features/candidate/server/data";
+import { loadCandidateDashboardBundle } from "@/features/candidate/server/data";
 import { loadCandidateDocuments } from "@/features/candidate/documents/server/data";
-import { requireRole } from "@/lib/auth/session";
 
 export default async function CandidateDashboardPage({
   searchParams,
 }: {
   searchParams: Promise<{ authNotice?: string }>;
 }) {
-  await requireRole("candidate");
   const [{ profile, candidate, membership }, counts, documents] = await Promise.all([
-    loadCandidateBundle(),
+    loadCandidateDashboardBundle(),
     loadCandidateDashboardCounts(),
     loadCandidateDocuments(),
   ]);

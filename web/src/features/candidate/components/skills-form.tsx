@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Label, SelectField, TextInput } from "@/components/ui/form";
 import { routes } from "@/config/routes";
 import { maxCandidateSkills } from "@/features/candidate/constants";
+import { OnboardingSubmitButton } from "@/features/candidate/components/onboarding-submit-button";
 import { saveCandidateSkills } from "@/features/candidate/server/actions";
 import type { CandidateSkillRow, SkillCategoryRow, SkillRow } from "@/types/domain";
 
@@ -99,9 +99,7 @@ export function SkillsForm({
         })}
       </div>
       <div className="sticky bottom-16 flex gap-3 bg-white/95 py-3 sm:static">
-        <Button type="submit" disabled={selected.length === 0}>
-          Save and continue
-        </Button>
+        <OnboardingSubmitButton disabled={selected.length === 0} />
       </div>
     </form>
   );

@@ -12,7 +12,7 @@ export default async function EmployerDashboardPage({
   const params = await searchParams;
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-5">
       <AuthNotice code={params.authNotice} />
       <PageTitle title="Employer dashboard" description="Search candidates, send interest, match, and connect." />
       <EmployerDashboard access={access} counts={counts} documents={documents} />

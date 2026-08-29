@@ -1,13 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { routes } from "@/config/routes";
-import { safeReturnPath } from "@/lib/auth/routing";
+import { parseAuthJourney, safeReturnPath } from "@/lib/auth/routing";
 import { supabaseConfig } from "@/lib/supabase/env";
 
 function completeUrl(request: NextRequest, params: Record<string, string | null> = {}) {
   const url = new URL(routes.authComplete, request.url);
   const next = safeReturnPath(request.nextUrl.searchParams.get("next"));
+  const journey = parseAuthJourney(request.nextUrl.searchParams.get("journey"));
   if (next) url.searchParams.set("next", next);
+  if (journey) url.searchParams.set("journey", journey);
   for (const [key, value] of Object.entries(params)) {
     if (value) url.searchParams.set(key, value);
   }

@@ -2,6 +2,8 @@ import { routes } from "@/config/routes";
 import type { UserRole } from "@/types/domain";
 
 export type AppAccountRole = Exclude<UserRole, "admin">;
+export type AuthMode = "login" | "register";
+export type AuthJourney = `${AppAccountRole}_${AuthMode}`;
 
 export type AccountStatus =
   | "unauthenticated"
@@ -38,6 +40,50 @@ export function dashboardForRole(role: UserRole) {
   return roleDashboard[role];
 }
 
+export function authJourney(role: AppAccountRole, mode: AuthMode): AuthJourney {
+  return `${role}_${mode}`;
+}
+
+export function parseAuthJourney(value: string | null | undefined): AuthJourney | null {
+  return value === "candidate_login" ||
+    value === "candidate_register" ||
+    value === "employer_login" ||
+    value === "employer_register"
+    ? value
+    : null;
+}
+
+export function roleForJourney(journey: AuthJourney): AppAccountRole {
+  return journey.startsWith("candidate_") ? "candidate" : "employer";
+}
+
+export function modeForJourney(journey: AuthJourney): AuthMode {
+  return journey.endsWith("_register") ? "register" : "login";
+}
+
+export function loginForRole(role: AppAccountRole) {
+  return role === "candidate" ? routes.candidateLogin : routes.employerLogin;
+}
+
+export function registerForRole(role: AppAccountRole) {
+  return role === "candidate" ? routes.candidateRegister : routes.employerRegister;
+}
+
+export function onboardingForRole(role: AppAccountRole) {
+  return role === "candidate" ? routes.candidateOnboarding : routes.employerOnboarding;
+}
+
+export function isRoleRoute(path: string, role: UserRole) {
+  const root = `/${role}`;
+  return path === root || path.startsWith(`${root}/`);
+}
+
+export function authenticatedEntryDestination(role: UserRole, returnPath?: string | null) {
+  if (role === "admin") return routes.admin;
+  const safePath = safeReturnPath(returnPath);
+  return safePath && isRoleRoute(safePath, role) ? safePath : onboardingForRole(role);
+}
+
 export function normalizeOtp(value: string) {
   return value.replace(/\D/g, "");
 }
@@ -68,6 +114,10 @@ export function safeReturnPath(value: string | null | undefined) {
   if (
     value.startsWith("/login") ||
     value.startsWith("/register") ||
+    value.startsWith(routes.candidateLogin) ||
+    value.startsWith(routes.candidateRegister) ||
+    value.startsWith(routes.employerLogin) ||
+    value.startsWith(routes.employerRegister) ||
     value.startsWith(routes.accountBlocked)
   ) {
     return null;
@@ -129,6 +179,9 @@ export function protectedRouteDecision(
   currentPath: string,
 ): RouteDecision {
   const recovery = profileRecoveryDecision(account);
+  if (recovery?.status === "unauthenticated") {
+    return { ...recovery, redirectTo: loginForRole(requestedRole) };
+  }
   if (recovery) return recovery;
 
   if (account.role !== requestedRole) {
@@ -196,7 +249,7 @@ export function postOtpDestination(
   const role = account.role as UserRole;
   const safePath = safeReturnPath(returnPath);
   const destination =
-    safePath && safePath.startsWith(`/${role}`) ? safePath : dashboardForRole(role);
+    safePath && isRoleRoute(safePath, role) ? safePath : dashboardForRole(role);
   const selectedWrongRole = role !== selectedRole;
 
   return {

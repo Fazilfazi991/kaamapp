@@ -9,7 +9,7 @@ export async function requireAdmin(): Promise<AdminAccount> {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect(routes.login);
+  if (!user) redirect(routes.candidateLogin);
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -20,7 +20,9 @@ export async function requireAdmin(): Promise<AdminAccount> {
   if (profile?.status === "blocked") redirect(routes.accountBlocked);
 
   if (!profile || profile.role !== "admin") {
-    redirect(routes.home);
+    if (profile?.role === "candidate") redirect(routes.candidateDashboard);
+    if (profile?.role === "employer") redirect(routes.employerDashboard);
+    redirect(routes.accountSetup);
   }
 
   return {

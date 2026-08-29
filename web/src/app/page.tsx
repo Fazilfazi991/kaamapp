@@ -1,5 +1,6 @@
 import { Footer } from "@/components/layout/footer";
 import Image from "next/image";
+import Link from "next/link";
 import { Header } from "@/components/layout/header";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { ButtonLink } from "@/components/ui/button";
@@ -32,9 +33,7 @@ export default async function HomePage() {
               <p className="mt-6 max-w-xl text-base leading-7 text-[#5e5662] sm:mt-8 sm:text-lg sm:leading-8">
                 KAAM connects workers and employers based on skills, requirements and mutual interest.
               </p>
-              <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row">
-                {account.authenticated && account.dashboardHref ? <><ButtonLink href={account.dashboardHref} className="w-full sm:w-auto">{dashboardLabel}</ButtonLink>{secondaryAction ? <ButtonLink href={secondaryAction.href} variant="secondary" className="w-full sm:w-auto">{secondaryAction.label}</ButtonLink> : null}</> : <><ButtonLink href={routes.candidates} className="w-full sm:w-auto">Find jobs</ButtonLink><ButtonLink href={routes.employers} variant="secondary" className="w-full sm:w-auto">Hire workers</ButtonLink><ButtonLink href={routes.login} variant="secondary" className="w-full sm:w-auto">Login</ButtonLink></>}
-              </div>
+              {account.authenticated && account.dashboardHref ? <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row"><ButtonLink href={account.dashboardHref} className="w-full sm:w-auto">{dashboardLabel}</ButtonLink>{secondaryAction ? <ButtonLink href={secondaryAction.href} variant="secondary" className="w-full sm:w-auto">{secondaryAction.label}</ButtonLink> : null}</div> : <div className="mt-8 divide-y divide-[#eadde3] border-y border-[#eadde3]"><section className="py-5"><h2 className="text-xl font-bold text-[#160847]">Looking for a job?</h2><p className="mt-1.5 text-sm leading-6 text-[#655b68]">Create your KAAM profile and get discovered by employers.</p><div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center"><ButtonLink href={routes.candidateRegister}>Register as Candidate</ButtonLink><Link href={routes.candidateLogin} className="focus-ring rounded-md text-sm font-semibold text-[#160847] underline decoration-[#f56ba1] decoration-2 underline-offset-4">Already registered? Candidate Login</Link></div></section><section className="py-5"><h2 className="text-xl font-bold text-[#160847]">Hiring workers?</h2><p className="mt-1.5 text-sm leading-6 text-[#655b68]">Find suitable candidates for your business.</p><div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center"><ButtonLink href={routes.employerRegister} variant="secondary">Register as Employer</ButtonLink><Link href={routes.employerLogin} className="focus-ring rounded-md text-sm font-semibold text-[#160847] underline decoration-[#f56ba1] decoration-2 underline-offset-4">Already have an employer account? Employer Login</Link></div></section></div>}
               <div className="kaam-trust-marquee mt-7 min-w-0 overflow-hidden border-t border-[#f1dce5] pt-5 sm:mt-8 sm:pt-6" aria-label="KAAM trust benefits">
                 <div className="kaam-trust-track flex w-max">
                   {[...trustBenefits, ...trustBenefits].map(([icon, title, text], index) => <div className="flex shrink-0 items-start gap-2 pr-7" key={`${title}-${index}`} aria-hidden={index >= trustBenefits.length || undefined}><span className="text-xl text-[#f56ba1]">{icon}</span><div className="whitespace-nowrap"><p className="text-sm font-bold text-[#160847]">{title}</p><p className="mt-0.5 text-xs text-[#766b74]">{text}</p></div></div>)}
@@ -63,7 +62,7 @@ export default async function HomePage() {
               <p className="mt-2 text-white/75">Use KAAM on the web today. The KAAM mobile app is coming soon for an even faster experience.</p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href={routes.register}>Create your KAAM profile</ButtonLink>
+              <ButtonLink href={routes.candidateRegister}>Register as Candidate</ButtonLink>
             </div>
           </div>
         </section>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Label, SelectField } from "@/components/ui/form";
 import { routes } from "@/config/routes";
 import {
@@ -9,6 +8,7 @@ import {
   regionsForCountry,
   normalizeCountry,
 } from "@/features/candidate/constants";
+import { OnboardingSubmitButton } from "@/features/candidate/components/onboarding-submit-button";
 import { saveLocationDetails } from "@/features/candidate/server/actions";
 
 export function LocationForm({
@@ -75,7 +75,7 @@ export function LocationForm({
         </SelectField>
       </label>
       <div className="sticky bottom-16 flex gap-3 bg-white/95 py-3 sm:static">
-        <Button type="submit">Save and continue</Button>
+        <OnboardingSubmitButton />
       </div>
     </form>
   );

@@ -13,11 +13,12 @@ export function DashboardSidebar({
   account?: { email: string | null; role: string; name?: string | null };
 }) {
   return (
-    <aside className="hidden min-h-screen w-[260px] flex-col border-r border-[#eadde3] bg-white p-4 lg:flex">
-      <div className="inline-flex justify-start self-start">
-        <Image src="/kaam-original-logo.png" alt="KAAM Perfect Match" width={132} height={58} priority className="h-auto w-[132px]" />
+    <aside className="hidden min-h-screen w-[264px] flex-col border-r border-[#e7e1f2] bg-white lg:flex">
+      <div className="flex h-24 items-center justify-center bg-[#160847] px-6 shadow-sm">
+        <Image src="/kaam-original-logo.png" alt="KAAM Perfect Match" width={132} height={58} priority className="h-auto w-[132px] object-contain" />
       </div>
-      <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-[#8a7c88]">
+      <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-5">
+      <p className="px-3 text-[11px] font-bold uppercase tracking-[0.18em] text-[#756b8a]">
         {title}
       </p>
       <nav className="mt-3 grid gap-1" aria-label={`${title} navigation`}>
@@ -27,13 +28,16 @@ export function DashboardSidebar({
             href={item.href}
             label={item.label}
             leading={<NavIcon label={item.label} />}
-            className="focus-ring flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-[#3b3340] hover:bg-[#f3f0ff] hover:text-[#160847]"
-            activeClassName="bg-[#160847] text-white shadow-sm"
+            className="focus-ring flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-[#3b3340] hover:bg-[#f3f0ff] hover:text-[#160847]"
+            activeClassName="bg-[#160847] text-white shadow-[0_4px_12px_rgba(22,8,71,.16)]"
           />
         ))}
       </nav>
-      {account ? <div className="mt-auto border-t border-[#eee9ff] pt-4"><div className="flex items-center gap-3 rounded-xl bg-[#faf9ff] p-3"><span className="grid h-9 w-9 place-items-center rounded-full bg-[#160847] text-xs font-bold text-white">{initials(account.name ?? account.email)}</span><div className="min-w-0"><p className="truncate text-sm font-bold text-[#160847]">{account.name || "KAAM account"}</p><p className="truncate text-xs text-[#746975]">{title}</p></div></div></div> : null}
-      <LogoutButton variant="secondary" className="pt-4" />
+      <div className="mt-auto">
+      {account ? <div className="border-t border-[#eee9ff] pt-4"><div className="flex items-center gap-3 rounded-xl bg-[#faf9ff] p-3"><span className="grid h-9 w-9 place-items-center rounded-full bg-[#160847] text-xs font-bold text-white">{initials(account.name ?? account.email)}</span><div className="min-w-0"><p className="truncate text-sm font-bold text-[#160847]">{account.name || "KAAM account"}</p><p className="truncate text-xs text-[#746975]">{title}</p></div></div></div> : null}
+      <LogoutButton variant="secondary" className={account ? "pt-3" : "border-t border-[#eee9ff] pt-4"} />
+      </div>
+      </div>
     </aside>
   );
 }

@@ -19,6 +19,33 @@ export type CandidateBundle = {
   membership: CandidateMembershipRow | null;
 };
 
+export type CandidateDashboardBundle = Pick<
+  CandidateBundle,
+  "profile" | "candidate" | "membership"
+>;
+
+export async function loadCandidateDashboardBundle(): Promise<CandidateDashboardBundle> {
+  const account = await requireRole("candidate");
+  const supabase = await createServerSupabaseClient();
+  const [{ data: profile }, { data: candidate }, { data: membership }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, role, full_name, phone, email, status")
+      .eq("id", account.userId)
+      .maybeSingle<ProfileRow>(),
+    supabase.from("candidate_profiles").select("*").eq("id", account.userId).maybeSingle<CandidateProfileRow>(),
+    supabase
+      .from("candidate_memberships")
+      .select("status, plan_code, membership_type, started_at, expires_at")
+      .eq("candidate_id", account.userId)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle<CandidateMembershipRow>(),
+  ]);
+
+  return { profile, candidate, membership };
+}
+
 export async function loadCandidateBundle(): Promise<CandidateBundle> {
   const account = await requireRole("candidate");
   const supabase = await createServerSupabaseClient();

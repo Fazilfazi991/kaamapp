@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   authPageDecision,
   accountSetupDecision,
+  authenticatedEntryDestination,
+  authJourney,
   blockedAccountMessage,
   canCreateProfile,
   isBlockedStatus,
+  isRoleRoute,
   normalizeOtp,
   postOtpDestination,
+  parseAuthJourney,
   protectedRouteDecision,
   safeReturnPath,
   type AccountSnapshot,
@@ -53,7 +57,7 @@ describe("protectedRouteDecision", () => {
         "candidate",
         routes.candidateDashboard,
       ),
-    ).toMatchObject({ allowed: false, redirectTo: routes.login });
+    ).toMatchObject({ allowed: false, redirectTo: routes.candidateLogin });
   });
 
   it("redirects unauthenticated employer routes to login", () => {
@@ -63,7 +67,7 @@ describe("protectedRouteDecision", () => {
         "employer",
         routes.employerDashboard,
       ),
-    ).toMatchObject({ allowed: false, redirectTo: routes.login });
+    ).toMatchObject({ allowed: false, redirectTo: routes.employerLogin });
   });
 
   it("allows candidate accounts to open the candidate dashboard", () => {
@@ -312,5 +316,31 @@ describe("auth routing helpers", () => {
 
   it("OTP normalization keeps digits only", () => {
     expect(normalizeOtp(" 12a 3-4\n56 ")).toBe("123456");
+  });
+
+  it("keeps all four role-specific OAuth journeys explicit", () => {
+    expect(authJourney("candidate", "login")).toBe("candidate_login");
+    expect(authJourney("candidate", "register")).toBe("candidate_register");
+    expect(authJourney("employer", "login")).toBe("employer_login");
+    expect(authJourney("employer", "register")).toBe("employer_register");
+    expect(parseAuthJourney("candidate_register")).toBe("candidate_register");
+    expect(parseAuthJourney("admin_login")).toBeNull();
+    expect(parseAuthJourney("https://evil.example")).toBeNull();
+  });
+
+  it("never uses the homepage as an authenticated entry destination", () => {
+    expect(authenticatedEntryDestination("candidate")).toBe(routes.candidateOnboarding);
+    expect(authenticatedEntryDestination("employer")).toBe(routes.employerOnboarding);
+    expect(authenticatedEntryDestination("admin")).toBe(routes.admin);
+    expect(authenticatedEntryDestination("candidate", routes.home)).not.toBe(routes.home);
+    expect(authenticatedEntryDestination("employer", routes.home)).not.toBe(routes.home);
+  });
+
+  it("does not confuse plural public journey routes with protected role routes", () => {
+    expect(isRoleRoute(routes.candidateDashboard, "candidate")).toBe(true);
+    expect(isRoleRoute(routes.candidates, "candidate")).toBe(false);
+    expect(isRoleRoute(routes.candidateLogin, "candidate")).toBe(false);
+    expect(authenticatedEntryDestination("candidate", routes.candidateLogin)).toBe(routes.candidateOnboarding);
+    expect(authenticatedEntryDestination("employer", routes.employerLogin)).toBe(routes.employerOnboarding);
   });
 });

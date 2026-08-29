@@ -1,15 +1,26 @@
+import type { AppAccountRole, AuthMode } from "@/lib/auth/routing";
+
 type AuthBrandPanelProps = {
-  mode: "login" | "register";
+  mode: AuthMode;
+  role: AppAccountRole;
 };
 
-const benefits = [
-  "Verified candidate & employer profiles",
-  "Smart matching built around real requirements",
-  "Direct interest and meaningful connections",
-];
+const roleContent = {
+  candidate: {
+    title: "Your next opportunity starts with a profile that shows what you can do.",
+    description: "Build one clear candidate profile, control your information, and hear from employers looking for your skills.",
+    benefits: ["Show your skills and experience clearly", "Review employer interest before connecting", "Keep private details protected"],
+  },
+  employer: {
+    title: "Find people whose skills fit the work you need done.",
+    description: "Create your employer workspace, define your requirements, and connect after genuine mutual interest.",
+    benefits: ["Create a trusted company presence", "Search candidates by relevant requirements", "Manage interest and matches in one place"],
+  },
+} as const;
 
-export function AuthBrandPanel({ mode }: AuthBrandPanelProps) {
+export function AuthBrandPanel({ mode, role }: AuthBrandPanelProps) {
   const isRegister = mode === "register";
+  const content = roleContent[role];
 
   return (
     <aside className="relative overflow-hidden rounded-3xl border border-[#e5dff4] bg-white/80 p-4 shadow-[0_18px_48px_rgba(22,8,71,.08)] sm:p-7 lg:min-h-[540px] lg:p-9">
@@ -17,17 +28,16 @@ export function AuthBrandPanel({ mode }: AuthBrandPanelProps) {
       <div className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-48 rounded-full border-[22px] border-[#f7f5ff]" />
       <div className="relative flex h-full flex-col">
         <div className="max-w-md pt-2 sm:pt-3 lg:pt-5">
-          <p className="text-xs font-bold uppercase tracking-[.18em] text-[#f56ba1]">Recruitment, made mutual</p>
           <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#160847] sm:text-4xl">
-            {isRegister ? "Start your KAAM journey." : "Find the right opportunity. Faster."}
+            {content.title}
           </h2>
           <p className="mt-4 max-w-lg text-sm leading-6 text-[#6b6071] sm:text-base">
-            KAAM connects candidates and employers through verified profiles, matching, and direct opportunities.
+            {content.description}
           </p>
         </div>
 
         <ul className="mt-5 grid gap-3 sm:mt-6" aria-label="KAAM benefits">
-          {benefits.map((benefit, index) => (
+          {content.benefits.map((benefit, index) => (
             <li key={benefit} className="flex items-center gap-3 text-sm font-medium leading-5 text-[#3c3441]">
               <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#f0edfb] text-[#160847]" aria-hidden="true">
                 <BenefitIcon index={index} />
@@ -49,7 +59,7 @@ export function AuthBrandPanel({ mode }: AuthBrandPanelProps) {
         </div>
 
         <p className="mt-4 border-t border-[#eee9ff] pt-3 text-xs font-semibold text-[#6b6071] lg:mt-auto lg:pt-4">
-          Profile <span className="px-1 text-[#f56ba1]">→</span> Match <span className="px-1 text-[#f56ba1]">→</span> Connect
+          {isRegister ? "Register" : "Sign in"} <span className="px-1 text-[#f56ba1]">→</span> {role === "candidate" ? "Build your profile" : "Set up your company"} <span className="px-1 text-[#f56ba1]">→</span> Connect
         </p>
       </div>
     </aside>

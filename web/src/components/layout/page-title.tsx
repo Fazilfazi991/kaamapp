@@ -11,7 +11,7 @@ export function PageTitle({
         {title}
       </h1>
       {description ? (
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#66616f]">
+        <p className="mt-1 max-w-2xl text-sm leading-5 text-[#66616f]">
           {description}
         </p>
       ) : null}

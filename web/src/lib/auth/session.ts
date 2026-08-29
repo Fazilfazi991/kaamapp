@@ -122,7 +122,10 @@ export const requireRole = cache(async function requireRole(role: AppAccountRole
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect(`${routes.login}?redirectTo=${encodeURIComponent(currentPath)}`);
+  if (!user) {
+    const loginRoute = role === "candidate" ? routes.candidateLogin : routes.employerLogin;
+    redirect(`${loginRoute}?redirectTo=${encodeURIComponent(currentPath)}`);
+  }
 
   const [{ data: profile }, { data: candidate }, { data: company }] =
     await Promise.all([
@@ -162,8 +165,9 @@ export const requireRole = cache(async function requireRole(role: AppAccountRole
   };
 });
 
-export async function redirectAuthenticatedAuthPage() {
+export async function redirectAuthenticatedAuthPage({ allowMissingProfile = false }: { allowMissingProfile?: boolean } = {}) {
   const snapshot = await getAuthenticatedAccountSnapshot();
+  if (allowMissingProfile && snapshot.userId && !snapshot.role) return;
   const decision = authPageDecision(snapshot);
   if (!decision.allowed && decision.redirectTo) redirect(decision.redirectTo);
 }
@@ -181,7 +185,7 @@ export async function signOutAction() {
   const supabase = await createServerSupabaseClient();
   await supabase.auth.signOut({ scope: "local" });
   revalidatePath("/", "layout");
-  redirect(`${routes.login}?analytics=logout`);
+  redirect(`${routes.candidateLogin}?analytics=logout`);
 }
 
 export async function signOutToHomeAction() {

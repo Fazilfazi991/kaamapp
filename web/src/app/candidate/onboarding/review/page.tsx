@@ -1,9 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { routes } from "@/config/routes";
+import { FinishOnboardingButton } from "@/features/candidate/components/finish-onboarding-button";
 import { OnboardingShell } from "@/features/candidate/components/onboarding-shell";
 import { ProfileSummary } from "@/features/candidate/components/profile-summary";
 import { candidateCompletion } from "@/features/candidate/profile-completion";
-import { finishCandidateOnboarding } from "@/features/candidate/server/actions";
 import { loadCandidateBundle } from "@/features/candidate/server/data";
 
 export default async function CandidateOnboardingReviewPage() {
@@ -41,11 +40,7 @@ export default async function CandidateOnboardingReviewPage() {
         candidate={bundle.candidate}
         membership={bundle.membership}
       />
-      <form action={finishCandidateOnboarding}>
-        <Button type="submit" disabled={!completion.isComplete}>
-          Finish and open dashboard
-        </Button>
-      </form>
+      <FinishOnboardingButton disabled={!completion.isComplete} />
     </OnboardingShell>
   );
 }

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { dashboardForRole, isBlockedStatus, safeReturnPath } from "@/lib/auth/routing";
+import { dashboardForRole, isBlockedStatus, isRoleRoute, safeReturnPath } from "@/lib/auth/routing";
 import { routes } from "@/config/routes";
 import { supabaseConfig } from "./env";
 
@@ -12,14 +12,17 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isBlockedPage = pathname === routes.accountBlocked;
   const isProtected =
-    pathname.startsWith("/candidate") ||
-    pathname.startsWith("/employer") ||
+    isRoleRoute(pathname, "candidate") ||
+    isRoleRoute(pathname, "employer") ||
     pathname.startsWith("/admin");
+  const loginRoute = isRoleRoute(pathname, "employer")
+    ? routes.employerLogin
+    : routes.candidateLogin;
 
   if (!config) {
     if (isProtected) {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = routes.login;
+      redirectUrl.pathname = loginRoute;
       redirectUrl.searchParams.set("redirectTo", pathname);
       return NextResponse.redirect(redirectUrl);
     }
@@ -54,12 +57,18 @@ export async function updateSession(request: NextRequest) {
 
   if (isProtected && !user) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = routes.login;
+    redirectUrl.pathname = loginRoute;
     redirectUrl.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  const isAuthPage = pathname === routes.login || pathname === routes.register;
+  const isAuthPage =
+    pathname === routes.login ||
+    pathname === routes.register ||
+    pathname === routes.candidateLogin ||
+    pathname === routes.candidateRegister ||
+    pathname === routes.employerLogin ||
+    pathname === routes.employerRegister;
   // Protected routes perform their role/status check in their server layout or page.
   // Keeping the proxy to session renewal and unauthenticated redirects lets the
   // application shell start streaming without a second profile request.
@@ -81,7 +90,7 @@ export async function updateSession(request: NextRequest) {
       const redirectUrl = request.nextUrl.clone();
       const returnPath = safeReturnPath(request.nextUrl.searchParams.get("redirectTo"));
       const destination =
-        returnPath?.startsWith(`/${profile.role}`) ? returnPath : dashboardForRole(profile.role);
+        returnPath && isRoleRoute(returnPath, profile.role) ? returnPath : dashboardForRole(profile.role);
       redirectUrl.pathname = destination;
       redirectUrl.search = "";
       return NextResponse.redirect(redirectUrl);

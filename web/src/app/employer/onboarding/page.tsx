@@ -2,11 +2,13 @@ import { PageTitle } from "@/components/layout/page-title";
 import { ButtonLink } from "@/components/ui/button";
 import { loadEmployerCompanyBundle } from "@/features/employer/server/profile-data";
 import { employerCompanyCompletion, nextEmployerOnboardingPath } from "@/features/employer/profile/completion";
+import { routes } from "@/config/routes";
 
 export default async function EmployerOnboardingPage() {
   const { company, documents } = await loadEmployerCompanyBundle();
   const completion = employerCompanyCompletion(company, documents);
   const next = nextEmployerOnboardingPath(company, documents);
+  if (completion.isComplete) redirect(routes.employerDashboard);
   return (
     <div className="grid gap-6">
       <PageTitle title="Employer setup" description="Manage the company information used by the KAAM employer workspace." />
@@ -24,3 +26,4 @@ export default async function EmployerOnboardingPage() {
     </div>
   );
 }
+import { redirect } from "next/navigation";

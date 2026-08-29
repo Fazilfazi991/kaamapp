@@ -9,32 +9,35 @@ import { routes } from "@/config/routes";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { oauthCallbackUrl } from "@/lib/auth/oauth-redirect";
 import {
+  authenticatedEntryDestination,
+  authJourney,
   blockedAccountMessage,
   dashboardForRole,
   isBlockedStatus,
   isValidEmail,
+  loginForRole,
   normalizeOtp,
-  postOtpDestination,
+  registerForRole,
   safeReturnPath,
   type AppAccountRole,
+  type AuthMode,
 } from "@/lib/auth/routing";
 import type { UserRole } from "@/types/domain";
 import { linkAnalyticsIdentity, track } from "@/features/analytics/tracker";
 import { otpErrorPresentation } from "@/features/auth/otp-errors";
 
 type Step = "email" | "otp";
-type AuthMode = "login" | "register";
 
 const otpLength = Number(process.env.NEXT_PUBLIC_EMAIL_OTP_LENGTH ?? "6");
 const resendCooldownSeconds = 45;
 
 export function AuthForm({
-  initialRole = "candidate",
-  mode = "login",
+  role,
+  mode,
   configError,
 }: {
-  initialRole?: AppAccountRole;
-  mode?: AuthMode;
+  role: AppAccountRole;
+  mode: AuthMode;
   configError?: string | null;
 }) {
   const router = useRouter();
@@ -43,7 +46,6 @@ export function AuthForm({
     () => (configError ? null : createBrowserSupabaseClient()),
     [configError],
   );
-  const [role, setRole] = useState<AppAccountRole>(initialRole);
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -193,8 +195,13 @@ export function AuthForm({
 
     if (!backendRole) {
       setLoading(false);
-      router.replace(routes.accountRecovery);
-      router.refresh();
+      await supabase.auth.signOut({ scope: "local" });
+      setSuggestRegistration(mode === "login");
+      setError(
+        mode === "login"
+          ? `We couldn't find a ${role === "candidate" ? "Candidate" : "Employer"} account for this email.`
+          : "We could not finish setting up your KAAM account. Please try again.",
+      );
       return;
     }
 
@@ -202,83 +209,31 @@ export function AuthForm({
     if (isNewRoleSelection) track("account_type_selected", { account_type: backendRole as "candidate" | "employer" });
     track(mode === "register" ? "registration_completed" : "login", { role: backendRole });
     if (mode === "login") track("login_success", { auth_method: "otp", account_type: backendRole });
-    const account = {
-      userId: data.user.id,
-      email: data.user.email ?? null,
-      role: backendRole,
-      profileStatus: backendStatus,
-      hasCandidateProfile: false,
-      hasEmployerProfile: false,
-    };
-    const decision = postOtpDestination(
-      account,
-      role,
-      searchParams.get("redirectTo"),
-    );
     setLoading(false);
     setOtp("");
 
     if (mode === "register" && roleResult.data?.role) {
       setMessage("This email is already registered. Continuing to the existing account.");
-    } else if (decision.status === "blocked") {
+    } else if (isBlockedStatus(backendStatus)) {
       setMessage(blockedAccountMessage);
-    } else if (decision.message) {
-      setMessage(decision.message);
+    } else if (backendRole !== role) {
+      setMessage(`This account is registered as a ${backendRole}.`);
     }
 
     const destination = new URL(
-      decision.redirectTo ?? dashboardForRole(backendRole),
+      isBlockedStatus(backendStatus)
+        ? routes.accountBlocked
+        : backendRole !== role
+          ? dashboardForRole(backendRole)
+          : authenticatedEntryDestination(backendRole, searchParams.get("redirectTo")),
       window.location.origin,
     );
     if (mode === "register" && roleResult.data?.role) {
       destination.searchParams.set("authNotice", "existing-account");
-    } else if (decision.message && decision.status !== "blocked") {
+    } else if (backendRole !== role && !isBlockedStatus(backendStatus)) {
       destination.searchParams.set("authNotice", "role-redirect");
     }
     router.replace(`${destination.pathname}${destination.search}`);
-    router.refresh();
-  }
-
-  async function continueSession() {
-    if (!supabase) return;
-    setLoading(true);
-    resetAlerts();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      setLoading(false);
-      setError("No active session was found on this browser.");
-      return;
-    }
-
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role,status")
-      .eq("id", user.id)
-      .maybeSingle<{ role: UserRole; status: string | null }>();
-
-    setLoading(false);
-    if (profileError) {
-      setError("We could not load your account role. Please try again.");
-      return;
-    }
-    if (!profile?.role) {
-      router.replace(routes.accountRecovery);
-      router.refresh();
-      return;
-    }
-    if (isBlockedStatus(profile.status)) {
-      setMessage(blockedAccountMessage);
-      router.replace(routes.accountBlocked);
-      router.refresh();
-      return;
-    }
-
-    router.replace(
-      safeReturnPath(searchParams.get("redirectTo")) ?? dashboardForRole(profile.role),
-    );
     router.refresh();
   }
 
@@ -294,6 +249,7 @@ export function AuthForm({
     }));
     const returnPath = safeReturnPath(searchParams.get("redirectTo"));
     if (returnPath) callback.searchParams.set("next", returnPath);
+    callback.searchParams.set("journey", authJourney(role, mode));
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -329,25 +285,7 @@ export function AuthForm({
       onSubmit={onSubmit}
       className="rounded-2xl border border-[#eadde3] bg-white p-5 shadow-[0_18px_42px_rgba(74,35,54,.10)] sm:p-6"
     >
-      <div className="grid grid-cols-2 gap-1 rounded-xl bg-[#f8f2f5] p-1" role="tablist" aria-label="Account type">
-        {(["candidate", "employer"] as const).map((item) => (
-          <button
-            key={item}
-            type="button"
-            onClick={() => setRole(item)}
-            aria-pressed={role === item}
-            className={`focus-ring rounded-lg px-4 py-3 text-sm font-semibold ${
-              role === item
-                ? "bg-[#160847] text-white shadow-sm"
-                : "text-[#5d5364] hover:bg-white"
-            }`}
-          >
-            {item === "candidate" ? "Candidate" : "Employer"}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-5 grid gap-3.5">
+      <div className="grid gap-3.5">
         <Label htmlFor="email">Email address</Label>
         <TextInput
           id="email"
@@ -397,11 +335,11 @@ export function AuthForm({
       {error ? (
         <div className="mt-4 rounded-lg bg-[#ffe4eb] px-3 py-2 text-sm text-[#9a1744]">
           <p>{error}</p>
-          {suggestRegistration ? <Link href={routes.register} className="mt-2 inline-block font-semibold underline">Register for KAAM</Link> : null}
+          {suggestRegistration ? <Link href={registerForRole(role)} className="mt-2 inline-block font-semibold underline underline-offset-4">Register as {role === "candidate" ? "a Candidate" : "an Employer"}</Link> : null}
         </div>
       ) : null}
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      <div className="mt-5 grid gap-3">
         {step === "email" ? (
           <Button type="submit" disabled={!canSend}>
             {loading ? "Sending..." : "Send OTP"}
@@ -422,16 +360,7 @@ export function AuthForm({
               ? `Resend in ${cooldownRemaining}s`
               : "Resend OTP"}
           </Button>
-        ) : (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={continueSession}
-            disabled={loading || Boolean(configError)}
-          >
-            Continue existing session
-          </Button>
-        )}
+        ) : null}
       </div>
 
       {step === "email" ? (
@@ -454,8 +383,11 @@ export function AuthForm({
         </div>
       ) : null}
 
-      <p className="mt-4 text-xs leading-5 text-[#766b74]">
-        Your selected tab is only the entry path. Kaam redirects using the backend role on your account.
+      <p className="mt-5 text-center text-sm leading-6 text-[#615667]">
+        {mode === "login" ? "New to KAAM?" : "Already registered?"}{" "}
+        <Link href={mode === "login" ? registerForRole(role) : loginForRole(role)} className="font-semibold text-[#160847] underline decoration-[#f56ba1] decoration-2 underline-offset-4">
+          {mode === "login" ? `Register as ${role === "candidate" ? "a Candidate" : "an Employer"}` : `${role === "candidate" ? "Candidate" : "Employer"} login`}
+        </Link>
       </p>
     </form>
   );
