@@ -56,6 +56,15 @@ export function isBlockedStatus(status: string | null | undefined) {
 export function safeReturnPath(value: string | null | undefined) {
   if (!value) return null;
   if (!value.startsWith("/") || value.startsWith("//")) return null;
+  try {
+    let decoded = value;
+    for (let pass = 0; pass < 3; pass += 1) {
+      decoded = decodeURIComponent(decoded);
+      if (!decoded.startsWith("/") || decoded.startsWith("//")) return null;
+    }
+  } catch {
+    return null;
+  }
   if (
     value.startsWith("/login") ||
     value.startsWith("/register") ||
