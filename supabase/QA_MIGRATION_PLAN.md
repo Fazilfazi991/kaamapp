@@ -15,7 +15,7 @@ Status: planning checkpoint only. No SQL in this document has been applied.
 | QA region | `ap-southeast-1` |
 | Organization | `Zorx Dashboard` (`ooeeuvrflbeqtbwydtij`) |
 
-The QA and Production refs differ. The regions do not: QA is Singapore while Production is Seoul. This is acceptable for functional Auth QA but not a faithful latency/data-residency replica. Do not delete or recreate QA without separate approval.
+The QA and Production refs differ. Their regions also differ: QA is Singapore while Production is Seoul. This is acceptable for functional Auth QA but not a faithful latency/data-residency replica. Do not delete or recreate QA without separate approval.
 
 Before any future write, run:
 
@@ -28,6 +28,8 @@ The repository is currently CLI-linked to Production. That link is not authoriza
 ## Proposed initial Auth-QA execution order
 
 This is a reviewed manifest, not a ready-to-run CLI migration directory. Execute each listed source once, in this order, only after the next approval checkpoint. Record every applied filename and checksum in a QA-only ledger.
+
+The hardened, checksum-locked preparation bundle is in `supabase/qa/`. It contains 32 canonical sources plus two post-source QA patches (34 SQL units total). Its executor is dry-run by default and never uses the repository's implicit Production link.
 
 | Order | Canonical source | Decision |
 | ---: | --- | --- |

@@ -89,3 +89,5 @@ shorebird-release-*.json
 .agents/
 .vercel
 .env*
+# QA schema executor runtime ledger (may contain operational timestamps).
+supabase/qa/qa-schema-apply.log.jsonl

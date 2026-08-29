@@ -10,6 +10,10 @@ node scripts/assert-qa-supabase-target.mjs --project-ref <qa-project-ref> --supa
 
 The command must print `QA TARGET VERIFIED` before a write-capable repository script is run. All future QA write scripts must import and call `assertQaSupabaseTarget` before opening a database connection. The guard rejects the KAAM Production ref `bhuhojzqxnvwbsypijac`, missing targets, malformed refs, and URL/ref mismatches.
 
+QA is in Singapore (`ap-southeast-1`); Production is in Seoul (`ap-northeast-2`). This is suitable for functional QA but does not reproduce Production latency or data residency.
+
+The prepared executor is dry-run unless `--execute` is explicitly supplied. It requires both the exact QA ref/URL and a `QA_DATABASE_URL` that identifies the QA ref; it does not use the repository's current Production link. See `supabase/qa/README.md`. On a failed empty-database initialization, stop and use a separately approved QA-only rebuild/checksum replay rather than ad-hoc reverse SQL.
+
 Run `007_qa_reset_tools.sql` in Supabase SQL Editor after the existing Kaam schema patches.
 
 ## Flutter environment

@@ -1,0 +1,245 @@
+{
+  "algorithm": "SHA-256",
+  "canonicalSourceCount": 32,
+  "totalSqlUnits": 34,
+  "entries": [
+    {
+      "order": 1,
+      "source": "supabase/001_kaam_initial_schema.sql",
+      "sha256": "16bd2a6175e4fed26833773e36f92c4e0908c58aaa05459a6cb246785b2e0f23",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 2,
+      "source": "supabase/002_mvp_functionality_patch.sql",
+      "sha256": "16200206406806bd5502f1d04cd4c96b41b4878c2723300aecabfb313f3b3819",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 3,
+      "source": "supabase/003_candidate_privacy_settings.sql",
+      "sha256": "17db3e3f81d1ba5269330f6e803950ad73f9467a1bf394bb800b8b6e06dad71d",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 4,
+      "source": "supabase/004_employer_hiring_requirements.sql",
+      "sha256": "e34b53ad8e923dbb1497a0b5069c1251110b86a075e2c23b7cde677100588e7d",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 5,
+      "source": "supabase/005_candidate_identity_documents.sql",
+      "sha256": "8512212fbfdd241bab72e92a2b02966b76b170886393a8200594024e9fa206a8",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 6,
+      "source": "supabase/006_candidate_document_phase2.sql",
+      "sha256": "6c979b589c467c1a18ee2b802929939718309b5fdac66d04a2f271db3b2d96f2",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 7,
+      "source": "supabase/008_candidate_document_versions_repair.sql",
+      "sha256": "40454d6ef694269e76976a8c259a4333b2bae5d3e03b8df9f70a85b3f18027f0",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 8,
+      "source": "supabase/009_skill_categories_and_candidate_skills.sql",
+      "sha256": "c2b1c8adfa1105b5aed3ef785310fbd2ece1a2c4fd83744ea0d840ebee121ae1",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 9,
+      "source": "supabase/010_identity_document_save_repair.sql",
+      "sha256": "8631c9a07ca9cd67155e7ad8e108a13af8d99c938b9072b55d6c4b449797417b",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 10,
+      "source": "supabase/011_candidate_membership_visibility.sql",
+      "sha256": "b183c25cd6260702f39d9a2c19536a27ac9bcd33edde7a83c5caadaff38eeb41",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 11,
+      "source": "supabase/012_employer_match_contact_rules.sql",
+      "sha256": "112d01e0c7ac41f4b16df9272956f965919f0f068e84de5631d6d15e077e71e7",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 12,
+      "source": "supabase/013_notification_foundation.sql",
+      "sha256": "4cee074ea0913b850f243c5ac9da81c89f5cead670c9bd236d4163fbfc77ac4d",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 13,
+      "source": "supabase/013_admin_notifications.sql",
+      "sha256": "3d0a9b1c3ff0200851d64b3b6d8d4a6504aa2cc9911580dca46a1957bdaa002a",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 14,
+      "source": "supabase/014_admin_broadcast_push_types.sql",
+      "sha256": "4c6ff32503e5167834cd5f91340dadf017b63cc5f68c9c4d92abb0933fb6b49f",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 15,
+      "source": "supabase/015_admin_notification_delivery_status.sql",
+      "sha256": "1b5aad32773c10a9f1dc788df1d5288b1b4e8a53d7bf3da727bc34e2bc52a3a3",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 16,
+      "source": "supabase/017_fix_employer_company_status_triggers.sql",
+      "sha256": "7960a5f2c282719a013e68ec374e5d7544c8fb5bf30b8fcbcbb7f5214a920793",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 17,
+      "source": "supabase/018_bootstrap_user_profile.sql",
+      "sha256": "6af861dd1148dfa2cd54b752ee58e3e202c92fdd08c2f41029244aa41e111828",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 18,
+      "source": "supabase/019_passport_front_back_documents.sql",
+      "sha256": "3e02767a8ecb471e3619c686ebb96a6258a0fa9037b5e9ed0747f86a398f03fe",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 19,
+      "source": "supabase/020_candidate_qa_batch_1_profile_fields.sql",
+      "sha256": "220d3e4eef0f51d723d074cfb43816a08882a83dfd6e56e3dc0df7d7b478a53c",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 20,
+      "source": "supabase/migrations/021_matching_chat_qa_batch_1.sql",
+      "sha256": "ddd19dab2358a77e26cff7194a20020657edcb3de2c2b552ea53ef76d64e5b70",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical-duplicate-choice"
+    },
+    {
+      "order": 21,
+      "source": "supabase/migrations/022_employer_saved_recently_viewed.sql",
+      "sha256": "0a839bc5bac94d8f85cfb34f1b17b00c2d0f35f3f297ce53a6379b602fb252de",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical-duplicate-choice"
+    },
+    {
+      "order": 22,
+      "source": "supabase/migrations/023_candidate_profile_photo_employer_read.sql",
+      "sha256": "14eb9be55c828b5a187956b701dfd680130e18989b9b3ace3f2cc4af312a56b4",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical-duplicate-choice"
+    },
+    {
+      "order": 23,
+      "source": "supabase/migrations/20260731000400_candidate_profile_visa_expiry.sql",
+      "sha256": "c9f56416542c7acb6014f782ff7f0b797a5f6cfd826306f639bcf4858430819e",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 24,
+      "source": "supabase/migrations/20260807151913_role_skills_taxonomy_phase_1_catalog.sql",
+      "sha256": "407f8621828d91251fa30ac4e21bb052cc179d56103f372f860e9edcfd16283d",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 25,
+      "source": "supabase/migrations/20260807160918_employer_taxonomy_dual_write_phase_2a.sql",
+      "sha256": "509accfed900df54898987e43eb231e85cd45a669c64ba8772323722d70b3899",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 26,
+      "source": "supabase/migrations/20260816000100_candidate_profile_email_privacy_repair.sql",
+      "sha256": "2c0a4817872d0dad378a1652b6bc32ea8dcad6ab8df50d828baa7667fbdd6a28",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 27,
+      "source": "supabase/migrations/20260817031957_candidate_profile_phone_privacy_repair.sql",
+      "sha256": "4fcdbec14e4b51c23a1e909b47dc76595fcb733d65a9f73d643256dd4d5b5e02",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 28,
+      "source": "supabase/migrations/20260817133058_stripe_candidate_membership_payments.sql",
+      "sha256": "88b323b793dcfe84734a2f322c9353ca0ce4bbe179101a0c087a9d684445b465",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 29,
+      "source": "supabase/migrations/20260817150126_employer_auto_activation.sql",
+      "sha256": "0d86fb60dfde3b401876fa3296474f40a7020c355e47ed75f222574bfdd913f3",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 30,
+      "source": "supabase/migrations/20260821120000_candidate_lifetime_membership.sql",
+      "sha256": "f02afb44eb246893c730e512e6f16908aaa432f3f72e3cb60bda01b8476d9f14",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 31,
+      "source": "supabase/migrations/20260821120001_restrict_candidate_membership_function_access.sql",
+      "sha256": "a26a43b71c925931997446515100a50257647edf5b4a7ca9bee1ad64fd20cf4a",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 32,
+      "source": "supabase/007_qa_reset_tools.sql",
+      "sha256": "4c711c5fdebbd98e83cbc104e3206a9b965715abd0943302d648f9a4eaa7cb30",
+      "classification": "canonical-schema-source",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 33,
+      "source": "supabase/qa/patches/001_qa_security_hardening.sql",
+      "sha256": "a653d9515c12826b1eb29fa2560683fd0c7b26612bc7e656bbbfd318614a7ac3",
+      "classification": "qa-hardening-patch",
+      "canonicalStatus": "canonical"
+    },
+    {
+      "order": 34,
+      "source": "supabase/qa/patches/002_qa_data_api_grants.sql",
+      "sha256": "a1c075d84b79cde614817b9fe71f96c1c75075c38d0583a7c3afede9f20b83c0",
+      "classification": "qa-hardening-patch",
+      "canonicalStatus": "canonical"
+    }
+  ]
+}
