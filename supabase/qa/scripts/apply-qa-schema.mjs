@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { appendFileSync, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { assertQaSupabaseTarget } from "../../../scripts/assert-qa-supabase-target.mjs";
@@ -29,6 +30,20 @@ if (!args.has("--execute")) {
 }
 const connection = process.env.QA_DATABASE_URL;
 if (!connection || !connection.includes(qaRef)) throw new Error("QA_DATABASE_URL must be set and must identify the verified QA ref.");
+const databaseUrl = new URL(connection);
+if (!databaseUrl.hostname.includes(qaRef) || databaseUrl.hostname.includes(productionRef)) throw new Error("QA_DATABASE_URL host is not the verified QA project.");
+const psqlPath = process.env.PSQL_PATH || "C:\\Program Files\\PostgreSQL\\17\\bin\\psql.exe";
+if (!existsSync(psqlPath)) throw new Error("A trusted psql executable was not found. Set PSQL_PATH explicitly.");
+const psqlEnvironment = {
+  ...process.env,
+  PGHOST: databaseUrl.hostname,
+  PGPORT: databaseUrl.port || "5432",
+  PGDATABASE: decodeURIComponent(databaseUrl.pathname.replace(/^\//, "") || "postgres"),
+  PGUSER: decodeURIComponent(databaseUrl.username),
+  PGPASSWORD: decodeURIComponent(databaseUrl.password),
+  PGSSLMODE: "require",
+};
+delete psqlEnvironment.QA_DATABASE_URL;
 const logPath = resolve(qaDir, "qa-schema-apply.log.jsonl");
 for (const entry of manifest.entries) {
   const file = resolve(supabaseDir, entry.source.replace(/^supabase\//, ""));
@@ -36,11 +51,13 @@ for (const entry of manifest.entries) {
   if (actualSha256 !== entry.sha256) throw new Error(`Checksum mismatch before execution: ${entry.source}`);
   const startedAt = new Date().toISOString();
   const startedMs = Date.now();
-  const npxCli = resolve(dirname(process.execPath), "node_modules", "npm", "bin", "npx-cli.js");
-  const result = spawnSync(process.execPath, [npxCli, "supabase", "db", "query", "--db-url", connection, "--file", file], { encoding: "utf8" });
+  const result = spawnSync(psqlPath, ["-X", "-v", "ON_ERROR_STOP=1", "-v", "VERBOSITY=verbose", "-f", file], { encoding: "utf8", env: psqlEnvironment });
   if (result.stdout) process.stdout.write(result.stdout);
-  if (result.stderr) process.stderr.write(result.stderr.replaceAll(connection, "[REDACTED_QA_DATABASE_URL]"));
-  const errorText = result.status === 0 ? null : `${result.stderr || result.stdout || result.error || "unknown error"}`.replaceAll(connection, "[REDACTED_QA_DATABASE_URL]");
+  const redact = (value) => `${value ?? ""}`
+    .replaceAll(connection, "[REDACTED_QA_DATABASE_URL]")
+    .replaceAll(psqlEnvironment.PGPASSWORD, "[REDACTED_PASSWORD]");
+  if (result.stderr) process.stderr.write(redact(result.stderr));
+  const errorText = result.status === 0 ? null : redact(result.stderr || result.stdout || result.error || "unknown error");
   const sqlstate = errorText?.match(/(?:SQLSTATE|code)[^0-9A-Z]*([0-9A-Z]{5})/i)?.[1] ?? null;
   appendFileSync(logPath, `${JSON.stringify({ order: entry.order, source: entry.source, expectedSha256: entry.sha256, actualSha256, startedAt, finishedAt: new Date().toISOString(), durationMs: Date.now() - startedMs, success: result.status === 0, sqlstate, error: errorText })}\n`);
   if (result.status !== 0) throw new Error(`Stopped after failure in ${entry.source}`);
