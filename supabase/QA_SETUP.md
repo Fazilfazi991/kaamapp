@@ -1,5 +1,15 @@
 # KAAM QA Reset Setup
 
+## Mandatory project guard
+
+Before any QA migration, reset, or fixture write, verify the exact target project ref. Do not rely on the `.env.qa` filename:
+
+```powershell
+node scripts/assert-qa-supabase-target.mjs --project-ref <qa-project-ref> --supabase-url https://<qa-project-ref>.supabase.co
+```
+
+The command must print `QA TARGET VERIFIED` before a write-capable repository script is run. All future QA write scripts must import and call `assertQaSupabaseTarget` before opening a database connection. The guard rejects the KAAM Production ref `bhuhojzqxnvwbsypijac`, missing targets, malformed refs, and URL/ref mismatches.
+
 Run `007_qa_reset_tools.sql` in Supabase SQL Editor after the existing Kaam schema patches.
 
 ## Flutter environment
