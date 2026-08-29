@@ -1,0 +1,7 @@
+{
+  "algorithm": "SHA-256",
+  "order": 35,
+  "source": "supabase/qa/patches/003_qa_post_init_privilege_repair.sql",
+  "sha256": "57a5e25a9985f397921949fc4c6ebe3e8b010d9c508badad04f2c67d865d0082",
+  "classification": "qa-post-init-security-patch"
+}

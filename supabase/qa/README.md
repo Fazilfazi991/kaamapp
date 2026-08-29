@@ -30,3 +30,11 @@ Each historical source controls its own transaction (`BEGIN`/`COMMIT` where auth
 - `kaam-private`: never public; candidate/employer owner access and explicit admin review only.
 
 The post-migration assertions require both buckets and zero Storage objects. No Production objects are copied.
+
+## Post-initialization patch 35
+
+After the successful 34-unit initialization, apply the separately checksum-locked
+`patches/003_qa_post_init_privilege_repair.sql` only under its own explicit approval.
+It is not part of the initial bundle and does not change the historical 34 checksums.
+The intended grants are documented in `PRIVILEGE_MATRIX.md`; verify the result with
+`post-repair-assertions.sql`.
