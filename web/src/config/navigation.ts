@@ -2,15 +2,15 @@ import { routes } from "./routes";
 
 export function candidateNavigation({ profileComplete = false }: { profileComplete?: boolean } = {}) {
   return [
-    { href: routes.candidateDashboard, label: "Dashboard" },
-    { href: routes.candidateProfile, label: "Profile" },
-    ...(profileComplete ? [] : [{ href: routes.candidateOnboarding, label: "Complete profile" }]),
-    { href: routes.candidateInterests, label: "Interests" },
-    { href: routes.candidateMatches, label: "Matches" },
-    { href: routes.candidateMessages, label: "Messages" },
-    { href: routes.candidateNotifications, label: "Notifications" },
-    { href: routes.candidateDocuments, label: "Documents" },
-    { href: routes.candidateMembership, label: "Membership" },
+    { href: routes.candidateDashboard, label: "Dashboard", prefetch: true },
+    { href: routes.candidateProfile, label: "Profile", prefetch: false },
+    ...(profileComplete ? [] : [{ href: routes.candidateOnboarding, label: "Complete profile", prefetch: true }]),
+    { href: routes.candidateInterests, label: "Interests", prefetch: false },
+    { href: routes.candidateMatches, label: "Matches", prefetch: false },
+    { href: routes.candidateMessages, label: "Messages", prefetch: false },
+    { href: routes.candidateNotifications, label: "Notifications", prefetch: false },
+    { href: routes.candidateDocuments, label: "Documents", prefetch: false },
+    { href: routes.candidateMembership, label: "Membership", prefetch: false },
   ];
 }
 

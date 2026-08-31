@@ -29,7 +29,7 @@ const completeCandidate: CandidateProfileRow = {
 
 describe("candidateCompletion", () => {
   it("calculates completed candidate profile", () => {
-    const result = candidateCompletion({ profile, candidate: completeCandidate, hasPassport: true });
+    const result = candidateCompletion({ profile, candidate: completeCandidate, requirePhone: true });
     expect(result.isComplete).toBe(true);
     expect(result.percentage).toBe(100);
   });
@@ -38,7 +38,7 @@ describe("candidateCompletion", () => {
     const result = candidateCompletion({
       profile,
       candidate: { ...completeCandidate, skills: [], headline: "" },
-      hasPassport: true,
+      requirePhone: true,
     });
     expect(result.isComplete).toBe(false);
     expect(result.nextHref).toBe(routes.candidateOnboardingSkills);
@@ -48,16 +48,37 @@ describe("candidateCompletion", () => {
     const result = candidateCompletion({
       profile: { ...profile, full_name: "", phone: "" },
       candidate: { ...completeCandidate, nationality: "", availability: "" },
-      hasPassport: false,
+      requirePhone: true,
     });
     expect(result.isComplete).toBe(false);
     expect(result.percentage).toBeLessThan(100);
   });
 
-  it("does not treat passport-derived fields as a required document upload", () => {
-    const result = candidateCompletion({ profile, candidate: completeCandidate, hasPassport: false });
+  it("does not require passport, visa, or documents for onboarding", () => {
+    const result = candidateCompletion({ profile, candidate: completeCandidate, requirePhone: true });
+    expect(result.isComplete).toBe(true);
+    expect(result.missingSections).toEqual([]);
+  });
+
+  it("requires mobile for the new onboarding review", () => {
+    const result = candidateCompletion({ profile: { ...profile, phone: "" }, candidate: completeCandidate, requirePhone: true });
     expect(result.isComplete).toBe(false);
-    expect(result.missingSections.map((section) => section.id)).toContain("identity");
-    expect(result.nextHref).toBe(routes.candidateDocuments);
+    expect(result.nextHref).toBe(routes.candidateOnboardingPersonal);
+  });
+
+  it("does not force an existing completed candidate back into onboarding for missing historical phone", () => {
+    const result = candidateCompletion({ profile: { ...profile, phone: "" }, candidate: completeCandidate });
+    expect(result.isComplete).toBe(true);
+  });
+
+  it("allows a non-UAE GCC preference without an emirate", () => {
+    const result = candidateCompletion({ profile, candidate: { ...completeCandidate, preferred_country: "Qatar", preferred_city: null }, requirePhone: true });
+    expect(result.isComplete).toBe(true);
+  });
+
+  it("does not keep legacy India as a valid preferred work country", () => {
+    const result = candidateCompletion({ profile, candidate: { ...completeCandidate, preferred_country: "India", preferred_city: "Kerala" }, requirePhone: true });
+    expect(result.isComplete).toBe(false);
+    expect(result.nextHref).toBe(routes.candidateOnboardingLocation);
   });
 });

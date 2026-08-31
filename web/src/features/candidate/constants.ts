@@ -11,7 +11,16 @@ export const nationalities = [
   "Other",
 ];
 
-export const countries = ["UAE", "India"] as const;
+export const currentResidenceCountries = ["UAE", "India"] as const;
+
+export const preferredWorkCountries = [
+  "UAE",
+  "Saudi Arabia",
+  "Qatar",
+  "Oman",
+  "Bahrain",
+  "Kuwait",
+] as const;
 
 export const uaeEmirates = [
   "Abu Dhabi",
@@ -99,6 +108,9 @@ export function regionsForCountry(country: string) {
 export function normalizeCountry(value: string) {
   const trimmed = value.trim();
   if (trimmed === "United Arab Emirates") return "UAE";
-  if (trimmed === "UAE" || trimmed === "India") return trimmed;
+  if (
+    currentResidenceCountries.includes(trimmed as (typeof currentResidenceCountries)[number]) ||
+    preferredWorkCountries.includes(trimmed as (typeof preferredWorkCountries)[number])
+  ) return trimmed;
   return "";
 }

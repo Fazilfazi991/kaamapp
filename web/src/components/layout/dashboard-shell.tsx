@@ -7,7 +7,7 @@ export function DashboardShell({
   account,
   children,
 }: {
-  items: Array<{ href: string; label: string }>;
+  items: Array<{ href: string; label: string; prefetch?: boolean }>;
   title: string;
   account?: { email: string | null; role: string; name?: string | null };
   children: React.ReactNode;

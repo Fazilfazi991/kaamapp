@@ -72,7 +72,6 @@ export function composeCandidateAccount({
           is_verified: candidate.is_verified,
         }
       : null,
-    hasPassport: Boolean(documents?.[0]?.passport_file_url?.trim()),
   });
 
   return {

@@ -10,6 +10,7 @@ export default async function CandidateOnboardingReviewPage() {
   const completion = candidateCompletion({
     profile: bundle.profile,
     candidate: bundle.candidate,
+    requirePhone: true,
   });
   return (
     <OnboardingShell
@@ -40,6 +41,10 @@ export default async function CandidateOnboardingReviewPage() {
         candidate={bundle.candidate}
         membership={bundle.membership}
       />
+      <section className="rounded-lg border border-[#e3dcf0] bg-[#faf8ff] p-4 text-sm text-[#5f5668]">
+        <p className="font-semibold text-[#302934]">Documents are optional</p>
+        <p className="mt-1">You can add passport or visa documents later from Documents to support verification.</p>
+      </section>
       <FinishOnboardingButton disabled={!completion.isComplete} />
     </OnboardingShell>
   );

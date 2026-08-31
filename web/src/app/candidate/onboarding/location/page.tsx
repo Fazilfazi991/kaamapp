@@ -10,7 +10,7 @@ export default async function CandidateOnboardingLocationPage() {
     <OnboardingShell
       current={routes.candidateOnboardingLocation}
       title="Location"
-      description="Set your current residence and preferred work location using UAE emirates or Indian states."
+      description="Set your current residence and choose where in the GCC you prefer to work."
     >
       <FormCard>
         <LocationForm

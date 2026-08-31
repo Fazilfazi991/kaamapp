@@ -1,8 +1,9 @@
 import { routes } from "@/config/routes";
+import { validateCurrentResidence, validatePreferredWorkLocation } from "@/features/candidate/validation";
 import type { CandidateProfileRow, ProfileRow } from "@/types/domain";
 
 export type CompletionSection = {
-  id: "personal" | "skills" | "location" | "experience" | "identity";
+  id: "personal" | "skills" | "location" | "experience";
   label: string;
   complete: boolean;
   href: string;
@@ -15,11 +16,11 @@ function hasText(value?: string | null) {
 export function candidateCompletion({
   profile,
   candidate,
-  hasPassport,
+  requirePhone = false,
 }: {
   profile: Pick<ProfileRow, "full_name" | "phone"> | null;
   candidate: CandidateProfileRow | null;
-  hasPassport?: boolean;
+  requirePhone?: boolean;
 }) {
   const sections: CompletionSection[] = [
     {
@@ -28,7 +29,7 @@ export function candidateCompletion({
       href: routes.candidateOnboardingPersonal,
       complete:
         hasText(profile?.full_name) &&
-        hasText(profile?.phone) &&
+        (!requirePhone || hasText(profile?.phone)) &&
         hasText(candidate?.nationality),
     },
     {
@@ -45,24 +46,14 @@ export function candidateCompletion({
       label: "Location",
       href: routes.candidateOnboardingLocation,
       complete:
-        hasText(candidate?.current_country) &&
-        hasText(candidate?.current_city) &&
-        hasText(candidate?.preferred_country) &&
-        hasText(candidate?.preferred_city),
+        validateCurrentResidence(candidate?.current_country ?? "", candidate?.current_city ?? "").ok &&
+        validatePreferredWorkLocation(candidate?.preferred_country ?? "", candidate?.preferred_city ?? "").ok,
     },
     {
       id: "experience",
       label: "Experience",
       href: routes.candidateOnboardingExperience,
       complete: hasText(candidate?.availability),
-    },
-    {
-      id: "identity",
-      label: "Identity document",
-      href: routes.candidateDocuments,
-      // OCR-derived fields never count as an upload: a stored private file is
-      // the only completion signal for the required passport document.
-      complete: hasPassport === true,
     },
   ];
   const completed = sections.filter((section) => section.complete).length;

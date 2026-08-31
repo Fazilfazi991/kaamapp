@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   maxCandidateSkills,
   normalizeCountry,
+  preferredWorkCountries,
   regionsForCountry,
 } from "@/features/candidate/constants";
 import {
-  validateLocationSelection,
+  isValidInternationalMobile,
+  validateCurrentResidence,
+  validatePreferredWorkLocation,
   validateSkillIds,
 } from "@/features/candidate/validation";
 
@@ -30,6 +33,11 @@ describe("candidate onboarding validation constants", () => {
     expect(regionsForCountry("")).toEqual([]);
   });
 
+  it("offers only GCC preferred work countries", () => {
+    expect(preferredWorkCountries).toEqual(["UAE", "Saudi Arabia", "Qatar", "Oman", "Bahrain", "Kuwait"]);
+    expect(preferredWorkCountries).not.toContain("India");
+  });
+
   it("fourth skill is rejected server-side", () => {
     expect(validateSkillIds(["a", "b", "c", "d"])).toMatchObject({
       ok: false,
@@ -47,12 +55,26 @@ describe("candidate onboarding validation constants", () => {
     });
   });
 
-  it("validates UAE and India locations", () => {
-    expect(validateLocationSelection("UAE", "Dubai")).toMatchObject({
-      ok: true,
-    });
-    expect(validateLocationSelection("India", "Dubai")).toMatchObject({
-      ok: false,
-    });
+  it("validates current residence and clears incompatible combinations", () => {
+    expect(validateCurrentResidence("India", "Kerala")).toMatchObject({ ok: true, value: { country: "India", region: "Kerala" } });
+    expect(validateCurrentResidence("India", "Dubai")).toMatchObject({ ok: false });
+    expect(validateCurrentResidence("UAE", "Kerala")).toMatchObject({ ok: false });
+  });
+
+  it("requires an emirate only for UAE preferred work", () => {
+    expect(validatePreferredWorkLocation("UAE", "Dubai")).toMatchObject({ ok: true });
+    expect(validatePreferredWorkLocation("UAE", "")).toMatchObject({ ok: false });
+    expect(validatePreferredWorkLocation("Saudi Arabia", "Dubai")).toEqual({ ok: true, value: { country: "Saudi Arabia", region: null } });
+    for (const country of ["Qatar", "Oman", "Bahrain", "Kuwait"]) {
+      expect(validatePreferredWorkLocation(country, "")).toMatchObject({ ok: true, value: { country, region: null } });
+    }
+  });
+
+  it("requires a normalized international mobile number", () => {
+    for (const phone of ["+971500000000", "+91 70125 54342", "+94-771234567", "+8801712345678", "+923001234567", "+639171234567"]) {
+      expect(isValidInternationalMobile(phone)).toBe(true);
+    }
+    expect(isValidInternationalMobile("0500000000")).toBe(false);
+    expect(isValidInternationalMobile("+0000")).toBe(false);
   });
 });

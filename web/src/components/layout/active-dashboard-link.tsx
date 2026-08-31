@@ -16,12 +16,14 @@ export function ActiveDashboardLink({
   className,
   activeClassName,
   leading,
+  prefetch,
 }: {
   href: string;
   label: string;
   className: string;
   activeClassName: string;
   leading?: ReactNode;
+  prefetch?: boolean;
 }) {
   const pathname = usePathname();
   const active = isActivePath(pathname, href);
@@ -29,6 +31,7 @@ export function ActiveDashboardLink({
   return (
     <Link
       href={href}
+      prefetch={prefetch}
       aria-current={active ? "page" : undefined}
       className={`${className} ${active ? activeClassName : ""}`}
     >

@@ -16,14 +16,12 @@ export function ProfileSummary({
   profile,
   candidate,
   membership,
-  hasPassport,
 }: {
   profile: ProfileRow | null;
   candidate: CandidateProfileRow | null;
   membership?: CandidateMembershipRow | null;
-  hasPassport?: boolean;
 }) {
-  const completion = candidateCompletion({ profile, candidate, hasPassport });
+  const completion = candidateCompletion({ profile, candidate });
   return (
     <div className="grid gap-5">
       <section className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
@@ -63,7 +61,7 @@ export function ProfileSummary({
       ]} />
       <Section title="Location" rows={[
         ["Current residence", `${value(candidate?.current_country)} · ${value(candidate?.current_city)}`],
-        ["Preferred work location", `${value(candidate?.preferred_country)} · ${value(candidate?.preferred_city)}`],
+        ["Preferred work location", candidate?.preferred_country === "UAE" ? `${value(candidate.preferred_country)} · ${value(candidate.preferred_city)}` : value(candidate?.preferred_country)],
       ]} />
       <Section title="Experience and privacy" rows={[
         ["Availability", value(candidate?.availability)],

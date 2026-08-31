@@ -25,7 +25,7 @@ export function FinishOnboardingButton({ disabled }: { disabled: boolean }) {
 
   return (
     <Button type="button" disabled={disabled || opening || isPending} onClick={openDashboard}>
-      {opening || isPending ? "Opening dashboard..." : "Finish and open dashboard"}
+      {opening || isPending ? "Finishing..." : "Finish and open dashboard"}
     </Button>
   );
 }

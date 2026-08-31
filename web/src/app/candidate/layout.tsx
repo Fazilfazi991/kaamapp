@@ -8,19 +8,17 @@ import type { CandidateProfileRow, ProfileRow } from "@/types/domain";
 export default async function CandidateLayout({ children }: { children: React.ReactNode }) {
   const account = await requireRole("candidate");
   const supabase = await createServerSupabaseClient();
-  const [{ data: profile }, { data: candidate }, { data: documents }] = await Promise.all([
+  const [{ data: profile }, { data: candidate }] = await Promise.all([
     supabase
       .from("profiles")
       .select("full_name,phone")
       .eq("id", account.userId)
       .maybeSingle<Pick<ProfileRow, "full_name" | "phone">>(),
-    supabase.from("candidate_profiles").select("*").eq("id", account.userId).maybeSingle<CandidateProfileRow>(),
-    supabase.from("candidate_documents").select("passport_file_url").eq("candidate_id", account.userId).maybeSingle<{ passport_file_url: string | null }>(),
+    supabase.from("candidate_profiles").select("headline,nationality,current_country,current_city,preferred_country,preferred_city,job_categories,skills,availability").eq("id", account.userId).maybeSingle<CandidateProfileRow>(),
   ]);
   const profileComplete = candidateCompletion({
     profile,
     candidate,
-    hasPassport: Boolean(documents?.passport_file_url?.trim()),
   }).isComplete;
 
   return (

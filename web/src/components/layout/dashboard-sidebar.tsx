@@ -8,7 +8,7 @@ export function DashboardSidebar({
   title,
   account,
 }: {
-  items: Array<{ href: string; label: string }>;
+  items: Array<{ href: string; label: string; prefetch?: boolean }>;
   title: string;
   account?: { email: string | null; role: string; name?: string | null };
 }) {
@@ -27,6 +27,7 @@ export function DashboardSidebar({
             key={item.href}
             href={item.href}
             label={item.label}
+            prefetch={item.prefetch}
             leading={<NavIcon label={item.label} />}
             className="focus-ring flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-[#3b3340] hover:bg-[#f3f0ff] hover:text-[#160847]"
             activeClassName="bg-[#160847] text-white shadow-[0_4px_12px_rgba(22,8,71,.16)]"

@@ -18,20 +18,35 @@ export function validateSkillIds(values: string[]) {
   return { ok: true as const, value: unique };
 }
 
-export function validateLocationSelection(countryValue: string, regionValue: string) {
+export function validateCurrentResidence(countryValue: string, regionValue: string) {
   const country = normalizeCountry(countryValue);
   const region = regionValue.trim();
-  if (!country) {
-    return { ok: false as const, error: "Select a country." };
-  }
+  if (country !== "UAE" && country !== "India") return { ok: false as const, error: "Please select your current residence country." };
   if (!regionsForCountry(country).includes(region)) {
     return {
       ok: false as const,
-      error:
-        country === "India"
-          ? "Select a valid Indian state."
-          : "Select a valid UAE emirate.",
+      error: country === "India" ? "Please select your current Indian state." : "Please select your current UAE emirate.",
     };
   }
   return { ok: true as const, value: { country, region } };
+}
+
+export function validatePreferredWorkLocation(countryValue: string, regionValue: string) {
+  const country = normalizeCountry(countryValue);
+  const region = regionValue.trim();
+  const allowed = ["UAE", "Saudi Arabia", "Qatar", "Oman", "Bahrain", "Kuwait"];
+  if (!allowed.includes(country)) return { ok: false as const, error: "Please select a preferred GCC work country." };
+  if (country === "UAE" && !regionsForCountry("UAE").includes(region)) {
+    return { ok: false as const, error: "Please select your preferred UAE emirate." };
+  }
+  return { ok: true as const, value: { country, region: country === "UAE" ? region : null } };
+}
+
+export function isValidInternationalMobile(value: string) {
+  const compact = value.replace(/[\s().-]/g, "");
+  return /^\+[1-9]\d{6,14}$/.test(compact);
+}
+
+export function normalizeInternationalMobile(value: string) {
+  return value.replace(/[\s().-]/g, "");
 }

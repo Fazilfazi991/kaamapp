@@ -6,7 +6,10 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/session";
 import { routes } from "@/config/routes";
 import {
-  validateLocationSelection,
+  isValidInternationalMobile,
+  normalizeInternationalMobile,
+  validateCurrentResidence,
+  validatePreferredWorkLocation,
   validateSkillIds,
 } from "@/features/candidate/validation";
 import type { SkillCategoryRow, SkillRow } from "@/types/domain";
@@ -31,7 +34,7 @@ function safeError(message: string): never {
   throw new Error(message);
 }
 
-type ExperienceActionState = {
+export type CandidateActionState = {
   error: string | null;
 };
 
@@ -65,9 +68,7 @@ export async function savePersonalDetails(formData: FormData) {
   const photo = formData.get("profilePhoto");
 
   if (!fullName) safeError("Full name is required.");
-  if (!phone || !/^[0-9+ ]{7,20}$/.test(phone)) {
-    safeError("Enter a valid mobile number.");
-  }
+  if (!isValidInternationalMobile(phone)) safeError("Enter a valid mobile number with country code, for example +971500000000.");
   if (!nationality) safeError("Nationality is required.");
 
   const { account, supabase } = await ensureCandidateRow();
@@ -103,7 +104,7 @@ export async function savePersonalDetails(formData: FormData) {
   const [{ error: profileError }, { error: candidateError }] = await Promise.all([
     supabase
       .from("profiles")
-      .update({ full_name: fullName, phone, status: "active" })
+      .update({ full_name: fullName, phone: normalizeInternationalMobile(phone), status: "active" })
       .eq("id", account.userId),
     supabase
       .from("candidate_profiles")
@@ -116,16 +117,19 @@ export async function savePersonalDetails(formData: FormData) {
   redirect(String(formData.get("next") ?? routes.candidateOnboardingSkills));
 }
 
-export async function saveLocationDetails(formData: FormData) {
+export async function saveLocationDetails(
+  _previousState: CandidateActionState,
+  formData: FormData,
+): Promise<CandidateActionState> {
   const currentCountry = text(formData, "currentCountry");
   const currentRegion = text(formData, "currentRegion");
   const preferredCountry = text(formData, "preferredCountry");
   const preferredRegion = text(formData, "preferredRegion");
-  const currentLocation = validateLocationSelection(currentCountry, currentRegion);
-  const preferredLocation = validateLocationSelection(preferredCountry, preferredRegion);
+  const currentLocation = validateCurrentResidence(currentCountry, currentRegion);
+  const preferredLocation = validatePreferredWorkLocation(preferredCountry, preferredRegion);
 
-  if (!currentLocation.ok) safeError(currentLocation.error);
-  if (!preferredLocation.ok) safeError(preferredLocation.error);
+  if (!currentLocation.ok) return { error: currentLocation.error };
+  if (!preferredLocation.ok) return { error: preferredLocation.error };
 
   const { account, supabase } = await ensureCandidateRow();
   const { error } = await supabase
@@ -137,16 +141,19 @@ export async function saveLocationDetails(formData: FormData) {
       preferred_city: preferredLocation.value.region,
     })
     .eq("id", account.userId);
-  if (error) safeError("Could not save location details.");
+  if (error) {
+    console.error("[candidate_location_save]", { code: error.code, message: error.message, details: error.details, hint: error.hint });
+    return { error: "We couldn't save your location. Please try again." };
+  }
 
   revalidateCandidatePages();
   redirect(String(formData.get("next") ?? routes.candidateOnboardingExperience));
 }
 
 export async function saveExperienceDetails(
-  _previousState: ExperienceActionState,
+  _previousState: CandidateActionState,
   formData: FormData,
-): Promise<ExperienceActionState> {
+): Promise<CandidateActionState> {
   const availability = text(formData, "availability");
   const experienceYears = numberOrNull(text(formData, "experienceYears"));
   const expectedSalary = intOrNull(text(formData, "expectedSalary"));

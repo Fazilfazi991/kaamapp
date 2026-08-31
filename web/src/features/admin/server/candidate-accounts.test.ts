@@ -87,12 +87,11 @@ function row({
 }
 
 describe("admin candidate account composition", () => {
-  it("keeps a candidate incomplete until a passport file is uploaded", () => {
+  it("keeps document verification separate from onboarding completion", () => {
     const result = row();
     expect(result.has_candidate_profile).toBe(true);
-    expect(result.profile_completion).toBe(80);
-    expect(result.operational_status).toBe("incomplete");
-    expect(result.missing_sections).toContain("Identity document");
+    expect(result.profile_completion).toBe(100);
+    expect(result.missing_sections).toEqual([]);
     expect(result.verification_status).toBe("pending_verification");
   });
 
@@ -129,7 +128,7 @@ describe("admin candidate account composition", () => {
 
   it("does not infer manual verification from profile completion or account status", () => {
     const completeActiveCandidate = row();
-    expect(completeActiveCandidate.profile_completion).toBe(80);
+    expect(completeActiveCandidate.profile_completion).toBe(100);
     expect(completeActiveCandidate.profiles?.status).toBe("active");
     expect(completeActiveCandidate.verification_status).toBe("pending_verification");
   });
