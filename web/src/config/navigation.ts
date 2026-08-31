@@ -1,10 +1,10 @@
 import { routes } from "./routes";
 
-export function candidateNavigation({ profileComplete = false }: { profileComplete?: boolean } = {}) {
+export function candidateNavigation({ profileComplete = false, onboarding = false }: { profileComplete?: boolean; onboarding?: boolean } = {}) {
   return [
-    { href: routes.candidateDashboard, label: "Dashboard", prefetch: true },
+    { href: routes.candidateDashboard, label: "Dashboard", prefetch: onboarding ? false : true },
     { href: routes.candidateProfile, label: "Profile", prefetch: false },
-    ...(profileComplete ? [] : [{ href: routes.candidateOnboarding, label: "Complete profile", prefetch: true }]),
+    ...(profileComplete ? [] : [{ href: routes.candidateOnboarding, label: "Complete profile", prefetch: onboarding ? false : true }]),
     { href: routes.candidateInterests, label: "Interests", prefetch: false },
     { href: routes.candidateMatches, label: "Matches", prefetch: false },
     { href: routes.candidateMessages, label: "Messages", prefetch: false },

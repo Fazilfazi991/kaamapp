@@ -53,6 +53,14 @@ async function ensureCandidateRow() {
   return { account, supabase };
 }
 
+async function candidateMutationClient() {
+  const supabase = await createServerSupabaseClient();
+  const { data, error } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub;
+  if (error || !userId) redirect(routes.candidateLogin);
+  return { userId, supabase };
+}
+
 function revalidateCandidatePages() {
   revalidatePath(routes.candidateDashboard);
   revalidatePath(routes.candidateProfile);
@@ -130,9 +138,10 @@ export async function saveLocationDetails(
 
   if (!currentLocation.ok) return { error: currentLocation.error };
   if (!preferredLocation.ok) return { error: preferredLocation.error };
-
-  const { account, supabase } = await ensureCandidateRow();
-  const { error } = await supabase
+  // Verify the signed access token without repeating requireRole's unrelated
+  // profile/company reads. RLS still authorizes ownership of the update.
+  const { userId, supabase } = await candidateMutationClient();
+  const { data: candidate, error } = await supabase
     .from("candidate_profiles")
     .update({
       current_country: currentLocation.value.country,
@@ -140,13 +149,17 @@ export async function saveLocationDetails(
       preferred_country: preferredLocation.value.country,
       preferred_city: preferredLocation.value.region,
     })
-    .eq("id", account.userId);
+    .eq("id", userId)
+    .select("id")
+    .maybeSingle<{ id: string }>();
   if (error) {
     console.error("[candidate_location_save]", { code: error.code, message: error.message, details: error.details, hint: error.hint });
+  }
+  if (error || !candidate) {
     return { error: "We couldn't save your location. Please try again." };
   }
-
-  revalidateCandidatePages();
+  // The redirect renders the next dynamic Server Component with fresh data;
+  // broad Candidate cache invalidation only adds work to this transition.
   redirect(String(formData.get("next") ?? routes.candidateOnboardingExperience));
 }
 

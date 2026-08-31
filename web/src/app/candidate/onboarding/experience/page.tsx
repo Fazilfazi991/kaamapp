@@ -2,10 +2,10 @@ import { routes } from "@/config/routes";
 import { ExperienceForm } from "@/features/candidate/components/experience-form";
 import { FormCard } from "@/features/candidate/components/form-card";
 import { OnboardingShell } from "@/features/candidate/components/onboarding-shell";
-import { loadCandidateBundle } from "@/features/candidate/server/data";
+import { loadCandidateExperienceData } from "@/features/candidate/server/data";
 
 export default async function CandidateOnboardingExperiencePage() {
-  const { candidate } = await loadCandidateBundle();
+  const { candidate } = await loadCandidateExperienceData();
   return (
     <OnboardingShell
       current={routes.candidateOnboardingExperience}

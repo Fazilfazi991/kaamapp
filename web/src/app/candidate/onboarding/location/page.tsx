@@ -2,10 +2,10 @@ import { routes } from "@/config/routes";
 import { FormCard } from "@/features/candidate/components/form-card";
 import { LocationForm } from "@/features/candidate/components/location-form";
 import { OnboardingShell } from "@/features/candidate/components/onboarding-shell";
-import { loadCandidateBundle } from "@/features/candidate/server/data";
+import { loadCandidateLocationData } from "@/features/candidate/server/data";
 
 export default async function CandidateOnboardingLocationPage() {
-  const { candidate } = await loadCandidateBundle();
+  const { candidate } = await loadCandidateLocationData();
   return (
     <OnboardingShell
       current={routes.candidateOnboardingLocation}

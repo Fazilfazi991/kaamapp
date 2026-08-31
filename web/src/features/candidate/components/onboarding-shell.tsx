@@ -20,6 +20,9 @@ export function OnboardingShell({
   description: string;
   children: React.ReactNode;
 }) {
+  const currentIndex = steps.findIndex((step) => step.href === current);
+  const nextHref = steps[currentIndex + 1]?.href;
+
   return (
     <div className="grid gap-6">
       <div>
@@ -36,6 +39,7 @@ export function OnboardingShell({
           <Link
             key={step.href}
             href={step.href}
+            prefetch={step.href === nextHref}
             className={`focus-ring whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold ${
               step.href === current
                 ? "bg-[#e53670] text-white"

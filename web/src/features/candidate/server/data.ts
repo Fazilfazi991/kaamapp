@@ -24,6 +24,33 @@ export type CandidateDashboardBundle = Pick<
   "profile" | "candidate" | "membership"
 >;
 
+const locationFields = "current_country,current_city,preferred_country,preferred_city";
+const experienceFields = "availability,experience_years,expected_salary_min,visa_status,languages,hide_phone_before_match,hide_email_before_match,is_visible";
+
+export async function loadCandidateLocationData() {
+  const account = await requireRole("candidate");
+  const supabase = await createServerSupabaseClient();
+  const { data: candidate } = await supabase
+    .from("candidate_profiles")
+    .select(locationFields)
+    .eq("id", account.userId)
+    .maybeSingle<CandidateProfileRow>();
+
+  return { candidate };
+}
+
+export async function loadCandidateExperienceData() {
+  const account = await requireRole("candidate");
+  const supabase = await createServerSupabaseClient();
+  const { data: candidate } = await supabase
+    .from("candidate_profiles")
+    .select(experienceFields)
+    .eq("id", account.userId)
+    .maybeSingle<CandidateProfileRow>();
+
+  return { candidate };
+}
+
 export async function loadCandidateDashboardBundle(): Promise<CandidateDashboardBundle> {
   const account = await requireRole("candidate");
   const supabase = await createServerSupabaseClient();

@@ -4,6 +4,14 @@ import { dashboardForRole, isBlockedStatus, isRoleRoute, safeReturnPath } from "
 import { routes } from "@/config/routes";
 import { supabaseConfig } from "./env";
 
+export function usesVerifiedClaimsForPath(pathname: string) {
+  return pathname === routes.candidateOnboarding || pathname.startsWith(`${routes.candidateOnboarding}/`);
+}
+
+export function isCandidateOnboardingServerAction(pathname: string, method: string, hasNextActionHeader: boolean) {
+  return usesVerifiedClaimsForPath(pathname) && method === "POST" && hasNextActionHeader;
+}
+
 export async function updateSession(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-current-path", request.nextUrl.pathname);
@@ -31,6 +39,12 @@ export async function updateSession(request: NextRequest) {
 
   const { url, anonKey } = config;
 
+  // The Server Action verifies signed claims itself. Avoid doing the same
+  // authentication work twice on this latency-sensitive POST request.
+  if (isCandidateOnboardingServerAction(pathname, request.method, request.headers.has("next-action"))) {
+    return response;
+  }
+
   const supabase = createServerClient(url, anonKey, {
     cookies: {
       getAll() {
@@ -51,11 +65,18 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let authenticatedUserId: string | null = null;
+  if (usesVerifiedClaimsForPath(pathname)) {
+    const { data } = await supabase.auth.getClaims();
+    authenticatedUserId = data?.claims.sub ?? null;
+  } else {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    authenticatedUserId = user?.id ?? null;
+  }
 
-  if (isProtected && !user) {
+  if (isProtected && !authenticatedUserId) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = loginRoute;
     redirectUrl.searchParams.set("redirectTo", pathname);
@@ -72,11 +93,11 @@ export async function updateSession(request: NextRequest) {
   // Protected routes perform their role/status check in their server layout or page.
   // Keeping the proxy to session renewal and unauthenticated redirects lets the
   // application shell start streaming without a second profile request.
-  if (user && (isAuthPage || isBlockedPage)) {
+  if (authenticatedUserId && (isAuthPage || isBlockedPage)) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role,status")
-      .eq("id", user.id)
+      .eq("id", authenticatedUserId)
       .maybeSingle<{ role: "candidate" | "employer" | "admin"; status: string | null }>();
 
     if (isBlockedStatus(profile?.status) && !isBlockedPage) {
