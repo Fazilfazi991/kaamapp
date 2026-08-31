@@ -5,11 +5,16 @@ import { routes } from "@/config/routes";
 import { supabaseConfig } from "./env";
 
 export function usesVerifiedClaimsForPath(pathname: string) {
-  return pathname === routes.candidateOnboarding || pathname.startsWith(`${routes.candidateOnboarding}/`);
+  return isRoleRoute(pathname, "candidate") || isRoleRoute(pathname, "employer") || pathname.startsWith("/admin");
 }
 
 export function isCandidateOnboardingServerAction(pathname: string, method: string, hasNextActionHeader: boolean) {
-  return usesVerifiedClaimsForPath(pathname) && method === "POST" && hasNextActionHeader;
+  const isCandidateOnboarding = pathname === routes.candidateOnboarding || pathname.startsWith(`${routes.candidateOnboarding}/`);
+  return isCandidateOnboarding && method === "POST" && hasNextActionHeader;
+}
+
+export function hasSupabaseAuthCookie(request: Pick<NextRequest, "cookies">) {
+  return request.cookies.getAll().some(({ name }) => name.startsWith("sb-") && name.includes("-auth-token"));
 }
 
 export async function updateSession(request: NextRequest) {
@@ -42,6 +47,13 @@ export async function updateSession(request: NextRequest) {
   // The Server Action verifies signed claims itself. Avoid doing the same
   // authentication work twice on this latency-sensitive POST request.
   if (isCandidateOnboardingServerAction(pathname, request.method, request.headers.has("next-action"))) {
+    return response;
+  }
+
+  // A request without a Supabase auth cookie cannot have a session to renew.
+  // Protected routes still need the normal unauthenticated redirect, while
+  // public and auth-entry pages can avoid an unnecessary Auth server call.
+  if (!isProtected && !hasSupabaseAuthCookie(request)) {
     return response;
   }
 

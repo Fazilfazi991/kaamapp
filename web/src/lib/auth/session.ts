@@ -36,7 +36,7 @@ function currentPathFromHeaders() {
     .catch(() => "");
 }
 
-export async function getAuthenticatedAccountSnapshot(): Promise<AccountSnapshot> {
+const resolveAuthenticatedAccountSnapshot = cache(async function resolveAuthenticatedAccountSnapshot(): Promise<AccountSnapshot> {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -77,6 +77,10 @@ export async function getAuthenticatedAccountSnapshot(): Promise<AccountSnapshot
     hasCandidateProfile: Boolean(candidate),
     hasEmployerProfile: Boolean(company),
   };
+});
+
+export function getAuthenticatedAccountSnapshot(): Promise<AccountSnapshot> {
+  return resolveAuthenticatedAccountSnapshot();
 }
 
 export const getPublicAccountNavigation = cache(async function getPublicAccountNavigation(): Promise<PublicAccountNavigation> {
@@ -116,53 +120,38 @@ export async function getAuthenticatedProfile() {
 }
 
 export const requireRole = cache(async function requireRole(role: AppAccountRole): Promise<AccountContext> {
-  const supabase = await createServerSupabaseClient();
   const currentPath = await currentPathFromHeaders();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  const snapshot = await getAuthenticatedAccountSnapshot();
+  if (!snapshot.userId) {
     const loginRoute = role === "candidate" ? routes.candidateLogin : routes.employerLogin;
     redirect(`${loginRoute}?redirectTo=${encodeURIComponent(currentPath)}`);
   }
 
-  const [{ data: profile }, { data: candidate }, { data: company }] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("id, role, full_name, email, status")
-        .eq("id", user.id)
-        .maybeSingle<ProfileRow>(),
-      supabase.from("candidate_profiles").select("id").eq("id", user.id).maybeSingle(),
-      supabase
-        .from("employer_companies")
-        .select("id")
-        .eq("owner_id", user.id)
-        .limit(1)
-        .maybeSingle(),
-    ]);
-
-  const snapshot: AccountSnapshot = {
-    userId: user.id,
-    email: user.email ?? profile?.email ?? null,
-    displayName: profile?.full_name ?? null,
-    role: profile?.role ?? null,
-    profileStatus: profile?.status ?? null,
-    hasCandidateProfile: Boolean(candidate),
-    hasEmployerProfile: Boolean(company),
-  };
   const decision = protectedRouteDecision(snapshot, role, currentPath);
   if (!decision.allowed && decision.redirectTo) redirect(decision.redirectTo);
 
   return {
-    userId: user.id,
+    userId: snapshot.userId,
     email: snapshot.email,
-    role: profile?.role as UserRole,
-    profileStatus: profile?.status ?? "draft",
+    role: snapshot.role as UserRole,
+    profileStatus: snapshot.profileStatus ?? "draft",
     hasCandidateProfile: snapshot.hasCandidateProfile,
     hasEmployerProfile: snapshot.hasEmployerProfile,
   };
+});
+
+export const loadCandidateCoreData = cache(async function loadCandidateCoreData() {
+  const account = await requireRole("candidate");
+  const supabase = await createServerSupabaseClient();
+  const [{ data: profile }, { data: candidate }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, role, full_name, phone, email, status")
+      .eq("id", account.userId)
+      .maybeSingle<ProfileRow>(),
+    supabase.from("candidate_profiles").select("*").eq("id", account.userId).maybeSingle<CandidateProfileRow>(),
+  ]);
+  return { account, profile, candidate };
 });
 
 export async function redirectAuthenticatedAuthPage({ allowMissingProfile = false }: { allowMissingProfile?: boolean } = {}) {

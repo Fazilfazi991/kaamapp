@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { requireRole } from "@/lib/auth/session";
+import { loadCandidateCoreData, requireRole } from "@/lib/auth/session";
 import type {
   CandidateMembershipRow,
   CandidateProfileRow,
@@ -52,44 +52,28 @@ export async function loadCandidateExperienceData() {
 }
 
 export async function loadCandidateDashboardBundle(): Promise<CandidateDashboardBundle> {
-  const account = await requireRole("candidate");
+  const { account, profile, candidate } = await loadCandidateCoreData();
   const supabase = await createServerSupabaseClient();
-  const [{ data: profile }, { data: candidate }, { data: membership }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, role, full_name, phone, email, status")
-      .eq("id", account.userId)
-      .maybeSingle<ProfileRow>(),
-    supabase.from("candidate_profiles").select("*").eq("id", account.userId).maybeSingle<CandidateProfileRow>(),
-    supabase
+  const { data: membership } = await supabase
       .from("candidate_memberships")
       .select("status, plan_code, membership_type, started_at, expires_at")
       .eq("candidate_id", account.userId)
       .order("updated_at", { ascending: false })
       .limit(1)
-      .maybeSingle<CandidateMembershipRow>(),
-  ]);
+      .maybeSingle<CandidateMembershipRow>();
 
   return { profile, candidate, membership };
 }
 
 export async function loadCandidateBundle(): Promise<CandidateBundle> {
-  const account = await requireRole("candidate");
+  const { account, profile, candidate } = await loadCandidateCoreData();
   const supabase = await createServerSupabaseClient();
   const [
-    { data: profile },
-    { data: candidate },
     { data: categories },
     { data: skills },
     { data: selectedSkills },
     { data: membership },
   ] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("id, role, full_name, phone, email, status")
-      .eq("id", account.userId)
-      .maybeSingle<ProfileRow>(),
-    supabase.from("candidate_profiles").select("*").eq("id", account.userId).maybeSingle<CandidateProfileRow>(),
     supabase
       .from("skill_categories")
       .select("id, name, slug, icon_name")
