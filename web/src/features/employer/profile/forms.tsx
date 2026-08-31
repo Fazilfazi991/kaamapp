@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { SelectField, TextInput } from "@/components/ui/form";
-import { indianStates, uaeEmirates } from "@/features/candidate/constants";
-import { saveCompanyContact, saveCompanyInformation, saveCompanyLocation, uploadCompanyLogo } from "@/features/employer/server/profile-actions";
+import { saveCompanyContact, saveCompanyInformation, uploadCompanyLogo } from "@/features/employer/server/profile-actions";
 import { companySizeOptions, employerIndustryOptions } from "./validation";
 import type { EmployerCompany } from "@/features/employer/types";
+
+export { CompanyLocationForm } from "./company-location-form";
 
 export function CompanyInformationForm({ company, next = "/employer/onboarding/location" }: { company: EmployerCompany | null; next?: string }) {
   return (
@@ -17,24 +18,6 @@ export function CompanyInformationForm({ company, next = "/employer/onboarding/l
         <label className="grid gap-2 text-sm font-semibold text-[#342b38]">Company size<SelectField name="companySize" defaultValue={company?.company_size ?? ""} required><option value="">Select size</option>{companySizeOptions.map((item) => <option key={item}>{item}</option>)}</SelectField></label>
       </div>
       <label className="mt-4 grid gap-2 text-sm font-semibold text-[#342b38]">Company description<textarea name="description" defaultValue={company?.description ?? ""} rows={4} className="focus-ring rounded-lg border border-[#dfd2d9] px-4 py-3 text-base text-[#201925]" /></label>
-      <div className="mt-5"><Button type="submit">Save and continue</Button></div>
-    </form>
-  );
-}
-
-export function CompanyLocationForm({ company, next = "/employer/onboarding/contact" }: { company: EmployerCompany | null; next?: string }) {
-  const country = company?.country === "India" ? "India" : "UAE";
-  const regions = country === "India" ? indianStates : uaeEmirates;
-  return (
-    <form action={saveCompanyLocation} className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
-      <input type="hidden" name="next" value={next} />
-      <h2 className="text-lg font-semibold text-[#201925]">Company location</h2>
-      <div className="mt-5 grid gap-4 md:grid-cols-2">
-        <label className="grid gap-2 text-sm font-semibold text-[#342b38]">Country<SelectField name="country" defaultValue={country}><option value="UAE">United Arab Emirates</option><option value="India">India</option></SelectField></label>
-        <label className="grid gap-2 text-sm font-semibold text-[#342b38]">{country === "India" ? "State / UT" : "Emirate"}<SelectField name="region" defaultValue={company?.city ?? ""} required><option value="">Select region</option>{regions.map((item) => <option key={item}>{item}</option>)}</SelectField></label>
-        <label className="grid gap-2 text-sm font-semibold text-[#342b38] md:col-span-2">Office area / branch<TextInput name="officeArea" defaultValue={company?.office_area ?? ""} /></label>
-      </div>
-      <p className="mt-3 text-sm text-[#66616f]">Changing country clears stale hidden region values on save.</p>
       <div className="mt-5"><Button type="submit">Save and continue</Button></div>
     </form>
   );

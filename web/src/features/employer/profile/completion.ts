@@ -1,4 +1,5 @@
 import type { EmployerCompany, VerificationDocumentRow } from "@/features/employer/types";
+import { validateEmployerLocation } from "./validation";
 
 // Employer verification evidence is optional and admin-managed. Historical
 // verification documents remain supported, but are not onboarding prerequisites.
@@ -11,7 +12,9 @@ export function employerCompanyCompletion(company: EmployerCompany | null, docum
       company?.industry?.trim() &&
       company?.company_size?.trim(),
   );
-  const locationComplete = Boolean(company?.country?.trim() && company?.city?.trim());
+  const locationComplete = company
+    ? validateEmployerLocation(company.country ?? "", company.city ?? "", company.office_area ?? "").ok
+    : false;
   const contactComplete = Boolean(company?.contact_person?.trim() && company?.contact_role?.trim());
   const documentsComplete = true;
   const completed = [infoComplete, locationComplete, contactComplete].filter(Boolean).length;

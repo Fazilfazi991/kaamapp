@@ -4,6 +4,7 @@ import { SecureDocumentViewer } from "@/components/documents/secure-document-vie
 import { AdminPageHeader, AdminStatus, DetailSection, Field } from "@/features/admin/components/admin-ui";
 import { EmployerDocumentReviewActions } from "@/features/admin/components/employer-review-actions";
 import { loadEmployerDocument } from "@/features/admin/server/data";
+import { employerCompanyLocationParts } from "@/features/employer/profile/validation";
 import { getEmployerDocumentReviewState } from "@/features/admin/validation/review";
 
 export default async function AdminEmployerDocumentDetailPage({ params }: { params: Promise<{ documentId: string }> }) {
@@ -17,7 +18,7 @@ export default async function AdminEmployerDocumentDetailPage({ params }: { para
       <DetailSection title="Document summary">
         <div className="grid gap-4 md:grid-cols-3">
           <Field label="Company" value={document.employer_companies?.company_name} />
-          <Field label="Location" value={[document.employer_companies?.city, document.employer_companies?.country].filter(Boolean).join(", ")} />
+          <Field label="Location" value={employerCompanyLocationParts(document.employer_companies?.country, document.employer_companies?.city).join(", ")} />
           <Field label="Status" value={<AdminStatus status={document.status} />} />
           <Field label="Submitted" value={document.created_at?.slice(0, 10)} />
           <Field label="Updated" value={document.updated_at?.slice(0, 10)} />

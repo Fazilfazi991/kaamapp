@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { AdminPageHeader, AdminStatus, DetailSection, Field, SafeLink } from "@/features/admin/components/admin-ui";
 import { EmployerCompanyVerificationForm } from "@/features/admin/components/employer-review-actions";
 import { loadEmployer } from "@/features/admin/server/data";
+import { employerCompanyLocationParts } from "@/features/employer/profile/validation";
 import {
   documentStatusesByType,
   getEmployerCompanyVerificationState,
@@ -25,7 +26,7 @@ export default async function AdminEmployerDetailPage({ params }: { params: Prom
       <DetailSection title="Company details">
         <div className="grid gap-4 md:grid-cols-3">
           <Field label="Industry" value={company.industry} />
-          <Field label="Location" value={[company.office_area, company.city, company.country].filter(Boolean).join(", ")} />
+          <Field label="Location" value={employerCompanyLocationParts(company.country, company.city, company.office_area).join(", ")} />
           <Field label="Status" value={<AdminStatus status={company.status} />} />
           <Field label="Verified" value={company.is_verified ? "Yes" : "No"} />
           <Field label="Contact" value={[company.contact_person, company.contact_role].filter(Boolean).join(", ")} />

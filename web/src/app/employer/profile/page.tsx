@@ -3,6 +3,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmployerDocumentCards } from "@/features/employer/documents/components";
 import { employerCompanyCompletion } from "@/features/employer/profile/completion";
+import { employerCompanyLocationParts } from "@/features/employer/profile/validation";
 import { loadEmployerCompanyBundle } from "@/features/employer/server/profile-data";
 
 export default async function EmployerProfilePage() {
@@ -15,7 +16,7 @@ export default async function EmployerProfilePage() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-[#201925]">{company?.company_name ?? "Employer details not created"}</h2>
-            <p className="mt-1 text-sm text-[#66616f]">{[company?.industry, company?.city, company?.country].filter(Boolean).join(" - ") || "Use setup to add your employer details."}</p>
+            <p className="mt-1 text-sm text-[#66616f]">{[company?.industry, ...employerCompanyLocationParts(company?.country, company?.city)].filter(Boolean).join(" - ") || "Use setup to add your employer details."}</p>
           </div>
           <StatusBadge tone={company?.is_verified ? "success" : "neutral"}>{company?.is_verified ? "Business verified" : "Optional verification"}</StatusBadge>
         </div>

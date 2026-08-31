@@ -4,6 +4,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { acceptInterest, rejectInterest } from "@/features/candidate/interests/server/actions";
 import { canRespondToInterest, extractInterestLine, interestStatusLabel, interestTone } from "@/features/candidate/interests/utils";
 import type { CandidateInterestRow } from "@/features/candidate/interests/types";
+import { employerCompanyLocationParts } from "@/features/employer/profile/validation";
 
 export function CandidateInterestCard({ interest, detailed = false }: { interest: CandidateInterestRow; detailed?: boolean }) {
   const company = interest.employer_companies;
@@ -15,7 +16,7 @@ export function CandidateInterestCard({ interest, detailed = false }: { interest
         <div>
           <h2 className="text-lg font-semibold text-[#201925]">{company?.company_name ?? "Employer"}</h2>
           <p className="mt-1 text-sm text-[#66616f]">
-            {[company?.industry, company?.city, company?.country].filter(Boolean).join(" - ") || "Company details"}
+            {[company?.industry, ...employerCompanyLocationParts(company?.country, company?.city)].filter(Boolean).join(" - ") || "Company details"}
           </p>
         </div>
         <StatusBadge tone={interestTone(interest.status)}>{interestStatusLabel(interest.status)}</StatusBadge>

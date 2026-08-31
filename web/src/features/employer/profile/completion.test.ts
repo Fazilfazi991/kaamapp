@@ -48,6 +48,14 @@ describe("employer profile completion", () => {
     expect(nextEmployerOnboardingPath({ ...company, city: null })).toBe("/employer/onboarding/location");
   });
 
+  it("completes a non-UAE GCC location without an emirate", () => {
+    expect(nextEmployerOnboardingPath({ ...company, country: "Qatar", city: null })).toBe("/employer/dashboard");
+  });
+
+  it("does not accept India as an employer company location", () => {
+    expect(nextEmployerOnboardingPath({ ...company, country: "India", city: "Kerala" })).toBe("/employer/onboarding/location");
+  });
+
   it("requires contact before completion", () => {
     expect(nextEmployerOnboardingPath({ ...company, contact_person: null })).toBe("/employer/onboarding/contact");
   });

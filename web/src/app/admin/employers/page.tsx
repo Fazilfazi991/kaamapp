@@ -1,5 +1,6 @@
 import { AdminPageHeader, AdminStatus, AdminTable, FilterBar, RowAction } from "@/features/admin/components/admin-ui";
 import { loadEmployers } from "@/features/admin/server/data";
+import { employerCompanyLocationParts } from "@/features/employer/profile/validation";
 
 export default async function AdminEmployersPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; page?: string }> }) {
   const params = await searchParams;
@@ -15,7 +16,7 @@ export default async function AdminEmployersPage({ searchParams }: { searchParam
           <tr key={company.id} className="block rounded-lg border border-[#eadde3] p-4 md:table-row md:border-0 md:p-0">
             <td className="px-4 py-3 font-semibold text-[#201925]">{company.company_name}</td>
             <td className="px-4 py-3 text-[#66616f]">{company.profiles?.email ?? "Owner email unavailable"}</td>
-            <td className="px-4 py-3 text-[#66616f]">{[company.city, company.country].filter(Boolean).join(", ") || "Not set"}</td>
+            <td className="px-4 py-3 text-[#66616f]">{employerCompanyLocationParts(company.country, company.city).join(", ") || "Not set"}</td>
             <td className="px-4 py-3"><AdminStatus status={company.status} /></td>
             <td className="px-4 py-3 text-[#66616f]">{company.verification_documents?.length ?? 0} submitted</td>
             <td className="px-4 py-3"><RowAction href={`/admin/employers/${company.id}`}>View</RowAction></td>

@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/session";
 import type { EmployerCompany } from "@/features/employer/types";
+import { validateEmployerLocation } from "@/features/employer/profile/validation";
 
 export type EmployerAccess =
   | { ok: true; userId: string; company: EmployerCompany; warning: string | null }
@@ -42,8 +43,9 @@ export async function resolveEmployerAccess(): Promise<EmployerAccess> {
     };
   }
 
-  const required = [company.company_name, company.city, company.contact_person];
-  const warning = required.some((value) => !value?.trim())
+  const required = [company.company_name, company.contact_person];
+  const locationValid = validateEmployerLocation(company.country ?? "", company.city ?? "", company.office_area ?? "").ok;
+  const warning = required.some((value) => !value?.trim()) || !locationValid
     ? "Complete your company profile to improve candidate trust."
     : company.is_verified
       ? null

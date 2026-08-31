@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { validateCompanyInfo, validateEmployerContact, validateEmployerLocation, validatePhone } from "./validation";
+import { employerCompanyCountries, employerCompanyLocationParts, validateCompanyInfo, validateEmployerContact, validateEmployerLocation, validatePhone } from "./validation";
 
 describe("employer profile validation", () => {
   it("requires UAE emirate", () => {
     expect(validateEmployerLocation("UAE", "Kerala", "").ok).toBe(false);
   });
 
-  it("requires India state", () => {
-    expect(validateEmployerLocation("India", "Dubai", "").ok).toBe(false);
+  it("offers the six supported GCC company countries and excludes India", () => {
+    expect(employerCompanyCountries).toEqual(["UAE", "Saudi Arabia", "Qatar", "Oman", "Bahrain", "Kuwait"]);
+    expect(employerCompanyCountries).not.toContain("India");
   });
 
   it("accepts UAE emirate", () => {
@@ -16,8 +17,22 @@ describe("employer profile validation", () => {
     if (result.ok) expect(result.value.country).toBe("UAE");
   });
 
-  it("accepts Indian state", () => {
-    expect(validateEmployerLocation("India", "Kerala", "").ok).toBe(true);
+  it("accepts non-UAE GCC countries without an emirate and clears stale UAE values", () => {
+    for (const country of ["Saudi Arabia", "Qatar", "Oman", "Bahrain", "Kuwait"]) {
+      expect(validateEmployerLocation(country, "Dubai", "")).toEqual({
+        ok: true,
+        value: { country, city: null, officeArea: null },
+      });
+    }
+  });
+
+  it("rejects India as an employer company country", () => {
+    expect(validateEmployerLocation("India", "Kerala", "")).toMatchObject({ ok: false });
+  });
+
+  it("does not display a stale UAE emirate for another GCC country", () => {
+    expect(employerCompanyLocationParts("Saudi Arabia", "Dubai")).toEqual(["Saudi Arabia"]);
+    expect(employerCompanyLocationParts("UAE", "Dubai")).toEqual(["Dubai", "UAE"]);
   });
 
   it("rejects missing company name", () => {
