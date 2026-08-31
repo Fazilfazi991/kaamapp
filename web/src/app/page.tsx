@@ -59,13 +59,10 @@ export default async function HomePage() {
         <HowItWorks />
 
         <section className="bg-[#201925]">
-          <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-10 text-white sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+          <div className="mx-auto max-w-6xl px-4 py-10 text-white sm:px-6 lg:px-8">
             <div>
               <p className="text-sm font-bold uppercase tracking-[.14em] text-[#ff9dbe]">KAAM mobile app</p><h2 className="mt-2 text-2xl font-bold">Coming soon</h2>
               <p className="mt-2 text-white/75">Use KAAM on the web today. The KAAM mobile app is coming soon for an even faster experience.</p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href={routes.candidateRegister}>Register as Candidate</ButtonLink>
             </div>
           </div>
         </section>

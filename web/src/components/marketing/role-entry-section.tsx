@@ -75,6 +75,17 @@ function BenefitList({ items, tone }: { items: readonly string[]; tone: "candida
   );
 }
 
+function LoginLink({ href, children, tone }: { href: string; children: string; tone: "candidate" | "employer" }) {
+  return (
+    <Link href={href} className="focus-ring group relative inline-block rounded-sm pb-1 font-bold text-[#160847]">
+      {children}
+      <svg aria-hidden="true" className={`absolute -bottom-0.5 left-0 h-1.5 w-full overflow-visible ${tone === "candidate" ? "text-[#f56ba1]" : "text-[#8b5bd4]"}`} preserveAspectRatio="none" viewBox="0 0 100 6">
+        <path d="M1 2.25 Q50 5.5 99 2.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+      </svg>
+    </Link>
+  );
+}
+
 export function RoleEntrySection() {
   return (
     <section className="overflow-hidden bg-[linear-gradient(135deg,#fffdfd_0%,#fff7fa_52%,#fbf8ff_100%)] px-3 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-14" aria-labelledby="role-entry-heading">
@@ -110,9 +121,7 @@ export function RoleEntrySection() {
               </ButtonLink>
               <p className="mt-4 text-center text-[13px] leading-5 text-[#655b68] sm:text-sm">
                 Already registered?{" "}
-                <Link href={routes.candidateLogin} className="focus-ring rounded font-bold text-[#160847] underline decoration-[#f56ba1] decoration-2 underline-offset-4">
-                  Candidate Login
-                </Link>
+                <LoginLink href={routes.candidateLogin} tone="candidate">Candidate Login</LoginLink>
               </p>
             </div>
           </article>
@@ -135,9 +144,7 @@ export function RoleEntrySection() {
               </ButtonLink>
               <p className="mt-4 text-center text-[13px] leading-5 text-[#655b68] sm:text-sm">
                 Already have an employer account?{" "}
-                <Link href={routes.employerLogin} className="focus-ring rounded font-bold text-[#160847] underline decoration-[#a98be0] decoration-2 underline-offset-4">
-                  Employer Login
-                </Link>
+                <LoginLink href={routes.employerLogin} tone="employer">Employer Login</LoginLink>
               </p>
             </div>
           </article>
