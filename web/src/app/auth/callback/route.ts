@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { routes } from "@/config/routes";
 import { parseAuthJourney, safeReturnPath } from "@/lib/auth/routing";
+import { authCallbackCredential } from "@/lib/auth/callback-credential";
 import { supabaseConfig } from "@/lib/supabase/env";
 
 function completeUrl(request: NextRequest, params: Record<string, string | null> = {}) {
@@ -24,10 +25,12 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const code = request.nextUrl.searchParams.get("code");
+  const credential = authCallbackCredential(request.nextUrl.searchParams);
   const config = supabaseConfig();
-  if (!code || !config) {
-    return NextResponse.redirect(completeUrl(request, { oauthError: code ? "failed" : "expired" }));
+  if (!credential || !config) {
+    return NextResponse.redirect(
+      completeUrl(request, { oauthError: credential ? "failed" : "expired" }),
+    );
   }
 
   const target = completeUrl(request);
@@ -47,7 +50,9 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { error } = credential.kind === "code"
+    ? await supabase.auth.exchangeCodeForSession(credential.value)
+    : await supabase.auth.verifyOtp({ token_hash: credential.value, type: "magiclink" });
   if (error) return NextResponse.redirect(completeUrl(request, { oauthError: "expired" }));
   return response;
 }
