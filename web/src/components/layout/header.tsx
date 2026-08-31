@@ -31,7 +31,7 @@ export async function Header() {
   return (
     <header className="border-b border-[#160847] bg-[#160847] text-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <Link href={routes.home} className="flex items-center justify-start">
+        <Link href={routes.home} prefetch={false} className="flex items-center justify-start">
           <Image src="/kaam-logo.webp" alt="KAAM Perfect Match" width={118} height={52} priority style={{ width: 118, height: "auto" }} />
         </Link>
         <nav className="ml-auto hidden items-center gap-1 md:flex" aria-label="Primary">
@@ -40,10 +40,10 @@ export async function Header() {
             { href: routes.employers, label: "Hire Candidates" },
             { href: routes.candidateLogin, label: "Candidate Login" },
             { href: routes.employerLogin, label: "Employer Login" },
-          ]).map((item) => <Link key={item.href} href={item.href} prefetch={item.href.includes("login") ? false : undefined} className="focus-ring rounded-md px-3 py-2 text-sm font-medium text-white/90 hover:text-[#f56ba1]">{item.label}</Link>)}
+          ]).map((item) => <Link key={item.href} href={item.href} prefetch={false} className="focus-ring rounded-md px-3 py-2 text-sm font-medium text-white/90 hover:text-[#f56ba1]">{item.label}</Link>)}
         </nav>
         <div className="hidden items-center gap-2 border-l border-white/25 pl-4 md:flex">
-          {account.authenticated && account.dashboardHref ? <><Link href={account.dashboardHref} className="focus-ring flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/10"><span aria-hidden="true" className="grid h-9 w-9 place-items-center rounded-full border border-white/40 bg-white/10 text-xs font-bold text-white">{initials}</span><span className="flex flex-col leading-tight"><span className="text-sm font-semibold text-white">{firstName}</span><span className="text-[11px] text-white/70">{roleLabel}</span></span></Link><LogoutButton destination={routes.home} variant="ghost" buttonClassName="min-h-0 px-2 py-2 text-white/80 hover:bg-transparent hover:text-[#f56ba1]" /></> : null}
+          {account.authenticated && account.dashboardHref ? <><Link href={account.dashboardHref} prefetch={false} className="focus-ring flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/10"><span aria-hidden="true" className="grid h-9 w-9 place-items-center rounded-full border border-white/40 bg-white/10 text-xs font-bold text-white">{initials}</span><span className="flex flex-col leading-tight"><span className="text-sm font-semibold text-white">{firstName}</span><span className="text-[11px] text-white/70">{roleLabel}</span></span></Link><LogoutButton destination={routes.home} variant="ghost" buttonClassName="min-h-0 px-2 py-2 text-white/80 hover:bg-transparent hover:text-[#f56ba1]" /></> : null}
         </div>
         <details className="relative md:hidden">
           <summary className="focus-ring cursor-pointer list-none rounded-lg border border-white/60 px-4 py-3 text-sm font-semibold text-white">Menu</summary>
@@ -64,8 +64,8 @@ export async function Header() {
                 <Link href={routes.home} prefetch={false} className="rounded-lg px-3 py-3 text-sm font-medium text-[#201925] hover:bg-[#f7f4ff]">Home</Link>
                 <Link href={routes.candidates} prefetch={false} className="rounded-lg px-3 py-3 text-sm font-medium text-[#201925] hover:bg-[#f7f4ff]">Find a Job</Link>
                 <Link href={routes.employers} prefetch={false} className="rounded-lg px-3 py-3 text-sm font-medium text-[#201925] hover:bg-[#f7f4ff]">Hire Candidates</Link>
-                <ButtonLink href={routes.candidateLogin} variant="secondary" className="mt-2 justify-start">Candidate Login</ButtonLink>
-                <ButtonLink href={routes.employerLogin}>Employer Login</ButtonLink>
+                <ButtonLink href={routes.candidateLogin} prefetch={false} variant="secondary" className="mt-2 justify-start">Candidate Login</ButtonLink>
+                <ButtonLink href={routes.employerLogin} prefetch={false}>Employer Login</ButtonLink>
               </nav>
             )}
           </div>
