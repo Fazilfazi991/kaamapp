@@ -1,4 +1,5 @@
-import { Button, ButtonLink } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
+import { PendingSubmitButton } from "@/components/ui/pending-submit-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { acceptInterest, rejectInterest } from "@/features/candidate/interests/server/actions";
 import { canRespondToInterest, extractInterestLine, interestStatusLabel, interestTone } from "@/features/candidate/interests/utils";
@@ -43,7 +44,7 @@ export function CandidateInterestCard({ interest, detailed = false }: { interest
       </p>
       <div className="mt-5 flex flex-wrap gap-3">
         {!detailed ? (
-          <ButtonLink href={`/candidate/interests/${interest.id}`} variant="secondary">
+          <ButtonLink href={`/candidate/interests/${interest.id}`} prefetch={false} variant="secondary">
             View details
           </ButtonLink>
         ) : null}
@@ -51,11 +52,11 @@ export function CandidateInterestCard({ interest, detailed = false }: { interest
           <>
             <form action={acceptInterest}>
               <input type="hidden" name="interestId" value={interest.id} />
-              <Button type="submit">Accept</Button>
+              <PendingSubmitButton pendingLabel="Accepting...">Accept</PendingSubmitButton>
             </form>
             <form action={rejectInterest}>
               <input type="hidden" name="interestId" value={interest.id} />
-              <Button type="submit" variant="ghost">Reject</Button>
+              <PendingSubmitButton pendingLabel="Rejecting..." variant="ghost">Reject</PendingSubmitButton>
             </form>
           </>
         ) : null}

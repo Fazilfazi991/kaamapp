@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
+import { PendingSubmitButton } from "@/components/ui/pending-submit-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { interestStatusLabel, interestTone } from "@/features/employer/utils";
 import {
@@ -71,27 +72,27 @@ export function EmployerCandidateCard({
       </div>
 
       <div className="mt-5 flex flex-wrap gap-3">
-        <ButtonLink href={`/employer/candidates/${candidate.id}`} variant="secondary">
+        <ButtonLink href={`/employer/candidates/${candidate.id}`} prefetch={false} variant="secondary">
           View profile
         </ButtonLink>
         <form action={candidate.isShortlisted ? removeShortlistCandidate : shortlistCandidate}>
           <input type="hidden" name="candidateId" value={candidate.id} />
-          <Button type="submit" variant="ghost">
+          <PendingSubmitButton pendingLabel={candidate.isShortlisted ? "Removing..." : "Saving..."} variant="ghost">
             {candidate.isShortlisted ? "Remove saved candidate" : "Save candidate"}
-          </Button>
+          </PendingSubmitButton>
         </form>
         {candidate.isMatched ? (
-          <ButtonLink href="/employer/matches" variant="ghost">
+          <ButtonLink href="/employer/matches" prefetch={false} variant="ghost">
             View Match
           </ButtonLink>
         ) : candidate.interestStatus ? (
-          <ButtonLink href="/employer/interests" variant="ghost">
+          <ButtonLink href="/employer/interests" prefetch={false} variant="ghost">
             Interest Sent
           </ButtonLink>
         ) : canSendInterest ? (
           <form action={sendInterest}>
             <input type="hidden" name="candidateId" value={candidate.id} />
-            <Button type="submit">Show Interest</Button>
+            <PendingSubmitButton pendingLabel="Sending interest...">Show Interest</PendingSubmitButton>
           </form>
         ) : null}
       </div>

@@ -32,6 +32,7 @@ export function ButtonLink({
   ...props
 }: AnchorHTMLAttributes<HTMLAnchorElement> & {
   href: string;
+  prefetch?: boolean;
   variant?: Variant;
   children: ReactNode;
 }) {

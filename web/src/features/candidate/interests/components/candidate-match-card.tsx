@@ -1,4 +1,5 @@
-import { Button, ButtonLink } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
+import { PendingSubmitButton } from "@/components/ui/pending-submit-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { revealContactForMatch } from "@/features/candidate/interests/server/actions";
 import type { CandidateMatchRow } from "@/features/candidate/interests/types";
@@ -26,12 +27,12 @@ export function CandidateMatchCard({ match }: { match: CandidateMatchRow }) {
       </p>
       <div className="mt-5 flex flex-wrap gap-3">
         {match.chat_enabled ? (
-          <ButtonLink href={`/candidate/messages/${match.match_id}`}>Open chat</ButtonLink>
+          <ButtonLink href={`/candidate/messages/${match.match_id}`} prefetch={false}>Open chat</ButtonLink>
         ) : null}
         {match.can_reveal_contact ? (
           <form action={revealContactForMatch}>
             <input type="hidden" name="matchId" value={match.match_id} />
-            <Button type="submit" variant="secondary">Reveal contact</Button>
+            <PendingSubmitButton pendingLabel="Revealing..." variant="secondary">Reveal contact</PendingSubmitButton>
           </form>
         ) : null}
       </div>

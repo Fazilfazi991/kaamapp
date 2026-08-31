@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Button } from "@/components/ui/button";
+import { PendingSubmitButton } from "@/components/ui/pending-submit-button";
 import { sendChatMessage } from "@/features/messaging/server/actions";
 import type { ChatMessageRow, ConversationAccess } from "@/features/messaging/types";
 
@@ -58,7 +58,7 @@ export function ConversationView({
             }}
           />
           <div className="flex justify-end">
-            <Button type="submit">Send</Button>
+            <PendingSubmitButton pendingLabel="Sending...">Send</PendingSubmitButton>
           </div>
         </form>
       ) : (

@@ -25,4 +25,11 @@ describe("workspace navigation", () => {
     expect(employerPaths).not.toContain(routes.employerDocuments);
     expect(employerPaths).not.toContain(routes.employerJobPosts);
   });
+
+  it("avoids background prefetch for secondary workspace navigation", () => {
+    expect(candidateNavigation().find((item) => item.href === routes.candidateMessages)?.prefetch).toBe(false);
+    expect(candidateNavigation().find((item) => item.href === routes.candidateDocuments)?.prefetch).toBe(false);
+    expect(employerNavigation.find((item) => item.href === routes.employerSearch)?.prefetch).toBe(false);
+    expect(employerNavigation.find((item) => item.href === routes.employerMessages)?.prefetch).toBe(false);
+  });
 });

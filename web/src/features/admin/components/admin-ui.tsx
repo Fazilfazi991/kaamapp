@@ -141,9 +141,9 @@ export function Field({ label, value }: { label: string; value?: React.ReactNode
 }
 
 export function SafeLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return <Link className="font-semibold text-[#bc1f55] hover:underline" href={href}>{children}</Link>;
+  return <Link className="font-semibold text-[#bc1f55] hover:underline" href={href} prefetch={false}>{children}</Link>;
 }
 
 export function RowAction({ href, children }: { href: string; children: React.ReactNode }) {
-  return <ButtonLink href={href} variant="secondary" className="min-h-9 px-3 py-2">{children}</ButtonLink>;
+  return <ButtonLink href={href} prefetch={false} variant="secondary" className="min-h-9 px-3 py-2">{children}</ButtonLink>;
 }

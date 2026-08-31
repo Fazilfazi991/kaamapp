@@ -16,10 +16,10 @@ export function candidateNavigation({ profileComplete = false, onboarding = fals
 
 export const employerNavigation = [
   { href: routes.employerDashboard, label: "Dashboard" },
-  { href: routes.employerSearch, label: "Search Candidates" },
-  { href: routes.employerShortlist, label: "Saved Candidates" },
-  { href: routes.employerInterests, label: "Interests" },
-  { href: routes.employerMatches, label: "Matches" },
-  { href: routes.employerMessages, label: "Messages" },
-  { href: routes.employerNotifications, label: "Notifications" },
+  { href: routes.employerSearch, label: "Search Candidates", prefetch: false },
+  { href: routes.employerShortlist, label: "Saved Candidates", prefetch: false },
+  { href: routes.employerInterests, label: "Interests", prefetch: false },
+  { href: routes.employerMatches, label: "Matches", prefetch: false },
+  { href: routes.employerMessages, label: "Messages", prefetch: false },
+  { href: routes.employerNotifications, label: "Notifications", prefetch: false },
 ];

@@ -202,9 +202,9 @@ export async function loadEmployerDashboard() {
 
   const [{ count: shortlisted }, { count: interestsSent }, { count: matches }, { data: documents }] =
     await Promise.all([
-      supabase.from("saved_candidates").select("*", { count: "exact", head: true }).eq("employer_id", access.userId),
-      supabase.from("interest_requests").select("*", { count: "exact", head: true }).eq("employer_id", access.userId),
-      supabase.from("matches").select("*", { count: "exact", head: true }).eq("employer_id", access.userId),
+      supabase.from("saved_candidates").select("id", { count: "exact", head: true }).eq("employer_id", access.userId),
+      supabase.from("interest_requests").select("id", { count: "exact", head: true }).eq("employer_id", access.userId),
+      supabase.from("matches").select("id", { count: "exact", head: true }).eq("employer_id", access.userId),
       documentsQuery,
     ]);
 
