@@ -34,13 +34,13 @@ export function OnboardingShell({
           {description}
         </p>
       </div>
-      <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Onboarding steps">
+      <nav className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-2 [scroll-padding-inline:1rem] [scrollbar-width:none] sm:mx-0 sm:px-0" aria-label="Onboarding steps">
         {steps.map((step, index) => (
           <Link
             key={step.href}
             href={step.href}
             prefetch={step.href === nextHref}
-            className={`focus-ring whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold ${
+            className={`focus-ring snap-start whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold ${
               step.href === current
                 ? "bg-[#e53670] text-white"
                 : "bg-white text-[#514856]"

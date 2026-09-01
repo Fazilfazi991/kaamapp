@@ -31,7 +31,9 @@ describe("candidateCompletion", () => {
   it("calculates completed candidate profile", () => {
     const result = candidateCompletion({ profile, candidate: completeCandidate, requirePhone: true });
     expect(result.isComplete).toBe(true);
-    expect(result.percentage).toBe(100);
+    expect(result.percentage).toBe(80);
+    expect(result.isComplete).toBe(true);
+    expect(result.isProfileReady).toBe(false);
   });
 
   it("resumes partial onboarding at the correct step", () => {
@@ -58,6 +60,19 @@ describe("candidateCompletion", () => {
     const result = candidateCompletion({ profile, candidate: completeCandidate, requirePhone: true });
     expect(result.isComplete).toBe(true);
     expect(result.missingSections).toEqual([]);
+    expect(result.percentage).toBeLessThan(100);
+  });
+
+  it("reaches full profile strength after a passport is uploaded", () => {
+    const result = candidateCompletion({ profile, candidate: completeCandidate, requirePhone: true, hasProfileDocument: true });
+    expect(result.isComplete).toBe(true);
+    expect(result.isProfileReady).toBe(true);
+    expect(result.percentage).toBe(100);
+  });
+
+  it("points strength CTA to documents when core profile is complete", () => {
+    const result = candidateCompletion({ profile, candidate: completeCandidate, requirePhone: true });
+    expect(result.strengthNextHref).toBe(routes.candidateDocuments);
   });
 
   it("requires mobile for the new onboarding review", () => {

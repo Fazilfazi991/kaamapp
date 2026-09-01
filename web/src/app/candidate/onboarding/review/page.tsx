@@ -4,9 +4,11 @@ import { OnboardingShell } from "@/features/candidate/components/onboarding-shel
 import { ProfileSummary } from "@/features/candidate/components/profile-summary";
 import { candidateCompletion } from "@/features/candidate/profile-completion";
 import { loadCandidateBundle } from "@/features/candidate/server/data";
+import { loadCandidateDocuments } from "@/features/candidate/documents/server/data";
 
 export default async function CandidateOnboardingReviewPage() {
-  const bundle = await loadCandidateBundle();
+  const [bundle, documents] = await Promise.all([loadCandidateBundle(), loadCandidateDocuments()]);
+  const passport = documents.cards.find((card) => card.type === "passport");
   const completion = candidateCompletion({
     profile: bundle.profile,
     candidate: bundle.candidate,
@@ -40,6 +42,7 @@ export default async function CandidateOnboardingReviewPage() {
         profile={bundle.profile}
         candidate={bundle.candidate}
         membership={bundle.membership}
+        hasProfileDocument={Boolean(passport?.hasFile)}
       />
       <section className="rounded-lg border border-[#e3dcf0] bg-[#faf8ff] p-4 text-sm text-[#5f5668]">
         <p className="font-semibold text-[#302934]">Documents are optional</p>

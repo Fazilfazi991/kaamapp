@@ -3,7 +3,7 @@ import { validateCurrentResidence, validatePreferredWorkLocation } from "@/featu
 import type { CandidateProfileRow, ProfileRow } from "@/types/domain";
 
 export type CompletionSection = {
-  id: "personal" | "skills" | "location" | "experience";
+  id: "personal" | "skills" | "location" | "experience" | "documents";
   label: string;
   complete: boolean;
   href: string;
@@ -17,10 +17,12 @@ export function candidateCompletion({
   profile,
   candidate,
   requirePhone = false,
+  hasProfileDocument = false,
 }: {
   profile: Pick<ProfileRow, "full_name" | "phone"> | null;
   candidate: CandidateProfileRow | null;
   requirePhone?: boolean;
+  hasProfileDocument?: boolean;
 }) {
   const sections: CompletionSection[] = [
     {
@@ -56,9 +58,11 @@ export function candidateCompletion({
       complete: hasText(candidate?.availability),
     },
   ];
-  const completed = sections.filter((section) => section.complete).length;
-  const percentage = Math.round((completed / sections.length) * 100);
   const missingSections = sections.filter((section) => !section.complete);
+  const documentSection: CompletionSection = { id: "documents", label: "Documents", href: routes.candidateDocuments, complete: hasProfileDocument };
+  const strengthSections = [...sections, documentSection];
+  const strengthMissingSections = strengthSections.filter((section) => !section.complete);
+  const percentage = Math.round((strengthSections.filter((section) => section.complete).length / strengthSections.length) * 100);
 
   return {
     sections,
@@ -66,5 +70,9 @@ export function candidateCompletion({
     missingSections,
     nextHref: missingSections[0]?.href ?? routes.candidateOnboardingReview,
     isComplete: missingSections.length === 0,
+    strengthSections,
+    strengthMissingSections,
+    strengthNextHref: strengthMissingSections[0]?.href ?? routes.candidateProfile,
+    isProfileReady: strengthMissingSections.length === 0,
   };
 }

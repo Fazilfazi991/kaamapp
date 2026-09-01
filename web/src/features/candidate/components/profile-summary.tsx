@@ -16,12 +16,14 @@ export function ProfileSummary({
   profile,
   candidate,
   membership,
+  hasProfileDocument = false,
 }: {
   profile: ProfileRow | null;
   candidate: CandidateProfileRow | null;
   membership?: CandidateMembershipRow | null;
+  hasProfileDocument?: boolean;
 }) {
-  const completion = candidateCompletion({ profile, candidate });
+  const completion = candidateCompletion({ profile, candidate, hasProfileDocument });
   return (
     <div className="grid gap-5">
       <section className="rounded-lg border border-[#eadde3] bg-white p-5 shadow-sm">
@@ -35,7 +37,7 @@ export function ProfileSummary({
           <ButtonLink href={routes.candidateProfileEdit}>Edit Profile</ButtonLink>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <StatusBadge tone={completion.isComplete ? "success" : "warning"}>
+          <StatusBadge tone={completion.isProfileReady ? "success" : "warning"}>
             {completion.percentage}% complete
           </StatusBadge>
           <StatusBadge tone={candidate?.is_verified ? "success" : "warning"}>

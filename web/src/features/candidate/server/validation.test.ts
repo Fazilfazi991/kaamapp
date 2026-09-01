@@ -7,6 +7,8 @@ import {
 } from "@/features/candidate/constants";
 import {
   isValidInternationalMobile,
+  normalizeCandidateMobile,
+  splitCandidateMobile,
   validateCurrentResidence,
   validatePreferredWorkLocation,
   validateSkillIds,
@@ -76,5 +78,17 @@ describe("candidate onboarding validation constants", () => {
     }
     expect(isValidInternationalMobile("0500000000")).toBe(false);
     expect(isValidInternationalMobile("+0000")).toBe(false);
+  });
+
+  it("normalizes supported country-code and national-number inputs", () => {
+    expect(normalizeCandidateMobile("+91", "94475 19596")).toBe("+919447519596");
+    expect(normalizeCandidateMobile("+971", "50 123 4567")).toBe("+971501234567");
+    expect(normalizeCandidateMobile("", "9447519596")).toBeNull();
+    expect(normalizeCandidateMobile("+91", "abc")).toBeNull();
+  });
+
+  it("preserves an unrecognized legacy number without guessing its country", () => {
+    expect(splitCandidateMobile("9447519596")).toEqual({ countryCode: "", nationalNumber: "9447519596", isLegacy: true });
+    expect(splitCandidateMobile("+919447519596")).toEqual({ countryCode: "+91", nationalNumber: "9447519596", isLegacy: false });
   });
 });

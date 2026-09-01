@@ -50,3 +50,28 @@ export function isValidInternationalMobile(value: string) {
 export function normalizeInternationalMobile(value: string) {
   return value.replace(/[\s().-]/g, "");
 }
+
+export const candidatePhoneCountries = [
+  { code: "+971", country: "UAE" },
+  { code: "+91", country: "India" },
+  { code: "+94", country: "Sri Lanka" },
+  { code: "+880", country: "Bangladesh" },
+  { code: "+92", country: "Pakistan" },
+  { code: "+63", country: "Philippines" },
+] as const;
+
+export function splitCandidateMobile(value?: string | null) {
+  const compact = normalizeInternationalMobile(value ?? "");
+  const match = candidatePhoneCountries.find(({ code }) => compact.startsWith(code));
+  if (!match) return { countryCode: "", nationalNumber: value ?? "", isLegacy: Boolean(value) };
+  return { countryCode: match.code, nationalNumber: compact.slice(match.code.length), isLegacy: false };
+}
+
+export function normalizeCandidateMobile(countryCode: string, nationalNumber: string) {
+  const code = countryCode.trim();
+  const number = nationalNumber.replace(/\D/g, "");
+  const normalized = `${code}${number}`;
+  return candidatePhoneCountries.some((item) => item.code === code) && isValidInternationalMobile(normalized)
+    ? normalized
+    : null;
+}

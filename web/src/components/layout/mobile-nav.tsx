@@ -20,7 +20,7 @@ export function MobileNavigation({
         <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-[#eadde3] bg-white px-1 pb-[max(.25rem,env(safe-area-inset-bottom))] pt-1 shadow-[0_-8px_24px_rgba(32,25,37,0.08)] lg:hidden" aria-label="Candidate primary navigation">
           {primary.map((item) => <ActiveDashboardLink key={item.href} href={item.href} prefetch={item.prefetch} label={item.label === "Dashboard" ? "Home" : item.label} className="focus-ring flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg px-1 text-[10px] font-semibold text-[#514856]" activeClassName="text-[#160847]" />)}
         </nav>
-        <details className="fixed bottom-[4.8rem] right-3 z-30 lg:hidden">
+        <details className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-[max(.75rem,env(safe-area-inset-right))] z-30 lg:hidden">
           <summary className="focus-ring cursor-pointer list-none rounded-full border border-[#eadde3] bg-white px-4 py-2 text-xs font-bold text-[#413946] shadow-lg">More</summary>
           <div className="absolute bottom-[calc(100%+.5rem)] right-0 grid w-56 gap-1 rounded-2xl border border-[#eadde3] bg-white p-2 shadow-xl"><nav aria-label={mobileMenuNavigationLabel}>{secondary.map((item) => <ActiveDashboardLink key={item.href} href={item.href} prefetch={item.prefetch} label={item.label} className="focus-ring flex min-h-11 items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-[#514856]" activeClassName="bg-[#f3f0ff] text-[#160847]" />)}</nav><LogoutButton variant="secondary" className="border-t border-[#eadde3] pt-2" /></div>
         </details>

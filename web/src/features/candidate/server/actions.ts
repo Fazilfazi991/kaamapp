@@ -7,6 +7,7 @@ import { requireRole } from "@/lib/auth/session";
 import { routes } from "@/config/routes";
 import {
   isValidInternationalMobile,
+  normalizeCandidateMobile,
   normalizeInternationalMobile,
   validateCurrentResidence,
   validatePreferredWorkLocation,
@@ -70,13 +71,13 @@ function revalidateCandidatePages() {
 
 export async function savePersonalDetails(formData: FormData) {
   const fullName = text(formData, "fullName");
-  const phone = text(formData, "phone");
+  const phone = normalizeCandidateMobile(text(formData, "phoneCountryCode"), text(formData, "phone"));
   const nationality = text(formData, "nationality");
   const bio = text(formData, "bio");
   const photo = formData.get("profilePhoto");
 
   if (!fullName) safeError("Full name is required.");
-  if (!isValidInternationalMobile(phone)) safeError("Enter a valid mobile number with country code, for example +971500000000.");
+  if (!phone || !isValidInternationalMobile(phone)) safeError("Enter a valid mobile number.");
   if (!nationality) safeError("Nationality is required.");
 
   const { account, supabase } = await ensureCandidateRow();
