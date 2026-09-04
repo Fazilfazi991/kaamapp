@@ -39,7 +39,7 @@ export function ConversationView({
         )}
       </div>
       {access.chatEnabled ? (
-        <form ref={formRef} action={sendChatMessage} className="mt-5 grid gap-3">
+        <form ref={formRef} action={sendChatMessage} className="chat-composer mt-5 grid gap-3">
           <input type="hidden" name="matchId" value={access.matchId} />
           <label className="sr-only" htmlFor="body">Message</label>
           <textarea

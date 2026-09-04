@@ -9,6 +9,25 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "11mb",
     },
   },
+  async headers() {
+    return [
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+      {
+        source: "/:privateArea(candidate|candidates|employer|employers|admin|account|auth|api)/:path*",
+        headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0" }],
+      },
+      {
+        source: "/:authPage(login|register)",
+        headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0" }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

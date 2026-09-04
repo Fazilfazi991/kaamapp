@@ -28,12 +28,17 @@
 
 html {
   scroll-behavior: smooth;
+  background: var(--background);
 }
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
+  overflow-x: clip;
+  padding-top: env(safe-area-inset-top);
 }
 
 a {
@@ -109,4 +114,110 @@ select {
 
 .focus-ring:focus-visible {
   outline-color: var(--brand);
+}
+
+.app-height {
+  min-height: calc(100vh - env(safe-area-inset-top));
+  min-height: calc(100dvh - env(safe-area-inset-top));
+}
+
+.dashboard-main {
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+}
+
+.mobile-dashboard-nav {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+.pwa-connection,
+.pwa-update,
+.pwa-install {
+  position: fixed;
+  z-index: 60;
+  left: max(1rem, env(safe-area-inset-left));
+  right: max(1rem, env(safe-area-inset-right));
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 30px rgb(22 8 71 / 20%);
+}
+
+.pwa-connection,
+.pwa-update {
+  top: calc(0.75rem + env(safe-area-inset-top));
+  justify-content: center;
+  background: #160847;
+  color: white;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
+
+.pwa-connection button,
+.pwa-update button,
+.pwa-install button {
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: 0.625rem;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.pwa-connection button,
+.pwa-update button {
+  background: #f56ba1;
+  color: #160847;
+  padding: 0.5rem 0.875rem;
+}
+
+.pwa-install {
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  margin-inline: auto;
+  max-width: 34rem;
+  background: white;
+  border: 1px solid #eadde3;
+  color: #160847;
+  padding: 1rem;
+}
+
+.pwa-install div {
+  flex: 1;
+}
+
+.pwa-install p {
+  margin: 0.25rem 0 0;
+  color: #66616f;
+  font-size: 0.8125rem;
+}
+
+.pwa-install > button:not(.pwa-dismiss) {
+  background: #160847;
+  color: white;
+  padding: 0.625rem 0.875rem;
+}
+
+.pwa-install .pwa-dismiss {
+  min-width: 2.75rem;
+  background: transparent;
+  color: #66616f;
+  font-size: 1.25rem;
+}
+
+@media (display-mode: standalone) {
+  html {
+    overscroll-behavior-y: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .dashboard-main {
+    padding-bottom: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pwa-install {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
 }
