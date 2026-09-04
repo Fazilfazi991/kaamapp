@@ -13,6 +13,7 @@ export const routes = {
   authCallback: "/auth/callback",
   authComplete: "/auth/complete",
   candidates: "/candidates",
+  jobs: "/jobs",
   employers: "/employers",
   howItWorks: "/how-it-works",
   about: "/about",

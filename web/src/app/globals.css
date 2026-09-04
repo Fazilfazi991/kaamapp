@@ -40,6 +40,20 @@ a {
   text-decoration: none;
 }
 
+.hot-jobs-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .hot-jobs-scroller {
+    scroll-behavior: auto;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   [aria-busy="true"] .rounded.bg-\[\#eadde3\]\/80 {
     animation: kaam-skeleton-pulse 1.6s ease-in-out infinite;

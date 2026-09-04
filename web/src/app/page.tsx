@@ -3,9 +3,11 @@ import Image from "next/image";
 import { Header } from "@/components/layout/header";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { RoleEntrySection } from "@/components/marketing/role-entry-section";
+import { HotJobsSection } from "@/components/marketing/hot-jobs-section";
 import { ButtonLink } from "@/components/ui/button";
 import { routes } from "@/config/routes";
 import { getPublicAccountNavigation } from "@/lib/auth/session";
+import { loadPublicHiringRequirements } from "@/features/public-jobs/data";
 
 const trustBenefits = [
   ["◈", "Verified Employers", "Trusted opportunities"],
@@ -15,6 +17,7 @@ const trustBenefits = [
 
 export default async function HomePage() {
   const account = await getPublicAccountNavigation();
+  const jobs = account.authenticated ? [] : await loadPublicHiringRequirements(12);
   const dashboardLabel = account.role === "candidate" ? "Go to Candidate Dashboard" : account.role === "employer" ? "Go to Employer Dashboard" : account.role === "admin" ? "Go to Admin Dashboard" : "Complete account setup";
   const secondaryAction = account.role === "candidate" ? { href: routes.candidateMatches, label: "View matches" } : account.role === "employer" ? { href: routes.employerSearch, label: "Search candidates" } : null;
   return (
@@ -56,6 +59,7 @@ export default async function HomePage() {
           </div>
         </section>}
 
+        {!account.authenticated ? <HotJobsSection jobs={jobs} /> : null}
         <HowItWorks />
 
         <section className="bg-[#201925]">
